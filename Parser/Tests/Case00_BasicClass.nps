@@ -1,0 +1,7 @@
+model ClassSimple
+    - MemberInt: int
+    - MemberFloat: string
+    - MemberUnknown
+    -- PropUnknown
+    + Method
+    +cmd Command
