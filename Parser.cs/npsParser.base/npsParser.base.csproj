@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>nf.protoscript</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Logger\" />
+    <Folder Include="Event\" />
+  </ItemGroup>
+
+</Project>

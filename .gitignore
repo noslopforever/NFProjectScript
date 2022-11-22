@@ -1,1 +1,8 @@
 __pycache__
+*.pyc
+/Parser/Tests/.logs
+bin/
+obj/
+.vs/
+.vscode/
+.shortcuts/
