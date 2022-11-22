@@ -9,6 +9,7 @@ namespace nf.protoscript.expression
     /// Expression node base.
     /// </summary>
     public class ExprNodeBase
+        : IExpressionNode
     {
         public ExprNodeBase(string InSignature)
         {
@@ -45,22 +46,5 @@ namespace nf.protoscript.expression
 
     }
 
-    /// <summary>
-    /// An expression.
-    /// </summary>
-    public class Expression
-        : IExpression
-    {
-        public Expression(ExprNodeBase InRoot)
-        {
-            Root = InRoot;
-        }
-
-        /// <summary>
-        /// Root node
-        /// </summary>
-        public ExprNodeBase Root { get; set; }
-
-    }
 
 }

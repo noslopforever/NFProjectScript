@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using nf.protoscript.expression;
 
 namespace nf.protoscript
 {
@@ -10,7 +11,7 @@ namespace nf.protoscript
     /// </summary>
     public class MemberInfo : Info
     {
-        public MemberInfo(Info InParentInfo, string InHeader, string InName, TypeInfo InType, IExpression InInitExpr)
+        public MemberInfo(Info InParentInfo, string InHeader, string InName, TypeInfo InType, IExpressionNode InInitExpr)
             : base(InParentInfo, InHeader, InName)
         {
             Archetype = InType;
@@ -25,7 +26,7 @@ namespace nf.protoscript
         /// <summary>
         /// This member's init-expression.
         /// </summary>
-        public IExpression InitExpression { get; private set; }
+        public IExpressionNode InitExpression { get; private set; }
 
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using nf.protoscript.expression;
 
 namespace nf.protoscript
 {
@@ -18,7 +19,7 @@ namespace nf.protoscript
         /// <summary>
         /// Init Expression of this attribute.
         /// </summary>
-        IExpression InitExpression;
+        IExpressionNode InitExpression;
 
     }
 

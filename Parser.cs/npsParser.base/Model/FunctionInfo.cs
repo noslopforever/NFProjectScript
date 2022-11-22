@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using nf.protoscript.expression;
 
 namespace nf.protoscript
 {
@@ -19,7 +20,7 @@ namespace nf.protoscript
         /// <summary>
         /// Execution expression.
         /// </summary>
-        IExpression ExecExpression;
+        IExpressionNode ExecExpression;
 
     }
 

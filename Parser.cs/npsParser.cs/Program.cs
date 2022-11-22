@@ -119,7 +119,7 @@ namespace nf.protoscript.parser.cs
             {
                 TypeInfo classA = new TypeInfo(testProj, "model", "classA"); {
                     MemberInfo propA = new MemberInfo(classA, "property", "propA", CommonTypeInfos.Integer
-                        , new Expression(new ExprNodeConstant(ExprNodeConstant.Integer, "100"))
+                        , new ExprNodeConstant(ExprNodeConstant.Integer, "100")
                         );
                 }
             }
