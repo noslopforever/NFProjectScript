@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CommandLine;
 using System.Diagnostics;
 using nf.protoscript;
+using nf.protoscript.expression;
 
 namespace nf.protoscript.parser.cs
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript
+namespace nf.protoscript.expression
 {
 
     public class ExprNodeUnaryOp
