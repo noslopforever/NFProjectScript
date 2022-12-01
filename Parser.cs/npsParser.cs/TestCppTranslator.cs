@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -6,7 +6,6 @@ using nf.protoscript.expression;
 
 namespace nf.protoscript.parser.cs
 {
-
 
     class FunctionCode
     {
@@ -53,7 +52,10 @@ namespace nf.protoscript.parser.cs
 
     class TestCppTranslator
     {
-
+        /// <summary>
+        /// Translate a project.
+        /// </summary>
+        /// <param name="InProjProj"></param>
         public void Translate(ProjectInfo InProjProj)
         {
             // gather translation informations.
@@ -72,91 +74,151 @@ namespace nf.protoscript.parser.cs
                 // generate class from the model
                 if (InInfo is TypeInfo)
                 {
-                    // generate header files:
-                    Console.WriteLine($">>>> HEADER : {InInfo.Extra.HeaderFilename}");
-                    {
+                    // # generate header files:
+                    _GenerateHeaderFile(InInfo);
 
-                        Console.WriteLine($"    class {InInfo.Extra.ClassFullname}");
-                        if (InInfo.Extra.ClassBase != "")
-                            Console.WriteLine($"        : public {InInfo.Extra.BaseClass}");
-                        Console.WriteLine("    {");
-                        Console.WriteLine("        GENERATED_BODY()");
-                        Console.WriteLine("    public:");
-
-                        // Handle members
-                        InInfo.ForeachSubInfo<MemberInfo>(info =>
-                        {
-                            if (info.IsExtraContains("MemberDeclCodes"))
-                            {
-                                foreach (string decl in info.Extra.MemberDeclCodes)
-                                { Console.WriteLine("        " + decl); }
-                            }
-
-                            if (info.IsExtraContains("MemberFunctions"))
-                            {
-                                foreach (FunctionCode func in info.Extra.MemberFunctions)
-                                {
-                                    Console.Write("        ");
-                                    WriteFunctionDecl(InInfo.Extra.ClassFullname, func, Console.Out, true);
-                                    Console.WriteLine("");
-                                }
-                            }
-                        });
-
-                        Console.WriteLine("    };");
-                    }
-
-                    // generate cpp files:
-                    Console.WriteLine($">>>> CPP : {InInfo.Extra.CppFilename}");
-                    {
-                        Console.WriteLine($"#include \"InInfo.Extra.HeaderFilename\"");
-                        Console.WriteLine($"");
-                        Console.WriteLine($"{InInfo.Extra.ClassFullname}::{InInfo.Extra.ClassFullname}()");
-                        Console.WriteLine("{");
-
-                        // Handle members
-                        InInfo.ForeachSubInfo<MemberInfo>(info =>
-                        {
-                            if (info.IsExtraContains("MemberInitCodes"))
-                            {
-                                foreach (string init in info.Extra.MemberInitCodes)
-                                { Console.WriteLine("    " + init); }
-                            }
-                        });
-
-                        Console.WriteLine("}");
-    
-                        Console.WriteLine($"");
-
-                        // function implements
-                        InInfo.ForeachSubInfo<MemberInfo>(info =>
-                        {
-                            if (info.IsExtraContains("MemberFunctions"))
-                            {
-
-                                foreach (FunctionCode func in info.Extra.MemberFunctions)
-                                {
-                                    WriteFunctionDecl(InInfo.Extra.ClassFullname, func, Console.Out, false);
-                                    Console.WriteLine("");
-                                    Console.WriteLine("{");
-                                    foreach (string code in func.FuncBodyCodes)
-                                    {
-                                        Console.WriteLine($"    {code}");
-                                    }
-                                    Console.WriteLine("}");
-                                }
-                            }
-                        });
-
-
-                    }
+                    // # generate cpp files:
+                    _GenerateCppFile(InInfo);
 
                 }
             }
-
-
         }
 
+        /// <summary>
+        /// Generate header file.
+        /// </summary>
+        /// <param name="InInfo"></param>
+        private void _GenerateHeaderFile(Info InInfo)
+        {
+            Console.WriteLine($">>>> HEADER : {InInfo.Extra.HeaderFilename}");
+            {
+
+                Console.WriteLine($"    class {InInfo.Extra.ClassFullname}");
+                if (InInfo.Extra.ClassBase != "")
+                    Console.WriteLine($"        : public {InInfo.Extra.BaseClass}");
+                Console.WriteLine("    {");
+                Console.WriteLine("        GENERATED_BODY()");
+                Console.WriteLine("    public:");
+
+                // Handle members
+                InInfo.ForeachSubInfo<MemberInfo>(info =>
+                {
+                    if (info.IsExtraContains("MemberDeclCodes"))
+                    {
+                        foreach (string decl in info.Extra.MemberDeclCodes)
+                        { Console.WriteLine("        " + decl); }
+                    }
+
+                    if (info.IsExtraContains("MemberFunctions"))
+                    {
+                        foreach (FunctionCode func in info.Extra.MemberFunctions)
+                        {
+                            Console.Write("        ");
+                            WriteFunctionDecl(InInfo.Extra.ClassFullname, func, Console.Out, true);
+                            Console.WriteLine("");
+                        }
+                    }
+                });
+
+                Console.WriteLine("    };");
+            }
+        }
+
+        /// <summary>
+        /// Generate cpp file.
+        /// </summary>
+        /// <param name="InInfo"></param>
+        private void _GenerateCppFile(Info InInfo)
+        {
+            Console.WriteLine($">>>> CPP : {InInfo.Extra.CppFilename}");
+            {
+                Console.WriteLine($"#include \"InInfo.Extra.HeaderFilename\"");
+                Console.WriteLine($"");
+
+                // ## c-tors
+                {
+                    Console.WriteLine($"{InInfo.Extra.ClassFullname}::{InInfo.Extra.ClassFullname}()");
+                    Console.WriteLine("{");
+
+                    // ### member-initializations.
+                    InInfo.ForeachSubInfo<MemberInfo>(info =>
+                    {
+                        if (info.IsExtraContains("MemberInitCodes"))
+                        {
+                            foreach (string init in info.Extra.MemberInitCodes)
+                            { Console.WriteLine("    " + init); }
+                        }
+                        if (info.IsExtraContains("MemberInitExpr"))
+                        {
+                            IExpressionNode initExprRoot = info.Extra.MemberInitExpr;
+                            string exprCode = _GenCodeForExpr(initExprRoot);
+                            Console.WriteLine($"    {exprCode};");
+                        }
+                    });
+
+                    Console.WriteLine("}");
+                }
+
+                Console.WriteLine($"");
+
+                // ## function implements
+                InInfo.ForeachSubInfo<MemberInfo>(info =>
+                {
+                    if (info.IsExtraContains("MemberFunctions"))
+                    {
+
+                        foreach (FunctionCode func in info.Extra.MemberFunctions)
+                        {
+                            WriteFunctionDecl(InInfo.Extra.ClassFullname, func, Console.Out, false);
+                            Console.WriteLine("");
+                            Console.WriteLine("{");
+                            foreach (string code in func.FuncBodyCodes)
+                            {
+                                Console.WriteLine($"    {code}");
+                            }
+                            Console.WriteLine("}");
+                        }
+                    }
+                });
+
+            }
+        }
+
+        /// <summary>
+        /// Generate code for an expression-node.
+        /// </summary>
+        /// <param name="InExprNode"></param>
+        /// <returns></returns>
+        string _GenCodeForExpr(IExpressionNode InExprNode)
+        {
+            ExprNodeAssign enAssign = InExprNode as ExprNodeAssign;
+            if (enAssign != null)
+            {
+                return _GenCodeForExpr(enAssign.LHS) + " = " + _GenCodeForExpr(enAssign.RHS);
+            }
+
+            ExprNodeId enId = InExprNode as ExprNodeId;
+            if (enId != null)
+            {
+                return enId.IDName;
+            }
+
+            ExprNodeConstant enConst = InExprNode as ExprNodeConstant;
+            if (enConst != null)
+            {
+                return enConst.ValueString;
+            }
+
+            return "$INVALID";
+        }
+
+        /// <summary>
+        /// Write function declaration.
+        /// </summary>
+        /// <param name="InClassName"></param>
+        /// <param name="InFunc"></param>
+        /// <param name="Output"></param>
+        /// <param name="InDecl"></param>
         private static void WriteFunctionDecl(string InClassName, FunctionCode InFunc, TextWriter Output, bool InDecl)
         {
             Output.Write($"{InFunc.FuncReturn} ");
@@ -255,61 +317,74 @@ namespace nf.protoscript.parser.cs
                 typeCode = "FString";
             }
 
-            // Common prop access codes:
+            // - if : Attribute access:
+            //InInfo.HasSubInfoWithName<AttributeInfo>("AsProperty");
+            bool isAttribute = true;
+            if (!isAttribute)
             {
+                // Common property access codes:
                 InInfo.Extra.MemberTypeCode = typeCode;
                 InInfo.Extra.MemberName = InInfo.Name;
-                InInfo.Extra.MemberInitCode = $"{InInfo.Name} = $RHS";
-                InInfo.Extra.MemberGetCode = $"{InInfo.Name}";
+
+                InInfo.Extra.MemberInitExpr = new ExprNodeAssign(new ExprNodeId(InInfo.Name), InInfo.InitExpression);
+                Func<IExpressionNode, IExpressionNode> setfunc = rhs =>
+                {
+                    return new ExprNodeAssign(new ExprNodeId(InInfo.Name), rhs);
+                };
+                InInfo.Extra.MemberSetExprAction = setfunc;
+
+                InInfo.Extra.MemberGetExpr = new ExprNodeId(InInfo.Name);
+
                 InInfo.Extra.MemberRefToSetCode = $"{InInfo.Name}";
                 InInfo.Extra.MemberCallerCode = $"{InInfo.Name}.$RHS";
                 InInfo.Extra.MemberAccessCode = $"{InInfo.Name}.$RHS";
 
-                // - if : Attribute access:
-                //InInfo.HasSubInfoWithName<AttributeInfo>("AsProperty");
-                bool isAttribute = false;
-                if (isAttribute)
-                {
-                    InInfo.Extra.MemberFunctions = new List<FunctionCode>();
-
-                    FunctionCode setter = new FunctionCode()
-                    {
-                        FuncName = $"set{InInfo.Name}",
-                        FuncReturn = "void",
-                        FuncConst = false,
-                    };
-                    setter.FuncParams.Add(new FunctionCode.FuncParam($"{typeCode}", "rhs"));
-                    setter.FuncBodyCodes.Add("// ??? ");
-                    InInfo.Extra.MemberFunctions.Add(setter);
-
-                    FunctionCode getter = new FunctionCode()
-                    {
-                        FuncName = $"get{InInfo.Name}",
-                        FuncReturn = $"{typeCode}",
-                        FuncConst = true,
-                    };
-                    getter.FuncBodyCodes.Add("// ???");
-                    getter.FuncBodyCodes.Add($"return {typeCode}(0);");
-                    InInfo.Extra.MemberFunctions.Add(getter);
-                }
-                else
-                {
-                    InInfo.Extra.MemberDeclCodes = new List<string>();
-                    InInfo.Extra.MemberDeclCodes.Add($"{typeCode} {InInfo.Name};");
-                }
-
-                //InInfo.Extra["PropSetCode"] = $"set{InInfo.Name}($RHS)";
-                //InInfo.Extra["PropGetCode"] = $"get{InInfo.Name}()";
-
-                //InInfo.Extra["PropRefToSetCode"] = $"ref{InInfo.Name}()";
-                // or
-                //InInfo.Extra["PropRefToSetCode"] = $"$TEMP = set{InInfo.Name}()";
-                //InInfo.Extra["PropRefToSetCode"] = $"$TEMP = $RHS";
-                //InInfo.Extra["PropRefToSetCode"] = $"set{InInfo.Name}($TEMP)";
+                InInfo.Extra.MemberDeclCodes = new List<string>();
+                InInfo.Extra.MemberDeclCodes.Add($"{typeCode} {InInfo.Name};");
             }
+            else
+            {
+                InInfo.Extra.MemberFunctions = new List<FunctionCode>();
+
+                // construct a setter function
+                FunctionCode setter = new FunctionCode()
+                {
+                    FuncName = $"set{InInfo.Name}",
+                    FuncReturn = "void",
+                    FuncConst = false,
+                };
+                setter.FuncParams.Add(new FunctionCode.FuncParam($"{typeCode}", "rhs"));
+                setter.FuncBodyCodes.Add("// ??? ");
+                InInfo.Extra.MemberFunctions.Add(setter);
+
+                // Call the setter function when we were setting the member.
+                // TODO RHS, how?
+                Func<IExpressionNode, IExpressionNode> setfunc = rhs =>
+                {
+                    return new ExprNodeCall(setter.FuncName, rhs);
+                };
+                InInfo.Extra.MemberSetExprAction = setfunc;
+
+                // construct a getter function.
+                FunctionCode getter = new FunctionCode()
+                {
+                    FuncName = $"get{InInfo.Name}",
+                    FuncReturn = $"{typeCode}",
+                    FuncConst = true,
+                };
+                getter.FuncBodyCodes.Add("// ???");
+                getter.FuncBodyCodes.Add($"return {typeCode}(0);");
+                InInfo.Extra.MemberFunctions.Add(getter);
+
+                // Call the getter function when we were getting the member.
+                // TODO RHS, how?
+                InInfo.Extra.MemberGetExpr = new ExprNodeCall(getter.FuncName);
+            }
+
 
 
         }
 
     }
+
 }
