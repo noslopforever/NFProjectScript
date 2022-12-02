@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -93,12 +93,12 @@ namespace nf.protoscript.parser.cs
             Console.WriteLine($">>>> HEADER : {InInfo.Extra.HeaderFilename}");
             {
 
-                Console.WriteLine($"    class {InInfo.Extra.ClassFullname}");
+                Console.WriteLine($"class {InInfo.Extra.ClassFullname}");
                 if (InInfo.Extra.ClassBase != "")
-                    Console.WriteLine($"        : public {InInfo.Extra.BaseClass}");
-                Console.WriteLine("    {");
-                Console.WriteLine("        GENERATED_BODY()");
-                Console.WriteLine("    public:");
+                    Console.WriteLine($"    : public {InInfo.Extra.BaseClass}");
+                Console.WriteLine("{");
+                Console.WriteLine("    GENERATED_BODY()");
+                Console.WriteLine("public:");
 
                 // Handle members
                 InInfo.ForeachSubInfo<MemberInfo>(info =>
@@ -106,21 +106,21 @@ namespace nf.protoscript.parser.cs
                     if (info.IsExtraContains("MemberDeclCodes"))
                     {
                         foreach (string decl in info.Extra.MemberDeclCodes)
-                        { Console.WriteLine("        " + decl); }
+                        { Console.WriteLine("    " + decl); }
                     }
 
                     if (info.IsExtraContains("MemberFunctions"))
                     {
                         foreach (FunctionCode func in info.Extra.MemberFunctions)
                         {
-                            Console.Write("        ");
+                            Console.Write("    ");
                             WriteFunctionDecl(InInfo.Extra.ClassFullname, func, Console.Out, true);
                             Console.WriteLine("");
                         }
                     }
                 });
 
-                Console.WriteLine("    };");
+                Console.WriteLine("};");
             }
         }
 
