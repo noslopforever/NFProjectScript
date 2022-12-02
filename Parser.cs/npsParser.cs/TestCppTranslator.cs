@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -146,13 +146,12 @@ namespace nf.protoscript.parser.cs
                         if (info.IsExtraContains("MemberInitCodes"))
                         {
                             foreach (string init in info.Extra.MemberInitCodes)
-                            { Console.WriteLine("    " + init); }
-                        }
-                        if (info.IsExtraContains("MemberInitExpr"))
-                        {
-                            IExpressionNode initExprRoot = info.Extra.MemberInitExpr;
-                            string exprCode = _GenCodeForExpr(initExprRoot);
-                            Console.WriteLine($"    {exprCode};");
+                            {
+                                string initExpCode = _GenCodeForExpr(InInfo, info.InitExpression);
+                                string replacedInitCode = init.Replace("$RHS", initExpCode);
+
+                                Console.WriteLine("    " + replacedInitCode + ";");
+                            }
                         }
                     });
 
@@ -187,19 +186,18 @@ namespace nf.protoscript.parser.cs
         /// <summary>
         /// Generate code for an expression-node.
         /// </summary>
-        /// <param name="InExprNode"></param>
-        /// <returns></returns>
-        string _GenCodeForExpr(IExpressionNode InExprNode)
+        string _GenCodeForExpr(Info InContextInfo, IExpressionNode InExprNode)
         {
             ExprNodeAssign enAssign = InExprNode as ExprNodeAssign;
             if (enAssign != null)
             {
-                return _GenCodeForExpr(enAssign.LHS) + " = " + _GenCodeForExpr(enAssign.RHS);
+                return _GenCodeForExpr(InContextInfo, enAssign.LHS) + " = " + _GenCodeForExpr(InContextInfo, enAssign.RHS);
             }
 
             ExprNodeId enId = InExprNode as ExprNodeId;
             if (enId != null)
             {
+                // TODO find name in context.
                 return enId.IDName;
             }
 
@@ -326,18 +324,10 @@ namespace nf.protoscript.parser.cs
                 InInfo.Extra.MemberTypeCode = typeCode;
                 InInfo.Extra.MemberName = InInfo.Name;
 
-                InInfo.Extra.MemberInitExpr = new ExprNodeAssign(new ExprNodeId(InInfo.Name), InInfo.InitExpression);
-                Func<IExpressionNode, IExpressionNode> setfunc = rhs =>
-                {
-                    return new ExprNodeAssign(new ExprNodeId(InInfo.Name), rhs);
-                };
-                InInfo.Extra.MemberSetExprAction = setfunc;
-
-                InInfo.Extra.MemberGetExpr = new ExprNodeId(InInfo.Name);
-
+                InInfo.Extra.MemberInitCodes = new string[1] { $"{InInfo.Name} = $RHS" };
+                InInfo.Extra.MemberSetExprCode = $"{InInfo.Name} = $RHS";
+                InInfo.Extra.MemberGetExprCode = $"{InInfo.Name}";
                 InInfo.Extra.MemberRefToSetCode = $"{InInfo.Name}";
-                InInfo.Extra.MemberCallerCode = $"{InInfo.Name}.$RHS";
-                InInfo.Extra.MemberAccessCode = $"{InInfo.Name}.$RHS";
 
                 InInfo.Extra.MemberDeclCodes = new List<string>();
                 InInfo.Extra.MemberDeclCodes.Add($"{typeCode} {InInfo.Name};");
@@ -357,14 +347,6 @@ namespace nf.protoscript.parser.cs
                 setter.FuncBodyCodes.Add("// ??? ");
                 InInfo.Extra.MemberFunctions.Add(setter);
 
-                // Call the setter function when we were setting the member.
-                // TODO RHS, how?
-                Func<IExpressionNode, IExpressionNode> setfunc = rhs =>
-                {
-                    return new ExprNodeCall(setter.FuncName, rhs);
-                };
-                InInfo.Extra.MemberSetExprAction = setfunc;
-
                 // construct a getter function.
                 FunctionCode getter = new FunctionCode()
                 {
@@ -376,9 +358,11 @@ namespace nf.protoscript.parser.cs
                 getter.FuncBodyCodes.Add($"return {typeCode}(0);");
                 InInfo.Extra.MemberFunctions.Add(getter);
 
-                // Call the getter function when we were getting the member.
-                // TODO RHS, how?
-                InInfo.Extra.MemberGetExpr = new ExprNodeCall(getter.FuncName);
+                // special Member init/set/get/ref codes
+                InInfo.Extra.MemberInitCodes = new string[1] { $"{InInfo.Name} = $RHS" };
+                InInfo.Extra.MemberSetExprCode = $"set{InInfo.Name}($RHS)";
+                InInfo.Extra.MemberGetExprCode = $"get{InInfo.Name}()";
+                InInfo.Extra.MemberRefToSetCode = $"{InInfo.Name}";
             }
 
 
