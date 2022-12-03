@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -201,13 +201,28 @@ namespace nf.protoscript.parser.cs
                 return stnVar.IDName;
             }
 
+            STNodeBinaryOp stnBinOp = InSTNode as STNodeBinaryOp;
+            if (stnBinOp != null)
+            {
+                string opcode = "$ERR";
+                switch (stnBinOp.OpCode)
+                {
+                    case STNodeBinaryOp.Def.Add: opcode = "+"; break;
+                    case STNodeBinaryOp.Def.Sub: opcode = "-"; break;
+                    case STNodeBinaryOp.Def.Mul: opcode = "*"; break;
+                    case STNodeBinaryOp.Def.Div: opcode = "/"; break;
+                    case STNodeBinaryOp.Def.Mod: opcode = "%"; break;
+                }
+                return _GenCodeForExpr(InContextInfo, stnBinOp.LHS) + " " + opcode + " " + _GenCodeForExpr(InContextInfo, stnBinOp.RHS);
+            }
+
             STNodeConstant stnConst = InSTNode as STNodeConstant;
             if (stnConst != null)
             {
                 return stnConst.ValueString;
             }
 
-            return "$INVALID";
+            return "$ERR";
         }
 
         /// <summary>
