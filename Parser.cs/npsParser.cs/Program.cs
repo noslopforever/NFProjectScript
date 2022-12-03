@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using CommandLine;
@@ -124,7 +124,7 @@ namespace nf.protoscript.parser.cs
 
                     MemberInfo propB = new MemberInfo(classA, "property", "propB", CommonTypeInfos.Integer
                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                            , new STNodeVariable("propA")
+                            , new STNodeGetVar("propA")
                             , new STNodeConstant(STNodeConstant.Integer, "100")
                             )
                         );

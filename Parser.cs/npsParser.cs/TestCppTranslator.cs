@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -194,7 +194,7 @@ namespace nf.protoscript.parser.cs
                 return _GenCodeForExpr(InContextInfo, stnAssign.LHS) + " = " + _GenCodeForExpr(InContextInfo, stnAssign.RHS);
             }
 
-            STNodeVariable stnVar = InSTNode as STNodeVariable;
+            STNodeGetVar stnVar = InSTNode as STNodeGetVar;
             if (stnVar != null)
             {
                 // TODO find name in context.

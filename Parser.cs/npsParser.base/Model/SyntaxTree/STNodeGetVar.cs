@@ -5,9 +5,9 @@ namespace nf.protoscript.syntaxtree
     /// <summary>
     /// expr node: identifier.
     /// </summary>
-    public class STNodeVariable : STNodeBase
+    public class STNodeGetVar : STNodeBase
     {
-        public STNodeVariable(string InIdName)
+        public STNodeGetVar(string InIdName)
             : base("id")
         {
             IDName = InIdName;
