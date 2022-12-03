@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using nf.protoscript.expression;
+using nf.protoscript.syntaxtree;
 
 namespace nf.protoscript.parser.cs
 {
@@ -147,7 +147,7 @@ namespace nf.protoscript.parser.cs
                         {
                             foreach (string init in info.Extra.MemberInitCodes)
                             {
-                                string initExpCode = _GenCodeForExpr(InInfo, info.InitExpression);
+                                string initExpCode = _GenCodeForExpr(InInfo, info.InitSyntax);
                                 string replacedInitCode = init.Replace("$RHS", initExpCode);
 
                                 Console.WriteLine("    " + replacedInitCode + ";");
@@ -184,27 +184,27 @@ namespace nf.protoscript.parser.cs
         }
 
         /// <summary>
-        /// Generate code for an expression-node.
+        /// Generate code for a syntax-tree node.
         /// </summary>
-        string _GenCodeForExpr(Info InContextInfo, IExpressionNode InExprNode)
+        string _GenCodeForExpr(Info InContextInfo, ISyntaxTreeNode InSTNode)
         {
-            ExprNodeAssign enAssign = InExprNode as ExprNodeAssign;
-            if (enAssign != null)
+            STNodeAssign stnAssign = InSTNode as STNodeAssign;
+            if (stnAssign != null)
             {
-                return _GenCodeForExpr(InContextInfo, enAssign.LHS) + " = " + _GenCodeForExpr(InContextInfo, enAssign.RHS);
+                return _GenCodeForExpr(InContextInfo, stnAssign.LHS) + " = " + _GenCodeForExpr(InContextInfo, stnAssign.RHS);
             }
 
-            ExprNodeId enId = InExprNode as ExprNodeId;
-            if (enId != null)
+            STNodeVariable stnVar = InSTNode as STNodeVariable;
+            if (stnVar != null)
             {
                 // TODO find name in context.
-                return enId.IDName;
+                return stnVar.IDName;
             }
 
-            ExprNodeConstant enConst = InExprNode as ExprNodeConstant;
-            if (enConst != null)
+            STNodeConstant stnConst = InSTNode as STNodeConstant;
+            if (stnConst != null)
             {
-                return enConst.ValueString;
+                return stnConst.ValueString;
             }
 
             return "$INVALID";

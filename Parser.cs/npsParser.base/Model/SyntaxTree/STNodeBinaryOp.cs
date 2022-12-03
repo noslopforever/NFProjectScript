@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript.expression
+namespace nf.protoscript.syntaxtree
 {
 
     /// <summary>
     /// Binary operators like + - * / %
     /// </summary>
-    public class ExprNodeBinaryOp : ExprNodeBase
+    public class STNodeBinaryOp : STNodeBase
     {
-        public ExprNodeBinaryOp(string InOpCode)
+        public STNodeBinaryOp(string InOpCode, ISyntaxTreeNode InLhs, ISyntaxTreeNode InRhs)
             : base(InOpCode)
         {
             OpCode = InOpCode;
+            LHS = InLhs;
+            RHS = InRhs;
         }
 
         /// <summary>
@@ -29,6 +31,16 @@ namespace nf.protoscript.expression
         }
 
         public string OpCode { get; } = "";
+
+        /// <summary>
+        /// Left hand expression
+        /// </summary>
+        public ISyntaxTreeNode LHS { get; }
+
+        /// <summary>
+        /// Right hand expression
+        /// </summary>
+        public ISyntaxTreeNode RHS { get; }
 
     }
 

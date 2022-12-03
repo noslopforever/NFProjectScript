@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript.expression
+namespace nf.protoscript.syntaxtree
 {
 
-    public class ExprNodeUnaryOp
-        : ExprNodeBase
+    public class STNodeUnaryOp
+        : STNodeBase
     {
-        public ExprNodeUnaryOp(string InUnaryOpStr)
+        public STNodeUnaryOp(string InUnaryOpStr)
             : base(InUnaryOpStr)
         {
         }

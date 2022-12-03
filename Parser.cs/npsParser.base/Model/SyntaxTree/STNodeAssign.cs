@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript.expression
+namespace nf.protoscript.syntaxtree
 {
 
     /// <summary>
     /// Expr node : assign.
     /// </summary>
-    public class ExprNodeAssign
-        : ExprNodeBase
+    public class STNodeAssign
+        : STNodeBase
     {
-        public ExprNodeAssign()
+        public STNodeAssign()
             : base("assign")
         {
         }
 
-        public ExprNodeAssign(IExpressionNode InLHS, IExpressionNode InRHS)
+        public STNodeAssign(ISyntaxTreeNode InLHS, ISyntaxTreeNode InRHS)
             : base("assign")
         {
             LHS = InLHS;
@@ -26,12 +26,12 @@ namespace nf.protoscript.expression
         /// <summary>
         /// Left hand value
         /// </summary>
-        public IExpressionNode LHS { get; }
+        public ISyntaxTreeNode LHS { get; }
 
         /// <summary>
         /// Right hand value
         /// </summary>
-        public IExpressionNode RHS { get; }
+        public ISyntaxTreeNode RHS { get; }
 
     }
 

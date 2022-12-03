@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript.expression
+namespace nf.protoscript.syntaxtree
 {
 
     /// <summary>
-    /// Expression node base.
+    /// Syntax-tree node base.
     /// </summary>
-    public class ExprNodeBase
-        : IExpressionNode
+    public class STNodeBase
+        : ISyntaxTreeNode
     {
-        public ExprNodeBase(string InSignature)
+        public STNodeBase(string InSignature)
         {
             Signature = InSignature;
         }
@@ -22,27 +22,27 @@ namespace nf.protoscript.expression
         public string Signature { get; protected set; }
 
         // Internal sub expr node, call DefSubExprNode to add entries to it.
-        private Dictionary<string, ExprNodeBase> mSubExprNodes = new Dictionary<string, ExprNodeBase>();
+        private Dictionary<string, STNodeBase> mSubExprNodes = new Dictionary<string, STNodeBase>();
 
         /// <summary>
         /// Define a sub expr-node.
         /// </summary>
         /// <param name="InName"></param>
         /// <param name="InNode"></param>
-        protected void DefSubExprNode(string InName, ExprNodeBase InNode)
+        protected void DefSubExprNode(string InName, STNodeBase InNode)
         {
             mSubExprNodes.Add(InName, InNode);
         }
 
         /// <summary>
-        /// Sub-expression node organized by collection.
+        /// Sub syntax-tree node organized by collection.
         /// </summary>
-        public IReadOnlyCollection<ExprNodeBase> SubExprNodesByCollection { get { return mSubExprNodes.Values; } }
+        public IReadOnlyCollection<STNodeBase> SubExprNodesByCollection { get { return mSubExprNodes.Values; } }
 
         /// <summary>
-        /// Sub-expression nodes, organized by dictionary.
+        /// Sub syntax-tree nodes, organized by dictionary.
         /// </summary>
-        public IReadOnlyDictionary<string, ExprNodeBase> SubExprNodes { get { return mSubExprNodes; } }
+        public IReadOnlyDictionary<string, STNodeBase> SubExprNodes { get { return mSubExprNodes; } }
 
     }
 

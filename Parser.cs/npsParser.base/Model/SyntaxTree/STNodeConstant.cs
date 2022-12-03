@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript.expression
+namespace nf.protoscript.syntaxtree
 {
 
     /// <summary>
     /// Expr-node: constant
     /// </summary>
-    public class ExprNodeConstant
-        : ExprNodeBase
+    public class STNodeConstant
+        : STNodeBase
     {
-        public ExprNodeConstant()
+        public STNodeConstant()
             : base("const")
         {
         }
 
-        public ExprNodeConstant(string InValueTypeStr, string InValueString)
+        public STNodeConstant(string InValueTypeStr, string InValueString)
             : base("const")
         {
             ValueTypeString = InValueTypeStr;

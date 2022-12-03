@@ -2,31 +2,31 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript.expression
+namespace nf.protoscript.syntaxtree
 {
 
     /// <summary>
     /// An expr-node to call some method.
     /// </summary>
-    public class ExprNodeCall
-        : ExprNodeBase
+    public class STNodeCall
+        : STNodeBase
     {
-        public ExprNodeCall()
+        public STNodeCall()
             : base("call")
         {
         }
 
-        public ExprNodeCall(string InFuncName)
+        public STNodeCall(string InFuncName)
             : base("call")
         {
             FuncName = InFuncName;
         }
 
-        public ExprNodeCall(string InFuncName, IExpressionNode InParam0)
+        public STNodeCall(string InFuncName, ISyntaxTreeNode InParam0)
             : base("call")
         {
             FuncName = InFuncName;
-            Params = new IExpressionNode[1] { InParam0 };
+            Params = new ISyntaxTreeNode[1] { InParam0 };
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace nf.protoscript.expression
         /// <summary>
         /// Parameters
         /// </summary>
-        public IExpressionNode[] Params { get; }
+        public ISyntaxTreeNode[] Params { get; }
 
     }
 

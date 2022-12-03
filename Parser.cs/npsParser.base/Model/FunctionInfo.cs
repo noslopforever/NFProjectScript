@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using nf.protoscript.expression;
+using nf.protoscript.syntaxtree;
 
 namespace nf.protoscript
 {
@@ -18,9 +18,9 @@ namespace nf.protoscript
         }
 
         /// <summary>
-        /// Execution expression.
+        /// Execution expressions.
         /// </summary>
-        IExpressionNode ExecExpression;
+        IReadOnlyList<ISyntaxTreeNode> ExecSyntaxes;
 
     }
 

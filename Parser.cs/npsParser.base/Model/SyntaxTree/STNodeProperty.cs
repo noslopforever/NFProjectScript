@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript.expression
+namespace nf.protoscript.syntaxtree
 {
 
     /// <summary>
     /// An expr-node to access a sub property of the LHS.
     /// </summary>
-    public class ExprNodeProperty : ExprNodeBase
+    public class STNodeProperty : STNodeBase
     {
-        public ExprNodeProperty()
+        public STNodeProperty()
             : base("property")
         {
         }

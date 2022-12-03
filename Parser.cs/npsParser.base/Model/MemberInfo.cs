@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using nf.protoscript.expression;
+using nf.protoscript.syntaxtree;
 
 namespace nf.protoscript
 {
@@ -11,11 +11,11 @@ namespace nf.protoscript
     /// </summary>
     public class MemberInfo : Info
     {
-        public MemberInfo(Info InParentInfo, string InHeader, string InName, TypeInfo InType, IExpressionNode InInitExpr)
+        public MemberInfo(Info InParentInfo, string InHeader, string InName, TypeInfo InType, ISyntaxTreeNode InInitExpr)
             : base(InParentInfo, InHeader, InName)
         {
             Archetype = InType;
-            InitExpression = InInitExpr;
+            InitSyntax = InInitExpr;
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace nf.protoscript
         /// <summary>
         /// This member's init-expression.
         /// </summary>
-        public IExpressionNode InitExpression { get; private set; }
+        public ISyntaxTreeNode InitSyntax { get; private set; }
 
     }
 

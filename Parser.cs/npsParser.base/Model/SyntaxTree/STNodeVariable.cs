@@ -1,14 +1,13 @@
-﻿using nf.protoscript.expression;
-
-namespace nf.protoscript.expression
+﻿
+namespace nf.protoscript.syntaxtree
 {
 
     /// <summary>
     /// expr node: identifier.
     /// </summary>
-    public class ExprNodeId : ExprNodeBase
+    public class STNodeVariable : STNodeBase
     {
-        public ExprNodeId(string InIdName)
+        public STNodeVariable(string InIdName)
             : base("id")
         {
             IDName = InIdName;
@@ -18,6 +17,11 @@ namespace nf.protoscript.expression
         /// The identifier's name: variable's name, member's name, and so on...
         /// </summary>
         public string IDName { get; }
+
+        ///// <summary>
+        ///// The scope of this variable.
+        ///// </summary>
+        //public Info Scope { get; }
 
     }
 }

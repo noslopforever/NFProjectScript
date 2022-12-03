@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using CommandLine;
 using System.Diagnostics;
 using nf.protoscript;
-using nf.protoscript.expression;
+using nf.protoscript.syntaxtree;
 
 namespace nf.protoscript.parser.cs
 {
@@ -119,7 +119,7 @@ namespace nf.protoscript.parser.cs
             {
                 TypeInfo classA = new TypeInfo(testProj, "model", "classA"); {
                     MemberInfo propA = new MemberInfo(classA, "property", "propA", CommonTypeInfos.Integer
-                        , new ExprNodeConstant(ExprNodeConstant.Integer, "100")
+                        , new STNodeConstant(STNodeConstant.Integer, "100")
                         );
                 }
             }

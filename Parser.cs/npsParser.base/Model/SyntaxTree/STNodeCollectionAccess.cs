@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace nf.protoscript.expression
+namespace nf.protoscript.syntaxtree
 {
 
     /// <summary>
@@ -11,9 +11,9 @@ namespace nf.protoscript.expression
     /// The collection may have multiple keys, like 2D-array or 3D-array.
     /// 
     /// </summary>
-    class ExprNodeCollectionAccess : ExprNodeBase
+    class STNodeCollectionAccess : STNodeBase
     {
-        public ExprNodeCollectionAccess()
+        public STNodeCollectionAccess()
             : base("array")
         {
         }
