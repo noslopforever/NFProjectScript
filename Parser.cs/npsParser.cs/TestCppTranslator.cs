@@ -191,14 +191,25 @@ namespace nf.protoscript.parser.cs
             STNodeAssign stnAssign = InSTNode as STNodeAssign;
             if (stnAssign != null)
             {
+                // TODO use the member's 'SetExprCode' and pass the RHS's expr-code.
                 return _GenCodeForExpr(InContextInfo, stnAssign.LHS) + " = " + _GenCodeForExpr(InContextInfo, stnAssign.RHS);
             }
 
-            STNodeGetVar stnVar = InSTNode as STNodeGetVar;
-            if (stnVar != null)
+            STNodeGetVar stnVarGet = InSTNode as STNodeGetVar;
+            if (stnVarGet != null)
             {
-                // TODO find name in context.
-                return stnVar.IDName;
+                // Find the member with certain name in the context.
+                // Then use the member's 'GetExprCode'.
+                Info propInfo = InfoHelper.FindPropertyAlongScopeTree(InContextInfo, stnVarGet.IDName);
+                if (propInfo != null)
+                {
+                    if (propInfo.IsExtraContains("MemberGetExprCode"))
+                    {
+                        return propInfo.Extra.MemberGetExprCode;
+                    }
+                    return "$ERR_PROP_EXTRA";
+                }
+                return "$ERR_PROP";
             }
 
             STNodeBinaryOp stnBinOp = InSTNode as STNodeBinaryOp;

@@ -66,7 +66,6 @@ namespace nf.protoscript
             mSubInfos.Add(InChild);
         }
 
-
         /// <summary>
         /// Test if 'Extra' contains some property.
         /// </summary>
@@ -101,6 +100,12 @@ namespace nf.protoscript
                     break;
         }
 
+        /// <summary>
+        /// Check if the info has a sub-info with InSubName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InSubName"></param>
+        /// <returns></returns>
         public bool HasSubInfoWithName<T>(string InSubName)
             where T : Info
         {
@@ -142,6 +147,12 @@ namespace nf.protoscript
             });
         }
 
+        /// <summary>
+        /// Iterate all sub infos by the predict function.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InPred"></param>
         public void ForeachSubInfo<T>(Func<T, bool> InFunc, Func<T, bool> InPred)
             where T : Info
         {
@@ -170,17 +181,45 @@ namespace nf.protoscript
             , InPred);
         }
 
-
+        /// <summary>
+        /// Foreach sub infos with InSubName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InSubName"></param>
         public void ForeachSubInfoByName<T>(Func<T, bool> InFunc, string InSubName)
             where T : Info
         {
             ForeachSubInfo<T>(InFunc, sub => { return sub.Name.ToUpper() == InSubName; });
         }
 
+        /// <summary>
+        /// Foreach sub infos with InSubName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InSubName"></param>
         public void ForeachSubInfoByName<T>(Action<T> InFunc, string InSubName)
             where T : Info
         {
             ForeachSubInfo<T>(InFunc, sub => { return sub.Name.ToUpper() == InSubName; });
+        }
+
+        /// <summary>
+        /// Find the first sub info with the certain name.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InSubName"></param>
+        /// <returns></returns>
+        public T FindTheFirstSubInfoWithName<T>(string InSubName)
+            where T : Info
+        {
+            var selectedInfos = from info in mSubInfos
+                                where (info is T
+                                    && info.Name == InSubName)
+                                select info as T;
+
+            return selectedInfos.First();
         }
 
 
