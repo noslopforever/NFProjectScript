@@ -117,7 +117,8 @@ namespace nf.protoscript.parser.cs
             // Parser: parse a project from .nps script files.
             ProjectInfo testProj = new ProjectInfo("TestProj");
             {
-                TypeInfo classA = new TypeInfo(testProj, "model", "classA"); {
+                TypeInfo classA = new TypeInfo(testProj, "model", "classA");
+                {
                     MemberInfo propA = new MemberInfo(classA, "property", "propA", CommonTypeInfos.Integer
                         , new STNodeConstant(STNodeConstant.Integer, "100")
                         );
@@ -129,7 +130,34 @@ namespace nf.protoscript.parser.cs
                             )
                         );
 
-                }
+                    // int TestMethodA(int InParam)
+                    FunctionInfo funcA = new FunctionInfo(classA, "method", "TestMethodA");
+                    {
+                        MemberInfo retVal = new MemberInfo(funcA, "param", "return", CommonTypeInfos.Integer, null);
+                        {
+                            AttributeInfo outAttr = new AttributeInfo(retVal, "Out", "Out");
+                        }
+                        MemberInfo inParam0 = new MemberInfo(funcA, "param", "InParam", CommonTypeInfos.Integer, null);
+
+                        // code ln 0: propA = propB + InParam.
+                        ISyntaxTreeNode ln0 = new STNodeAssign(
+                            new STNodeGetVar("propA", true)
+                            , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
+                                , new STNodeGetVar("propB")
+                                , new STNodeGetVar("InParam")
+                                )
+                            );
+                        // code ln 1: return propA
+                        ISyntaxTreeNode ln1 = new STNodeAssign(
+                            new STNodeGetVar("return", true)
+                            , new STNodeGetVar("propA")
+                            );
+
+                        funcA.SetSyntaxTrees(new ISyntaxTreeNode[]{ln0, ln1});
+
+                    } // finish funcA
+                } // finish classA
+
             }
 
             // Translator: translate the project to a target development environment.

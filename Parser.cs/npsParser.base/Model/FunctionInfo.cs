@@ -20,7 +20,16 @@ namespace nf.protoscript
         /// <summary>
         /// Execution expressions.
         /// </summary>
-        IReadOnlyList<ISyntaxTreeNode> ExecSyntaxes;
+        public IReadOnlyList<ISyntaxTreeNode> ExecSyntaxTrees { get; private set; }
+
+        /// <summary>
+        /// Set expressions of the function.
+        /// </summary>
+        /// <param name="InSyntaxTrees"></param>
+        public void SetSyntaxTrees(IReadOnlyList<ISyntaxTreeNode> InSyntaxTrees)
+        {
+            ExecSyntaxTrees = InSyntaxTrees;
+        }
 
     }
 
