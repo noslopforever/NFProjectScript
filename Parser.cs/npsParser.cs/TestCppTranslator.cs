@@ -310,10 +310,9 @@ namespace nf.protoscript.parser.cs
             // Handle members
             InInfo.ForeachSubInfo<MemberInfo>(info =>
             {
-                if (info.Archetype is FunctionInfo)
+                if (info.Archetype is DelegateTypeInfo)
                 {
-                    throw new NotImplementedException();
-                    //TryProcessInfoAsFunction(info);
+                    TryProcessInfoAsFunction(InInfo, info);
                 }
                 // Handle common TypeInfo
                 else
@@ -325,7 +324,18 @@ namespace nf.protoscript.parser.cs
         }
 
         /// <summary>
-        /// Try process a sub-info of a type to gather enough informations for translating.
+        /// Try gather enough informations of a function.
+        /// </summary>
+        /// <param name="inInfo"></param>
+        /// <param name="info"></param>
+        private void TryProcessInfoAsFunction(TypeInfo InParentTypeInfo, MemberInfo InInfo)
+        {
+            Console.WriteLine($"Handle function : {InInfo.Name}");
+            //throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Try gather enough informations of a property.
         /// </summary>
         /// <param name="InInfo"></param>
         private void TryProcessInfoAsProperty(TypeInfo InParentTypeInfo, MemberInfo InInfo)

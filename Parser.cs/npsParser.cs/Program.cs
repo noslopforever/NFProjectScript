@@ -130,32 +130,36 @@ namespace nf.protoscript.parser.cs
                             )
                         );
 
-                    // int TestMethodA(int InParam)
-                    FunctionInfo funcA = new FunctionInfo(classA, "method", "TestMethodA");
+                    // delegate int MethodType(int InParam)
+                    DelegateTypeInfo funcAType = new DelegateTypeInfo(testProj, "FuncType", "funcAType");
                     {
-                        MemberInfo retVal = new MemberInfo(funcA, "param", "return", CommonTypeInfos.Integer, null);
+                        MemberInfo retVal = new MemberInfo(funcAType, "param", "return", CommonTypeInfos.Integer, null);
                         {
                             AttributeInfo outAttr = new AttributeInfo(retVal, "Out", "Out");
                         }
-                        MemberInfo inParam0 = new MemberInfo(funcA, "param", "InParam", CommonTypeInfos.Integer, null);
+                        MemberInfo inParam0 = new MemberInfo(funcAType, "param", "InParam", CommonTypeInfos.Integer, null);
+                    }
 
-                        // code ln 0: propA = propB + InParam.
-                        ISyntaxTreeNode ln0 = new STNodeAssign(
-                            new STNodeGetVar("propA", true)
-                            , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                , new STNodeGetVar("propB")
-                                , new STNodeGetVar("InParam")
+                    // int TestMethodA(int InParam)
+                    // which means TestMethodA = new MethodType_funcAType { ... }
+                    MethodInfo funcA = new MethodInfo(classA, "method", "TestMethodA", funcAType
+                        , new STNodeSequence(
+                            // code ln 0: propA = propB + InParam.
+                            new STNodeAssign(
+                                new STNodeGetVar("propA", true)
+                                , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
+                                    , new STNodeGetVar("propB")
+                                    , new STNodeGetVar("InParam")
+                                    )
+                                ),
+                            // code ln 1: return propA (return = propA)
+                            new STNodeAssign(
+                                new STNodeGetVar("return", true)
+                                , new STNodeGetVar("propA")
                                 )
-                            );
-                        // code ln 1: return propA
-                        ISyntaxTreeNode ln1 = new STNodeAssign(
-                            new STNodeGetVar("return", true)
-                            , new STNodeGetVar("propA")
-                            );
+                            )
+                        );
 
-                        funcA.SetSyntaxTrees(new ISyntaxTreeNode[]{ln0, ln1});
-
-                    } // finish funcA
                 } // finish classA
 
             }
