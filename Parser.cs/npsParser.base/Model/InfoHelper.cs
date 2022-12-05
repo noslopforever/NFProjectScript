@@ -20,10 +20,18 @@ namespace nf.protoscript
             Info contextInfo = InContextInfo;
             while (contextInfo != null)
             {
+                // find properties of the context
                 Info foundInfo = contextInfo.FindTheFirstSubInfoWithName<MemberInfo>(InIDName);
                 if (foundInfo != null)
+                { return foundInfo; }
+
+                // if the context is a member, find properties in its archetype.
+                MemberInfo member = contextInfo as MemberInfo;
+                if (member != null)
                 {
-                    return foundInfo;
+                    foundInfo = member.Archetype.FindTheFirstSubInfoWithName<MemberInfo>(InIDName);
+                    if (foundInfo != null)
+                    { return foundInfo; }
                 }
 
                 contextInfo = contextInfo.ParentInfo;

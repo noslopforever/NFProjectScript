@@ -219,7 +219,11 @@ namespace nf.protoscript
                                     && info.Name == InSubName)
                                 select info as T;
 
-            return selectedInfos.First();
+            if (selectedInfos.Any())
+            {
+                return selectedInfos.First();
+            }
+            return null;
         }
 
 

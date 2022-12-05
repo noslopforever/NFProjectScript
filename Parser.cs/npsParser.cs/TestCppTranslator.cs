@@ -71,6 +71,10 @@ namespace nf.protoscript.parser.cs
             // do translating after all informations gathered.
             foreach (Info InInfo in InProjProj.SubInfos)
             {
+                // skip delegate types.
+                if (InInfo is DelegateTypeInfo)
+                { continue; }
+
                 // generate class from the model
                 if (InInfo is TypeInfo)
                 {
@@ -330,8 +334,60 @@ namespace nf.protoscript.parser.cs
         /// <param name="info"></param>
         private void TryProcessInfoAsFunction(TypeInfo InParentTypeInfo, MemberInfo InInfo)
         {
-            Console.WriteLine($"Handle function : {InInfo.Name}");
-            //throw new NotImplementedException();
+            DelegateTypeInfo delegateType = InInfo.Archetype as DelegateTypeInfo;
+            System.Diagnostics.Debug.Assert(delegateType != null);
+
+            // Exact the return-param and in/out parameters.
+            MemberInfo returnMember = null;
+            List<MemberInfo> inOutMembers = new List<MemberInfo>();
+            delegateType.ForeachSubInfo<MemberInfo>(member =>
+            {
+                if (member.HasSubInfoWithName<AttributeInfo>("Return"))
+                { returnMember = member; }
+                else
+                { inOutMembers.Add(member); }
+            });
+
+            string retTypeCode = "";
+            if (returnMember != null)
+            {
+                retTypeCode = _ExactCppTypeCodeFromInfo(returnMember.Archetype);
+            }
+
+            // generate C++ function decl by delegateType
+            FunctionCode cppFunc = new FunctionCode()
+            {
+                FuncName = $"{InInfo.Name}",
+                FuncReturn = returnMember != null ? $"{retTypeCode}" : "void",
+                FuncConst = false,
+            };
+            // add parameters
+            foreach (MemberInfo param in inOutMembers)
+            {
+                string typeCode = _ExactCppTypeCodeFromInfo(param.Archetype);
+                cppFunc.FuncParams.Add(new FunctionCode.FuncParam($"{typeCode}", $"{param.Name}"));
+            }
+
+            // generate C++ function codes
+            STNodeSequence exprSeq = InInfo.InitSyntax as STNodeSequence;
+            System.Diagnostics.Debug.Assert(exprSeq != null);
+            // prepare return
+            if (returnMember != null)
+            { cppFunc.FuncBodyCodes.Add($"{retTypeCode} {returnMember.Name};"); }
+
+            // generate c++ codes per ST line.
+            foreach (ISyntaxTreeNode stnode in exprSeq.NodeList)
+            {
+                string code = _GenCodeForExpr(InInfo, stnode);
+                cppFunc.FuncBodyCodes.Add(code + ";");
+            }
+
+            // finish return
+            if (returnMember != null)
+            { cppFunc.FuncBodyCodes.Add($"return {returnMember.Name};"); }
+
+            InInfo.Extra.MemberFunctions = new List<FunctionCode>();
+            InInfo.Extra.MemberFunctions.Add(cppFunc);
         }
 
         /// <summary>
@@ -341,15 +397,7 @@ namespace nf.protoscript.parser.cs
         private void TryProcessInfoAsProperty(TypeInfo InParentTypeInfo, MemberInfo InInfo)
         {
             // Generate different prop codes by info's type and attributes.
-            string typeCode = $"{InInfo.Archetype.Name}";
-            if (CommonTypeInfos.IsInteger32Type(InInfo.Archetype))
-            {
-                typeCode = "int32";
-            }
-            else if (CommonTypeInfos.IsStringType(InInfo.Archetype))
-            {
-                typeCode = "FString";
-            }
+            string typeCode = _ExactCppTypeCodeFromInfo(InInfo.Archetype);
 
             // - if : Attribute access:
             //InInfo.HasSubInfoWithName<AttributeInfo>("AsProperty");
@@ -405,6 +453,20 @@ namespace nf.protoscript.parser.cs
 
         }
 
+        private static string _ExactCppTypeCodeFromInfo(TypeInfo InArchetype)
+        {
+            string typeCode = $"{InArchetype.Name}";
+            if (CommonTypeInfos.IsInteger32Type(InArchetype))
+            {
+                typeCode = "int32";
+            }
+            else if (CommonTypeInfos.IsStringType(InArchetype))
+            {
+                typeCode = "FString";
+            }
+
+            return typeCode;
+        }
     }
 
 }

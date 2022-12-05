@@ -133,9 +133,9 @@ namespace nf.protoscript.parser.cs
                     // delegate int MethodType(int InParam)
                     DelegateTypeInfo funcAType = new DelegateTypeInfo(testProj, "FuncType", "funcAType");
                     {
-                        MemberInfo retVal = new MemberInfo(funcAType, "param", "return", CommonTypeInfos.Integer, null);
+                        MemberInfo retVal = new MemberInfo(funcAType, "param", "___return___", CommonTypeInfos.Integer, null);
                         {
-                            AttributeInfo outAttr = new AttributeInfo(retVal, "Out", "Out");
+                            AttributeInfo retAttr = new AttributeInfo(retVal, "Return", "Return");
                         }
                         MemberInfo inParam0 = new MemberInfo(funcAType, "param", "InParam", CommonTypeInfos.Integer, null);
                     }
@@ -154,7 +154,7 @@ namespace nf.protoscript.parser.cs
                                 ),
                             // code ln 1: return propA (return = propA)
                             new STNodeAssign(
-                                new STNodeGetVar("return", true)
+                                new STNodeGetVar("___return___", true)
                                 , new STNodeGetVar("propA")
                                 )
                             )
