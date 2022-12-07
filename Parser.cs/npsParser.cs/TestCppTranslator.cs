@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -67,6 +67,21 @@ namespace nf.protoscript.parser.cs
                     TryProcessInfoAsClass(InInfo as TypeInfo);
                 }
             }
+
+            // generate code for expressions.
+            foreach (Info InInfo in InProjProj.SubInfos)
+            {
+                // skip delegate types.
+                if (InInfo is DelegateTypeInfo)
+                { continue; }
+
+                // generate class from the model
+                if (InInfo is TypeInfo)
+                {
+                    TryGenerateExpressionCodesForMethods(InInfo as TypeInfo);
+                }
+            }
+
 
             // do translating after all informations gathered.
             foreach (Info InInfo in InProjProj.SubInfos)
@@ -334,6 +349,7 @@ namespace nf.protoscript.parser.cs
         /// <param name="info"></param>
         private void TryProcessInfoAsFunction(TypeInfo InParentTypeInfo, MemberInfo InInfo)
         {
+            // # Exact signatures(name, parameters) of the function, but DO NOT translate any expression in the function body.
             DelegateTypeInfo delegateType = InInfo.Archetype as DelegateTypeInfo;
             System.Diagnostics.Debug.Assert(delegateType != null);
 
@@ -348,46 +364,31 @@ namespace nf.protoscript.parser.cs
                 { inOutMembers.Add(member); }
             });
 
-            string retTypeCode = "";
+            InInfo.Extra.MethodReturnMember = returnMember;
+            InInfo.Extra.MethodReturnType = null;
+            InInfo.Extra.MethodReturnTypeCode = "void";
             if (returnMember != null)
             {
-                retTypeCode = _ExactCppTypeCodeFromInfo(returnMember.Archetype);
+                InInfo.Extra.MethodReturnType = returnMember.Archetype;
+                InInfo.Extra.MethodReturnTypeCode = _ExactCppTypeCodeFromInfo(returnMember.Archetype);
             }
 
             // generate C++ function decl by delegateType
-            FunctionCode cppFunc = new FunctionCode()
+            InInfo.Extra.cppFuncCode = new FunctionCode()
             {
                 FuncName = $"{InInfo.Name}",
-                FuncReturn = returnMember != null ? $"{retTypeCode}" : "void",
+                FuncReturn = InInfo.Extra.MethodReturnTypeCode,
                 FuncConst = false,
             };
             // add parameters
             foreach (MemberInfo param in inOutMembers)
             {
                 string typeCode = _ExactCppTypeCodeFromInfo(param.Archetype);
-                cppFunc.FuncParams.Add(new FunctionCode.FuncParam($"{typeCode}", $"{param.Name}"));
+                InInfo.Extra.cppFuncCode.FuncParams.Add(new FunctionCode.FuncParam($"{typeCode}", $"{param.Name}"));
             }
 
-            // generate C++ function codes
-            STNodeSequence exprSeq = InInfo.InitSyntax as STNodeSequence;
-            System.Diagnostics.Debug.Assert(exprSeq != null);
-            // prepare return
-            if (returnMember != null)
-            { cppFunc.FuncBodyCodes.Add($"{retTypeCode} {returnMember.Name};"); }
-
-            // generate c++ codes per ST line.
-            foreach (ISyntaxTreeNode stnode in exprSeq.NodeList)
-            {
-                string code = _GenCodeForExpr(InInfo, stnode);
-                cppFunc.FuncBodyCodes.Add(code + ";");
-            }
-
-            // finish return
-            if (returnMember != null)
-            { cppFunc.FuncBodyCodes.Add($"return {returnMember.Name};"); }
-
-            InInfo.Extra.MemberFunctions = new List<FunctionCode>();
-            InInfo.Extra.MemberFunctions.Add(cppFunc);
+            // Only declarations and signatures.
+            // The translation of the function body should start after all infos in a project had been parsed.
         }
 
         /// <summary>
@@ -449,9 +450,44 @@ namespace nf.protoscript.parser.cs
                 InInfo.Extra.MemberRefToSetCode = $"{InInfo.Name}";
             }
 
-
-
         }
+
+        /// <summary>
+        /// Try generate expression codes.
+        /// </summary>
+        /// <param name="InInfo"></param>
+        private void TryGenerateExpressionCodesForMethods(TypeInfo InInfo)
+        {
+            // Handle methods
+            InInfo.ForeachSubInfo<MethodInfo>(methodInfo =>
+            {
+                // generate C++ function codes
+                STNodeSequence exprSeq = methodInfo.InitSyntax as STNodeSequence;
+                System.Diagnostics.Debug.Assert(exprSeq != null);
+
+                var returnMember = methodInfo.Extra.MethodReturnMember;
+                var retTypeCode = methodInfo.Extra.MethodReturnTypeCode;
+
+                // prepare return
+                if (returnMember != null)
+                { methodInfo.Extra.cppFuncCode.FuncBodyCodes.Add($"{retTypeCode} {returnMember.Name};"); }
+
+                // generate c++ codes per ST line.
+                foreach (ISyntaxTreeNode stnode in exprSeq.NodeList)
+                {
+                    string code = _GenCodeForExpr(methodInfo, stnode);
+                    methodInfo.Extra.cppFuncCode.FuncBodyCodes.Add(code + ";");
+                }
+
+                // finish return
+                if (returnMember != null)
+                { methodInfo.Extra.cppFuncCode.FuncBodyCodes.Add($"return {returnMember.Name};"); }
+
+                methodInfo.Extra.MemberFunctions = new List<FunctionCode>();
+                methodInfo.Extra.MemberFunctions.Add(methodInfo.Extra.cppFuncCode);
+            });
+        }
+
 
         private static string _ExactCppTypeCodeFromInfo(TypeInfo InArchetype)
         {
