@@ -329,7 +329,7 @@ namespace nf.protoscript.parser.cs
             // Handle members
             InInfo.ForeachSubInfo<MemberInfo>(info =>
             {
-                if (info.Archetype is DelegateTypeInfo)
+                if (info is MethodInfo)
                 {
                     TryProcessInfoAsFunction(InInfo, info);
                 }
