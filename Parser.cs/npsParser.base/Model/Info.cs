@@ -118,6 +118,24 @@ namespace nf.protoscript
         }
 
         /// <summary>
+        /// Check if there is a sub-info which header is InHeaderName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InHeaderName"></param>
+        /// <returns></returns>
+        public bool HasSubInfoWithHeader<T>(string InHeaderName)
+            where T : Info
+        {
+            var selectedInfos = from info in mSubInfos
+                                where (info is T
+                                    && info.Header == InHeaderName)
+                                select info as T;
+
+            return selectedInfos.Count() != 0;
+        }
+
+
+        /// <summary>
         /// Iterate all sub infos by type.
         /// </summary>
         /// <typeparam name="T"></typeparam>

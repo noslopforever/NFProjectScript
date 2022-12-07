@@ -122,6 +122,9 @@ namespace nf.protoscript.parser.cs
                     MemberInfo propA = new MemberInfo(classA, "property", "propA", CommonTypeInfos.Integer
                         , new STNodeConstant(STNodeConstant.Integer, "100")
                         );
+                    {
+                        AttributeInfo propAttr = new AttributeInfo(propA, "Property", "Anonymous_Property_Attribute");
+                    }
 
                     MemberInfo propB = new MemberInfo(classA, "property", "propB", CommonTypeInfos.Integer
                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
@@ -135,7 +138,7 @@ namespace nf.protoscript.parser.cs
                     {
                         MemberInfo retVal = new MemberInfo(funcAType, "param", "___return___", CommonTypeInfos.Integer, null);
                         {
-                            AttributeInfo retAttr = new AttributeInfo(retVal, "Return", "Return");
+                            AttributeInfo retAttr = new AttributeInfo(retVal, "Return", "Anonymous_Return_Property");
                         }
                         MemberInfo inParam0 = new MemberInfo(funcAType, "param", "InParam", CommonTypeInfos.Integer, null);
                     }

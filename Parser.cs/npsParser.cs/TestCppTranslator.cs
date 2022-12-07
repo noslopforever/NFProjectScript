@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -358,7 +358,7 @@ namespace nf.protoscript.parser.cs
             List<MemberInfo> inOutMembers = new List<MemberInfo>();
             delegateType.ForeachSubInfo<MemberInfo>(member =>
             {
-                if (member.HasSubInfoWithName<AttributeInfo>("Return"))
+                if (member.HasSubInfoWithHeader<AttributeInfo>("Return"))
                 { returnMember = member; }
                 else
                 { inOutMembers.Add(member); }
@@ -401,8 +401,7 @@ namespace nf.protoscript.parser.cs
             string typeCode = _ExactCppTypeCodeFromInfo(InInfo.Archetype);
 
             // - if : Attribute access:
-            //InInfo.HasSubInfoWithName<AttributeInfo>("AsProperty");
-            bool isAttribute = true;
+            bool isAttribute = InInfo.HasSubInfoWithHeader<AttributeInfo>("Property");
             if (!isAttribute)
             {
                 // Common property access codes:
