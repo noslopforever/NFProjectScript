@@ -78,10 +78,20 @@ namespace nf.protoscript.parser.cs
                 // generate class from the model
                 if (InInfo is TypeInfo)
                 {
-                    TryGenFunctionCodesForMethods(InInfo as TypeInfo);
+                    // Gen codes for member-inits
+                    InInfo.ForeachSubInfo<MemberInfo>(memberInfo =>
+                    {
+                        TryGenExprCodeForMemberInit(InInfo, memberInfo);
+                    }
+                    );
+
+                    // Gen codes for methods.
+                    InInfo.ForeachSubInfo<MethodInfo>(methodInfo =>
+                    {
+                        TryGenExprCodesForMethod(InInfo, methodInfo);
+                    });
                 }
             }
-
 
             // do translating after all informations gathered.
             foreach (Info InInfo in InProj.SubInfos)
@@ -120,7 +130,7 @@ namespace nf.protoscript.parser.cs
                 Console.WriteLine("public:");
 
                 // Handle members
-                InInfo.ForeachSubInfo<MemberInfo>(info =>
+                InInfo.ForeachSubInfo<Info>(info =>
                 {
                     if (info.IsExtraContains("MemberDeclCodes"))
                     {
@@ -160,15 +170,14 @@ namespace nf.protoscript.parser.cs
                     Console.WriteLine("{");
 
                     // ### member-initializations.
-                    InInfo.ForeachSubInfo<MemberInfo>(info =>
+                    InInfo.ForeachSubInfo<Info>(info =>
                     {
-                        if (info.IsExtraContains("MemberInitCodes"))
+                        if (info.IsExtraContains("MemberInitCodes")
+                            && info.IsExtraContains("MemberInitExprCode"))
                         {
                             foreach (string init in info.Extra.MemberInitCodes)
                             {
-                                string initExpCode = _GenCodeForExpr(InInfo, info.InitSyntax);
-                                string replacedInitCode = init.Replace("$RHS", initExpCode);
-
+                                string replacedInitCode = init.Replace("$RHS", info.Extra.MemberInitExprCode);
                                 Console.WriteLine("    " + replacedInitCode + ";");
                             }
                         }
@@ -180,11 +189,10 @@ namespace nf.protoscript.parser.cs
                 Console.WriteLine($"");
 
                 // ## function implements
-                InInfo.ForeachSubInfo<MemberInfo>(info =>
+                InInfo.ForeachSubInfo<Info>(info =>
                 {
                     if (info.IsExtraContains("MemberFunctions"))
                     {
-
                         foreach (FunctionCode func in info.Extra.MemberFunctions)
                         {
                             WriteFunctionDecl(InInfo.Extra.ClassFullname, func, Console.Out, false);
@@ -200,59 +208,6 @@ namespace nf.protoscript.parser.cs
                 });
 
             }
-        }
-
-        /// <summary>
-        /// Generate code for a syntax-tree node.
-        /// </summary>
-        string _GenCodeForExpr(Info InContextInfo, ISyntaxTreeNode InSTNode)
-        {
-            STNodeAssign stnAssign = InSTNode as STNodeAssign;
-            if (stnAssign != null)
-            {
-                // TODO use the member's 'SetExprCode' and pass the RHS's expr-code.
-                return _GenCodeForExpr(InContextInfo, stnAssign.LHS) + " = " + _GenCodeForExpr(InContextInfo, stnAssign.RHS);
-            }
-
-            STNodeGetVar stnVarGet = InSTNode as STNodeGetVar;
-            if (stnVarGet != null)
-            {
-                // Find the member with certain name in the context.
-                // Then use the member's 'GetExprCode'.
-                Info propInfo = InfoHelper.FindPropertyAlongScopeTree(InContextInfo, stnVarGet.IDName);
-                if (propInfo != null)
-                {
-                    if (propInfo.IsExtraContains("MemberGetExprCode"))
-                    {
-                        return propInfo.Extra.MemberGetExprCode;
-                    }
-                    return "$ERR_PROP_EXTRA";
-                }
-                return "$ERR_PROP";
-            }
-
-            STNodeBinaryOp stnBinOp = InSTNode as STNodeBinaryOp;
-            if (stnBinOp != null)
-            {
-                string opcode = "$ERR";
-                switch (stnBinOp.OpCode)
-                {
-                    case STNodeBinaryOp.Def.Add: opcode = "+"; break;
-                    case STNodeBinaryOp.Def.Sub: opcode = "-"; break;
-                    case STNodeBinaryOp.Def.Mul: opcode = "*"; break;
-                    case STNodeBinaryOp.Def.Div: opcode = "/"; break;
-                    case STNodeBinaryOp.Def.Mod: opcode = "%"; break;
-                }
-                return _GenCodeForExpr(InContextInfo, stnBinOp.LHS) + " " + opcode + " " + _GenCodeForExpr(InContextInfo, stnBinOp.RHS);
-            }
-
-            STNodeConstant stnConst = InSTNode as STNodeConstant;
-            if (stnConst != null)
-            {
-                return stnConst.ValueString;
-            }
-
-            return "$ERR";
         }
 
         /// <summary>
@@ -452,41 +407,99 @@ namespace nf.protoscript.parser.cs
         }
 
         /// <summary>
-        /// Try generate expression codes.
+        /// Generate code for a syntax-tree node.
         /// </summary>
-        /// <param name="InInfo"></param>
-        private void TryGenFunctionCodesForMethods(TypeInfo InInfo)
+        string _GenCodeForExpr(Info InContextInfo, ISyntaxTreeNode InSTNode)
         {
-            // Handle methods
-            InInfo.ForeachSubInfo<MethodInfo>(methodInfo =>
+            STNodeAssign stnAssign = InSTNode as STNodeAssign;
+            if (stnAssign != null)
             {
-                // generate C++ function codes
-                STNodeSequence exprSeq = methodInfo.ExecSequence as STNodeSequence;
-                System.Diagnostics.Debug.Assert(exprSeq != null);
+                // TODO use the member's 'SetExprCode' and pass the RHS's expr-code.
+                return _GenCodeForExpr(InContextInfo, stnAssign.LHS) + " = " + _GenCodeForExpr(InContextInfo, stnAssign.RHS);
+            }
 
-                var returnMember = methodInfo.Extra.MethodReturnMember;
-                var retTypeCode = methodInfo.Extra.MethodReturnTypeCode;
-
-                // prepare return
-                if (returnMember != null)
-                { methodInfo.Extra.cppFuncCode.FuncBodyCodes.Add($"{retTypeCode} {returnMember.Name};"); }
-
-                // generate c++ codes per ST line.
-                foreach (ISyntaxTreeNode stnode in exprSeq.NodeList)
+            STNodeGetVar stnVarGet = InSTNode as STNodeGetVar;
+            if (stnVarGet != null)
+            {
+                // Find the member with certain name in the context.
+                // Then use the member's 'GetExprCode'.
+                Info propInfo = InfoHelper.FindPropertyAlongScopeTree(InContextInfo, stnVarGet.IDName);
+                if (propInfo != null)
                 {
-                    string code = _GenCodeForExpr(methodInfo, stnode);
-                    methodInfo.Extra.cppFuncCode.FuncBodyCodes.Add(code + ";");
+                    if (propInfo.IsExtraContains("MemberGetExprCode"))
+                    {
+                        return propInfo.Extra.MemberGetExprCode;
+                    }
+                    return "$ERR_PROP_EXTRA";
                 }
+                return "$ERR_PROP";
+            }
 
-                // finish return
-                if (returnMember != null)
-                { methodInfo.Extra.cppFuncCode.FuncBodyCodes.Add($"return {returnMember.Name};"); }
+            STNodeBinaryOp stnBinOp = InSTNode as STNodeBinaryOp;
+            if (stnBinOp != null)
+            {
+                string opcode = "$ERR";
+                switch (stnBinOp.OpCode)
+                {
+                    case STNodeBinaryOp.Def.Add: opcode = "+"; break;
+                    case STNodeBinaryOp.Def.Sub: opcode = "-"; break;
+                    case STNodeBinaryOp.Def.Mul: opcode = "*"; break;
+                    case STNodeBinaryOp.Def.Div: opcode = "/"; break;
+                    case STNodeBinaryOp.Def.Mod: opcode = "%"; break;
+                }
+                return _GenCodeForExpr(InContextInfo, stnBinOp.LHS) + " " + opcode + " " + _GenCodeForExpr(InContextInfo, stnBinOp.RHS);
+            }
 
-                methodInfo.Extra.MemberFunctions = new List<FunctionCode>();
-                methodInfo.Extra.MemberFunctions.Add(methodInfo.Extra.cppFuncCode);
-            });
+            STNodeConstant stnConst = InSTNode as STNodeConstant;
+            if (stnConst != null)
+            {
+                return stnConst.ValueString;
+            }
+
+            return "$ERR";
         }
 
+        /// <summary>
+        /// Try generate expression codes for member-init.
+        /// </summary>
+        /// <param name="InMemberInfo"></param>
+        /// <param name="InInfo"></param>
+        private void TryGenExprCodeForMemberInit(Info InInfo, MemberInfo InMemberInfo)
+        {
+            InMemberInfo.Extra.MemberInitExprCode = _GenCodeForExpr(InInfo, InMemberInfo.InitSyntax);
+        }
+
+        /// <summary>
+        /// Try generate expression codes for method.
+        /// </summary>
+        /// <param name="InInfo"></param>
+        void TryGenExprCodesForMethod(Info InInfo, MethodInfo InMethodInfo)
+        {
+            // generate C++ function codes
+            STNodeSequence exprSeq = InMethodInfo.ExecSequence as STNodeSequence;
+            System.Diagnostics.Debug.Assert(exprSeq != null);
+
+            var returnMember = InMethodInfo.Extra.MethodReturnMember;
+            var retTypeCode = InMethodInfo.Extra.MethodReturnTypeCode;
+
+            // prepare return
+            if (returnMember != null)
+            { InMethodInfo.Extra.cppFuncCode.FuncBodyCodes.Add($"{retTypeCode} {returnMember.Name};"); }
+
+            // generate c++ codes per ST line.
+            foreach (ISyntaxTreeNode stnode in exprSeq.NodeList)
+            {
+                string code = _GenCodeForExpr(InMethodInfo, stnode);
+                InMethodInfo.Extra.cppFuncCode.FuncBodyCodes.Add(code + ";");
+            }
+
+            // finish return
+            if (returnMember != null)
+            { InMethodInfo.Extra.cppFuncCode.FuncBodyCodes.Add($"return {returnMember.Name};"); }
+
+            InMethodInfo.Extra.MemberFunctions = new List<FunctionCode>();
+            InMethodInfo.Extra.MemberFunctions.Add(InMethodInfo.Extra.cppFuncCode);
+        }
 
         private static string _ExactCppTypeCodeFromInfo(TypeInfo InArchetype)
         {
