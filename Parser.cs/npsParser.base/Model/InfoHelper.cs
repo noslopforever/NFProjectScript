@@ -34,6 +34,15 @@ namespace nf.protoscript
                     { return foundInfo; }
                 }
 
+                // if the context is a method, find properties in its signature.
+                MethodInfo method = contextInfo as MethodInfo;
+                if (method != null)
+                {
+                    foundInfo = method.MethodSignature.FindTheFirstSubInfoWithName<MemberInfo>(InIDName);
+                    if (foundInfo != null)
+                    { return foundInfo; }
+                }
+
                 contextInfo = contextInfo.ParentInfo;
             }
             return null;
