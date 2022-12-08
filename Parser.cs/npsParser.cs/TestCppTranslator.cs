@@ -327,18 +327,18 @@ namespace nf.protoscript.parser.cs
             }
 
             // Handle members
-            InInfo.ForeachSubInfo<MemberInfo>(info =>
+            InInfo.ForeachSubInfo<MemberInfo>(memberInfo =>
             {
-                if (info is MethodInfo)
-                {
-                    TryProcessInfoAsFunction(InInfo, info);
-                }
-                // Handle common TypeInfo
-                else
-                {
-                    TryProcessInfoAsProperty(InInfo, info);
-                }
+                TryProcessInfoAsProperty(InInfo, memberInfo);
             });
+
+            // Handle methods
+            InInfo.ForeachSubInfo<MethodInfo>(methodInfo =>
+            {
+                TryProcessInfoAsFunction(InInfo, methodInfo);
+            });
+
+            // TODO handle states, graphs, events
 
         }
 
@@ -347,10 +347,10 @@ namespace nf.protoscript.parser.cs
         /// </summary>
         /// <param name="inInfo"></param>
         /// <param name="info"></param>
-        private void TryProcessInfoAsFunction(TypeInfo InParentTypeInfo, MemberInfo InInfo)
+        private void TryProcessInfoAsFunction(TypeInfo InParentTypeInfo, MethodInfo InMethodInfo)
         {
             // # Exact signatures(name, parameters) of the function, but DO NOT translate any expression in the function body.
-            DelegateTypeInfo delegateType = InInfo.Archetype as DelegateTypeInfo;
+            DelegateTypeInfo delegateType = InMethodInfo.MethodSignature as DelegateTypeInfo;
             System.Diagnostics.Debug.Assert(delegateType != null);
 
             // Exact the return-param and in/out parameters.
@@ -364,27 +364,27 @@ namespace nf.protoscript.parser.cs
                 { inOutMembers.Add(member); }
             });
 
-            InInfo.Extra.MethodReturnMember = returnMember;
-            InInfo.Extra.MethodReturnType = null;
-            InInfo.Extra.MethodReturnTypeCode = "void";
+            InMethodInfo.Extra.MethodReturnMember = returnMember;
+            InMethodInfo.Extra.MethodReturnType = null;
+            InMethodInfo.Extra.MethodReturnTypeCode = "void";
             if (returnMember != null)
             {
-                InInfo.Extra.MethodReturnType = returnMember.Archetype;
-                InInfo.Extra.MethodReturnTypeCode = _ExactCppTypeCodeFromInfo(returnMember.Archetype);
+                InMethodInfo.Extra.MethodReturnType = returnMember.Archetype;
+                InMethodInfo.Extra.MethodReturnTypeCode = _ExactCppTypeCodeFromInfo(returnMember.Archetype);
             }
 
             // generate C++ function decl by delegateType
-            InInfo.Extra.cppFuncCode = new FunctionCode()
+            InMethodInfo.Extra.cppFuncCode = new FunctionCode()
             {
-                FuncName = $"{InInfo.Name}",
-                FuncReturn = InInfo.Extra.MethodReturnTypeCode,
+                FuncName = $"{InMethodInfo.Name}",
+                FuncReturn = InMethodInfo.Extra.MethodReturnTypeCode,
                 FuncConst = false,
             };
             // add parameters
             foreach (MemberInfo param in inOutMembers)
             {
                 string typeCode = _ExactCppTypeCodeFromInfo(param.Archetype);
-                InInfo.Extra.cppFuncCode.FuncParams.Add(new FunctionCode.FuncParam($"{typeCode}", $"{param.Name}"));
+                InMethodInfo.Extra.cppFuncCode.FuncParams.Add(new FunctionCode.FuncParam($"{typeCode}", $"{param.Name}"));
             }
 
             // Only declarations and signatures.
@@ -461,7 +461,7 @@ namespace nf.protoscript.parser.cs
             InInfo.ForeachSubInfo<MethodInfo>(methodInfo =>
             {
                 // generate C++ function codes
-                STNodeSequence exprSeq = methodInfo.InitSyntax as STNodeSequence;
+                STNodeSequence exprSeq = methodInfo.ExecSequence as STNodeSequence;
                 System.Diagnostics.Debug.Assert(exprSeq != null);
 
                 var returnMember = methodInfo.Extra.MethodReturnMember;
