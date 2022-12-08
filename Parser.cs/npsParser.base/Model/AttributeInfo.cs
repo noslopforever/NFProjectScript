@@ -11,15 +11,16 @@ namespace nf.protoscript
     /// </summary>
     public class AttributeInfo : Info
     {
-        public AttributeInfo(Info InParentInfo, string InHeader, string InName)
+        public AttributeInfo(Info InParentInfo, string InHeader, string InName, ISyntaxTreeNode InInitExpr = null)
             : base(InParentInfo, InHeader, InName)
         {
+            InitSyntaxTree = InInitExpr;
         }
 
         /// <summary>
         /// Init syntax of this attribute.
         /// </summary>
-        ISyntaxTreeNode InitSyntax;
+        public ISyntaxTreeNode InitSyntaxTree { get; }
 
     }
 
