@@ -55,11 +55,11 @@ namespace nf.protoscript.parser.cs
         /// <summary>
         /// Translate a project.
         /// </summary>
-        /// <param name="InProjProj"></param>
-        public void Translate(ProjectInfo InProjProj)
+        /// <param name="InProj"></param>
+        public void Translate(ProjectInfo InProj)
         {
             // gather translation informations.
-            foreach (Info InInfo in InProjProj.SubInfos)
+            foreach (Info InInfo in InProj.SubInfos)
             {
                 // generate class from the model
                 if (InInfo is TypeInfo)
@@ -69,7 +69,7 @@ namespace nf.protoscript.parser.cs
             }
 
             // generate code for expressions.
-            foreach (Info InInfo in InProjProj.SubInfos)
+            foreach (Info InInfo in InProj.SubInfos)
             {
                 // skip delegate types.
                 if (InInfo is DelegateTypeInfo)
@@ -78,13 +78,13 @@ namespace nf.protoscript.parser.cs
                 // generate class from the model
                 if (InInfo is TypeInfo)
                 {
-                    TryGenerateExpressionCodesForMethods(InInfo as TypeInfo);
+                    TryGenFunctionCodesForMethods(InInfo as TypeInfo);
                 }
             }
 
 
             // do translating after all informations gathered.
-            foreach (Info InInfo in InProjProj.SubInfos)
+            foreach (Info InInfo in InProj.SubInfos)
             {
                 // skip delegate types.
                 if (InInfo is DelegateTypeInfo)
@@ -455,7 +455,7 @@ namespace nf.protoscript.parser.cs
         /// Try generate expression codes.
         /// </summary>
         /// <param name="InInfo"></param>
-        private void TryGenerateExpressionCodesForMethods(TypeInfo InInfo)
+        private void TryGenFunctionCodesForMethods(TypeInfo InInfo)
         {
             // Handle methods
             InInfo.ForeachSubInfo<MethodInfo>(methodInfo =>
