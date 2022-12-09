@@ -414,8 +414,10 @@ namespace nf.protoscript.parser.cs
             STNodeAssign stnAssign = InSTNode as STNodeAssign;
             if (stnAssign != null)
             {
-                // TODO use the member's 'SetExprCode' and pass the RHS's expr-code.
-                return _GenCodeForExpr(InContextInfo, stnAssign.LHS) + " = " + _GenCodeForExpr(InContextInfo, stnAssign.RHS);
+                // use the member's 'SetExprCode' and pass the RHS's expr-code.
+                string lhsCode = _GenCodeForExpr(InContextInfo, stnAssign.LHS);
+                string rhsCode = _GenCodeForExpr(InContextInfo, stnAssign.RHS);
+                return lhsCode.Replace("$RHS", rhsCode);
             }
 
             STNodeGetVar stnVarGet = InSTNode as STNodeGetVar;
@@ -426,9 +428,14 @@ namespace nf.protoscript.parser.cs
                 Info propInfo = InfoHelper.FindPropertyAlongScopeTree(InContextInfo, stnVarGet.IDName);
                 if (propInfo != null)
                 {
-                    if (propInfo.IsExtraContains("MemberGetExprCode"))
-                    {
+                    if (!stnVarGet.LeftHandValue
+                        && propInfo.IsExtraContains("MemberGetExprCode")
+                        ) {
                         return propInfo.Extra.MemberGetExprCode;
+                    }
+                    if (stnVarGet.LeftHandValue
+                        && propInfo.IsExtraContains("MemberSetExprCode")) {
+                        return propInfo.Extra.MemberSetExprCode;
                     }
                     return "$ERR_PROP_EXTRA";
                 }
