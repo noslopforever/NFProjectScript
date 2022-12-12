@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.base", "npsParser
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "npsParser.test.cppTranslatorBasics", "npsParser.test.cppTranslatorBasics\npsParser.test.cppTranslatorBasics.csproj", "{AA83EF54-1621-4F87-83D7-E05E3F687A07}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.cppTranslatorBasics", "Tests\npsParser.test.cppTranslatorBasics\npsParser.test.cppTranslatorBasics.csproj", "{AA83EF54-1621-4F87-83D7-E05E3F687A07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
