@@ -57,9 +57,7 @@ namespace nf.protoscript.parser.cs
                 {
                     HandleStepMode(o.StepMode);
 
-                    TestFunc();
-
-                    TestFunc2();
+                    // 
                 });
 
         }
@@ -73,108 +71,6 @@ namespace nf.protoscript.parser.cs
                 Console.Read();
             }
         }
-
-        private static void TestFunc()
-        {
-            // a dynamic
-            ProjectInfo testProj = new ProjectInfo("TestProj");
-            dynamic extra = testProj.Extra;
-            extra.Name = "haha";
-
-            // set it in parser-plugin
-            {
-                extra.Feature = 1984;
-            }
-
-            // get it in translator
-            {
-                Console.WriteLine(extra.Feature);
-
-                // missing the feature.
-                try
-                {
-                    Console.WriteLine(extra.feature_not_exist);
-                }
-                catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
-                {
-                    Console.WriteLine("Successfully catch a runtime-binder");
-                }
-            }
-
-            // reflection
-            {
-                testProj.ForeachExtraProperties((name, val) =>
-                {
-                    Console.WriteLine(name + ": " + val);
-                    return true;
-                });
-            }
-
-        }
-
-        private static void TestFunc2()
-        {
-            // Parser: parse a project from .nps script files.
-            ProjectInfo testProj = new ProjectInfo("TestProj");
-            {
-                TypeInfo classA = new TypeInfo(testProj, "model", "classA");
-                {
-                    MemberInfo propA = new MemberInfo(classA, "property", "propA", CommonTypeInfos.Integer
-                        , new STNodeConstant(STNodeConstant.Integer, "100")
-                        );
-                    {
-                        AttributeInfo propAttr = new AttributeInfo(propA, "Property", "Anonymous_Property_Attribute");
-                    }
-
-                    MemberInfo propB = new MemberInfo(classA, "property", "propB", CommonTypeInfos.Integer
-                        , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                            , new STNodeGetVar("propA")
-                            , new STNodeConstant(STNodeConstant.Integer, "100")
-                            )
-                        );
-
-                    // delegate int MethodType(int InParam)
-                    DelegateTypeInfo funcAType = new DelegateTypeInfo(testProj, "FuncType", "funcAType");
-                    {
-                        MemberInfo retVal = new MemberInfo(funcAType, "param", "___return___", CommonTypeInfos.Integer, null);
-                        {
-                            AttributeInfo retAttr = new AttributeInfo(retVal, "Return", "Anonymous_Return_Property");
-                        }
-                        MemberInfo inParam0 = new MemberInfo(funcAType, "param", "InParam", CommonTypeInfos.Integer, null);
-                    }
-
-                    // int TestMethodA(int InParam)
-                    // which means TestMethodA = new MethodType_funcAType { ... }
-                    MethodInfo funcA = new MethodInfo(classA, "method", "TestMethodA", funcAType
-                        , new STNodeSequence(
-                            // code ln 0: propA = propB + InParam.
-                            new STNodeAssign(
-                                new STNodeGetVar("propA", true)
-                                , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                    , new STNodeGetVar("propB")
-                                    , new STNodeGetVar("InParam")
-                                    )
-                                ),
-                            // code ln 1: return propA (return = propA)
-                            new STNodeAssign(
-                                new STNodeGetVar("___return___", true)
-                                , new STNodeGetVar("propA")
-                                )
-                            )
-                        );
-
-                } // finish classA
-
-            }
-
-            // Translator: translate the project to a target development environment.
-            {
-                TestCppTranslator cppTranslator = new TestCppTranslator();
-                cppTranslator.Translate(testProj);
-            }
-
-        }
-
 
 
     }

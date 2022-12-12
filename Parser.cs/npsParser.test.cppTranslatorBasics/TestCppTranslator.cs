@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using nf.protoscript.syntaxtree;
 
-namespace nf.protoscript.parser.cs
+namespace nf.protoscript.test
 {
 
     class FunctionCode
