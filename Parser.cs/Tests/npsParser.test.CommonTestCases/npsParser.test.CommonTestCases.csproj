@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\npsParser.test.CommonTestCases\npsParser.test.CommonTestCases.csproj" />
+    <ProjectReference Include="..\..\npsParser.base\npsParser.base.csproj" />
   </ItemGroup>
 
 </Project>
