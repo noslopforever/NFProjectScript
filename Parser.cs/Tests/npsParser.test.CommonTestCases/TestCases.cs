@@ -4,8 +4,20 @@ using System;
 
 namespace nf.protoscript.test
 {
-    public static class TestCases
+    public static partial class TestCases
     {
+
+        /// <summary>
+        /// Basic language test:
+        /// model classA
+        ///     - propA = 100 @Property
+        ///     - propB = propA + 100
+        ///     methodA([Return] int return, int InParam)
+        ///         propA = propB + InParam
+        ///         return = propA
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static ProjectInfo BasicLanguage()
         {
             // Parser: parse a project from .nps script files.
@@ -13,6 +25,7 @@ namespace nf.protoscript.test
             {
                 TypeInfo classA = new TypeInfo(testProj, "model", "classA");
                 {
+                    // int propA = 100
                     MemberInfo propA = new MemberInfo(classA, "property", "propA", CommonTypeInfos.Integer
                         , new STNodeConstant(STNodeConstant.Integer, "100")
                         );
@@ -20,6 +33,7 @@ namespace nf.protoscript.test
                         AttributeInfo propAttr = new AttributeInfo(propA, "Property", "Anonymous_Property_Attribute");
                     }
 
+                    // int propB = propA + 100
                     MemberInfo propB = new MemberInfo(classA, "property", "propB", CommonTypeInfos.Integer
                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
                             , new STNodeGetVar("propA")
@@ -27,19 +41,21 @@ namespace nf.protoscript.test
                             )
                         );
 
-                    // delegate int MethodType(int InParam)
-                    DelegateTypeInfo funcAType = new DelegateTypeInfo(testProj, "FuncType", "funcAType");
+                    // delegate int func_I_I_Type(int InParam)
+                    DelegateTypeInfo func_I_I_Type = new DelegateTypeInfo(testProj, "FuncType", "func_I_I_Type");
                     {
-                        MemberInfo retVal = new MemberInfo(funcAType, "param", "___return___", CommonTypeInfos.Integer, null);
+                        MemberInfo retVal = new MemberInfo(func_I_I_Type, "param", "___return___", CommonTypeInfos.Integer, null);
                         {
-                            AttributeInfo retAttr = new AttributeInfo(retVal, "Return", "Anonymous_Return_Property");
+                            AttributeInfo retAttr = new AttributeInfo(retVal, "Return", "__Anonymous_Return_Property__");
                         }
-                        MemberInfo inParam0 = new MemberInfo(funcAType, "param", "InParam", CommonTypeInfos.Integer, null);
+                        MemberInfo inParam0 = new MemberInfo(func_I_I_Type, "param", "InParam", CommonTypeInfos.Integer, null);
                     }
 
                     // int TestMethodA(int InParam)
-                    // which means TestMethodA = new MethodType_funcAType { ... }
-                    MethodInfo funcA = new MethodInfo(classA, "method", "TestMethodA", funcAType
+                    //      propA = propB + InParam
+                    //      return propA
+                    // which means TestMethodA = new func_I_I_Type { ... }
+                    MethodInfo funcA = new MethodInfo(classA, "method", "TestMethodA", func_I_I_Type
                         , new STNodeSequence(
                             // code ln 0: propA = propB + InParam.
                             new STNodeAssign(
@@ -50,10 +66,59 @@ namespace nf.protoscript.test
                                     )
                                 ),
                             // code ln 1: return propA (return = propA)
+                            // TODO a better __return__ var
                             new STNodeAssign(
                                 new STNodeGetVar("___return___", true)
                                 , new STNodeGetVar("propA")
                                 )
+                            )
+                        );
+
+                    // delegate void func_V_IR_Type(int&)
+                    DelegateTypeInfo func_V_IR_Type = new DelegateTypeInfo(testProj, "FuncType", "funcV_IR_Type");
+                    {
+                        MemberInfo refParam0 = new MemberInfo(func_I_I_Type, "param", "RefParam", CommonTypeInfos.Integer, null);
+                    }
+
+                    //
+                    // void TestMethodB(int& RefParam)
+                    //
+                    MethodInfo funcB = new MethodInfo(classA, "method", "TestMethodB", func_V_IR_Type
+                        , new STNodeSequence(
+                                // code ln 0: propA = propA + RefParam
+                                new STNodeAssign(
+                                    new STNodeGetVar("propA", true)
+                                    , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
+                                        , new STNodeGetVar("propA", false)
+                                        , new STNodeGetVar("RefParam")
+                                        )
+                                    ),
+                                // code ln 1: RefParam = propA
+                                new STNodeAssign(
+                                    new STNodeGetVar("RefParam", true)
+                                    , new STNodeGetVar("propA")
+                                    )
+                            )
+                        );
+
+
+                    // delegate void func_V_V_Type()
+                    DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(testProj, "FuncType", "func_V_V_Type");
+
+                    //
+                    // void TestMethodC()
+                    //
+                    //
+                    // Because propA is a setter property, so the results should be like:
+                    //      int tmp = get_propA();
+                    //      TestMethodB(tmp);
+                    //      set_propA(tmp);
+                    //
+                    MethodInfo funcC = new MethodInfo(classA, "method", "TestMethodC", func_V_V_Type
+                        , new STNodeSequence(
+                            // code ln 0: TestMethodB(propA)
+                            new STNodeCall("TestMethodB"
+                                , new STNodeGetVar("propA", true))
                             )
                         );
 

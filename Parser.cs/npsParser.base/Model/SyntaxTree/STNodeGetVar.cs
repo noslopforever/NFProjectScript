@@ -20,7 +20,7 @@ namespace nf.protoscript.syntaxtree
         public string IDName { get; }
 
         /// <summary>
-        /// Is this var a left-value, which should be assigned by another value.
+        /// Is this var a left-value, which should be assigned and modified.
         /// 
         /// a = b - a is a left hand value, and b is a right hand value.
         /// a.b = c - a and b are left hand values, and c is a right hand value.
