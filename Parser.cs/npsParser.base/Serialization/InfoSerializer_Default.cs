@@ -70,7 +70,7 @@ namespace nf.protoscript.Serialization
             }
 
             // If the property is marked as Serializable, serialize it.
-            if (prop.GetCustomAttributes<SerializableInfoAttribute>() != null)
+            if (prop.GetCustomAttribute<SerializableInfoAttribute>() != null)
             {
                 return true;
             }
