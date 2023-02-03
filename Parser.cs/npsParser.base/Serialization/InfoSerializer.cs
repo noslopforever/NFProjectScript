@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Text;
 
 namespace nf.protoscript.Serialization
@@ -81,7 +82,28 @@ namespace nf.protoscript.Serialization
         protected virtual Info DeserializeInstance(InfoSerializationData InSourceData, Info InParentInfo)
         {
             Type infoType = Type.GetType(InSourceData.Class);
-            Info result = Activator.CreateInstance(infoType, InParentInfo, InSourceData.Header, InSourceData.Name) as Info;
+            //var ctor = infoType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+            //    , null
+            //    , new Type[] { typeof(Info), typeof(string), typeof(string) }
+            //    , null
+            //    );
+            //Info result = ctor.Invoke(new object[] { InParentInfo, InSourceData.Header, InSourceData.Name }) as Info;
+            Info result = Activator.CreateInstance(
+                // type
+                infoType
+                // binding flags
+                , BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+                // binder
+                , null
+                // parameters
+                , new object[] {
+                    InParentInfo
+                    , InSourceData.Header
+                    , InSourceData.Name
+                    }
+                // culture info
+                , null
+                ) as Info;
             return result;
         }
 
