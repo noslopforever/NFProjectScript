@@ -27,13 +27,13 @@ namespace nf.protoscript
         /// The method's signature.
         /// </summary>
         [Serialization.SerializableInfo]
-        public DelegateTypeInfo MethodSignature { get; }
+        public DelegateTypeInfo MethodSignature { get; private set; }
 
         /// <summary>
         /// Execution expressions.
         /// </summary>
         [Serialization.SerializableInfo]
-        public STNodeSequence ExecSequence { get; }
+        public STNodeSequence ExecSequence { get; private set; }
 
     }
 

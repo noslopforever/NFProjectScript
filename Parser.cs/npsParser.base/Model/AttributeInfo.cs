@@ -26,7 +26,7 @@ namespace nf.protoscript
         /// Init syntax of this attribute.
         /// </summary>
         [Serialization.SerializableInfo]
-        public ISyntaxTreeNode InitSyntaxTree { get; }
+        public ISyntaxTreeNode InitSyntaxTree { get; private set; }
 
     }
 
