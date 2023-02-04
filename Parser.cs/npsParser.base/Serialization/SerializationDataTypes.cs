@@ -6,11 +6,12 @@ namespace nf.protoscript.Serialization
 {
 
     /// <summary>
-    /// A serializable info which can help auto-serialization.
+    /// Hold all Info's necessary datas which can be used to reconstruct the Info itself in the future.
+    /// InfoData is Serializer-friendly.
     /// </summary>
-    public sealed class InfoSerializationData
+    public sealed class InfoData
     {
-        public InfoSerializationData()
+        public InfoData()
         {
         }
 
@@ -32,13 +33,44 @@ namespace nf.protoscript.Serialization
         /// <summary>
         /// Sub-infos
         /// </summary>
-        public List<InfoSerializationData> SubInfos { get; } = new List<InfoSerializationData>();
+        public List<InfoData> SubInfos { get; } = new List<InfoData>();
 
         /// <summary>
         /// Append datas of info: Member's InitExpr, Method's Codebody, etc...
         /// </summary>
         public Dictionary<string, object> AppendData { get; } = new Dictionary<string, object>();
 
+    }
+
+
+
+    /// <summary>
+    /// Type reference
+    /// </summary>
+    public sealed class TypeReferenceData
+    {
+
+        /// <summary>
+        /// Path of the type: 
+        /// -   Package.Type.SubType
+        /// -   Or __sys__.Typename
+        /// </summary>
+        public string PathOfTheType { get; set; }
+
+    }
+
+
+    public sealed class MethodDelegateTypeData
+    {
+        // TODO ...
+    }
+
+    /// <summary>
+    /// Data to save values in Syntaxes
+    /// </summary>
+    public sealed class SyntaxData
+    {
+        // TODO ...
     }
 
 

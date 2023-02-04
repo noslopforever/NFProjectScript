@@ -6,80 +6,81 @@ namespace nf.protoscript.Serialization
 {
 
     /// <summary>
-    /// Info serializer to serialize a Info into a InfoSerializationData.
+    /// Gather datas from an Info.
     /// </summary>
-    public abstract class InfoSerializer
+    public abstract class InfoGatherer
     {
         /// <summary>
-        /// Serialize InInfo into an InfoSerializationData, so it can be handled with Xml or Json Serializer.
+        /// Gather InfoDatas from an InInfo.
         /// </summary>
         /// <param name="InInfo"></param>
         /// <returns></returns>
-        public static InfoSerializationData Serialize(Info InInfo)
+        public static InfoData Gather(Info InInfo)
         {
-            InfoSerializationData serialData = new InfoSerializationData();
+            InfoData gatherData = new InfoData();
 
             // Handle basic infos.
-            serialData.Class = InInfo.GetType().ToString();
-            serialData.Header = InInfo.Header;
-            serialData.Name = InInfo.Name;
+            gatherData.Class = InInfo.GetType().ToString();
+            gatherData.Header = InInfo.Header;
+            gatherData.Name = InInfo.Name;
 
             // Handle info specific datas.
-            var serializer = InfoSerializerManager.Instance.FindSerializer(InInfo);
-            System.Diagnostics.Debug.Assert(serializer != null);
-            serializer.SerializeData(InInfo, serialData);
+            var gatherer = InfoGathererManager.Instance.FindGatherer(InInfo);
+            System.Diagnostics.Debug.Assert(gatherer != null);
+            gatherer.GatherData(InInfo, gatherData);
 
             // Handle SubInfos.
             foreach (var sub in InInfo.SubInfos)
             {
-                serialData.SubInfos.Add(Serialize(sub));
+                var subInfoData = Gather(sub);
+                gatherData.SubInfos.Add(subInfoData);
             }
 
-            return serialData;
+            return gatherData;
         }
 
         /// <summary>
-        /// Deserialize an InfoSerializationData into an info.
+        /// Restore an InfoData into an Info.
         /// </summary>
         /// <param name="InParentInfo"></param>
         /// <param name="InData"></param>
         /// <returns></returns>
-        public static Info Deserialize(Info InParentInfo, InfoSerializationData InData)
+        public static Info Restore(Info InParentInfo, InfoData InData)
         {
-            // Find an approxiate serializer.
+            // Find an approxiate gatherer.
             Type infoType = Type.GetType(InData.Class);
-            var serializer = InfoSerializerManager.Instance.FindSerializer(infoType);
-            System.Diagnostics.Debug.Assert(serializer != null);
+            var gatherer = InfoGathererManager.Instance.FindGatherer(infoType);
+            System.Diagnostics.Debug.Assert(gatherer != null);
 
             // New info instance from InData.
-            Info info= serializer.DeserializeInstance(InData, InParentInfo);
+            Info info= gatherer.RestoreInstance(InData, InParentInfo);
 
             // Handle info specific datas.
-            serializer.DeserializeData(InData, info);
+            gatherer.RestoreData(InData, info);
 
             // Handle SubInfos
             foreach (var subData in InData.SubInfos)
             {
-                Info subInfo = Deserialize(info, subData);
+                Info subInfo = Restore(info, subData);
             }
 
             return info;
         }
 
         /// <summary>
-        /// Serialize datas of InSourceInfo.
+        /// Gather datas of InSourceInfo.
         /// </summary>
         /// <param name="InSourceInfo"></param>
         /// <param name="InTargetData"></param>
-        protected abstract void SerializeData(Info InSourceInfo, InfoSerializationData InTargetData);
+        protected abstract void GatherData(Info InSourceInfo, InfoData InTargetData);
 
         /// <summary>
-        /// Create Info instance when deserializing.
+        /// Create Info instance when restoring.
         /// </summary>
         /// <param name="InSourceData"></param>
         /// <param name="InParentInfo"></param>
         /// <returns></returns>
-        protected virtual Info DeserializeInstance(InfoSerializationData InSourceData, Info InParentInfo)
+        protected virtual Info RestoreInstance(InfoData InSourceData, Info InParentInfo)
         {
             Type infoType = Type.GetType(InSourceData.Class);
             //var ctor = infoType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
@@ -108,11 +109,11 @@ namespace nf.protoscript.Serialization
         }
 
         /// <summary>
-        /// Deserialize InTargetInfo's datas from InSourceData.
+        /// Restore InTargetInfo's datas from InSourceData.
         /// </summary>
         /// <param name="InSourceData"></param>
         /// <param name="InTargetInfo"></param>
-        protected abstract void DeserializeData(InfoSerializationData InSourceData, Info InTargetInfo);
+        protected abstract void RestoreData(InfoData InSourceData, Info InTargetInfo);
 
     }
 

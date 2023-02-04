@@ -20,52 +20,50 @@ namespace nf.protoscript.test
 
             ProjectInfo testProj = TestCases.BasicLanguage();
 
+            // Serialization: gather testProj to an InfoData.
+            var gatheredProjData = InfoGatherer.Gather(testProj);
+
+            // Test deserialization from data immediately
             {
-                // Serialization: serialize testProj to an InfoSerializationData.
-                var serialData = InfoSerializer.Serialize(testProj);
-
-                // Test deserialization from data immediately
+                try
                 {
-                    try
-                    {
-                        ProjectInfo deserialProj = InfoSerializer.Deserialize(null, serialData) as ProjectInfo;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("[ERROR] Immediately deserialize failed.");
-                        Console.WriteLine(ex.Message);
-                    }
+                    ProjectInfo restoredProj = InfoGatherer.Restore(null, gatheredProjData) as ProjectInfo;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("[ERROR] Immediately deserialize failed.");
+                    Console.WriteLine(ex.Message);
+                }
+            }
+
+            // test serializer: XML
+            {
+                try
+                {
+                    XmlSerializer xmlSerial = new XmlSerializer(typeof(InfoData));
+                    TextWriter writer = new StringWriter();
+                    xmlSerial.Serialize(writer, gatheredProjData);
+                    Console.WriteLine(writer.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("[ERROR] Xml writer failed.");
+                    Console.WriteLine(ex.Message);
                 }
 
-                // test formatter: XML
-                {
-                    try
-                    {
-                        XmlSerializer xmlSerial = new XmlSerializer(typeof(InfoSerializationData));
-                        TextWriter writer = new StringWriter();
-                        xmlSerial.Serialize(writer, serialData);
-                        Console.WriteLine(writer.ToString());
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("[ERROR] Xml writer failed.");
-                        Console.WriteLine(ex.Message);
-                    }
+            }
 
+            // test serializer: Json
+            {
+                try
+                {
+                    string jsonStr = JsonSerializer.Serialize(gatheredProjData);
+                    Console.WriteLine(jsonStr);
                 }
-
-                // test formatter: Json
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        string jsonStr = JsonSerializer.Serialize(serialData);
-                        Console.WriteLine(jsonStr);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("[ERROR] Json writer failed.");
-                        Console.WriteLine(ex.Message);
-                    }
+                    Console.WriteLine("[ERROR] Json writer failed.");
+                    Console.WriteLine(ex.Message);
                 }
             }
 
