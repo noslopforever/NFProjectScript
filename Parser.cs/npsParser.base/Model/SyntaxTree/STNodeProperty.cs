@@ -11,7 +11,6 @@ namespace nf.protoscript.syntaxtree
     public class STNodeProperty : STNodeBase
     {
         public STNodeProperty()
-            : base("property")
         {
         }
 

@@ -10,8 +10,11 @@ namespace nf.protoscript.syntaxtree
     /// </summary>
     public class STNodeBinaryOp : STNodeBase
     {
+        internal STNodeBinaryOp()
+        {
+        }
+
         public STNodeBinaryOp(string InOpCode, ISyntaxTreeNode InLhs, ISyntaxTreeNode InRhs)
-            : base(InOpCode)
         {
             OpCode = InOpCode;
             LHS = InLhs;

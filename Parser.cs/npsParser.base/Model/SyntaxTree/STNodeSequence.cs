@@ -13,13 +13,11 @@ namespace nf.protoscript.syntaxtree
     /// </summary>
     public class STNodeSequence : STNodeBase
     {
-        public STNodeSequence()
-            : base("sequence")
+        internal STNodeSequence()
         {
         }
 
         public STNodeSequence(params ISyntaxTreeNode[] InSTNodes)
-            : base("sequence")
         {
             NodeList = InSTNodes;
         }

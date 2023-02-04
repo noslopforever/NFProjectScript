@@ -9,7 +9,6 @@ namespace nf.protoscript.syntaxtree
         : STNodeBase
     {
         public STNodeUnaryOp(string InUnaryOpStr)
-            : base(InUnaryOpStr)
         {
         }
 

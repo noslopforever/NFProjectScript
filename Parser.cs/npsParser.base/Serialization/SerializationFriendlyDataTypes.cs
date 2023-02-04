@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Dynamic;
 using System.Text;
 
 namespace nf.protoscript.Serialization
@@ -38,7 +38,7 @@ namespace nf.protoscript.Serialization
         /// <summary>
         /// Append datas of info: Member's InitExpr, Method's Codebody, etc...
         /// </summary>
-        public Dictionary<string, object> AppendData { get; } = new Dictionary<string, object>();
+        public ExpandoObject AppendData { get; private set; } = new ExpandoObject();
 
     }
 
@@ -49,26 +49,48 @@ namespace nf.protoscript.Serialization
     /// </summary>
     public sealed class TypeReferenceData
     {
+        public TypeReferenceData()
+        {
+        }
+
+        public TypeReferenceData(string InTypeFullname)
+        {
+            TypeFullname = InTypeFullname;
+        }
 
         /// <summary>
         /// Path of the type: 
         /// -   Package.Type.SubType
         /// -   Or __sys__.Typename
         /// </summary>
-        public string PathOfTheType { get; set; }
+        public string TypeFullname { get; set; }
 
     }
 
-
-    public sealed class MethodDelegateTypeData
-    {
-        // TODO ...
-    }
 
     /// <summary>
     /// Data to save values in Syntaxes
     /// </summary>
     public sealed class SyntaxData
+    {
+        public SyntaxData()
+        {
+        }
+
+        /// <summary>
+        /// Class of the syntax.
+        /// </summary>
+        public string Class { get; set; }
+
+        /// <summary>
+        /// Extras of a syntax node.
+        /// </summary>
+        public ExpandoObject Extra { get; private set; } = new ExpandoObject();
+
+    }
+
+
+    public sealed class MethodDelegateTypeData
     {
         // TODO ...
     }

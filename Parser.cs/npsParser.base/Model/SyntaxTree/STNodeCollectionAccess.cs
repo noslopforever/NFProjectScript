@@ -14,7 +14,6 @@ namespace nf.protoscript.syntaxtree
     class STNodeCollectionAccess : STNodeBase
     {
         public STNodeCollectionAccess()
-            : base("array")
         {
         }
 

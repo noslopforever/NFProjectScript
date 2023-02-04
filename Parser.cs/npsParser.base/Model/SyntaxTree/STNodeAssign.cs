@@ -12,12 +12,12 @@ namespace nf.protoscript.syntaxtree
         : STNodeBase
     {
         public STNodeAssign()
-            : base("assign")
+            : base()
         {
         }
 
         public STNodeAssign(ISyntaxTreeNode InLHS, ISyntaxTreeNode InRHS)
-            : base("assign")
+            : base()
         {
             LHS = InLHS;
             RHS = InRHS;

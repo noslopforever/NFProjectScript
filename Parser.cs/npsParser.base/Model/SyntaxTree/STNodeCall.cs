@@ -11,19 +11,16 @@ namespace nf.protoscript.syntaxtree
     public class STNodeCall
         : STNodeBase
     {
-        public STNodeCall()
-            : base("call")
+        internal STNodeCall()
         {
         }
 
         public STNodeCall(string InFuncName)
-            : base("call")
         {
             FuncName = InFuncName;
         }
 
         public STNodeCall(string InFuncName, ISyntaxTreeNode InParam0)
-            : base("call")
         {
             FuncName = InFuncName;
             Params = new ISyntaxTreeNode[1] { InParam0 };

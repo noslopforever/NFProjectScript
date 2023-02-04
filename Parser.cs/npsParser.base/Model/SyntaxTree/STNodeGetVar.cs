@@ -7,8 +7,11 @@ namespace nf.protoscript.syntaxtree
     /// </summary>
     public class STNodeGetVar : STNodeBase
     {
+        internal STNodeGetVar()
+        {
+        }
+
         public STNodeGetVar(string InIdName, bool InLeftHand = false)
-            : base("id")
         {
             IDName = InIdName;
             LeftHandValue = InLeftHand;

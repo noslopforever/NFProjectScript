@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 
@@ -11,6 +12,8 @@ namespace nf.protoscript.Serialization
     /// </summary>
     public class InfoGatherer
     {
+        // facades
+
         /// <summary>
         /// Gather InfoDatas from an InInfo.
         /// </summary>
@@ -68,6 +71,9 @@ namespace nf.protoscript.Serialization
             return info;
         }
 
+
+        // overridable
+
         /// <summary>
         /// Gather datas of InSourceInfo.
         /// </summary>
@@ -82,9 +88,19 @@ namespace nf.protoscript.Serialization
             foreach (var prop in props)
             {
                 object value = prop.GetValue(InSourceInfo);
+
+                object valueToWrite = value;
+
                 // If value is an Info, it should always be a reference.
 
-                InTargetData.AppendData.Add(prop.Name, value);
+                // TODO friendly-value converter.
+                //var cvter = InfoGathererManager.Instance.FindConverterFor(value);
+                //if (cvter != null)
+                //{
+                //    valueToWrite = cvter.Convert(value);
+                //}
+
+                InTargetData.AppendData.TryAdd(prop.Name, valueToWrite);
             }
         }
 
@@ -133,15 +149,21 @@ namespace nf.protoscript.Serialization
             var props = _FindPropertiesHandledByThis(infoType);
             foreach (var prop in props)
             {
-                object value = null;
-
                 // TODO handle renames, re-types
-                if (InSourceData.AppendData.TryGetValue(prop.Name, out value))
+
+                object value = null;
+                var dict = (IDictionary<string, object>)InSourceData.AppendData;
+                if (dict.TryGetValue(prop.Name, out value))
                 {
+                    // value maybe null.
                     prop.SetValue(InTargetInfo, value);
                 }
             }
         }
+        
+
+
+        // internal
 
         /// <summary>
         /// Select properties handled by this Gatherer.

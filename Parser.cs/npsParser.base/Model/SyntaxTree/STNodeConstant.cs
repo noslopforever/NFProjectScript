@@ -11,13 +11,11 @@ namespace nf.protoscript.syntaxtree
     public class STNodeConstant
         : STNodeBase
     {
-        public STNodeConstant()
-            : base("const")
+        internal STNodeConstant()
         {
         }
 
         public STNodeConstant(string InValueTypeStr, string InValueString)
-            : base("const")
         {
             ValueTypeString = InValueTypeStr;
             ValueString = InValueString;
