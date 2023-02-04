@@ -16,7 +16,7 @@ namespace nf.protoscript.Serialization
     {
         private InfoGathererManager()
         {
-            RegisterInfoGatherer(typeof(Info), new InfoGatherer_Default());
+            RegisterInfoGatherer(typeof(Info), new InfoGatherer());
         }
 
         /// <summary>

@@ -9,7 +9,7 @@ namespace nf.protoscript.Serialization
     /// <summary>
     /// Gather datas from an Info.
     /// </summary>
-    public abstract class InfoGatherer
+    public class InfoGatherer
     {
         /// <summary>
         /// Gather InfoDatas from an InInfo.
