@@ -6,19 +6,41 @@ using System.Linq;
 namespace nf.protoscript
 {
 
-
     /// <summary>
     /// Base class for all conceptions include in a proto: classes, members, datas, tables, plans, dead-lines, worlds, comments, attributes, etc.
     /// </summary>
     /// All infos will be organized as a tree which root is an project.
     public class Info
     {
+        /// <summary>
+        /// A special info, the root of all other Infos.
+        /// 
+        /// Info without Parent (like Project, System) will always be the sub of this root info.
+        /// </summary>
+        public static Info Root { get; } = new Info("", "$ROOT");
+
+        /// <summary>
+        /// A special info that stores all system-types.
+        /// </summary>
+        public static Info SystemTypePackage { get; } = new Info(null, "", "__sys__");
+
+
+        // ctor for the Root info.
+        private Info(string InHeader, string InName)
+        {
+            ParentInfo = null;
+            Header = InHeader;
+            Name = InName;
+        }
+
         public Info(Info InParentInfo, string InHeader, string InName)
         {
-            if (InParentInfo != null)
+            if (InParentInfo == null)
             {
-                InParentInfo.SubAdd(this);
+                InParentInfo = Root;
             }
+            InParentInfo.SubAdd(this);
+
             ParentInfo = InParentInfo;
             Header = InHeader;
             Name = InName;

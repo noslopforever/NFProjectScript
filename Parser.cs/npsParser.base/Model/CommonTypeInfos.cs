@@ -10,18 +10,17 @@ namespace nf.protoscript
     /// </summary>
     public static class CommonTypeInfos
     {
+        public static TypeInfo Unknown { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "unknown");
 
-        public static TypeInfo Unknown { get; } = new TypeInfo(null, "__sys__", "unknown");
+        public static TypeInfo Any { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "any");
 
-        public static TypeInfo Any { get; } = new TypeInfo(null, "__sys__", "any");
+        public static TypeInfo Integer { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "integer");
 
-        public static TypeInfo Integer { get; } = new TypeInfo(null, "__sys__", "integer");
+        public static TypeInfo Float { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "float");
 
-        public static TypeInfo Float { get; } = new TypeInfo(null, "__sys__", "float");
+        public static TypeInfo String { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "string");
 
-        public static TypeInfo String { get; } = new TypeInfo(null, "__sys__", "string");
-
-        public static TypeInfo AsciiString { get; } = new TypeInfo(null, "__sys__", "ascii");
+        public static TypeInfo AsciiString { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "ascii");
 
         public static bool IsInteger32Type(TypeInfo InType)
         {
