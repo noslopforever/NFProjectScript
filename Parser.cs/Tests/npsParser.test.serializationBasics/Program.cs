@@ -57,7 +57,12 @@ namespace nf.protoscript.test
             {
                 try
                 {
-                    string jsonStr = JsonSerializer.Serialize(gatheredProjData);
+                    var serializeOption = new JsonSerializerOptions()
+                    {
+                        AllowTrailingCommas = false,
+                        WriteIndented = true,
+                    };
+                    string jsonStr = JsonSerializer.Serialize(gatheredProjData, serializeOption);
                     Console.WriteLine(jsonStr);
                 }
                 catch (Exception ex)
