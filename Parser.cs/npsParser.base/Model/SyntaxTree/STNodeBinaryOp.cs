@@ -33,17 +33,20 @@ namespace nf.protoscript.syntaxtree
             public const string Mod = "mod";
         }
 
-        public string OpCode { get; } = "";
+        [Serialization.SerializableInfo]
+        public string OpCode { get; private set; } = "";
 
         /// <summary>
         /// Left hand expression
         /// </summary>
-        public ISyntaxTreeNode LHS { get; }
+        [Serialization.SerializableInfo]
+        public ISyntaxTreeNode LHS { get; private set; }
 
         /// <summary>
         /// Right hand expression
         /// </summary>
-        public ISyntaxTreeNode RHS { get; }
+        [Serialization.SerializableInfo]
+        public ISyntaxTreeNode RHS { get; private set; }
 
     }
 

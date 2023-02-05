@@ -25,7 +25,8 @@ namespace nf.protoscript.syntaxtree
         /// <summary>
         /// Sub STNode list.
         /// </summary>
-        public IReadOnlyList<ISyntaxTreeNode> NodeList { get; }
+        [Serialization.SerializableInfo]
+        public IReadOnlyList<ISyntaxTreeNode> NodeList { get; private set; }
 
     }
 

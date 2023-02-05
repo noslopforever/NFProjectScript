@@ -29,12 +29,14 @@ namespace nf.protoscript.syntaxtree
         /// <summary>
         /// Function name
         /// </summary>
-        public string FuncName { get; }
+        [Serialization.SerializableInfo]
+        public string FuncName { get; private set; }
 
         /// <summary>
         /// Parameters
         /// </summary>
-        public ISyntaxTreeNode[] Params { get; }
+        [Serialization.SerializableInfo]
+        public ISyntaxTreeNode[] Params { get; private set; }
 
     }
 

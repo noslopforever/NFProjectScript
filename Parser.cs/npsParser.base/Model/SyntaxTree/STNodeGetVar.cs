@@ -1,4 +1,4 @@
-
+﻿
 namespace nf.protoscript.syntaxtree
 {
 
@@ -19,7 +19,8 @@ namespace nf.protoscript.syntaxtree
         /// <summary>
         /// The identifier's name: variable's name, member's name, and so on...
         /// </summary>
-        public string IDName { get; }
+        [Serialization.SerializableInfo]
+        public string IDName { get; private set; }
 
 
     }

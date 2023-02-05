@@ -34,11 +34,13 @@ namespace nf.protoscript.syntaxtree
         /// <summary>
         /// Type of the constant.
         /// </summary>
+        [Serialization.SerializableInfo]
         public string ValueTypeString { get; set; } = "";
 
         /// <summary>
         /// String to save the constant.
         /// </summary>
+        [Serialization.SerializableInfo]
         public string ValueString { get; set; } = "";
 
     }

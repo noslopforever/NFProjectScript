@@ -24,7 +24,7 @@ namespace nf.protoscript.Serialization
             InfoData gatherData = new InfoData();
 
             // Handle basic infos.
-            gatherData.Class = InInfo.GetType().ToString();
+            gatherData.Typename = InInfo.GetType().ToString();
             gatherData.Header = InInfo.Header;
             gatherData.Name = InInfo.Name;
 
@@ -52,7 +52,7 @@ namespace nf.protoscript.Serialization
         public static Info Restore(Info InParentInfo, InfoData InData)
         {
             // Find an approxiate gatherer.
-            Type infoType = Type.GetType(InData.Class);
+            Type infoType = Type.GetType(InData.Typename);
             var gatherer = InfoGathererManager.Instance.FindGatherer(infoType);
             System.Diagnostics.Debug.Assert(gatherer != null);
 
@@ -84,23 +84,15 @@ namespace nf.protoscript.Serialization
             Type infoType = InSourceInfo.GetType();
 
             // Exact properties which save in sub-classes of Info.
-            var props = _FindPropertiesHandledByThis(infoType);
+            var props = SerializationHelper._FindPropertiesHandledByGatherer(infoType);
             foreach (var prop in props)
             {
+                // Read source value.
                 object value = prop.GetValue(InSourceInfo);
 
-                object valueToWrite = value;
-
-                // If value is an Info, it should always be a reference.
-
-                // TODO friendly-value converter.
-                //var cvter = InfoGathererManager.Instance.FindConverterFor(value);
-                //if (cvter != null)
-                //{
-                //    valueToWrite = cvter.Convert(value);
-                //}
-
-                InTargetData.AppendData.TryAdd(prop.Name, valueToWrite);
+                // Convert source value to friendly-data and save it.
+                var dataToWrite = SerializationHelper.ConvertValueToData(prop.PropertyType, value);
+                InTargetData.TryAdd(prop.Name, dataToWrite);
             }
         }
 
@@ -112,13 +104,7 @@ namespace nf.protoscript.Serialization
         /// <returns></returns>
         protected virtual Info RestoreInstance(InfoData InSourceData, Info InParentInfo)
         {
-            Type infoType = Type.GetType(InSourceData.Class);
-            //var ctor = infoType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
-            //    , null
-            //    , new Type[] { typeof(Info), typeof(string), typeof(string) }
-            //    , null
-            //    );
-            //Info result = ctor.Invoke(new object[] { InParentInfo, InSourceData.Header, InSourceData.Name }) as Info;
+            Type infoType = Type.GetType(InSourceData.Typename);
             Info result = Activator.CreateInstance(
                 // type
                 infoType
@@ -146,66 +132,25 @@ namespace nf.protoscript.Serialization
         protected virtual void RestoreData(InfoData InSourceData, Info InTargetInfo)
         {
             Type infoType = InTargetInfo.GetType();
-            var props = _FindPropertiesHandledByThis(infoType);
+            var props = SerializationHelper._FindPropertiesHandledByGatherer(infoType);
             foreach (var prop in props)
             {
                 // TODO handle renames, re-types
 
-                object value = null;
-                var dict = (IDictionary<string, object>)InSourceData.AppendData;
-                if (dict.TryGetValue(prop.Name, out value))
+                // Read saved data
+                ISerializationFriendlyData data = null;
+                if (InSourceData.TryGetExtraData(prop.Name, out data))
                 {
-                    // value maybe null.
-                    prop.SetValue(InTargetInfo, value);
+                    // Restore friendly-data to value.
+                    object valueToRestore = SerializationHelper.RestoreValueFromData(prop.PropertyType, data);
+
+                    // Write it to the target property.
+                    // The value may be null.
+                    prop.SetValue(InTargetInfo, valueToRestore);
                 }
             }
         }
         
-
-
-        // internal
-
-        /// <summary>
-        /// Select properties handled by this Gatherer.
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerable<PropertyInfo> _FindPropertiesHandledByThis(Type InType)
-        {
-            List<PropertyInfo> gatherProps = new List<PropertyInfo>();
-            var props = InType.GetProperties();
-            foreach (var prop in props)
-            {
-                if (_IsPropertyHandledByThis(prop))
-                {
-                    gatherProps.Add(prop);
-                }
-            }
-            return gatherProps;
-        }
-
-        /// <summary>
-        /// Check if the InProperty needs to be gathered.
-        /// </summary>
-        /// <param name="prop"></param>
-        /// <returns></returns>
-        private bool _IsPropertyHandledByThis(PropertyInfo prop)
-        {
-            // Exclude system and base-Info properties.
-            if (prop.ReflectedType == typeof(Info)
-                || prop.ReflectedType == typeof(object)
-                )
-            {
-                return false;
-            }
-
-            // If the property is marked as Serializable, gather it.
-            if (prop.GetCustomAttribute<SerializableInfoAttribute>() != null)
-            {
-                return true;
-            }
-
-            return false;
-        }
 
     }
 

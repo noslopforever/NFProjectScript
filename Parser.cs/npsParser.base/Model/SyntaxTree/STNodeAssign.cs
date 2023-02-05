@@ -26,12 +26,14 @@ namespace nf.protoscript.syntaxtree
         /// <summary>
         /// Left hand value
         /// </summary>
-        public ISyntaxTreeNode LHS { get; }
+        [Serialization.SerializableInfo]
+        public ISyntaxTreeNode LHS { get; private set; }
 
         /// <summary>
         /// Right hand value
         /// </summary>
-        public ISyntaxTreeNode RHS { get; }
+        [Serialization.SerializableInfo]
+        public ISyntaxTreeNode RHS { get; private set; }
 
     }
 
