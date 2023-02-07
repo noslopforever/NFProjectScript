@@ -40,7 +40,7 @@ namespace nf.protoscript.test
             {
                 try
                 {
-                    XmlSerializer xmlSerial = new XmlSerializer(typeof(InfoData));
+                    XmlSerializer xmlSerial = new XmlSerializer(typeof(SerializationFriendlyData));
                     TextWriter writer = new StringWriter();
                     xmlSerial.Serialize(writer, gatheredProjData);
                     Console.WriteLine(writer.ToString());

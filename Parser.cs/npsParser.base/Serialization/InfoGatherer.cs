@@ -19,12 +19,11 @@ namespace nf.protoscript.Serialization
         /// </summary>
         /// <param name="InInfo"></param>
         /// <returns></returns>
-        public static InfoData Gather(Info InInfo)
+        public static SerializationFriendlyData Gather(Info InInfo)
         {
-            InfoData gatherData = new InfoData();
+            dynamic gatherData = SerializationFriendlyData.NewObject(InInfo.GetType());
 
             // Handle basic infos.
-            gatherData.Typename = InInfo.GetType().ToString();
             gatherData.Header = InInfo.Header;
             gatherData.Name = InInfo.Name;
 
@@ -33,11 +32,15 @@ namespace nf.protoscript.Serialization
             System.Diagnostics.Debug.Assert(gatherer != null);
             gatherer.GatherData(InInfo, gatherData);
 
-            // Handle SubInfos.
-            foreach (var sub in InInfo.SubInfos)
+            // Handle SubInfos if not empty.
+            if (InInfo.SubInfos.Count != 0)
             {
-                var subInfoData = Gather(sub);
-                gatherData.SubInfos.Add(subInfoData);
+                gatherData.SubInfos = new List<SerializationFriendlyData>();
+                foreach (var sub in InInfo.SubInfos)
+                {
+                    var subInfoData = Gather(sub);
+                    gatherData.SubInfos.Add(subInfoData);
+                }
             }
 
             return gatherData;
@@ -49,23 +52,30 @@ namespace nf.protoscript.Serialization
         /// <param name="InParentInfo"></param>
         /// <param name="InData"></param>
         /// <returns></returns>
-        public static Info Restore(Info InParentInfo, InfoData InData)
+        public static Info Restore(Info InParentInfo, SerializationFriendlyData InData)
         {
+            System.Diagnostics.Debug.Assert(InData.SourceValueType.IsSubclassOf(typeof(Info)));
+
+            dynamic dynData = InData as dynamic;
+
             // Find an approxiate gatherer.
-            Type infoType = Type.GetType(InData.Typename);
+            Type infoType = InData.SourceValueType;
             var gatherer = InfoGathererManager.Instance.FindGatherer(infoType);
             System.Diagnostics.Debug.Assert(gatherer != null);
 
             // New info instance from InData.
-            Info info= gatherer.RestoreInstance(InData, InParentInfo);
+            Info info = gatherer.RestoreInstance(dynData.SourceValueType, dynData.Header, dynData.Name, InParentInfo);
 
             // Handle info specific datas.
             gatherer.RestoreData(InData, info);
 
             // Handle SubInfos
-            foreach (var subData in InData.SubInfos)
+            if (InData.HasMember("SubInfos"))
             {
-                Info subInfo = Restore(info, subData);
+                foreach (var subData in dynData.SubInfos)
+                {
+                    Info subInfo = Restore(info, subData);
+                }
             }
 
             return info;
@@ -79,7 +89,7 @@ namespace nf.protoscript.Serialization
         /// </summary>
         /// <param name="InSourceInfo"></param>
         /// <param name="InTargetData"></param>
-        protected virtual void GatherData(Info InSourceInfo, InfoData InTargetData)
+        protected virtual void GatherData(Info InSourceInfo, SerializationFriendlyData InTargetData)
         {
             Type infoType = InSourceInfo.GetType();
 
@@ -92,7 +102,7 @@ namespace nf.protoscript.Serialization
 
                 // Convert source value to friendly-data and save it.
                 var dataToWrite = SerializationHelper.ConvertValueToData(prop.PropertyType, value);
-                InTargetData.TryAdd(prop.Name, dataToWrite);
+                InTargetData.TryAddExtra(prop.Name, dataToWrite);
             }
         }
 
@@ -102,12 +112,11 @@ namespace nf.protoscript.Serialization
         /// <param name="InSourceData"></param>
         /// <param name="InParentInfo"></param>
         /// <returns></returns>
-        protected virtual Info RestoreInstance(InfoData InSourceData, Info InParentInfo)
+        protected virtual Info RestoreInstance(Type InInfoType, string InHeader, string InName, Info InParentInfo)
         {
-            Type infoType = Type.GetType(InSourceData.Typename);
             Info result = Activator.CreateInstance(
                 // type
-                infoType
+                InInfoType
                 // binding flags
                 , BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
                 // binder
@@ -115,8 +124,8 @@ namespace nf.protoscript.Serialization
                 // parameters
                 , new object[] {
                     InParentInfo
-                    , InSourceData.Header
-                    , InSourceData.Name
+                    , InHeader
+                    , InName
                     }
                 // culture info
                 , null
@@ -129,7 +138,7 @@ namespace nf.protoscript.Serialization
         /// </summary>
         /// <param name="InSourceData"></param>
         /// <param name="InTargetInfo"></param>
-        protected virtual void RestoreData(InfoData InSourceData, Info InTargetInfo)
+        protected virtual void RestoreData(SerializationFriendlyData InSourceData, Info InTargetInfo)
         {
             Type infoType = InTargetInfo.GetType();
             var props = SerializationHelper._FindPropertiesHandledByGatherer(infoType);
@@ -138,8 +147,8 @@ namespace nf.protoscript.Serialization
                 // TODO handle renames, re-types
 
                 // Read saved data
-                ISerializationFriendlyData data = null;
-                if (InSourceData.TryGetExtraData(prop.Name, out data))
+                SerializationFriendlyData data = null;
+                if (InSourceData.TryGetExtra(prop.Name, out data))
                 {
                     // Restore friendly-data to value.
                     object valueToRestore = SerializationHelper.RestoreValueFromData(prop.PropertyType, data);

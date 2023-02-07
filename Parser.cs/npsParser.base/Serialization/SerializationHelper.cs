@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Dynamic;
 using System.Collections.Generic;
@@ -20,47 +20,48 @@ namespace nf.protoscript.Serialization
         /// </summary>
         /// <param name="InData"></param>
         /// <returns></returns>
-        public static object RestoreValueFromData(Type InTargetType, ISerializationFriendlyData InData)
+        public static object RestoreValueFromData(Type InTargetType, SerializationFriendlyData InData)
         {
             // TODO 202302051343 use manager to select the approxiate converter dynamically.
 
             // InfoRefData: always be read as a ****Info
-            if (InData is InfoRefData)
+            if (InData.IsInfoRef())
             {
-                return _Restore(InData as InfoRefData);
+                return _RestoreAsInfoRef(InData);
             }
+
             // InfoData: always be read as a ****Info instance. But should be handled in InfoGatherer, not here.
-            if (InData is InfoData)
+            if (InData.IsObjectOf(typeof(Info)))
             {
                 throw new InvalidProgramException();
             }
 
             // SyntaxData : always be read as a STNode****
-            if (InData is SyntaxData)
+            if (InData.IsObjectOf(typeof(STNodeBase)))
             {
-                return _Restore(InData as SyntaxData);
+                return _RestoreAsSyntax(InData);
             }
 
             // POD Data
-            if (InData is PODData)
+            if (InData.IsPODData())
             {
-                return (InData as PODData).Value;
+                return InData.AsPODData();
             }
 
             // Collection Data
-            if (InData is CollectionData)
+            if (InData.IsCollection())
             {
-                var srcCollData = InData as CollectionData;
+                IReadOnlyList<SerializationFriendlyData> srcCollData = InData.AsCollection();
 
                 // Handle Array type (object[])
-                if (srcCollData.CollectionType.IsArray)
+                if (InData.SourceValueType.IsArray)
                 {
                     // Create array instance, pass in the size.
-                    object targetObj = Activator.CreateInstance(srcCollData.CollectionType, new object[] { srcCollData.Count });
+                    object targetObj = Activator.CreateInstance(InData.SourceValueType, new object[] { srcCollData.Count });
                     Array targetArray = targetObj as Array;
 
                     // then fill values.
-                    Type elemType = srcCollData.CollectionType.GetElementType();
+                    Type elemType = InData.SourceValueType.GetElementType();
                     for (int i = 0; i < srcCollData.Count; i++)
                     {
                         object targetElemVal = RestoreValueFromData(elemType, srcCollData[i]);
@@ -78,13 +79,13 @@ namespace nf.protoscript.Serialization
                 }
             }
 
-            if (InData is DictionaryData)
+            if (InData.IsCollection())
             {
                 throw new NotImplementedException();
             }
 
             // Null Data
-            if (InData is NullData)
+            if (InData.IsNull())
             {
                 return null;
             }
@@ -98,65 +99,59 @@ namespace nf.protoscript.Serialization
         /// <param name="InValueDeclType">InValue should be null, in this case, use this type to determine how to convert the value.</param>
         /// <param name="InValue"></param>
         /// <returns></returns>
-        public static ISerializationFriendlyData ConvertValueToData(Type InValueDeclType, object InValue)
+        public static SerializationFriendlyData ConvertValueToData(Type InValueDeclType, object InValue)
         {
             // TODO 202302051343 use manager to select the approxiate converter dynamically.
 
             // null value, check InValueDeclType
             if (InValue == null)
             {
-                var data = new NullData(InValueDeclType);
+                var data = SerializationFriendlyData.NewNullData(InValueDeclType);
                 return data;
             }
-            else
+
+            // ****Info: Always convert to InfoRefData
+            if (InValue is Info)
             {
-                // ****Info: Always convert to InfoRefData
-                if (InValue is Info)
+                var data = _ConvertToInfoRef(InValue as Info);
+                return data;
+            }
+
+            // STNode****: Always convert to SyntaxData
+            if (InValue is STNodeBase)
+            {
+                var data = _ConvertToSyntax(InValue as STNodeBase);
+                return data;
+            }
+
+            // Array: write it to collection
+            if (InValue.GetType().IsArray)
+            {
+                Type elemType = InValue.GetType().GetElementType();
+                Array arrayVal = InValue as Array;
+
+                var convertedCollection = new List<SerializationFriendlyData>() { Capacity = arrayVal.Length };
+                for (int i = 0; i < arrayVal.Length; ++i)
                 {
-                    var data = _Convert(InValue as Info);
-                    return data;
+                    var elemData = ConvertValueToData(elemType, arrayVal.GetValue(i));
+                    convertedCollection.Add(elemData);
                 }
+                var data = SerializationFriendlyData.NewCollection(arrayVal.GetType(), convertedCollection);
+                return data;
+            }
 
-                // STNode****: Always convert to SyntaxData
-                if (InValue is STNodeBase)
-                {
-                    var data = _Convert(InValue as STNodeBase);
-                    return data;
-                }
+            // TODO support ICollections like List<>
+            // TODO support IDictionary like Dictionary<,>
 
-                // Array: write it to collection
-                if (InValue.GetType().IsArray)
-                {
-                    Type elemType = InValue.GetType().GetElementType();
-                    Array arrayVal = InValue as Array;
-
-                    CollectionData targetCollData = new CollectionData()
-                    {
-                        CollectionType = InValue.GetType(),
-                        Capacity = arrayVal.Length
-                    };
-                    for (int i = 0; i < arrayVal.Length; ++i)
-                    {
-                        var elemData = ConvertValueToData(elemType, arrayVal.GetValue(i));
-                        targetCollData.Add(elemData);
-                    }
-                    return targetCollData;
-                }
-
-                // TODO support ICollections like List<>
-                // TODO support IDictionary like Dictionary<,>
-
-                // POD types: Always convert to PODData
-                if (InValue is string
-                    || InValue.GetType().IsPrimitive
-                    || InValue.GetType().IsEnum
-                    || InValue.GetType().IsValueType
-                    )
-                {
-                    var data = new PODData(InValue);
-                    return data;
-                }
-
+            // POD types: Always convert to PODData
+            if (InValue is string
+                || InValue.GetType().IsPrimitive
+                || InValue.GetType().IsEnum
+                || InValue.GetType().IsValueType
+                )
+            {
+                var data = SerializationFriendlyData.NewPODData(InValue.GetType(), InValue);
+                return data;
             }
 
             throw new InvalidCastException();
@@ -166,12 +161,12 @@ namespace nf.protoscript.Serialization
         /// <summary>
         /// Convert a Info to a InfoRefData
         /// </summary>
-        /// <param name="InTypeInfo"></param>
+        /// <param name="InInfo"></param>
         /// <returns></returns>
-        private static InfoRefData _Convert(Info InTypeInfo)
+        private static SerializationFriendlyData _ConvertToInfoRef(Info InInfo)
         {
-            string infoFullname = InfoHelper.GetFullnameOfInfo(InTypeInfo);
-            return new InfoRefData(infoFullname);
+            string infoFullname = InfoHelper.GetFullnameOfInfo(InInfo);
+            return SerializationFriendlyData.NewInfoRefName(InInfo.GetType(), infoFullname);
         }
 
         /// <summary>
@@ -179,37 +174,33 @@ namespace nf.protoscript.Serialization
         /// </summary>
         /// <param name="InTypeRefData"></param>
         /// <returns></returns>
-        private static Info _Restore(InfoRefData InTypeRefData)
+        private static Info _RestoreAsInfoRef(SerializationFriendlyData InTypeRefData)
         {
-            Info foundInfo = InfoHelper.FindInfoByFullname(InTypeRefData.Fullname);
+            Info foundInfo = InfoHelper.FindInfoByFullname(InTypeRefData.AsInfoRefName());
             return foundInfo;
         }
 
         /// <summary>
         /// Convert SyntaxTree into SyntaxData.
         /// </summary>
-        /// <param name="InSyntaxTree"></param>
+        /// <param name="InSTNode"></param>
         /// <returns></returns>
-        private static SyntaxData _Convert(ISyntaxTreeNode InSyntaxTree)
+        private static SerializationFriendlyData _ConvertToSyntax(STNodeBase InSTNode)
         {
             // TODO Support ISyntaxTreeNode provided by 3rd-library.
 
-            SyntaxData targetData = new SyntaxData();
-
-            var srcNode = InSyntaxTree as STNodeBase;
-            var treeType = srcNode.GetType();
-            targetData.Typename = treeType.FullName;
-            var nodeType = srcNode.GetType();
+            var nodeType = InSTNode.GetType();
+            var targetData = SerializationFriendlyData.NewObject(nodeType);
 
             // Write property values.
             var props = _FindPropertiesHandledByGatherer(nodeType);
             foreach (var prop in props)
             {
                 // Get values in 
-                object val = prop.GetValue(srcNode);
+                object val = prop.GetValue(InSTNode);
                 var data = ConvertValueToData(prop.PropertyType, val);
 
-                targetData.TryAdd(prop.Name, data);
+                targetData.Add(prop.Name, data);
             }
 
             return targetData;
@@ -218,12 +209,15 @@ namespace nf.protoscript.Serialization
         /// <summary>
         /// Restore SyntaxTree from SyntaxData.
         /// </summary>
-        /// <param name="InSyntaxData"></param>
+        /// <param name="InSTNodeData"></param>
         /// <returns></returns>
-        private static syntaxtree.ISyntaxTreeNode _Restore(SyntaxData InSyntaxData)
+        private static syntaxtree.ISyntaxTreeNode _RestoreAsSyntax(SerializationFriendlyData InSTNodeData)
         {
+            System.Diagnostics.Debug.Assert(InSTNodeData.SourceValueType.IsSubclassOf(typeof(STNodeBase)));
+
             // Restore node instance by SyntaxData.Class.
-            Type nodeType = Type.GetType(InSyntaxData.Typename);
+            Type nodeType = InSTNodeData.SourceValueType;
+
             //STNodeBase targetNode = Activator.CreateInstance(nodeType) as STNodeBase;
             STNodeBase targetNode = Activator.CreateInstance(
                 // type
@@ -243,8 +237,8 @@ namespace nf.protoscript.Serialization
             foreach (var prop in props)
             {
                 // Read data from SyntaxData
-                ISerializationFriendlyData data = null;
-                if (!InSyntaxData.TryGetExtraData(prop.Name, out data))
+                SerializationFriendlyData data = null;
+                if (!InSTNodeData.TryGetExtra(prop.Name, out data))
                 { continue; }
 
                 // If property is a STNode
