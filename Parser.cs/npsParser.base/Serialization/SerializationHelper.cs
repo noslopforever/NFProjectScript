@@ -102,6 +102,11 @@ namespace nf.protoscript.Serialization
         {
             // TODO 202302051343 use manager to select the approxiate converter dynamically.
 
+            if (InValue is SerializationFriendlyData)
+            {
+                return InValue as SerializationFriendlyData;
+            }
+
             // null value, check InValueDeclType
             if (InValue == null)
             {
