@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Dynamic;
 using System.Collections.Generic;
@@ -182,7 +182,7 @@ namespace nf.protoscript.Serialization
         private static Info _Restore(InfoRefData InTypeRefData)
         {
             Info foundInfo = InfoHelper.FindInfoByFullname(InTypeRefData.Fullname);
-            return foundInfo as TypeInfo;
+            return foundInfo;
         }
 
         /// <summary>
