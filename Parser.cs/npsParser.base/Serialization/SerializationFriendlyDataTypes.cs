@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Reflection;
 using System.Text;
 
@@ -11,41 +10,11 @@ namespace nf.protoscript.Serialization
     /// Serialization friendly data
     /// </summary>
     public sealed class SerializationFriendlyData
-        : DynamicObject
+        : Dictionary<string, object>
     {
         private SerializationFriendlyData()
         {
         }
-
-        #region "dynamic Object implementations"
-
-        // The inner dictionary.
-        Dictionary<string, object> _Dictionary = new Dictionary<string, object>();
-
-        // If you try to get a value of a property
-        // not defined in the class, this method is called.
-        public override bool TryGetMember(GetMemberBinder InBinder, out object OutResult)
-        {
-            string name = InBinder.Name;
-
-            // If the property name is found in a dictionary,
-            // set the result parameter to the property value and return true.
-            // Otherwise, return false.
-            return _Dictionary.TryGetValue(name, out OutResult);
-        }
-
-        // If you try to set a value of a property that is
-        // not defined in the class, this method is called.
-        public override bool TrySetMember(SetMemberBinder InBinder, object InValue)
-        {
-            _Dictionary[InBinder.Name] = InValue;
-
-            // You can always add a value to a dictionary,
-            // so this method always returns true.
-            return true;
-        }
-
-        #endregion
 
         /// <summary>
         /// Check if we have a propety names InName in this dynamic object.
@@ -54,22 +23,8 @@ namespace nf.protoscript.Serialization
         /// <returns></returns>
         public bool HasMember(string InName)
         {
-            return _Dictionary.ContainsKey(InName);
+            return ContainsKey(InName);
         }
-
-        public object this[string InKey]
-        { 
-            get
-            {
-                return _Dictionary[InKey];
-            }
-            set
-            {
-                _Dictionary[InKey] = value;
-            }
-        }
-
-
 
         /// <summary>
         /// Try add some extra
@@ -79,25 +34,25 @@ namespace nf.protoscript.Serialization
         /// <returns></returns>
         public bool TryAddExtra(string InPropName, SerializationFriendlyData InData)
         {
-            return _Dictionary.TryAdd(InPropName, InData);
+            return TryAdd(InPropName, InData);
         }
 
-        /// <summary>
-        /// Add some extra.
-        /// 
-        /// If name-conflict, throw Key
-        /// </summary>
-        /// <param name="InName"></param>
-        /// <param name="InData"></param>
-        /// <returns></returns>
-        public void Add(string InPropName, SerializationFriendlyData InData)
-        {
-            if (_Dictionary.ContainsKey(InPropName))
-            {
-                throw new ArgumentException();
-            }
-            _Dictionary[InPropName] = InData;
-        }
+        ///// <summary>
+        ///// Add some extra.
+        ///// 
+        ///// If name-conflict, throw Key
+        ///// </summary>
+        ///// <param name="InName"></param>
+        ///// <param name="InData"></param>
+        ///// <returns></returns>
+        //public void Add(string InPropName, SerializationFriendlyData InData)
+        //{
+        //    if (_Dictionary.ContainsKey(InPropName))
+        //    {
+        //        throw new ArgumentException();
+        //    }
+        //    _Dictionary[InPropName] = InData;
+        //}
 
         /// <summary>
         /// Try get extra data by name.
@@ -109,7 +64,7 @@ namespace nf.protoscript.Serialization
         {
             OutData = null;
             object savedVal = null;
-            if (!_Dictionary.TryGetValue(InPropName, out savedVal))
+            if (!TryGetValue(InPropName, out savedVal))
             {
                 return false;
             }
@@ -137,8 +92,8 @@ namespace nf.protoscript.Serialization
 
         public static SerializationFriendlyData NewNullData(Type InDeclValueType)
         {
-            dynamic dynData = new SerializationFriendlyData() { SourceValueType = InDeclValueType };
-            dynData.IsNullValue = true;
+            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclValueType };
+            dynData["IsNullValue"] = true;
             return dynData;
         }
 
@@ -149,8 +104,7 @@ namespace nf.protoscript.Serialization
 
         public object AsPODData()
         {
-            dynamic dynData = this;
-            return dynData.PODValue;
+            return this["PODValue"];
         }
 
         public static SerializationFriendlyData NewPODData(Type InDeclValueType, object InValue)
@@ -160,8 +114,8 @@ namespace nf.protoscript.Serialization
                 return NewNullData(InDeclValueType);
             }
 
-            dynamic dynData = new SerializationFriendlyData() { SourceValueType = InValue.GetType() };
-            dynData.PODValue = InValue;
+            var dynData = new SerializationFriendlyData() { SourceValueType = InValue.GetType() };
+            dynData["PODValue"] = InValue;
             return dynData;
         }
 
@@ -172,14 +126,13 @@ namespace nf.protoscript.Serialization
 
         public string AsInfoRefName()
         {
-            dynamic dynData = this;
-            return dynData.InfoRefFullName;
+            return this["InfoRefFullName"] as string;
         }
 
         public static SerializationFriendlyData NewInfoRefName(Type InDeclValueType, string InInfoFullName)
         {
-            dynamic dynData = new SerializationFriendlyData() { SourceValueType = InDeclValueType };
-            dynData.InfoRefFullName = InInfoFullName;
+            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclValueType };
+            dynData["InfoRefFullName"] = InInfoFullName;
             return dynData;
         }
 
@@ -190,14 +143,14 @@ namespace nf.protoscript.Serialization
 
         public IReadOnlyList<SerializationFriendlyData> AsCollection()
         {
-            dynamic dynData = this as dynamic;
-            return dynData.Collection;
+            var coll = this["Collection"] as List<SerializationFriendlyData>;
+            return coll;
         }
 
         public static SerializationFriendlyData NewCollection(Type InDeclCollectionType, List<SerializationFriendlyData> InCollection)
         {
-            dynamic dynData = new SerializationFriendlyData() { SourceValueType = InDeclCollectionType };
-            dynData.Collection = InCollection;
+            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclCollectionType };
+            dynData["Collection"] = InCollection;
             return dynData;
         }
 
@@ -208,14 +161,14 @@ namespace nf.protoscript.Serialization
 
         public IReadOnlyDictionary<SerializationFriendlyData, SerializationFriendlyData> AsDictionary()
         {
-            dynamic dynData = this as dynamic;
-            return dynData.SFD_Dictionary;
+            var dict = this["SFD_Dictionary"] as Dictionary<SerializationFriendlyData, SerializationFriendlyData>;
+            return dict;
         }
 
         public static SerializationFriendlyData NewDictionary(Type InDeclDictType, Dictionary<SerializationFriendlyData, SerializationFriendlyData> InDictionary)
         {
-            dynamic dynData = new SerializationFriendlyData() { SourceValueType = InDeclDictType };
-            dynData.SFD_Dictionary = InDictionary;
+            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclDictType };
+            dynData["SFD_Dictionary"] = InDictionary;
             return dynData;
         }
 
@@ -241,14 +194,14 @@ namespace nf.protoscript.Serialization
 
         public object AsObject()
         {
-            // Take this dynamic as an object.
+            // Take this dictionary as an object.
             return this;
         }
 
         public static SerializationFriendlyData NewObject(Type InDeclObjectType)
         {
-            dynamic dynData = new SerializationFriendlyData() { SourceValueType = InDeclObjectType };
-            dynData.SFD_IsObject = true;
+            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclObjectType };
+            dynData["SFD_IsObject"] = true;
             return dynData;
         }
 

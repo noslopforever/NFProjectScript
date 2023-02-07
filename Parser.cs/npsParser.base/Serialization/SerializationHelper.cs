@@ -1,6 +1,5 @@
 ﻿using nf.protoscript.syntaxtree;
 using System;
-using System.Dynamic;
 using System.Collections.Generic;
 using System.Reflection;
 

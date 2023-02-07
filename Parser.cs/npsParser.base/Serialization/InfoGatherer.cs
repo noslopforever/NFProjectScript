@@ -21,11 +21,11 @@ namespace nf.protoscript.Serialization
         /// <returns></returns>
         public static SerializationFriendlyData Gather(Info InInfo)
         {
-            dynamic gatherData = SerializationFriendlyData.NewObject(InInfo.GetType());
+            SerializationFriendlyData gatherData = SerializationFriendlyData.NewObject(InInfo.GetType());
 
             // Handle basic infos.
-            gatherData.Header = InInfo.Header;
-            gatherData.Name = InInfo.Name;
+            gatherData["Header"] = InInfo.Header;
+            gatherData["Name"] = InInfo.Name;
 
             // Handle info specific datas.
             var gatherer = InfoGathererManager.Instance.FindGatherer(InInfo);
@@ -35,12 +35,13 @@ namespace nf.protoscript.Serialization
             // Handle SubInfos if not empty.
             if (InInfo.SubInfos.Count != 0)
             {
-                gatherData.SubInfos = new List<SerializationFriendlyData>();
+                var subInfos = new List<SerializationFriendlyData>();
                 foreach (var sub in InInfo.SubInfos)
                 {
                     var subInfoData = Gather(sub);
-                    gatherData.SubInfos.Add(subInfoData);
+                    subInfos.Add(subInfoData);
                 }
+                gatherData["SubInfos"] = subInfos;
             }
 
             return gatherData;
@@ -56,15 +57,13 @@ namespace nf.protoscript.Serialization
         {
             System.Diagnostics.Debug.Assert(InData.SourceValueType.IsSubclassOf(typeof(Info)));
 
-            dynamic dynData = InData as dynamic;
-
             // Find an approxiate gatherer.
             Type infoType = InData.SourceValueType;
             var gatherer = InfoGathererManager.Instance.FindGatherer(infoType);
             System.Diagnostics.Debug.Assert(gatherer != null);
 
             // New info instance from InData.
-            Info info = gatherer.RestoreInstance(dynData.SourceValueType, dynData.Header, dynData.Name, InParentInfo);
+            Info info = gatherer.RestoreInstance(InData.SourceValueType, InData["Header"] as string, InData["Name"] as string, InParentInfo);
 
             // Handle info specific datas.
             gatherer.RestoreData(InData, info);
@@ -72,7 +71,8 @@ namespace nf.protoscript.Serialization
             // Handle SubInfos
             if (InData.HasMember("SubInfos"))
             {
-                foreach (var subData in dynData.SubInfos)
+                var subInfos = InData["SubInfos"] as List<SerializationFriendlyData>;
+                foreach (var subData in subInfos)
                 {
                     Info subInfo = Restore(info, subData);
                 }
@@ -159,7 +159,7 @@ namespace nf.protoscript.Serialization
                 }
             }
         }
-        
+
 
     }
 
