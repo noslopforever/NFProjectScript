@@ -24,8 +24,8 @@ namespace nf.protoscript.Serialization
             SerializationFriendlyData gatherData = SerializationFriendlyData.NewObject(InInfo.GetType());
 
             // Handle basic infos.
-            gatherData["Header"] = InInfo.Header;
-            gatherData["Name"] = InInfo.Name;
+            gatherData.TryAddExtra("Header", SerializationHelper.ConvertValueToData(typeof(string), InInfo.Header));
+            gatherData.TryAddExtra("Name", SerializationHelper.ConvertValueToData(typeof(string), InInfo.Name));
 
             // Handle info specific datas.
             var gatherer = InfoGathererManager.Instance.FindGatherer(InInfo);
@@ -41,7 +41,8 @@ namespace nf.protoscript.Serialization
                     var subInfoData = Gather(sub);
                     subInfos.Add(subInfoData);
                 }
-                gatherData["SubInfos"] = subInfos;
+                var subInfosData = SerializationHelper.ConvertValueToData(subInfos.GetType(), subInfos.ToArray());
+                gatherData.TryAddExtra("SubInfos", subInfosData);
             }
 
             return gatherData;
@@ -63,7 +64,9 @@ namespace nf.protoscript.Serialization
             System.Diagnostics.Debug.Assert(gatherer != null);
 
             // New info instance from InData.
-            Info info = gatherer.RestoreInstance(InData.SourceValueType, InData["Header"] as string, InData["Name"] as string, InParentInfo);
+            string header = InData.GetExtra("Header").AsPODData() as string;
+            string name = InData.GetExtra("Name").AsPODData() as string;
+            Info info = gatherer.RestoreInstance(InData.SourceValueType, header, name, InParentInfo);
 
             // Handle info specific datas.
             gatherer.RestoreData(InData, info);
@@ -71,7 +74,7 @@ namespace nf.protoscript.Serialization
             // Handle SubInfos
             if (InData.HasMember("SubInfos"))
             {
-                var subInfos = InData["SubInfos"] as List<SerializationFriendlyData>;
+                var subInfos = InData.GetExtra("SubInfos").AsCollection();
                 foreach (var subData in subInfos)
                 {
                     Info subInfo = Restore(info, subData);

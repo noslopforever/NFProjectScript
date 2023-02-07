@@ -6,6 +6,7 @@ using System.Text;
 namespace nf.protoscript.Serialization
 {
 
+
     /// <summary>
     /// Serialization friendly data
     /// </summary>
@@ -15,6 +16,11 @@ namespace nf.protoscript.Serialization
         private SerializationFriendlyData()
         {
         }
+
+        /// <summary>
+        /// Type of the source value that has been converted to this data.
+        /// </summary>
+        public Type SourceValueType { get; set; }
 
         /// <summary>
         /// Check if we have a propety names InName in this dynamic object.
@@ -79,9 +85,14 @@ namespace nf.protoscript.Serialization
         }
 
         /// <summary>
-        /// Type of the source value that has been converted to this data.
+        /// Get extra data by name.
         /// </summary>
-        public Type SourceValueType { get; set; }
+        /// <param name="InPropName"></param>
+        /// <returns></returns>
+        public SerializationFriendlyData GetExtra(string InPropName)
+        {
+            return this[InPropName] as SerializationFriendlyData;
+        }
 
         #region "Data Accessors"
 
