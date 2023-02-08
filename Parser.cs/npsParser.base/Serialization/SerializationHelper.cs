@@ -53,14 +53,15 @@ namespace nf.protoscript.Serialization
                 IReadOnlyList<SerializationFriendlyData> srcCollData = InData.AsCollection();
 
                 // Handle Array type (object[])
-                if (InData.SourceValueType.IsArray)
+                Type collType = InData.GetCollectionType();
+                if (collType.IsArray)
                 {
                     // Create array instance, pass in the size.
-                    object targetObj = Activator.CreateInstance(InData.SourceValueType, new object[] { srcCollData.Count });
+                    object targetObj = Activator.CreateInstance(collType, new object[] { srcCollData.Count });
                     Array targetArray = targetObj as Array;
 
                     // then fill values.
-                    Type elemType = InData.SourceValueType.GetElementType();
+                    Type elemType = collType.GetElementType();
                     for (int i = 0; i < srcCollData.Count; i++)
                     {
                         object targetElemVal = RestoreValueFromData(elemType, srcCollData[i]);
@@ -217,10 +218,10 @@ namespace nf.protoscript.Serialization
         /// <returns></returns>
         private static syntaxtree.ISyntaxTreeNode _RestoreAsSyntax(SerializationFriendlyData InSTNodeData)
         {
-            System.Diagnostics.Debug.Assert(InSTNodeData.SourceValueType.IsSubclassOf(typeof(STNodeBase)));
+            System.Diagnostics.Debug.Assert(InSTNodeData.IsObjectOf(typeof(STNodeBase)));
 
             // Restore node instance by SyntaxData.Class.
-            Type nodeType = InSTNodeData.SourceValueType;
+            Type nodeType = InSTNodeData.GetObjectType();
 
             //STNodeBase targetNode = Activator.CreateInstance(nodeType) as STNodeBase;
             STNodeBase targetNode = Activator.CreateInstance(

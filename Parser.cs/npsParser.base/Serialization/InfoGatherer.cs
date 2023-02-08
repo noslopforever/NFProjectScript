@@ -56,17 +56,17 @@ namespace nf.protoscript.Serialization
         /// <returns></returns>
         public static Info Restore(Info InParentInfo, SerializationFriendlyData InData)
         {
-            System.Diagnostics.Debug.Assert(InData.SourceValueType.IsSubclassOf(typeof(Info)));
+            System.Diagnostics.Debug.Assert(InData.IsObjectOf(typeof(Info)));
 
             // Find an approxiate gatherer.
-            Type infoType = InData.SourceValueType;
+            Type infoType = InData.GetObjectType();
             var gatherer = InfoGathererManager.Instance.FindGatherer(infoType);
             System.Diagnostics.Debug.Assert(gatherer != null);
 
             // New info instance from InData.
             string header = InData.GetExtra("Header").AsPODData() as string;
             string name = InData.GetExtra("Name").AsPODData() as string;
-            Info info = gatherer.RestoreInstance(InData.SourceValueType, header, name, InParentInfo);
+            Info info = gatherer.RestoreInstance(infoType, header, name, InParentInfo);
 
             // Handle info specific datas.
             gatherer.RestoreData(InData, info);

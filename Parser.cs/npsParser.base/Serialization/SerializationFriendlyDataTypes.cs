@@ -18,11 +18,6 @@ namespace nf.protoscript.Serialization
         }
 
         /// <summary>
-        /// Type of the source value that has been converted to this data.
-        /// </summary>
-        public Type SourceValueType { get; set; }
-
-        /// <summary>
         /// Check if we have a propety names InName in this dynamic object.
         /// </summary>
         /// <param name="InName"></param>
@@ -75,7 +70,7 @@ namespace nf.protoscript.Serialization
                 return false;
             }
 
-            if (! (savedVal is SerializationFriendlyData))
+            if (!(savedVal is SerializationFriendlyData))
             {
                 return false;
             }
@@ -98,13 +93,19 @@ namespace nf.protoscript.Serialization
 
         public bool IsNull()
         {
-            return HasMember("IsNullValue");
+            return HasMember("NullValueType");
+        }
+
+        public Type GetNullType()
+        {
+            Type type = this["NullValueType"] as Type;
+            return type;
         }
 
         public static SerializationFriendlyData NewNullData(Type InDeclValueType)
         {
-            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclValueType };
-            dynData["IsNullValue"] = true;
+            var dynData = new SerializationFriendlyData();
+            dynData["NullValueType"] = InDeclValueType;
             return dynData;
         }
 
@@ -125,7 +126,7 @@ namespace nf.protoscript.Serialization
                 return NewNullData(InDeclValueType);
             }
 
-            var dynData = new SerializationFriendlyData() { SourceValueType = InValue.GetType() };
+            var dynData = new SerializationFriendlyData();
             dynData["PODValue"] = InValue;
             return dynData;
         }
@@ -158,28 +159,42 @@ namespace nf.protoscript.Serialization
             return coll;
         }
 
+        public Type GetCollectionType()
+        {
+            var collType = this["CollType"] as Type;
+            return collType;
+        }
+
         public static SerializationFriendlyData NewCollection(Type InDeclCollectionType, List<SerializationFriendlyData> InCollection)
         {
-            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclCollectionType };
+            var dynData = new SerializationFriendlyData();
+            dynData["CollType"] = InDeclCollectionType;
             dynData["Collection"] = InCollection;
             return dynData;
         }
 
         public bool IsDictionary()
         {
-            return HasMember("SFD_Dictionary");
+            return HasMember("Dictionary");
         }
 
         public IReadOnlyDictionary<SerializationFriendlyData, SerializationFriendlyData> AsDictionary()
         {
-            var dict = this["SFD_Dictionary"] as Dictionary<SerializationFriendlyData, SerializationFriendlyData>;
+            var dict = this["Dictionary"] as Dictionary<SerializationFriendlyData, SerializationFriendlyData>;
             return dict;
+        }
+
+        public Type GetDictionaryType()
+        {
+            var dictType = this["DictType"] as Type;
+            return dictType;
         }
 
         public static SerializationFriendlyData NewDictionary(Type InDeclDictType, Dictionary<SerializationFriendlyData, SerializationFriendlyData> InDictionary)
         {
-            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclDictType };
-            dynData["SFD_Dictionary"] = InDictionary;
+            var dynData = new SerializationFriendlyData();
+            dynData["DictType"] = InDeclDictType;
+            dynData["Dictionary"] = InDictionary;
             return dynData;
         }
 
@@ -190,7 +205,7 @@ namespace nf.protoscript.Serialization
         /// <returns></returns>
         public bool IsObject()
         {
-            return HasMember("SFD_IsObject");
+            return HasMember("SFD_ObjectType");
         }
 
         /// <summary>
@@ -200,7 +215,9 @@ namespace nf.protoscript.Serialization
         /// <returns></returns>
         public bool IsObjectOf(Type InType)
         {
-            return InType.IsAssignableFrom(SourceValueType);
+            return IsObject()
+                && InType.IsAssignableFrom(GetObjectType())
+                ;
         }
 
         public object AsObject()
@@ -209,217 +226,22 @@ namespace nf.protoscript.Serialization
             return this;
         }
 
+        public Type GetObjectType()
+        {
+            Type objType = this["SFD_ObjectType"] as Type;
+            return objType;
+        }
+
         public static SerializationFriendlyData NewObject(Type InDeclObjectType)
         {
-            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclObjectType };
-            dynData["SFD_IsObject"] = true;
+            var dynData = new SerializationFriendlyData();
+            dynData["SFD_ObjectType"] = InDeclObjectType;
             return dynData;
         }
 
         #endregion
 
     }
-
-
-    ///// <summary>
-    ///// POD (int, byte, string, structure ...) data.
-    ///// </summary>
-    //public sealed class PODData
-    //    : ISerializationFriendlyData
-    //{
-    //    internal PODData()
-    //    {
-    //    }
-    //    public PODData(object InValue)
-    //    {
-    //        Value = InValue;
-    //    }
-
-    //    /// <summary>
-    //    /// The POD value.
-    //    /// </summary>
-    //    public object Value { get; set; }
-
-    //}
-
-    ///// <summary>
-    ///// CollectionData that holds a collection
-    ///// </summary>
-    //public sealed class CollectionData
-    //    : List<ISerializationFriendlyData>
-    //    , ISerializationFriendlyData
-    //{
-
-    //    /// <summary>
-    //    /// Type of the collection.
-    //    /// </summary>
-    //    public Type CollectionType { get; set; }
-
-    //}
-
-    ///// <summary>
-    ///// DictionaryData which holds a dictionary.
-    ///// </summary>
-    //public sealed class DictionaryData
-    //    : Dictionary<ISerializationFriendlyData, ISerializationFriendlyData>
-    //    , ISerializationFriendlyData
-    //{
-
-    //    /// <summary>
-    //    /// Type of the dictionary.
-    //    /// </summary>
-    //    public Type DictionaryType { get; set; }
-
-    //}
-
-    ///// <summary>
-    ///// Null data but saves Type of the value.
-    ///// </summary>
-    //public sealed class NullData
-    //    : ISerializationFriendlyData
-    //{
-    //    internal NullData()
-    //    {
-    //    }
-    //    public NullData(Type InType)
-    //    {
-    //        Type = InType;
-    //    }
-
-    //    /// <summary>
-    //    /// Type of the value
-    //    /// </summary>
-    //    public Type Type { get; set; }
-
-    //}
-
-    ///// <summary>
-    ///// Data to save info references.
-    ///// </summary>
-    //public sealed class InfoRefData
-    //    : ISerializationFriendlyData
-    //{
-    //    internal InfoRefData()
-    //    {
-    //    }
-    //    public InfoRefData(string InTypeFullname)
-    //    {
-    //        Fullname = InTypeFullname;
-    //    }
-
-    //    /// <summary>
-    //    /// Path of the info: 
-    //    /// -   Package.Type.SubInfo.SubInfo
-    //    /// </summary>
-    //    public string Fullname { get; set; }
-
-    //}
-
-
-    ////public sealed class MethodDelegateTypeData
-    ////    : SerializationFriendlyDataBase
-    ////{
-    ////    // TODO ...
-    ////}
-
-
-    ///// <summary>
-    ///// Dynamic serialization friendly data.
-    ///// </summary>
-    //public abstract class DynamicSerializationFriendlyData
-    //    : ISerializationFriendlyData
-    //{
-    //    /// <summary>
-    //    /// Class of the source object.
-    //    /// </summary>
-    //    public string Typename { get; set; }
-
-    //    /// <summary>
-    //    /// Append datas of info: Member's InitExpr, Method's Codebody, etc...
-    //    /// </summary>
-    //    private ExpandoObject Extra { get; set; } = new ExpandoObject();
-
-    //    /// <summary>
-    //    /// Try get extra data by name.
-    //    /// </summary>
-    //    /// <param name="InName"></param>
-    //    /// <param name="OutData"></param>
-    //    /// <returns></returns>
-    //    public bool TryGetExtraData(string InName, out ISerializationFriendlyData OutData)
-    //    {
-    //        OutData = null;
-
-    //        IDictionary<string, object> dict = Extra as IDictionary<string, object>;
-    //        object dataObj = null;
-    //        if (!dict.TryGetValue(InName, out dataObj))
-    //        {
-    //            return false;
-    //        }
-
-    //        // The dataObj must implement ISerializationFriendlyDataBase
-    //        if (!typeof(ISerializationFriendlyData).IsAssignableFrom(dataObj.GetType()))
-    //        {
-    //            throw new InvalidCastException();
-    //        }
-
-    //        OutData = dataObj as ISerializationFriendlyData;
-    //        return true;
-    //    }
-
-    //    /// <summary>
-    //    /// Try add some extra
-    //    /// </summary>
-    //    /// <param name="InName"></param>
-    //    /// <param name="InData"></param>
-    //    /// <returns></returns>
-    //    public bool TryAdd(string InName, ISerializationFriendlyData InData)
-    //    {
-    //        return Extra.TryAdd(InName, InData);
-    //    }
-
-    //}
-
-    ///// <summary>
-    ///// Hold all Info's necessary datas which can be used to reconstruct the Info itself in the future.
-    ///// InfoData is Serializer-friendly.
-    ///// </summary>
-    //public sealed class InfoData
-    //    : DynamicSerializationFriendlyData
-    //{
-    //    public InfoData()
-    //    {
-    //    }
-
-    //    /// <summary>
-    //    /// Info's header
-    //    /// </summary>
-    //    public string Header { get; set; }
-
-    //    /// <summary>
-    //    /// Info's Name
-    //    /// </summary>
-    //    public string Name { get; set; }
-
-    //    /// <summary>
-    //    /// Sub-infos
-    //    /// </summary>
-    //    public List<InfoData> SubInfos { get; } = new List<InfoData>();
-
-    //}
-
-
-    ///// <summary>
-    ///// Data to save values in Syntaxes
-    ///// </summary>
-    //public sealed class SyntaxData
-    //    : DynamicSerializationFriendlyData
-    //{
-    //    public SyntaxData()
-    //    {
-    //    }
-
-    //}
-
 
 
 }
