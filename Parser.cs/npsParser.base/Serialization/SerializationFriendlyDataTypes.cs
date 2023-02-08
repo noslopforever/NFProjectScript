@@ -140,9 +140,9 @@ namespace nf.protoscript.Serialization
             return this["InfoRefFullName"] as string;
         }
 
-        public static SerializationFriendlyData NewInfoRefName(Type InDeclValueType, string InInfoFullName)
+        public static SerializationFriendlyData NewInfoRefName(string InInfoFullName)
         {
-            var dynData = new SerializationFriendlyData() { SourceValueType = InDeclValueType };
+            var dynData = new SerializationFriendlyData();
             dynData["InfoRefFullName"] = InInfoFullName;
             return dynData;
         }

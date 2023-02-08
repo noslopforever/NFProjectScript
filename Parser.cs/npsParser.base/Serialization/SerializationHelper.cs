@@ -170,7 +170,7 @@ namespace nf.protoscript.Serialization
         private static SerializationFriendlyData _ConvertToInfoRef(Info InInfo)
         {
             string infoFullname = InfoHelper.GetFullnameOfInfo(InInfo);
-            return SerializationFriendlyData.NewInfoRefName(InInfo.GetType(), infoFullname);
+            return SerializationFriendlyData.NewInfoRefName(infoFullname);
         }
 
         /// <summary>
