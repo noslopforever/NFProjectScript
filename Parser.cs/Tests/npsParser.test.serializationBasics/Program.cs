@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Diagnostics;
 using nf.protoscript;
 using nf.protoscript.syntaxtree;
@@ -8,10 +7,10 @@ using System.Runtime.InteropServices;
 using nf.protoscript.Serialization;
 using System.Xml.Serialization;
 using System.Text.Json;
-using System.Xml;
-using System.Xml.Schema;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
+using System.Xml;
+using System.Text;
 
 namespace nf.protoscript.test
 {
@@ -44,10 +43,22 @@ namespace nf.protoscript.test
             {
                 try
                 {
-                    XmlSerializer xmlSerial = new XmlSerializer(typeof(SerializationFriendlyData));
-                    TextWriter writer = new StringWriter();
-                    xmlSerial.Serialize(writer, gatheredProjData);
-                    Console.WriteLine(writer.ToString());
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+
+                        XmlWriterSettings settings = new XmlWriterSettings();
+                        settings.Indent = true;
+                        settings.Encoding = new UTF8Encoding(false);
+                        settings.NewLineChars = Environment.NewLine;
+
+                        using (XmlWriter xmlWriter = XmlWriter.Create(ms, settings))
+                        {
+                            SFDXmlSerializer.WriteSFDProperty(xmlWriter, "Project", gatheredProjData);
+                        }
+
+                        string xml = Encoding.UTF8.GetString(ms.ToArray());
+                        Console.WriteLine(xml);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -119,62 +130,6 @@ namespace nf.protoscript.test
         {
             writer.WriteStringValue(InType.Name);
         }
-    }
-
-    [Serializable]
-    public class SerialDictionary<TKey, TValue>
-        : Dictionary<TKey, TValue>
-        , IXmlSerializable
-    {
-        public void WriteXml(XmlWriter InWriter)       // Serializer
-        {
-            XmlSerializer KeySerializer = new XmlSerializer(typeof(TKey));
-            XmlSerializer ValueSerializer = new XmlSerializer(typeof(TValue));
-
-            InWriter.WriteStartElement("Dictionary");
-            foreach (KeyValuePair<TKey, TValue> kv in this)
-            {
-                InWriter.WriteStartElement("element");
-                InWriter.WriteStartElement("key");
-                KeySerializer.Serialize(InWriter, kv.Key);
-                InWriter.WriteEndElement();
-                InWriter.WriteStartElement("value");
-                ValueSerializer.Serialize(InWriter, kv.Value);
-                InWriter.WriteEndElement();
-                InWriter.WriteEndElement();
-            }
-            InWriter.WriteEndElement();
-        }
-        public void ReadXml(XmlReader InReader)       // Deserializer
-        {
-            InReader.Read();
-            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-            XmlSerializer ValueSerializer = new XmlSerializer(typeof(TValue));
-
-            InReader.ReadStartElement();
-            while (InReader.NodeType != XmlNodeType.EndElement)
-            {
-                InReader.ReadStartElement("element");
-                InReader.ReadStartElement("key");
-                TKey tk = (TKey)keySerializer.Deserialize(InReader);
-                InReader.ReadEndElement();
-                InReader.ReadStartElement("value");
-                TValue vl = (TValue)ValueSerializer.Deserialize(InReader);
-                InReader.ReadEndElement();
-                InReader.ReadEndElement();
-
-                this.Add(tk, vl);
-                InReader.MoveToContent();
-            }
-            InReader.ReadEndElement();
-            InReader.ReadEndElement();
-
-        }
-        public XmlSchema GetSchema()
-        {
-            return null;
-        }
-
     }
 
 }
