@@ -98,14 +98,32 @@ namespace nf.protoscript.Serialization
 
         public Type GetNullType()
         {
-            Type type = this["NullValueType"] as Type;
-            return type;
+            var nullTypeData = this["NullValueType"] as SerializationFriendlyData;
+            return nullTypeData.AsType();
         }
 
         public static SerializationFriendlyData NewNullData(Type InDeclValueType)
         {
             var dynData = new SerializationFriendlyData();
-            dynData["NullValueType"] = InDeclValueType;
+            dynData["NullValueType"] = SerializationFriendlyData.NewTypeData(InDeclValueType);
+            return dynData;
+        }
+
+        public bool IsType()
+        {
+            return HasMember("Type");
+        }
+
+        public Type AsType()
+        {
+            Type type = this["Type"] as Type;
+            return type;
+        }
+
+        public static SerializationFriendlyData NewTypeData(Type InDeclValueType)
+        {
+            var dynData = new SerializationFriendlyData();
+            dynData["Type"] = InDeclValueType;
             return dynData;
         }
 
@@ -161,14 +179,14 @@ namespace nf.protoscript.Serialization
 
         public Type GetCollectionType()
         {
-            var collType = this["CollType"] as Type;
-            return collType;
+            var collTypeData = this["CollType"] as SerializationFriendlyData;
+            return collTypeData.AsType();
         }
 
         public static SerializationFriendlyData NewCollection(Type InDeclCollectionType, List<SerializationFriendlyData> InCollection)
         {
             var dynData = new SerializationFriendlyData();
-            dynData["CollType"] = InDeclCollectionType;
+            dynData["CollType"] = SerializationFriendlyData.NewTypeData(InDeclCollectionType);
             dynData["Collection"] = InCollection;
             return dynData;
         }
@@ -186,14 +204,14 @@ namespace nf.protoscript.Serialization
 
         public Type GetDictionaryType()
         {
-            var dictType = this["DictType"] as Type;
-            return dictType;
+            var dictTypeData = this["DictType"] as SerializationFriendlyData;
+            return dictTypeData.AsType();
         }
 
         public static SerializationFriendlyData NewDictionary(Type InDeclDictType, Dictionary<SerializationFriendlyData, SerializationFriendlyData> InDictionary)
         {
             var dynData = new SerializationFriendlyData();
-            dynData["DictType"] = InDeclDictType;
+            dynData["DictType"] = SerializationFriendlyData.NewTypeData(InDeclDictType);
             dynData["Dictionary"] = InDictionary;
             return dynData;
         }
@@ -228,14 +246,14 @@ namespace nf.protoscript.Serialization
 
         public Type GetObjectType()
         {
-            Type objType = this["SFD_ObjectType"] as Type;
-            return objType;
+            var objTypeData = this["SFD_ObjectType"] as SerializationFriendlyData;
+            return objTypeData.AsType();
         }
 
         public static SerializationFriendlyData NewObject(Type InDeclObjectType)
         {
             var dynData = new SerializationFriendlyData();
-            dynData["SFD_ObjectType"] = InDeclObjectType;
+            dynData["SFD_ObjectType"] = SerializationFriendlyData.NewTypeData(InDeclObjectType);
             return dynData;
         }
 

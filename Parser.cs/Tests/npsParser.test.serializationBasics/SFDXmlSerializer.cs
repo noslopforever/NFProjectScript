@@ -34,7 +34,7 @@ namespace nf.protoscript.test
             // not data, take it as POD values.
             if (propData == null)
             {
-                WritePODAttributeString(InWriter, InName, InDataObj);
+                InWriter.WriteAttributeString(InName, _MakePureValueString(InDataObj));
             }
             // data, exact it.
             else
@@ -42,15 +42,21 @@ namespace nf.protoscript.test
                 if (propData.IsPODData())
                 {
                     object podVal = propData.AsPODData();
-                    WritePODAttributeString(InWriter, InName, podVal);
+                    InWriter.WriteAttributeString(InName, _MakePureValueString(podVal));
+                    // No need for a complex version: there are no Non-SFD PODValues saved in any level of SFDs for now.
+                    //InWriter.WriteAttributeString(InName, _MakeValueString(podVal));
+                }
+                else if (propData.IsType())
+                {
+                    InWriter.WriteAttributeString(InName, MakeTypeString(propData.AsType()));
                 }
                 else if (propData.IsInfoRef())
                 {
-                    InWriter.WriteAttributeString(InName, MakeInfoRefString(propData.AsInfoRefName()));
+                    InWriter.WriteAttributeString(InName, _MakeInfoRefString(propData.AsInfoRefName()));
                 }
                 else if (propData.IsNull())
                 {
-                    InWriter.WriteAttributeString(InName, MakeNullString(propData.GetNullType()));
+                    InWriter.WriteAttributeString(InName, _MakeNullString(propData.GetNullType()));
                 }
                 else if (propData.IsCollection())
                 {
@@ -104,24 +110,26 @@ namespace nf.protoscript.test
 
         }
 
-        //public static object ReadSFDProperty(XmlReader InReader, string InName)
-        //{
-        //    string attrValStr = InReader.GetAttribute(InName);
-        //    if (attrValStr != null)
-        //    {
-        //        object valObj = ExactValueFromIdentifiedString(attrValStr);
-        //        return valObj;
-        //    }
-        //    else
-        //    {
-        //        InReader.ReadStartElement(InName);
-        //        for (int i = 0; i < InReader.AttributeCount; i++)
-        //        {
-        //            string InAttrName = InReader.GetAttribute(i);
-        //        }
-        //        InReader.ReadEndElement();
-        //    }
-        //}
+        public static object ReadSFDProperty(XmlReader InReader, string InName)
+        {
+            string attrValStr = InReader.GetAttribute(InName);
+            if (attrValStr != null)
+            {
+                object valObj = ExactValueFromIdentifiedString(attrValStr);
+                return valObj;
+            }
+            else
+            {
+                InReader.ReadStartElement(InName);
+                for (int i = 0; i < InReader.AttributeCount; i++)
+                {
+                    string InAttrName = InReader.GetAttribute(i);
+                }
+                InReader.ReadEndElement();
+            }
+
+            return null;
+        }
 
 
         private static List<string> _AutoFillNS = new List<string>();
@@ -143,23 +151,37 @@ namespace nf.protoscript.test
             return null;
         }
 
-        private static string MakeNullString(Type InType)
+        private static string _MakeNullString(Type InType)
         {
-            string typeStr = MakeTypeString(InType);
-            return IdentifyValueString("$null", typeStr);
+            string typeStr = _ConvertTypeToString(InType);
+            return IdentifyValueString("$N", typeStr);
         }
 
-        private static string MakeInfoRefString(string InInfoRefStr)
+        private static string _MakeInfoRefString(string InInfoRefStr)
         {
-            return IdentifyValueString("$nfo", InInfoRefStr);
+            return IdentifyValueString("$R", InInfoRefStr);
         }
 
-        private static string MakeValueString(object InDataObj)
+        private static string _MakePureValueString(object InDataObj)
         {
             Type objType = InDataObj.GetType();
-            string typeName = MakeTypeString(objType);
+            string typeName = _ConvertTypeToString(objType);
 
             return IdentifyValueString(typeName, InDataObj);
+        }
+
+        private static string MakeTypeString(Type InType)
+        {
+            string typename = _ConvertTypeToString(InType);
+            return IdentifyValueString("$T", typename);
+        }
+
+        private static string _MakeValueString(object InDataObj)
+        {
+            Type objType = InDataObj.GetType();
+            string typeName = _ConvertTypeToString(objType);
+
+            return IdentifyValueString("$P" + typeName, InDataObj);
         }
 
         // Typename will never contains special characters like: : % $ / \ | ( ) ...
@@ -184,22 +206,39 @@ namespace nf.protoscript.test
             string typecode = "";
             string valStr = "";
             ParseIdentifiedString(InString, out typecode, out valStr);
-            if (typecode == "$null")
+            if (typecode == "$N")
             {
-                Type type = ParseTypeFromString(valStr);
+                Type type = _ParseTypeFromString(valStr);
                 return SerializationFriendlyData.NewNullData(type);
             }
-            else if (typecode == "$nfo")
+            else if (typecode == "$R")
             {
                 return SerializationFriendlyData.NewInfoRefName(valStr);
             }
+            else if (typecode == "$T")
+            {
+                Type type = _ParseTypeFromString(valStr);
+                return SerializationFriendlyData.NewTypeData(type);
+            }
+            else if (typecode.StartsWith("$P"))
+            {
+                string purePODTypeCode = typecode.Substring(2);
+                object purePODVal = _ExactPurePODValue(purePODTypeCode, valStr);
+                return SerializationFriendlyData.NewPODData(purePODVal.GetType(), purePODVal);
+            }
 
-            Type valType = ParseTypeFromString(typecode);
-            object valInst = Convert.ChangeType(valStr, valType);
+            return _ExactPurePODValue(typecode, valStr);
+        }
+
+        private static object _ExactPurePODValue(string InTypeCode, string InValueString)
+        {
+            // Pure POD value
+            Type valType = _ParseTypeFromString(InTypeCode);
+            object valInst = Convert.ChangeType(InValueString, valType);
             return valInst;
         }
 
-        private static string MakeTypeString(Type InType)
+        private static string _ConvertTypeToString(Type InType)
         {
             string typeName = InType.Name;
 
@@ -208,28 +247,13 @@ namespace nf.protoscript.test
             {
                 typeName = alias;
             }
-
             return typeName;
         }
 
-        private static Type ParseTypeFromString(string InString)
+        private static Type _ParseTypeFromString(string InString)
         {
             return Type.GetType(InString);
         }
-
-        private static void WritePODAttributeString(XmlWriter InWriter, string InName, object InDataObj)
-        {
-            if (InDataObj is Type)
-            {
-                string typeStr = MakeTypeString(InDataObj as Type);
-                InWriter.WriteAttributeString(InName, typeStr);
-            }
-            else
-            {
-                InWriter.WriteAttributeString(InName, MakeValueString(InDataObj));
-            }
-        }
-
 
 
     }
