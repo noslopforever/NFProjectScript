@@ -4,6 +4,7 @@ using System.Xml;
 using System.Xml.Schema;
 using nf.protoscript.Serialization;
 using System;
+using System.Reflection.PortableExecutable;
 
 namespace nf.protoscript.test
 {
@@ -18,6 +19,12 @@ namespace nf.protoscript.test
             _AddTypeAlias("s", typeof(string));
             _AddTypeAlias("c", typeof(char));
             _AddTypeAlias("SFD", typeof(SerializationFriendlyData));
+            _AddTypeAlias("n[]", typeof(int[]));
+            _AddTypeAlias("f[]", typeof(float[]));
+            _AddTypeAlias("b[]", typeof(bool[]));
+            _AddTypeAlias("s[]", typeof(string[]));
+            _AddTypeAlias("c[]", typeof(char[]));
+            _AddTypeAlias("SFD[]", typeof(SerializationFriendlyData[]));
 
             _AutoFillNS.Add("System");
             _AutoFillNS.Add("System.Collection");
@@ -62,7 +69,7 @@ namespace nf.protoscript.test
                 {
                     InWriter.WriteStartElement(InName);
 
-                    InWriter.WriteAttributeString("CollectionType", MakeTypeString(propData.GetCollectionType()));
+                    InWriter.WriteAttributeString("CollType", MakeTypeString(propData.GetCollectionType()));
 
                     // Special codes for collection
                     var dataCol = propData.AsCollection();
@@ -78,7 +85,7 @@ namespace nf.protoscript.test
                 {
                     InWriter.WriteStartElement(InName);
 
-                    InWriter.WriteAttributeString("DictionaryType", MakeTypeString(propData.GetDictionaryType()));
+                    InWriter.WriteAttributeString("DictType", MakeTypeString(propData.GetDictionaryType()));
                     // Write subs.
                     var dict = propData.AsDictionary();
                     foreach (var kvp in dict)
@@ -110,27 +117,55 @@ namespace nf.protoscript.test
 
         }
 
-        public static object ReadSFDProperty(XmlReader InReader, string InName)
+        public static SerializationFriendlyData ReadSFDNode(XmlNode InNode)
         {
-            string attrValStr = InReader.GetAttribute(InName);
-            if (attrValStr != null)
+            SerializationFriendlyData sfd = SerializationFriendlyData.NewEmpty();
+            foreach (XmlAttribute xmlAttr in InNode.Attributes)
             {
-                object valObj = ExactValueFromIdentifiedString(attrValStr);
-                return valObj;
-            }
-            else
-            {
-                InReader.ReadStartElement(InName);
-                for (int i = 0; i < InReader.AttributeCount; i++)
-                {
-                    string InAttrName = InReader.GetAttribute(i);
-                }
-                InReader.ReadEndElement();
+                string attrKey = xmlAttr.LocalName;
+                string attrValue = xmlAttr.Value;
+
+                var exactData = _ExactValueFromIdentifiedString(attrValue);
+                sfd[attrKey] = exactData;
             }
 
-            return null;
+            if (sfd.HasMember("CollType"))
+            {
+                // try read subs.
+                List<SerializationFriendlyData> list = new List<SerializationFriendlyData>();
+                _ReadSFDCollections(list, InNode);
+                return SerializationFriendlyData.NewCollection(sfd.GetCollectionType(), list);
+            }
+            if (sfd.HasMember("DictType"))
+            {
+                throw new NotImplementedException();
+            }
+            if (sfd.IsObject())
+            {
+                foreach (XmlNode subNode in InNode.ChildNodes)
+                {
+                    _ReadSFDProperties(sfd, subNode);
+                }
+            }
+            return sfd;
         }
 
+        private static SerializationFriendlyData _ReadSFDProperties(SerializationFriendlyData InSFD, XmlNode InNode)
+        {
+            string key = InNode.LocalName;
+            var sfd = ReadSFDNode(InNode);
+            InSFD[key] = sfd;
+            return sfd;
+        }
+
+        private static void _ReadSFDCollections(List<SerializationFriendlyData> RefList, XmlNode InNode)
+        {
+            foreach (XmlNode itemNode in InNode.ChildNodes)
+            {
+                var sfdItem = ReadSFDNode(itemNode);
+                RefList.Add(sfdItem);
+            }
+        }
 
         private static List<string> _AutoFillNS = new List<string>();
 
@@ -147,6 +182,14 @@ namespace nf.protoscript.test
             if (_TypeToAliasTable.ContainsKey(InType))
             {
                 return _TypeToAliasTable[InType];
+            }
+            return null;
+        }
+        static Type _GetTypeByAlias(string InAlias)
+        {
+            if (_AliasToTypeTable.ContainsKey(InAlias))
+            {
+                return _AliasToTypeTable[InAlias];
             }
             return null;
         }
@@ -190,22 +233,12 @@ namespace nf.protoscript.test
         {
             return $"{InTypeCode}:{InDataObj.ToString()}";
         }
-        private static void ParseIdentifiedString(string InString, out string OutTypecode, out string OutValueStr)
-        {
-            int splitterIdx = InString.IndexOf(':');
-            if (splitterIdx == -1)
-            {
-                throw new InvalidCastException("Invalid Identify String");
-            }
-            OutTypecode = InString.Substring(0, splitterIdx);
-            OutValueStr = InString.Substring(splitterIdx + 1);
-        }
 
-        private static object ExactValueFromIdentifiedString(string InString)
+        private static object _ExactValueFromIdentifiedString(string InString)
         {
             string typecode = "";
             string valStr = "";
-            ParseIdentifiedString(InString, out typecode, out valStr);
+            _SplitIdentifiedString(InString, out typecode, out valStr);
             if (typecode == "$N")
             {
                 Type type = _ParseTypeFromString(valStr);
@@ -230,6 +263,17 @@ namespace nf.protoscript.test
             return _ExactPurePODValue(typecode, valStr);
         }
 
+        private static void _SplitIdentifiedString(string InString, out string OutTypecode, out string OutValueStr)
+        {
+            int splitterIdx = InString.IndexOf(':');
+            if (splitterIdx == -1)
+            {
+                throw new InvalidCastException("Invalid Identify String");
+            }
+            OutTypecode = InString.Substring(0, splitterIdx);
+            OutValueStr = InString.Substring(splitterIdx + 1);
+        }
+
         private static object _ExactPurePODValue(string InTypeCode, string InValueString)
         {
             // Pure POD value
@@ -240,7 +284,7 @@ namespace nf.protoscript.test
 
         private static string _ConvertTypeToString(Type InType)
         {
-            string typeName = InType.Name;
+            string typeName = InType.FullName;
 
             string alias = _GetTypeAlias(InType);
             if (alias != null)
@@ -252,9 +296,20 @@ namespace nf.protoscript.test
 
         private static Type _ParseTypeFromString(string InString)
         {
-            return Type.GetType(InString);
-        }
+            Type type = Type.GetType(InString);
+            if (type != null)
+            {
+                return type;
+            }
 
+            type = _GetTypeByAlias(InString);
+            if (type != null)
+            {
+                return type;
+            }
+
+            return null;
+        }
 
     }
 

@@ -17,6 +17,11 @@ namespace nf.protoscript.Serialization
         {
         }
 
+        public static SerializationFriendlyData NewEmpty()
+        { 
+            return new SerializationFriendlyData();
+        }
+
         /// <summary>
         /// Check if we have a propety names InName in this dynamic object.
         /// </summary>

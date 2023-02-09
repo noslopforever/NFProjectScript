@@ -41,10 +41,12 @@ namespace nf.protoscript.test
 
             // test serializer: XML
             {
+                string xmlResult = "";
                 try
                 {
                     using (MemoryStream ms = new MemoryStream())
                     {
+                        // Test Writer
                         XmlWriterSettings settings = new XmlWriterSettings();
                         settings.Indent = true;
                         settings.Encoding = new UTF8Encoding(false);
@@ -54,19 +56,35 @@ namespace nf.protoscript.test
                         {
                             SFDXmlSerializer.WriteSFDProperty(xmlWriter, "Project", gatheredProjData);
                         }
-                        Console.WriteLine(Encoding.UTF8.GetString(ms.ToArray()));
 
-                        using (XmlReader xmlReader = XmlReader.Create(ms))
-                        {
-                            //object returnVal = SFDXmlSerializer.ReadSFDProperty(xmlReader, "Project");
-                            //Console.WriteLine(returnVal);
-                        }
+                        xmlResult = Encoding.UTF8.GetString(ms.ToArray());
+                        Console.WriteLine(xmlResult);
+
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("[ERROR] Xml writer failed.");
                     Console.WriteLine(ex.Message);
+                }
+
+                // Test reader
+                using (var txtReader = new StringReader(xmlResult))
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.Load(txtReader);
+
+                    object returnVal = SFDXmlSerializer.ReadSFDNode(xmlDoc.LastChild);
+
+                    try
+                    {
+                        ProjectInfo restoredProj = InfoGatherer.Restore(null, gatheredProjData) as ProjectInfo;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("[ERROR] Xml deserialize failed.");
+                        Console.WriteLine(ex.Message);
+                    }
                 }
 
             }
