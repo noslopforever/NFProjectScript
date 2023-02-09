@@ -129,5 +129,84 @@ namespace nf.protoscript.test
             return testProj;
         }
 
+
+        /// <summary>
+        /// Basic data-binding test:
+        /// 
+        /// model Character
+        ///     - HP = 100
+        /// 
+        /// world SimpleWorld
+        ///     -Character TestCharacter
+        ///     
+        /// editor host
+        ///     -SimpleWorld TestWorld
+        ///     +CharacterInfoPanel testPanel
+        ///         @db = "TestWorld.TestCharacter"
+        ///         +Label
+        ///             @db="HP"
+        /// </summary>
+        /// <returns></returns>
+        public static ProjectInfo BasicDataBinding()
+        {
+            ProjectInfo testProj = new ProjectInfo("TestProj");
+            {
+                // model Character
+                //     - HP = 100
+                TypeInfo characterType = new TypeInfo(testProj, "model", "Character");
+                {
+                    // int HP = 100
+                    MemberInfo propA = new MemberInfo(characterType, "property", "HP", CommonTypeInfos.Integer
+                        , new STNodeConstant(STNodeConstant.Integer, "100")
+                        );
+                } // finish Character
+
+                /// world SimpleWorld
+                ///     -Character TestCharacter
+                TypeInfo simpleWorldType = new TypeInfo(testProj, "world", "SimpleWorld");
+                {
+                    MemberInfo testCharacter = new MemberInfo(simpleWorldType, "Character", "TestCharacter", characterType, null);
+                }
+
+                // editor host
+                //     -SimpleWorld TestWorld
+                //     +uipanel characterInfoPanel
+                //         @db = TestWorld.TestCharacter
+                //         +Label
+                //             @db=HP
+                Info editor = new Info(testProj, "editor", "host");
+                {
+                    MemberInfo testWorld = new MemberInfo(editor, "SimpleWorld", "TestWorld", simpleWorldType, null);
+
+                    //     +uipanel characterInfoPanel
+                    //         @db = TestWorld.TestCharacter
+                    //         +Label
+                    //             @db=HP
+                    Info panel = new Info(editor, "uipanel", "characterInfoPanel");
+                    {
+                        AttributeInfo dbAttr = new AttributeInfo(panel, "db", "Anonymous_db_0"
+                            , new STNodeConstant(STNodeConstant.String, "TestWorld.TestCharacter")
+                            );
+
+                        //         +Label
+                        //             @db=HP
+                        Info label = new Info(panel, "label", "Anonymous_label_0");
+                        {
+                            AttributeInfo lblDbAttr = new AttributeInfo(label, "db", "Anonymous_db_0"
+                                , new STNodeConstant(STNodeConstant.String, "HP")
+                                );
+
+                        } // end label
+
+                    } // end panel 
+
+                }// end editor
+
+            }// end test proj
+
+            return testProj;
+        }
+
+
     }
 }
