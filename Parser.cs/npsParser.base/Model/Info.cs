@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -245,6 +245,32 @@ namespace nf.protoscript
             ForeachSubInfo<T>(InFunc, sub => { return sub.Name == InSubName; });
         }
 
+
+        /// <summary>
+        /// Foreach sub infos with InHeaderName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InHeaderName"></param>
+        public void ForeachSubInfoByHeader<T>(Func<T, bool> InFunc, string InHeaderName)
+            where T : Info
+        {
+            ForeachSubInfo<T>(InFunc, sub => { return sub.Header == InHeaderName; });
+        }
+
+        /// <summary>
+        /// Foreach sub infos with InHeaderName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InHeaderName"></param>
+        public void ForeachSubInfoByHeader<T>(Action<T> InFunc, string InHeaderName)
+            where T : Info
+        {
+            ForeachSubInfo<T>(InFunc, sub => { return sub.Header == InHeaderName; });
+        }
+
+
         /// <summary>
         /// Find the first sub info with the certain name.
         /// </summary>
@@ -266,6 +292,26 @@ namespace nf.protoscript
             return null;
         }
 
+        /// <summary>
+        /// Find the first sub info with the certain name.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InHeaderName"></param>
+        /// <returns></returns>
+        public T FindTheFirstSubInfoWithHeader<T>(string InHeaderName)
+            where T : Info
+        {
+            var selectedInfos = from info in mSubInfos
+                                where (info is T
+                                    && info.Header == InHeaderName)
+                                select info as T;
+
+            if (selectedInfos.Any())
+            {
+                return selectedInfos.First();
+            }
+            return null;
+        }
 
     }
 
