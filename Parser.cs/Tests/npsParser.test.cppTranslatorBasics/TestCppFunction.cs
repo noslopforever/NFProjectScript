@@ -88,7 +88,7 @@ namespace nf.protoscript.test
             FuncParam registeredTmpVar = new FuncParam()
             {
                 Typecode = InTypeCode,
-                Name = "InVarName",
+                Name = InVarName,
                 Default = InDefault,
             };
 
