@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -230,7 +230,7 @@ namespace nf.protoscript
         public void ForeachSubInfoByName<T>(Func<T, bool> InFunc, string InSubName)
             where T : Info
         {
-            ForeachSubInfo<T>(InFunc, sub => { return sub.Name.ToUpper() == InSubName; });
+            ForeachSubInfo<T>(InFunc, sub => { return sub.Name == InSubName; });
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace nf.protoscript
         public void ForeachSubInfoByName<T>(Action<T> InFunc, string InSubName)
             where T : Info
         {
-            ForeachSubInfo<T>(InFunc, sub => { return sub.Name.ToUpper() == InSubName; });
+            ForeachSubInfo<T>(InFunc, sub => { return sub.Name == InSubName; });
         }
 
         /// <summary>
