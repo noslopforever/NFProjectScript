@@ -3,7 +3,7 @@ using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
-namespace npsParser.test.basicEditorApplet
+namespace nf.protoscript.test
 {
 
 

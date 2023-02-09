@@ -3,7 +3,7 @@ using nf.protoscript.test;
 using System;
 using System.Diagnostics;
 
-namespace npsParser.test.basicEditorApplet
+namespace nf.protoscript.test
 {
 
 

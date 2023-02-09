@@ -135,6 +135,7 @@ namespace nf.protoscript.test
         /// 
         /// model Character
         ///     - HP = 100
+        ///     - NonBindingValue = 100
         /// 
         /// world SimpleWorld
         ///     -Character TestCharacter
@@ -156,7 +157,10 @@ namespace nf.protoscript.test
                 TypeInfo characterType = new TypeInfo(testProj, "model", "Character");
                 {
                     // int HP = 100
-                    MemberInfo propA = new MemberInfo(characterType, "property", "HP", CommonTypeInfos.Integer
+                    MemberInfo hp = new MemberInfo(characterType, "property", "HP", CommonTypeInfos.Integer
+                        , new STNodeConstant(STNodeConstant.Integer, "100")
+                        );
+                    MemberInfo nbval = new MemberInfo(characterType, "property", "NonBindingValue", CommonTypeInfos.Integer
                         , new STNodeConstant(STNodeConstant.Integer, "100")
                         );
                 } // finish Character
