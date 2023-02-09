@@ -14,6 +14,9 @@ namespace npsParser.test.basicEditorApplet
         public string[] Params { get; set; }
         public string[] BodyLines { get; set; }
 
+        /// <summary>
+        /// Merge params to "param0, param1, param2 ... "
+        /// </summary>
         public string ParamsCode
         {
             get
