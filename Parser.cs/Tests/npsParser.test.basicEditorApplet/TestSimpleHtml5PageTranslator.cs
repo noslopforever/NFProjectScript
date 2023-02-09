@@ -57,7 +57,17 @@ namespace nf.protoscript.test
             InTypeInfo.ForeachSubInfo<MemberInfo>(m =>
             {
                 m.Extra.JSDecls = new List<string>();
-                m.Extra.JSDecls.Add($"this.{m.Name} = $(RHS);");
+                if (m.InitSyntax != null)
+                {
+                    IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InTypeInfo), m.InitSyntax);
+                    // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
+                    m.Extra.JSDecls.Add($"this.{m.Name} = {codes[0]};");
+                }
+                else
+                {
+                    m.Extra.JSDecls.Add($"this.{m.Name} = null;");
+                }
+
 
                 if (DataBindingFeature.IsDataSourceProperty(m))
                 {
@@ -69,13 +79,13 @@ namespace nf.protoscript.test
                     genDSForClass = true;
 
                     // Special member-setter codes
-                    m.Extra.GetterCode = $"{m.Name}";
-                    m.Extra.SetterCode = $"set{m.Name}($RHS)";
-                    m.Extra.RefCode = $"{m.Name}";
+                    m.Extra.MemberGetExprCode = $"{m.Name}";
+                    m.Extra.MemberSetExprCode = $"set{m.Name}($RHS)";
+                    m.Extra.MemberRefExprCode = $"{m.Name}";
 
                     m.Extra.JSFuncs = new JsFunction[]
                     {
-                        new JsFunction()
+                        new JsFunction(InTypeInfo)
                         {
                             Name = $"set{m.Name}",
                             Params = new string[]{ "val" },
@@ -89,9 +99,9 @@ namespace nf.protoscript.test
                 }
                 else
                 {
-                    m.Extra.GetterCode = $"{m.Name}";
-                    m.Extra.SetterCode = $"{m.Name} = ($RHS)";
-                    m.Extra.RefCode = $"{m.Name}";
+                    m.Extra.MemberGetExprCode = $"{m.Name}";
+                    m.Extra.MemberSetExprCode = $"{m.Name} = ($RHS)";
+                    m.Extra.MemberRefExprCode = $"{m.Name}";
                 }
 
             });
