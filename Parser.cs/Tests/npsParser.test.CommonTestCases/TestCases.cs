@@ -170,22 +170,24 @@ namespace nf.protoscript.test
 
                 // editor host
                 //     -SimpleWorld TestWorld
-                //     +uipanel characterInfoPanel
-                //         @db = TestWorld.TestCharacter
-                //         +Label
-                //             @db=HP
-                Info editor = new Info(testProj, "editor", "host");
+                // ...
+                // MENTION: Here we register a inline type for 'Editor'. This process should have been done by parsers.
+                TypeInfo inlineEditorType = new TypeInfo(testProj, "editor", "InlineEditor_0");
                 {
-                    MemberInfo testWorld = new MemberInfo(editor, "SimpleWorld", "TestWorld", simpleWorldType, null);
-
+                    MemberInfo testWorld = new MemberInfo(inlineEditorType, "SimpleWorld", "TestWorld", simpleWorldType, null);
+                }
+                Info editor = new Info(testProj, "InlineEditor_0", "host");
+                {
                     //     +uipanel characterInfoPanel
                     //         @db = TestWorld.TestCharacter
-                    //         +Label
-                    //             @db=HP
+                    //         ...
                     Info panel = new Info(editor, "uipanel", "characterInfoPanel");
                     {
                         AttributeInfo dbAttr = new AttributeInfo(panel, "db", "Anonymous_db_0"
-                            , new STNodeConstant(STNodeConstant.String, "TestWorld.TestCharacter")
+                            , new STNodeSub(
+                                new STNodeGetVar("TestWorld")
+                                , new STNodeGetVar("TestCharacter")
+                                )
                             );
 
                         //         +Label
@@ -193,7 +195,7 @@ namespace nf.protoscript.test
                         Info label = new Info(panel, "label", "Anonymous_label_0");
                         {
                             AttributeInfo lblDbAttr = new AttributeInfo(label, "db", "Anonymous_db_0"
-                                , new STNodeConstant(STNodeConstant.String, "HP")
+                                , new STNodeGetVar("HP")
                                 );
 
                         } // end label
