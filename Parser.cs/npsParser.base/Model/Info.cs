@@ -270,6 +270,25 @@ namespace nf.protoscript
             ForeachSubInfo<T>(InFunc, sub => { return sub.Header == InHeaderName; });
         }
 
+        /// <summary>
+        /// Find the first subinfo that matches InPred
+        /// </summary>
+        /// <param name="p"></param>
+        public T FindTheFirstSubInfo<T>(Func<T, bool> InPred)
+            where T: Info
+        {
+            var selectedInfos = from info in mSubInfos
+                                where (info is T
+                                    && InPred(info as T))
+                                select info as T;
+
+            if (selectedInfos.Any())
+            {
+                return selectedInfos.First();
+            }
+            return null;
+        }
+
 
         /// <summary>
         /// Find the first sub info with the certain name.
@@ -280,16 +299,7 @@ namespace nf.protoscript
         public T FindTheFirstSubInfoWithName<T>(string InSubName)
             where T : Info
         {
-            var selectedInfos = from info in mSubInfos
-                                where (info is T
-                                    && info.Name == InSubName)
-                                select info as T;
-
-            if (selectedInfos.Any())
-            {
-                return selectedInfos.First();
-            }
-            return null;
+            return FindTheFirstSubInfo<T>(i => i.Name == InSubName);
         }
 
         /// <summary>
@@ -301,16 +311,7 @@ namespace nf.protoscript
         public T FindTheFirstSubInfoWithHeader<T>(string InHeaderName)
             where T : Info
         {
-            var selectedInfos = from info in mSubInfos
-                                where (info is T
-                                    && info.Header == InHeaderName)
-                                select info as T;
-
-            if (selectedInfos.Any())
-            {
-                return selectedInfos.First();
-            }
-            return null;
+            return FindTheFirstSubInfo<T>(i => i.Header == InHeaderName);
         }
 
     }

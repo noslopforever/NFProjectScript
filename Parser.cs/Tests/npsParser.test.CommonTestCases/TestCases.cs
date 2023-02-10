@@ -143,9 +143,9 @@ namespace nf.protoscript.test
         /// editor host
         ///     -SimpleWorld TestWorld
         ///     +CharacterInfoPanel testPanel
-        ///         @db = "TestWorld.TestCharacter"
+        ///         -DataContext = $db"TestWorld.TestCharacter"
         ///         +Label
-        ///             @db="HP"
+        ///             -Text = $db"HP"
         /// </summary>
         /// <returns></returns>
         public static ProjectInfo BasicDataBinding()
@@ -180,7 +180,7 @@ namespace nf.protoscript.test
                 {
                     MemberInfo testWorld = new MemberInfo(inlineEditorType, "SimpleWorld", "TestWorld", simpleWorldType, null);
                 }
-                Info editor = new Info(testProj, "InlineEditor_0", "host");
+                Info editor = new Info(testProj, "editor", "host");
                 {
                     //     +uipanel characterInfoPanel
                     //         @db = TestWorld.TestCharacter

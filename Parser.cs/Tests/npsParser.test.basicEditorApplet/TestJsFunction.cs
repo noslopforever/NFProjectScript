@@ -19,8 +19,19 @@ namespace nf.protoscript.test
         /// </summary>
         public Info ContextInfo { get; }
 
+        /// <summary>
+        /// Name of the function.
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Function parameters, Js only need param-names.
+        /// </summary>
         public string[] Params { get; set; }
+
+        /// <summary>
+        /// Function body.
+        /// </summary>
         public string[] BodyLines { get; set; }
 
         /// <summary>
@@ -43,6 +54,9 @@ namespace nf.protoscript.test
             }
         }
 
+        /// <summary>
+        /// Get function's decl-code "funcName(param0, param1, param2 ... )"
+        /// </summary>
         public string FuncDeclCode
         {
             get
@@ -51,19 +65,18 @@ namespace nf.protoscript.test
             }
         }
 
-
         /// <summary>
         /// Temporary variables used in code-translating
         /// </summary>
-        List<string> TempVars { get; } = new List<string>();
+        List<string> _TempVars { get; } = new List<string>();
 
         /// <summary>
         /// Try register a temporary variable.
         /// </summary>
         public string TryRegTempVar()
         {
-            string registeredTmpVar = $"___TMPV_{TempVars.Count}_";
-            TempVars.Add(registeredTmpVar);
+            string registeredTmpVar = $"___TMPV_{_TempVars.Count}_";
+            _TempVars.Add(registeredTmpVar);
             return registeredTmpVar;
         }
 
