@@ -1,4 +1,5 @@
 ﻿using nf.protoscript;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -43,6 +44,36 @@ namespace nf.protoscript.test
             }
 
             // generate Pages and applet codes
+            {
+                List<string> pageLns = new List<string>();
+                pageLns.Add("<!DOCTYPE html>");
+                pageLns.Add("<html>");
+                pageLns.Add("    <head>");
+                pageLns.Add("        <meta charset=\"utf-8\">");
+                pageLns.Add("        <title>A simplest Html Page</title>");
+                pageLns.Add("    </head>");
+                pageLns.Add("    <body>");
+
+                Info editorInfo = InProjInfo.FindTheFirstSubInfo<Info>(i => i.Header == "editor" && !(i is TypeInfo));
+                string[] editorViewCodeLns = _GenerateEditorView(editorInfo);
+                foreach (var str in editorViewCodeLns)
+                {
+                    pageLns.Add("        " + str);
+                }
+
+                pageLns.Add("    </body>");
+                pageLns.Add("</html>");
+
+                // Write to console
+                Console.WriteLine(">>>> WEB PAGE <<<<");
+                foreach (var str in pageLns)
+                {
+                    Console.WriteLine(str);
+                }
+
+                // Write to file
+                File.WriteAllLines("index.html", pageLns);
+            }
         }
 
         /// <summary>
@@ -104,6 +135,13 @@ namespace nf.protoscript.test
                     m.Extra.MemberRefExprCode = $"{m.Name}";
                 }
 
+                // TODO generate databinding registeration
+                //out string dbPathName = "";
+                //if (DataBindingFeature.IsDataBindingTarget(m, out dbPathName))
+                //{
+                //    string regCode = $"GearsetDataBindingManager.inst().RegDataListener(\"{dbPathName}, {m.Name}\")";
+                //}
+
             });
 
 
@@ -161,6 +199,100 @@ namespace nf.protoscript.test
             System.Console.Write(sw.ToString());
         }
 
+
+        /// <summary>
+        /// Generate codes for editor's view-model
+        /// </summary>
+        /// <param name="editorInfo"></param>
+        private string[] _GenerateEditorView(Info editorInfo)
+        {
+            List<string> resultStringLns = new List<string>();
+
+            List<Info> floatingElements = new List<Info>();
+
+            editorInfo.ForeachSubInfo<Info>(elem =>
+                {
+                    // ignore attributes.
+                    if (elem is AttributeInfo)
+                    { return; }
+
+                    if (elem.Header == "uipanel")
+                    {
+                        floatingElements.Add(elem);
+                    }
+                }
+                );
+
+            {
+                resultStringLns.Add("<div name=\"EditorViewRoot\">");
+
+                {
+                    resultStringLns.Add("<div name=\"BackgroundRoot\">");
+
+                    // end BackgroundRoot
+                    resultStringLns.Add($"</div>");
+                }
+
+                {
+                    resultStringLns.Add("<div name=\"UIRoot\">");
+
+                    // end UIRoot
+                    resultStringLns.Add($"</div>");
+                }
+
+                {
+                    resultStringLns.Add("<div name=\"FloatingRoot\">");
+                    foreach (var elem in floatingElements)
+                    {
+                        string[] codelns = _GenerateViewElement(elem);
+                        foreach (var codeln in codelns)
+                        {
+                            resultStringLns.Add("    " + codeln);
+                        }
+                    }
+                    // end FloatingRoot
+                    resultStringLns.Add($"</div>");
+                }
+
+                // end EditorViewRoot
+                resultStringLns.Add($"</div>");
+            }
+
+            return resultStringLns.ToArray();
+        }
+
+        private string[] _GenerateViewElement(Info InInfo)
+        {
+            List<string> codelns = new List<string>();
+            if (InInfo.Header == "uipanel")
+            {
+                // TODO datacontext and databinding
+                codelns.Add($"<div name=\"{InInfo.Name}\">");
+                // Add sub codes.
+                InInfo.ForeachSubInfo<Info>(elem =>
+                {
+                    // ignore attributes.
+                    if (elem is AttributeInfo)
+                    { return; }
+
+                    var subCodes = _GenerateViewElement(elem);
+                    foreach (var subCode in subCodes)
+                    {
+                        codelns.Add("    " + subCode);
+                    }
+                });
+                codelns.Add($"</div>");
+            }
+            else if (InInfo.Header == "label")
+            {
+                // TODO databinding
+                codelns.Add($"<div name=\"{InInfo.Name}\">%Default_Label_Text%</div>");
+                // labels have no sub
+            }
+
+
+            return codelns.ToArray();
+        }
 
     }
 
