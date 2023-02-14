@@ -1,7 +1,9 @@
 ﻿using nf.protoscript;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace nf.protoscript.test
 {
@@ -72,7 +74,24 @@ namespace nf.protoscript.test
                 }
 
                 // Write to file
-                File.WriteAllLines("index.html", pageLns);
+                const string GTestHtmlFileName = "index.html";
+                File.WriteAllLines(GTestHtmlFileName, pageLns);
+
+                // Windows: use shell exec to open the "index.html"
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    var procStartInfo = new ProcessStartInfo("cmd", $"/c start {GTestHtmlFileName}") { CreateNoWindow = true };
+                    Process.Start(procStartInfo);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", GTestHtmlFileName);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", GTestHtmlFileName);
+                }
+
             }
         }
 
@@ -224,24 +243,24 @@ namespace nf.protoscript.test
                 );
 
             {
-                resultStringLns.Add("<div name=\"EditorViewRoot\">");
+                resultStringLns.Add("<div id=\"EditorViewRoot\">");
 
                 {
-                    resultStringLns.Add("<div name=\"BackgroundRoot\">");
+                    resultStringLns.Add("<div id=\"BackgroundRoot\">");
 
                     // end BackgroundRoot
                     resultStringLns.Add($"</div>");
                 }
 
                 {
-                    resultStringLns.Add("<div name=\"UIRoot\">");
+                    resultStringLns.Add("<div id=\"UIRoot\">");
 
                     // end UIRoot
                     resultStringLns.Add($"</div>");
                 }
 
                 {
-                    resultStringLns.Add("<div name=\"FloatingRoot\">");
+                    resultStringLns.Add("<div id=\"FloatingRoot\">");
                     foreach (var elem in floatingElements)
                     {
                         string[] codelns = _GenerateViewElement(elem);
@@ -267,7 +286,7 @@ namespace nf.protoscript.test
             if (InInfo.Header == "uipanel")
             {
                 // TODO datacontext and databinding
-                codelns.Add($"<div name=\"{InInfo.Name}\">");
+                codelns.Add($"<div id=\"{InInfo.Name}\">");
                 // Add sub codes.
                 InInfo.ForeachSubInfo<Info>(elem =>
                 {
@@ -286,10 +305,9 @@ namespace nf.protoscript.test
             else if (InInfo.Header == "label")
             {
                 // TODO databinding
-                codelns.Add($"<div name=\"{InInfo.Name}\">%Default_Label_Text%</div>");
+                codelns.Add($"<div id=\"{InInfo.Name}\">%Default_Label_Text%</div>");
                 // labels have no sub
             }
-
 
             return codelns.ToArray();
         }
