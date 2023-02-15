@@ -107,6 +107,8 @@ class DynamicDataBinding
 
         this.TargetObj = null;
 
+        this.Listener = null;
+
         this.UpdateDataBinding();
     }
 
@@ -137,8 +139,8 @@ class DynamicDataBinding
         }
 
         if (this.SourceObj.DSComp) {
-            let listener = new PropertyUpdateListener(this, this._Trigger);
-            this.SourceObj.DSComp.Attach(this.Settings.SourcePath, listener);
+            this.Listener = new PropertyUpdateListener(this, this._Trigger);
+            this.SourceObj.DSComp.Attach(this.Settings.SourcePath, this.Listener);
             this._Trigger(this);
         } 
         else {
@@ -152,10 +154,17 @@ class DynamicDataBinding
 class StaticDataBinding
 {
     constructor(InHost, InSourceObjFn, InSourcePath, InFn) {
+
         this.Host = InHost;
+
         this.SourceObjFn = InSourceObjFn;
+
         this.SourcePath = InSourcePath;
+
         this.Fn = InFn;
+
+        this.Listener = null;
+
         this.UpdateDataBinding();
     }
 
@@ -171,8 +180,8 @@ class StaticDataBinding
     UpdateDataBinding() {
         let sourceObj = this.SourceObjFn.call(this.Host);
         if (sourceObj.DSComp) {
-            let listener = new PropertyUpdateListener(this, this._Trigger);
-            sourceObj.DSComp.Attach(this.SourcePath, listener);
+            this.Listener = new PropertyUpdateListener(this, this._Trigger);
+            sourceObj.DSComp.Attach(this.SourcePath, this.Listener);
             this._Trigger(this);
         } 
         else {
