@@ -149,5 +149,35 @@ class DynamicDataBinding
 
 }
 
+class StaticDataBinding
+{
+    constructor(InHost, InSourceObjFn, InSourcePath, InFn) {
+        this.Host = InHost;
+        this.SourceObjFn = InSourceObjFn;
+        this.SourcePath = InSourcePath;
+        this.Fn = InFn;
+        this.UpdateDataBinding();
+    }
 
+    static New(InHost, InSourceObjFn, InSourcePath, InFn) {
+        return new StaticDataBinding(InHost, InSourceObjFn, InSourcePath, InFn);
+    }
 
+    _Trigger(InThis) {
+        // Trigger is to trigger the static function.
+        InThis.Fn.call(InThis.Host);
+    }
+
+    UpdateDataBinding() {
+        let sourceObj = this.SourceObjFn.call(this.Host);
+        if (sourceObj.DSComp) {
+            let listener = new PropertyUpdateListener(this, this._Trigger);
+            sourceObj.DSComp.Attach(this.SourcePath, listener);
+            this._Trigger(this);
+        } 
+        else {
+            // refresh only once
+            alert("Must be used with DataSource object.")
+        }
+    }
+}

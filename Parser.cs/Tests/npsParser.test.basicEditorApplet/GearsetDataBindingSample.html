@@ -46,7 +46,21 @@ $(document).ready(function(){
     var labelUIDynBinding = $("#labelddb").get(0);
     labelUIDynBinding.dataContext = m;
     labelUIDynBinding.dataBindings = [];
-    labelUIDynBinding.dataBindings.push(DynamicDataBinding.New(labelUIDynBinding, "hp", "innerHTML"));
+    labelUIDynBinding.dataBindings.push(
+        DynamicDataBinding.New(labelUIDynBinding, "hp", "innerHTML")
+        );
+
+    var labelUIStaticBinding = $("#labelsdb").get(0);
+    labelUIStaticBinding.dataContext = m;
+    labelUIStaticBinding.dataBindings = [];
+    labelUIStaticBinding.dataBindings.push(
+        StaticDataBinding.New(labelUIStaticBinding
+        , function() { return this.dataContext }
+        , "hp"
+        , function() {
+            this.innerHTML = this.dataContext.hp;
+        })
+        );
 
     // Runtime: modify data and trigger bindings.
     $("p").click(function() {
@@ -67,5 +81,7 @@ $(document).ready(function(){
         <h1>Other views with the same model:</h1>
         <p>By dynamic DataBinding:</p>
         <p id="labelddb">-1</p>
+        <p>By satic DataBinding:</p>
+        <p id="labelsdb">-1</p>
     </body>
 </html>
