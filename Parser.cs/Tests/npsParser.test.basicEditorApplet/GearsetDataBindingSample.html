@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"> 
+        <title>jQuery Test</title> 
+        <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+        <script src="GearsetDataBindingSample.js"></script>
+        <script>
+
+class testmodel
+{
+    constructor() {
+        this.DSComp = new DataSourceComponent();
+        this.hp = 100;
+    }
+
+    modifyHpAndTrigger() {
+        this.hp -= 1;
+        this.DSComp.Trigger("hp");
+    }
+}
+
+$(document).ready(function(){
+
+    var m = new testmodel();
+
+    // register databindings in UI-elements
+    var labelUI = $("#label").get(0);
+    labelUI.dataContext = m;
+    {
+        // These works should be done by DataBinding-object automatically when dataContext changed
+        let staticHpUpdated = function onLabelHpUpdated(label) {
+            //alert("update triggered");
+            label.innerHTML = label.dataContext.hp;
+        }
+
+        // TODO destroy the old listener
+
+        // attach listener to new source.
+        let testListener = new PropertyUpdateListener(labelUI, staticHpUpdated);
+        m.DSComp.Attach("hp", testListener);
+        // immediate call listener once to init the view.
+        testListener.Invoke();
+    }
+
+    // Runtime: modify data and trigger bindings.
+    $("p").click(function() {
+        m.modifyHpAndTrigger();
+    });
+
+
+});
+
+        </script>
+    </head>
+    <body>
+        <p id="label">-1</p>
+        <p>Click the number above to modify the model.</p>
+        <p>Then see how the view has been changed.</p>
+    </body>
+</html>
