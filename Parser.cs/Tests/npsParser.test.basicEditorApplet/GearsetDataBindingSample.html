@@ -43,19 +43,29 @@ $(document).ready(function(){
         testListener.Invoke();
     }
 
+    var labelUIDynBinding = $("#labelddb").get(0);
+    labelUIDynBinding.dataContext = m;
+    labelUIDynBinding.dataBindings = [];
+    labelUIDynBinding.dataBindings.push(DynamicDataBinding.New(labelUIDynBinding, "hp", "innerHTML"));
+
     // Runtime: modify data and trigger bindings.
     $("p").click(function() {
         m.modifyHpAndTrigger();
     });
-
 
 });
 
         </script>
     </head>
     <body>
+        <h1>View of a model:</h1>
         <p id="label">-1</p>
         <p>Click the number above to modify the model.</p>
-        <p>Then see how the view has been changed.</p>
+        <p>Debug to see how the view has been changed.</p>
+        <p></p>
+        <p></p>
+        <h1>Other views with the same model:</h1>
+        <p>By dynamic DataBinding:</p>
+        <p id="labelddb">-1</p>
     </body>
 </html>

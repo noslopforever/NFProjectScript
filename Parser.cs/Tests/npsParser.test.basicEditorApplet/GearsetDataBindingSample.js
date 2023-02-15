@@ -94,10 +94,59 @@ class DataBindingSettings
 
 }
 
-class DataBinding
+class DynamicDataBinding
 {
-    constructor() {
+    constructor(InHost, InSettings) {
+
+        // host vm-element of the databinding.
+        this.Host = InHost;
+
+        this.Settings = InSettings;
+
+        this.SourceObj = null;
+
+        this.TargetObj = null;
+
+        this.UpdateDataBinding();
     }
+
+    static New(InHost, InSourcePath, InTargetPath) {
+        let settings = new DataBindingSettings();
+        settings.SourceType = "dc";
+        settings.SourcePath = InSourcePath;
+        settings.TargetType = "this";
+        settings.TargetPath = InTargetPath;
+        return new DynamicDataBinding(InHost, settings);
+    }
+
+    _Trigger(InThis)
+    {
+        InThis.TargetObj[InThis.Settings.TargetPath] = InThis.SourceObj[InThis.Settings.SourcePath];
+    }
+
+    UpdateDataBinding()
+    {
+        this.SourceObj = null;
+        if (this.Settings.SourceType == "dc") {
+            this.SourceObj = this.Host.dataContext;
+        }
+
+        this.TargetObj = null;
+        if (this.Settings.TargetType == "this") {
+            this.TargetObj = this.Host;
+        }
+
+        if (this.SourceObj.DSComp) {
+            let listener = new PropertyUpdateListener(this, this._Trigger);
+            this.SourceObj.DSComp.Attach(this.Settings.SourcePath, listener);
+            this._Trigger(this);
+        } 
+        else {
+            // refresh only once
+            alert("Must be used with DataSource object.")
+        }
+    }
+
 }
 
 
