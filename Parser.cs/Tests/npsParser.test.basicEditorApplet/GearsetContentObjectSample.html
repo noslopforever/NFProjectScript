@@ -24,8 +24,16 @@ $(document).ready(function(){
     ]);
     testLabel.Text = "This is a label."
 
+    var testLabel2 = new ContentObject(
+        testContentPanel,
+        ["<div class=\"label\">",
+        "    {Text}",
+        "</div>",
+    ]);
+    testLabel2.Text = "This is a label 2."
+
     // replace content with ContentObjects.
-    $("#root").get(0).innerHTML = testLabel.GenElementCodes();
+    $("#root").get(0).innerHTML = testContentPanel.GenElementCodes();
 
 });
 

@@ -31,8 +31,14 @@ class ContentObject
             props.forEach(function (v, k, m) {
                 // replace {properties}
                 const key = `{${k}}`;
-                const tv = typeof v;
+                const collKey = `{{${k}}}`;
+                if (ln.indexOf(key) == -1
+                 && ln.indexOf(collKey) == -1
+                 ) {
+                    return;
+                 }
 
+                const tv = typeof v;
                 if (tv == "number"
                     || tv == "string"
                     || tv == "boolean"
@@ -41,13 +47,12 @@ class ContentObject
                 }
 
                 // replace {collection properties}
-                const collKey = `{{${k}}}`;
                 if (v instanceof Array) {
                     let childStrings = "";
                     for (let subIdx = 0; subIdx < v.length; subIdx++) {
                         const sub = v[subIdx];
                         if (sub instanceof ContentObject) {
-                            childStrings += v.GenElementCodes() + "\n";
+                            childStrings += sub.GenElementCodes() + "\n";
                         }
                     }
                     ln = ln.replaceAll(collKey, childStrings);
