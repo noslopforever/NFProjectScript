@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"> 
+        <title>jQuery Test</title> 
+        <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+        <script src="GearsetContentObjectSample.js"></script>
+        <script>
+
+$(document).ready(function(){
+
+    var testContentPanel = new ContentObject(
+        null,
+        ["<div class=\"cpanel\">",
+        "    {{children}}",
+        "</div>",
+    ]);
+
+    var testLabel = new ContentObject(
+        testContentPanel,
+        ["<div class=\"label\">",
+        "    {Text}",
+        "</div>",
+    ]);
+    testLabel.Text = "This is a label."
+
+    // replace content with ContentObjects.
+    $("#root").get(0).innerHTML = testLabel.GenElementCodes();
+
+});
+
+        </script>
+    </head>
+    <body>
+        <h1>Content Object:</h1>
+        <div id="root">
+            ... Here should be filled with Content Objects ...
+        </div>
+    </body>
+</html>
