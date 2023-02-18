@@ -9,27 +9,12 @@
 
 $(document).ready(function(){
 
-    var testContentPanel = new ContentObject(
-        null,
-        ["<div class=\"cpanel\">",
-        "    {{children}}",
-        "</div>",
-    ]);
+    var testContentPanel = new Panel(null);
 
-    var testLabel = new ContentObject(
-        testContentPanel,
-        ["<div class=\"label\">",
-        "    {Text}",
-        "</div>",
-    ]);
+    var testLabel = new Label(testContentPanel);
     testLabel.Text = "This is a label."
 
-    var testLabel2 = new ContentObject(
-        testContentPanel,
-        ["<div class=\"label\">",
-        "    {Text}",
-        "</div>",
-    ]);
+    var testLabel2 = new Label(testContentPanel);
     testLabel2.Text = "This is a label 2."
 
     // replace content with ContentObjects.
