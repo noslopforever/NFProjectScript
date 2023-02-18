@@ -18,7 +18,9 @@ $(document).ready(function(){
     testLabel2.Text = "This is a label 2."
 
     // replace content with ContentObjects.
-    $("#root").get(0).innerHTML = testContentPanel.GenElementCodes();
+    let panelEl = testContentPanel.createElements();
+    let uiroot = $("#root")[0];
+    uiroot.replaceChild(panelEl, uiroot.firstChild);
 
 });
 
