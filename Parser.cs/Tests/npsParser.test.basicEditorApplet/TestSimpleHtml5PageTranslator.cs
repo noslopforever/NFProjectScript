@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -74,15 +75,20 @@ namespace nf.protoscript.test
 
                 pageLns.Add("            $(document).ready(function(){");
                 // editor conception:
-                //      
                 Info editorInfo = InProjInfo.FindTheFirstSubInfo<Info>(i => i.Header == "editor" && !(i is TypeInfo));
                 string editorName = editorInfo.Name;
                 string editorClassName = editorInfo.IsExtraContains("InlineEditorTypeName") ? editorInfo.Extra.InlineEditorTypeName : "Editor";
-                pageLns.Add($"                var {editorName} = new {editorClassName}();");
+
+                // new editor instance
+                pageLns.Add($"                {editorName} = new {editorClassName}();");
+
+                // TODO override properties of object-template.
+                pageLns.Add($"                {editorName}.Model = new testCharacterTemplate();");
+
                 {
-                    // editor models
-                    string[] editorModelCodeLns = _GenerateEditorModel(editorInfo, $"{editorName}.UIRoot");
-                    foreach (var ln in editorModelCodeLns)
+                    // editor controls
+                    string[] editorCtrlCodes = _GenerateEditorModel(editorInfo, $"{editorName}.UIRoot");
+                    foreach (var ln in editorCtrlCodes)
                     {
                         pageLns.Add("                " + ln);
                     }
@@ -165,7 +171,7 @@ namespace nf.protoscript.test
                     // Generate DataSource codes for the class.
                     if (!genDSForClass)
                     {
-                        m.Extra.JSDecls.Add($"this.gsDataSourceComponent = new DataSourceComponent();");
+                        m.Extra.JSDecls.Add($"this.DSComp = new DataSourceComponent();");
                     }
                     genDSForClass = true;
 
@@ -183,7 +189,7 @@ namespace nf.protoscript.test
                             BodyLines = new string[]
                             {
                                 $"this.{m.Name} = val;",
-                                $"this.gsDataSourceComponent.Trigger(\"{m.Name}\");"
+                                $"this.DSComp.Trigger(\"{m.Name}\");"
                             }
                         },
                     };
@@ -278,8 +284,7 @@ namespace nf.protoscript.test
             // recursive
             InInfo.ForeachSubInfo<Info>(elem =>
             {
-                // ignore attributes.
-                if (elem is AttributeInfo)
+                if (!_IsUIElement(elem))
                 { return; }
 
                 // parent which hold this element.
@@ -290,11 +295,7 @@ namespace nf.protoscript.test
 
                 // header: determines class of the element
                 string elemClassName = "$ERROR_UICtrl_ClassName";
-                switch (elem.Header)
-                {
-                    case "panel": elemClassName = "Panel"; break;
-                    case "label": elemClassName = "Label"; break;
-                }
+                elemClassName = _GetElementClassNameFromHeader(elem, elemClassName);
 
                 // let code line
                 RefResultStrings.Add($"let {elemName} = new {elemClassName}({parentName});");
@@ -310,21 +311,115 @@ namespace nf.protoscript.test
                 // TODO attributes
 
 
-                // TODO data bindings
+                // data bindings
+                List<string> dbCodes = new List<string>();
+                elem.ForeachSubInfoByHeader<AttributeInfo>("db", attr =>
+                {
+                    var stdb = attr.InitSyntaxTree as syntaxtree.STNodeDataBinding;
+                    if (stdb == null)
+                    {
+                        throw new InvalidProgramException();
+                    }
+                    dynamic jsdbs = _ConvertDBSettingsToJS(stdb.Settings);
+                    dbCodes.Add($"{{");
+                    dbCodes.Add($"    let dbSettings = DataBindingSettings.New(\"{jsdbs.srcType}\", \"{jsdbs.srcName}\",");
+                    dbCodes.Add($"        \"{jsdbs.srcPath}\", ");
+                    dbCodes.Add($"        \"{jsdbs.tarType}\", \"{jsdbs.tarName}\",");
+                    dbCodes.Add($"        \"{jsdbs.tarPath}\"");
+                    dbCodes.Add($"    );");
+                    dbCodes.Add($"    {elemName}.dataBindings.push(DynamicDataBinding.New({elemName}, dbSettings));");
+                    dbCodes.Add($"}}");
+                });
+                RefResultStrings.Add($"    // begin data bindings of {elemName}.");
+                foreach (var dbCode in dbCodes)
+                {
+                    RefResultStrings.Add($"    {dbCode}");
+                }
+                RefResultStrings.Add($"    // ~ end data bindings of {elemName}.");
 
 
                 // Handle child code-gen and indents.
-                List<string> subResultStrs = new List<string>();
-                _GenerateElementModel(elem, subResultStrs, elemName);
-                foreach (var subStr in subResultStrs)
+                List<string> subCodes = new List<string>();
+                _GenerateElementModel(elem, subCodes, elemName);
+                foreach (var subCode in subCodes)
                 {
-                    RefResultStrings.Add($"    {subStr}");
+                    RefResultStrings.Add($"    {subCode}");
                 }
 
                 RefResultStrings.Add("}");
 
             }
             );
+        }
+
+        private static dynamic _ConvertDBSettingsToJS(DataBindingSettings InSettings)
+        {
+            dynamic jsdbs = new ExpandoObject();
+            jsdbs.srcType = _ConvertDBObjTypeToJS(InSettings.SourceObjectType);
+            jsdbs.srcName = InSettings.SourceObjectName;
+            jsdbs.srcPath = InSettings.SourcePath.ToString();
+            jsdbs.tarType = _ConvertDBObjTypeToJS(InSettings.TargetObjectType);
+            jsdbs.tarName = InSettings.TargetObjectName;
+            jsdbs.tarPath = InSettings.TargetPath.ToString();
+            return jsdbs;
+        }
+
+        private static string _ConvertDBObjTypeToJS(EDataBindingObjectType InObjType)
+        {
+            switch (InObjType)
+            {
+                case EDataBindingObjectType.This: return "this";
+                case EDataBindingObjectType.DataContext: return "dc";
+                case EDataBindingObjectType.StaticGlobal: return "g";
+                case EDataBindingObjectType.Resource: return "r";
+            }
+            return "";
+        }
+
+        private static bool _IsUIElement(Info InInfo)
+        {
+            // ignore attributes.
+            if (InInfo is AttributeInfo
+                || InInfo is MemberInfo
+                || InInfo is MethodInfo
+                )
+            { return false; }
+
+            var uiHeaders = new string[]
+            {
+                "panel",
+                "label",
+                "button",
+                "checkbox",
+                "radiobox",
+                "selector",
+                "listview",
+                "tabview",
+                "treeview",
+            };
+            if (-1 == Array.IndexOf(uiHeaders, InInfo.Header))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private static string _GetElementClassNameFromHeader(Info elem, string elemClassName)
+        {
+            switch (elem.Header)
+            {
+                case "panel": elemClassName = "Panel"; break;
+                case "label": elemClassName = "Label"; break;
+                case "button": elemClassName = "Button"; break;
+                case "checkbox": elemClassName = "CheckBox"; break;
+                case "radiobox": elemClassName = "RadioBox"; break;
+                case "selector": elemClassName = "Selector"; break;
+                case "listview": elemClassName = "ListView"; break;
+                case "tabview": elemClassName = "TabView"; break;
+                case "treeview": elemClassName = "TreeView"; break;
+            }
+
+            return elemClassName;
         }
 
         /// <summary>

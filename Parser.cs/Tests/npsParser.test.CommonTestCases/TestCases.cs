@@ -140,7 +140,7 @@ namespace nf.protoscript.test
         /// editor host
         ///     -Model = new testCharacterTemplate();
         ///     +panel CharacterInfoPanel
-        ///         -DataContext = $db"Model"
+        ///         -DataContext = $db"Src=g:host, Path=Model"
         ///         +Label
         ///             -Text = $db"HP"
         ///             
@@ -175,23 +175,27 @@ namespace nf.protoscript.test
                 Info editor = new Info(testProj, "editor", "host");
                 {
                     //     +panel characterInfoPanel
-                    //         @db = TestWorld.TestCharacter
+                    //         -DataContext = $db"host:Model"
                     //         ...
                     Info panel = new Info(editor, "panel", "characterInfoPanel");
                     {
                         AttributeInfo dbAttr = new AttributeInfo(panel, "db", "Anonymous_db_0"
-                            , new STNodeSub(
-                                new STNodeGetVar("TestWorld")
-                                , new STNodeGetVar("TestCharacter")
+                            , new STNodeDataBinding(
+                                    EDataBindingObjectType.StaticGlobal,
+                                    "host",
+                                    "Model",
+                                    EDataBindingObjectType.This,
+                                    "",
+                                    "DataContext"
                                 )
                             );
 
                         //         +Label
-                        //             @db=HP
+                        //             -Text=$db"HP"
                         Info label = new Info(panel, "label", "Anonymous_label_0");
                         {
                             AttributeInfo lblDbAttr = new AttributeInfo(label, "db", "Anonymous_db_0"
-                                , new STNodeGetVar("HP")
+                                , new STNodeDataBinding("HP", "Text")
                                 );
 
                         } // end label

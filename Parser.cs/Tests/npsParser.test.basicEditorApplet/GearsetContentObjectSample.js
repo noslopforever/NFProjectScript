@@ -12,6 +12,7 @@ class ContentObject {
         // content child of this ContentObject.
         this.children = [];
 
+        this.dataContext = null;
     }
 
     destroy() {
@@ -22,6 +23,9 @@ class ContentObject {
         }
         // unref data-bindings
         this.dataBindings = [];
+
+        // unref dataContext
+        this.dataContext = null;
 
         // recursive children's destroy
         for (let i = 0; i < this.children.length; i++) {
@@ -34,6 +38,34 @@ class ContentObject {
         // mark this CO has already been destroyed.
         this.destroyed = true;
 
+    }
+
+    get dataContext() {
+        if (this._dataContext) {
+            return this._dataContext;
+        }
+        if (this.parent) {
+            return this.parent.dataContext;
+        }
+        return null;
+    }
+
+    set dataContext(InDC) {
+        this._dataContext = InDC;
+        // Update data-bindings
+        for (let i = 0; i < this.dataBindings.length; i++) {
+            let db = this.dataBindings[i];
+            db.UpdateDataBinding();
+        }
+
+    }
+
+    get DataContext() {
+        return this.dataContext;
+    }
+
+    set DataContext(InDC) {
+        this.dataContext = InDC;
     }
 
     createElements() {
@@ -136,6 +168,9 @@ class Editor {
 
         // UI root of the editor
         this.UIRoot = new Panel(null);
+
+        // Editor should always be a data source.
+        this.DSComp = new DataSourceComponent();
 
     }
 

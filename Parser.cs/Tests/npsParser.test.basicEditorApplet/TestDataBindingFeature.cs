@@ -59,21 +59,14 @@ namespace nf.protoscript.test
 
         private static void _GatherDataBindingNamesFromSyntaxes(ISyntaxTreeNode InSyntaxNode)
         {
-            if (InSyntaxNode is STNodeGetVar)
+            var sndb = InSyntaxNode as STNodeDataBinding;
+            if (sndb != null)
             {
-                DataBindingNames.Add((InSyntaxNode as STNodeGetVar).IDName);
-            }
-            else if (InSyntaxNode is STNodeBinaryOp)
-            {
-                var binOp = InSyntaxNode as STNodeBinaryOp;
-                _GatherDataBindingNamesFromSyntaxes(binOp.LHS);
-                _GatherDataBindingNamesFromSyntaxes(binOp.RHS);
-            }
-            else if (InSyntaxNode is STNodeSub)
-            {
-                var sub = InSyntaxNode as STNodeSub;
-                _GatherDataBindingNamesFromSyntaxes(sub.LHS);
-                _GatherDataBindingNamesFromSyntaxes(sub.RHS);
+                var propNames = sndb.Settings.SourcePath.GatherPropertyNames();
+                foreach (var n in propNames)
+                {
+                    DataBindingNames.Add(n);
+                }
             }
             else
             {

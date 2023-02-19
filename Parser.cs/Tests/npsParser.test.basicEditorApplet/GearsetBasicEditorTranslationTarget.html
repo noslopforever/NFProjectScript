@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>A simplest Html Page</title>
+        <script src = "https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+        <script src = "./GearsetDataBindingSample.js"></script>
+        <script src = "./GearsetContentObjectSample.js"></script>
+        <script>
+            class testCharacterTemplate {
+                constructor() {
+                    this.HP = 100;
+                    this.DSComp = new DataSourceComponent();
+                    this.NonBindingValue = 100;
+                }
+                setHP(val) {
+                    this.HP = val;
+                    this.DSComp.Trigger("HP");
+                }
+            }
+            $(document).ready(function(){
+                host = new Editor();
+                host.Model = new testCharacterTemplate();
+                let characterInfoPanel = new Panel(host.UIRoot);
+                {
+                    {
+                        let dbSettings = DataBindingSettings.New("g", "host", "Model", "this", "", "DataContext");
+                        characterInfoPanel.dataBindings.push(DynamicDataBinding.New(characterInfoPanel, dbSettings));
+                    }
+                    host.UIRoot.characterInfoPanel = characterInfoPanel;
+                    
+                    let Anonymous_label_0 = new Label(characterInfoPanel);
+                    {
+                        {
+                            let dbSettings = DataBindingSettings.New("dc", "", "HP", "this", "", "Text");
+                            Anonymous_label_0.dataBindings.push(DynamicDataBinding.New(Anonymous_label_0, dbSettings));
+                        }
+                    }
+                }
+                $("#UIRoot")[0].appendChild(host.UIRoot.createElements());
+            });
+        </script>
+    </head>
+    <body>
+        <div id="EditorViewRoot">
+            <div id="BackgroundRoot">
+            </div>
+            <div id="UIRoot">
+            </div>
+            <div id="FloatingRoot">
+            </div>
+        </div>
+    </body>
+</html>

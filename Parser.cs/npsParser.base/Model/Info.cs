@@ -245,6 +245,31 @@ namespace nf.protoscript
             ForeachSubInfo<T>(InFunc, sub => { return sub.Name == InSubName; });
         }
 
+        /// <summary>
+        /// Foreach sub infos with InSubName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InSubName"></param>
+        public void ForeachSubInfoByName<T>(string InSubName, Func<T, bool> InFunc)
+            where T : Info
+        {
+            ForeachSubInfo<T>(InFunc, sub => { return sub.Name == InSubName; });
+        }
+
+        /// <summary>
+        /// Foreach sub infos with InSubName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InSubName"></param>
+        public void ForeachSubInfoByName<T>(string InSubName, Action<T> InFunc)
+            where T : Info
+        {
+            ForeachSubInfo<T>(InFunc, sub => { return sub.Name == InSubName; });
+        }
+
+
 
         /// <summary>
         /// Foreach sub infos with InHeaderName.
@@ -265,6 +290,30 @@ namespace nf.protoscript
         /// <param name="InFunc"></param>
         /// <param name="InHeaderName"></param>
         public void ForeachSubInfoByHeader<T>(Action<T> InFunc, string InHeaderName)
+            where T : Info
+        {
+            ForeachSubInfo<T>(InFunc, sub => { return sub.Header == InHeaderName; });
+        }
+
+        /// <summary>
+        /// Foreach sub infos with InHeaderName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InHeaderName"></param>
+        public void ForeachSubInfoByHeader<T>(string InHeaderName, Func<T, bool> InFunc)
+            where T : Info
+        {
+            ForeachSubInfo<T>(InFunc, sub => { return sub.Header == InHeaderName; });
+        }
+
+        /// <summary>
+        /// Foreach sub infos with InHeaderName.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        /// <param name="InHeaderName"></param>
+        public void ForeachSubInfoByHeader<T>(string InHeaderName, Action<T> InFunc)
             where T : Info
         {
             ForeachSubInfo<T>(InFunc, sub => { return sub.Header == InHeaderName; });

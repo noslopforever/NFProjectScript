@@ -101,6 +101,17 @@ class DataBindingSettings
         return settings;
     }
 
+    static New(InSourceType, InSourceName, InSourcePath, InTargetType, InTargetName, InTargetPath) {
+        let settings = new DataBindingSettings();
+        settings.SourceType = InSourceType;
+        settings.SourceName = InSourceName;
+        settings.SourcePath = InSourcePath;
+        settings.TargetType = InTargetType;
+        settings.TargetName = InTargetName;
+        settings.TargetPath = InTargetPath;
+        return settings;
+    }
+
 }
 
 class DynamicDataBinding
@@ -126,6 +137,11 @@ class DynamicDataBinding
         return new DynamicDataBinding(InHost, settings);
     }
 
+    static New(InHost, InSettings) {
+        return new DynamicDataBinding(InHost, InSettings);
+    }
+
+
     _Trigger(InThis)
     {
         InThis.TargetObj[InThis.Settings.TargetPath] = InThis.SourceObj[InThis.Settings.SourcePath];
@@ -133,25 +149,40 @@ class DynamicDataBinding
 
     UpdateDataBinding()
     {
-        this.SourceObj = null;
-        if (this.Settings.SourceType == "dc") {
-            this.SourceObj = this.Host.dataContext;
-        }
+        this.SourceObj = this._GetObjectFromSetting(this.Settings.SourceType, this.Settings.SourceName);
+        this.TargetObj = this._GetObjectFromSetting(this.Settings.TargetType, this.Settings.TargetName);
 
-        this.TargetObj = null;
-        if (this.Settings.TargetType == "this") {
-            this.TargetObj = this.Host;
+        if (this.SourceObj) {
+            if (this.SourceObj.DSComp) {
+                this.Listener = new PropertyUpdateListener(this, this._Trigger);
+                this.SourceObj.DSComp.Attach(this.Settings.SourcePath, this.Listener);
+                this._Trigger(this);
+            }
+            else {
+                // refresh only once
+                alert("Must be used with DataSource object.")
+            }
         }
-
-        if (this.SourceObj.DSComp) {
-            this.Listener = new PropertyUpdateListener(this, this._Trigger);
-            this.SourceObj.DSComp.Attach(this.Settings.SourcePath, this.Listener);
-            this._Trigger(this);
-        } 
         else {
-            // refresh only once
-            alert("Must be used with DataSource object.")
+            console.log("missing SourceObj");
         }
+
+    }
+
+    _GetObjectFromSetting(InType, InName) {
+        if (InType == "dc") {
+            return this.Host.dataContext;
+        }
+        else if (InType == "this") {
+            return this.Host;
+        }
+        else if (InType == "g") {
+            return window[InName];
+        }
+        else {
+            alert("Unrecognized object type.")
+        }
+        return null;
     }
 
 }
