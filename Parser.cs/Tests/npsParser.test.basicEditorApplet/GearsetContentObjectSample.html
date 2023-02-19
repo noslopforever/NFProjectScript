@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8"> 
-        <title>jQuery Test</title> 
+        <title>Gearset ContentObject samples</title> 
         <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
         <script src="GearsetContentObjectSample.js"></script>
         <script>
@@ -21,6 +21,8 @@ $(document).ready(function(){
     let panelEl = testContentPanel.createElements();
     let uiroot = $("#root")[0];
     uiroot.replaceChild(panelEl, uiroot.firstChild);
+
+    testLabel2.Text = "This is label2. Its Text has been modified after app begin";
 
 });
 
