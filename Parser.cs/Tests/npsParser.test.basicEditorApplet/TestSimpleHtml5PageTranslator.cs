@@ -35,28 +35,68 @@ namespace nf.protoscript.test
             });
 
             // generate classes.
+            List<string> classesCodes = new List<string>();
             foreach (Info info in InProjInfo.SubInfos)
             {
                 // TypeInfo, generate class for it.
                 if (info is TypeInfo)
                 {
                     TypeInfo typeInfo = info as TypeInfo;
-                    _GenerateClassForType(typeInfo);
+                    var typeCodes = _GenerateClassForType(typeInfo);
+                    classesCodes.AddRange(typeCodes);
                 }
             }
 
-            // generate Pages and applet codes
+            foreach (var ln in classesCodes)
+            {
+                System.Console.WriteLine(ln);
+            }
+
+
+            // generate Pages and applet codes for the 'Editor'.
             {
                 List<string> pageLns = new List<string>();
-                pageLns.Add("<!DOCTYPE html>");
-                pageLns.Add("<html>");
-                pageLns.Add("    <head>");
-                pageLns.Add("        <meta charset=\"utf-8\">");
-                pageLns.Add("        <title>A simplest Html Page</title>");
-                pageLns.Add("    </head>");
-                pageLns.Add("    <body>");
+                pageLns.Add($"<!DOCTYPE html>");
+                pageLns.Add($"<html>");
+                pageLns.Add($"    <head>");
+                pageLns.Add($"        <meta charset=\"utf-8\">");
+                pageLns.Add($"        <title>A simplest Html Page</title>");
+                pageLns.Add($"        <script src = \"https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js\"></script>");
+                pageLns.Add($"        <script src = \"../../../GearsetDataBindingSample.js\"></script>");
+                pageLns.Add($"        <script src = \"../../../GearsetContentObjectSample.js\"></script>");
+                pageLns.Add($"        <script>");
 
+                // class defines
+                foreach (var ln in classesCodes)
+                {
+                    pageLns.Add("            " + ln);
+                }
+
+                pageLns.Add("            $(document).ready(function(){");
+                // editor conception:
+                //      
                 Info editorInfo = InProjInfo.FindTheFirstSubInfo<Info>(i => i.Header == "editor" && !(i is TypeInfo));
+                string editorName = editorInfo.Name;
+                string editorClassName = editorInfo.IsExtraContains("InlineEditorTypeName") ? editorInfo.Extra.InlineEditorTypeName : "Editor";
+                pageLns.Add($"                var {editorName} = new {editorClassName}();");
+                {
+                    // editor models
+                    string[] editorModelCodeLns = _GenerateEditorModel(editorInfo, $"{editorName}.UIRoot");
+                    foreach (var ln in editorModelCodeLns)
+                    {
+                        pageLns.Add("                " + ln);
+                    }
+
+                }
+                pageLns.Add($"                $(\"#UIRoot\")[0].appendChild({editorName}.UIRoot.createElements());");
+
+                pageLns.Add("            });");
+
+                
+                pageLns.Add($"        </script>");
+                pageLns.Add($"    </head>");
+                pageLns.Add($"    <body>");
+
                 string[] editorViewCodeLns = _GenerateEditorView(editorInfo);
                 foreach (var str in editorViewCodeLns)
                 {
@@ -65,6 +105,7 @@ namespace nf.protoscript.test
 
                 pageLns.Add("    </body>");
                 pageLns.Add("</html>");
+
 
                 // Write to console
                 Console.WriteLine(">>>> WEB PAGE <<<<");
@@ -124,7 +165,7 @@ namespace nf.protoscript.test
                     // Generate DataSource codes for the class.
                     if (!genDSForClass)
                     {
-                        m.Extra.JSDecls.Add($"this.gsDataSourceComponent = GearsetDataSourceComponent.New(this);");
+                        m.Extra.JSDecls.Add($"this.gsDataSourceComponent = new DataSourceComponent();");
                     }
                     genDSForClass = true;
 
@@ -142,7 +183,7 @@ namespace nf.protoscript.test
                             BodyLines = new string[]
                             {
                                 $"this.{m.Name} = val;",
-                                $"this.gsDataSourceComponent.triggerPropertyChanged(\"{m.Name}\", val);"
+                                $"this.gsDataSourceComponent.Trigger(\"{m.Name}\");"
                             }
                         },
                     };
@@ -172,14 +213,14 @@ namespace nf.protoscript.test
         /// Generate class codes.
         /// </summary>
         /// <param name="InTypeInfo"></param>
-        private void _GenerateClassForType(TypeInfo InTypeInfo)
+        private string[] _GenerateClassForType(TypeInfo InTypeInfo)
         {
-            StringWriter sw = new StringWriter();
+            List<string> resultLns = new List<string>();
 
-            sw.WriteLine($"class {InTypeInfo.Extra.ClassName} {{");
+            resultLns.Add($"class {InTypeInfo.Extra.ClassName} {{");
 
             // Constructor and member decl
-            sw.WriteLine($"    constructor {{");
+            resultLns.Add($"    constructor() {{");
 
             foreach (Info subInfo in InTypeInfo.SubInfos)
             {
@@ -189,11 +230,11 @@ namespace nf.protoscript.test
                 IEnumerable<string> decls = subInfo.Extra.JSDecls;
                 foreach (string decl in decls)
                 {
-                    sw.WriteLine("        " + decl);
+                    resultLns.Add("        " + decl);
                 }
             }
 
-            sw.WriteLine($"    }}");
+            resultLns.Add($"    }}");
 
             // Methods
             foreach (Info subInfo in InTypeInfo.SubInfos)
@@ -204,73 +245,117 @@ namespace nf.protoscript.test
                 IEnumerable<JsFunction> funcs = subInfo.Extra.JSFuncs;
                 foreach (JsFunction func in funcs)
                 {
-                    sw.WriteLine("    " + func.FuncDeclCode + " {");
+                    resultLns.Add("    " + func.FuncDeclCode + " {");
                     foreach (string bodyLn in func.BodyLines)
                     {
-                        sw.WriteLine("        " + bodyLn);
+                        resultLns.Add("        " + bodyLn);
                     }
-                    sw.WriteLine("    }");
+                    resultLns.Add("    }");
                 }
             }
 
-            sw.WriteLine($"}}");
+            resultLns.Add($"}}");
 
-            System.Console.Write(sw.ToString());
+            return resultLns.ToArray();
         }
 
 
         /// <summary>
-        /// Generate codes for editor's view-model
+        /// Generate codes for editor's model
         /// </summary>
-        /// <param name="editorInfo"></param>
-        private string[] _GenerateEditorView(Info editorInfo)
+        /// <param name="InEditorInfo"></param>
+        /// <returns></returns>
+        private string[] _GenerateEditorModel(Info InEditorInfo, string InParentElemName)
         {
             List<string> resultStringLns = new List<string>();
+            _GenerateElementModel(InEditorInfo, resultStringLns, InParentElemName);
 
-            List<Info> floatingElements = new List<Info>();
+            return resultStringLns.ToArray();
+        }
 
-            editorInfo.ForeachSubInfo<Info>(elem =>
+        private void _GenerateElementModel(Info InInfo, List<string> RefResultStrings, string InParentElemName)
+        {
+            // recursive
+            InInfo.ForeachSubInfo<Info>(elem =>
+            {
+                // ignore attributes.
+                if (elem is AttributeInfo)
+                { return; }
+
+                // parent which hold this element.
+                string parentName = InParentElemName;
+
+                // this element's name.
+                string elemName = elem.Name;
+
+                // header: determines class of the element
+                string elemClassName = "$ERROR_UICtrl_ClassName";
+                switch (elem.Header)
                 {
-                    // ignore attributes.
-                    if (elem is AttributeInfo)
-                    { return; }
-
-                    if (elem.Header == "uipanel")
-                    {
-                        floatingElements.Add(elem);
-                    }
+                    case "panel": elemClassName = "Panel"; break;
+                    case "label": elemClassName = "Label"; break;
                 }
-                );
+
+                // let code line
+                RefResultStrings.Add($"let {elemName} = new {elemClassName}({parentName});");
+                RefResultStrings.Add("{");
+
+                // named element: register to it's parent's element dictionary.
+                // TODO a better way to describe nameless Infos.
+                if (!elemName.StartsWith("Anonymous_"))
+                {
+                    RefResultStrings.Add($"    {parentName}.{elemName} = {elemName};");
+                }
+
+                // TODO attributes
+
+
+                // TODO data bindings
+
+
+                // Handle child code-gen and indents.
+                List<string> subResultStrs = new List<string>();
+                _GenerateElementModel(elem, subResultStrs, elemName);
+                foreach (var subStr in subResultStrs)
+                {
+                    RefResultStrings.Add($"    {subStr}");
+                }
+
+                RefResultStrings.Add("}");
+
+            }
+            );
+        }
+
+        /// <summary>
+        /// Generate codes for editor's view-model
+        /// </summary>
+        /// <param name="InEditorInfo"></param>
+        private string[] _GenerateEditorView(Info InEditorInfo)
+        {
+            List<string> resultStringLns = new List<string>();
 
             {
                 resultStringLns.Add("<div id=\"EditorViewRoot\">");
 
                 {
-                    resultStringLns.Add("<div id=\"BackgroundRoot\">");
+                    resultStringLns.Add("    <div id=\"BackgroundRoot\">");
 
                     // end BackgroundRoot
-                    resultStringLns.Add($"</div>");
+                    resultStringLns.Add($"    </div>");
                 }
 
                 {
-                    resultStringLns.Add("<div id=\"UIRoot\">");
+                    resultStringLns.Add("    <div id=\"UIRoot\">");
 
                     // end UIRoot
-                    resultStringLns.Add($"</div>");
+                    resultStringLns.Add($"    </div>");
                 }
 
                 {
-                    resultStringLns.Add("<div id=\"FloatingRoot\">");
-                    foreach (var elem in floatingElements)
-                    {
-                        string[] codelns = _GenerateViewElement(elem);
-                        foreach (var codeln in codelns)
-                        {
-                            resultStringLns.Add("    " + codeln);
-                        }
-                    }
+                    resultStringLns.Add("    <div id=\"FloatingRoot\">");
                     // end FloatingRoot
-                    resultStringLns.Add($"</div>");
+                    resultStringLns.Add($"    </div>");
                 }
 
                 // end EditorViewRoot
@@ -280,37 +365,6 @@ namespace nf.protoscript.test
             return resultStringLns.ToArray();
         }
 
-        private string[] _GenerateViewElement(Info InInfo)
-        {
-            List<string> codelns = new List<string>();
-            if (InInfo.Header == "uipanel")
-            {
-                // TODO datacontext and databinding
-                codelns.Add($"<div id=\"{InInfo.Name}\">");
-                // Add sub codes.
-                InInfo.ForeachSubInfo<Info>(elem =>
-                {
-                    // ignore attributes.
-                    if (elem is AttributeInfo)
-                    { return; }
-
-                    var subCodes = _GenerateViewElement(elem);
-                    foreach (var subCode in subCodes)
-                    {
-                        codelns.Add("    " + subCode);
-                    }
-                });
-                codelns.Add($"</div>");
-            }
-            else if (InInfo.Header == "label")
-            {
-                // TODO databinding
-                codelns.Add($"<div id=\"{InInfo.Name}\">%Default_Label_Text%</div>");
-                // labels have no sub
-            }
-
-            return codelns.ToArray();
-        }
 
     }
 

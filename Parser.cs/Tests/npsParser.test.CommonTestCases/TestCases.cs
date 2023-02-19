@@ -133,28 +133,31 @@ namespace nf.protoscript.test
         /// <summary>
         /// Basic data-binding test:
         /// 
-        /// model Character
+        /// model testCharacterTemplate
         ///     - HP = 100
-        ///     - NonBindingValue = 100
+        ///     - TestNonBindingValue = Guid()
         /// 
-        /// world SimpleWorld
-        ///     -Character TestCharacter
-        ///     
         /// editor host
-        ///     -SimpleWorld TestWorld
-        ///     +CharacterInfoPanel testPanel
-        ///         -DataContext = $db"TestWorld.TestCharacter"
+        ///     -Model = new testCharacterTemplate();
+        ///     +panel CharacterInfoPanel
+        ///         -DataContext = $db"Model"
         ///         +Label
         ///             -Text = $db"HP"
+        ///             
+        /// applet
+        ///     + startup()
+        ///         host.startup();
+        ///     
         /// </summary>
         /// <returns></returns>
         public static ProjectInfo BasicDataBinding()
         {
             ProjectInfo testProj = new ProjectInfo("TestProj");
             {
-                // model Character
-                //     - HP = 100
-                TypeInfo characterType = new TypeInfo(testProj, "model", "Character");
+                /// model testCharacterTemplate
+                ///     - HP = 100
+                ///     - TestNonBindingValue = Guid()
+                TypeInfo characterType = new TypeInfo(testProj, "model", "testCharacterTemplate");
                 {
                     // int HP = 100
                     MemberInfo hp = new MemberInfo(characterType, "property", "HP", CommonTypeInfos.Integer
@@ -165,27 +168,16 @@ namespace nf.protoscript.test
                         );
                 } // finish Character
 
-                /// world SimpleWorld
-                ///     -Character TestCharacter
-                TypeInfo simpleWorldType = new TypeInfo(testProj, "world", "SimpleWorld");
-                {
-                    MemberInfo testCharacter = new MemberInfo(simpleWorldType, "Character", "TestCharacter", characterType, null);
-                }
 
                 // editor host
                 //     -SimpleWorld TestWorld
                 // ...
-                // MENTION: Here we register a inline type for 'Editor'. This process should have been done by parsers.
-                TypeInfo inlineEditorType = new TypeInfo(testProj, "editor", "InlineEditor_0");
-                {
-                    MemberInfo testWorld = new MemberInfo(inlineEditorType, "SimpleWorld", "TestWorld", simpleWorldType, null);
-                }
                 Info editor = new Info(testProj, "editor", "host");
                 {
-                    //     +uipanel characterInfoPanel
+                    //     +panel characterInfoPanel
                     //         @db = TestWorld.TestCharacter
                     //         ...
-                    Info panel = new Info(editor, "uipanel", "characterInfoPanel");
+                    Info panel = new Info(editor, "panel", "characterInfoPanel");
                     {
                         AttributeInfo dbAttr = new AttributeInfo(panel, "db", "Anonymous_db_0"
                             , new STNodeSub(

@@ -83,6 +83,7 @@ class Panel extends ContentObject {
 class Label extends ContentObject {
     constructor(InParent) {
         super(InParent);
+        this._Text = "Default Label Text";
     }
 
     createElements() {
@@ -125,3 +126,17 @@ class Label extends ContentObject {
 //
 //}
 
+
+// nps Editor conception.
+class Editor {
+    constructor() {
+
+        // Model of the editor
+        this.Model = null;
+
+        // UI root of the editor
+        this.UIRoot = new Panel(null);
+
+    }
+
+}
