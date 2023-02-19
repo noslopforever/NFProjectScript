@@ -47,7 +47,7 @@ $(document).ready(function(){
     labelUIDynBinding.dataContext = m;
     labelUIDynBinding.dataBindings = [];
     labelUIDynBinding.dataBindings.push(
-        DynamicDataBinding.New(labelUIDynBinding, "hp", "innerHTML")
+        DynamicDataBinding.NewSimple(labelUIDynBinding, "hp", "innerHTML")
         );
 
     var labelUIStaticBinding = $("#labelsdb").get(0);

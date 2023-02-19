@@ -92,7 +92,7 @@ class DataBindingSettings
 
     }
 
-    static New(InSourcePath, InTargetPath) {
+    static NewSimple(InSourcePath, InTargetPath) {
         let settings = new DataBindingSettings();
         settings.SourceType = "dc";
         settings.SourcePath = InSourcePath;
@@ -132,8 +132,8 @@ class DynamicDataBinding
         this.UpdateDataBinding();
     }
 
-    static New(InHost, InSourcePath, InTargetPath) {
-        let settings = DataBindingSettings.New(InSourcePath, InTargetPath);
+    static NewSimple(InHost, InSourcePath, InTargetPath) {
+        let settings = DataBindingSettings.NewSimple(InSourcePath, InTargetPath);
         return new DynamicDataBinding(InHost, settings);
     }
 
