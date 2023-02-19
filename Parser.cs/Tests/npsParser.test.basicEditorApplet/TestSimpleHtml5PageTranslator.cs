@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace nf.protoscript.test
@@ -82,15 +83,26 @@ namespace nf.protoscript.test
                 // new editor instance
                 pageLns.Add($"                {editorName} = new {editorClassName}();");
 
-                // TODO override properties of object-template.
-                pageLns.Add($"                {editorName}.Model = new testCharacterTemplate();");
-
+                // override properties
+                // TODO bad smell, merge it with the same call in _GenerateElementCode.
                 {
-                    // editor controls
-                    string[] editorCtrlCodes = _GenerateEditorModel(editorInfo, $"{editorName}.UIRoot");
-                    foreach (var ln in editorCtrlCodes)
+                    List<string> memberSetCodes = new List<string>();
+                    _GenerateOverrideProperties(memberSetCodes, editorInfo, editorName);
+                    foreach (var ln in memberSetCodes)
                     {
-                        pageLns.Add("                " + ln);
+                        pageLns.Add($"                {ln}");
+                    }
+                }
+                // generate elements
+                {
+                    List<string> elemCodes = new List<string>();
+                    // editor controls
+                    editorInfo.ForeachSubInfo<Info>(editorSub => {
+                        _GenerateElementCode(editorSub, elemCodes, $"{editorName}.UIRoot");
+                    });
+                    foreach (var ln in elemCodes)
+                    {
+                        pageLns.Add($"                {ln}");
                     }
 
                 }
@@ -98,7 +110,7 @@ namespace nf.protoscript.test
 
                 pageLns.Add("            });");
 
-                
+
                 pageLns.Add($"        </script>");
                 pageLns.Add($"    </head>");
                 pageLns.Add($"    <body>");
@@ -201,13 +213,6 @@ namespace nf.protoscript.test
                     m.Extra.MemberRefExprCode = $"{m.Name}";
                 }
 
-                // TODO generate databinding registeration
-                //out string dbPathName = "";
-                //if (DataBindingFeature.IsDataBindingTarget(m, out dbPathName))
-                //{
-                //    string regCode = $"GearsetDataBindingManager.inst().RegDataListener(\"{dbPathName}, {m.Name}\")";
-                //}
-
             });
 
 
@@ -269,87 +274,101 @@ namespace nf.protoscript.test
         /// <summary>
         /// Generate codes for editor's model
         /// </summary>
-        /// <param name="InEditorInfo"></param>
-        /// <returns></returns>
-        private string[] _GenerateEditorModel(Info InEditorInfo, string InParentElemName)
+        /// <param name="InInfo"></param>
+        private void _GenerateElementCode(Info InInfo, List<string> RefResultStrings, string InParentElemName)
         {
-            List<string> resultStringLns = new List<string>();
-            _GenerateElementModel(InEditorInfo, resultStringLns, InParentElemName);
+            if (!_IsUIElement(InInfo))
+            { return; }
 
-            return resultStringLns.ToArray();
+            // parent which hold this element.
+            string parentName = InParentElemName;
+
+            // this element's name.
+            string elemName = InInfo.Name;
+
+            // header: determines class of the element
+            string elemClassName = "$ERROR_UICtrl_ClassName";
+            elemClassName = _GetElementClassNameFromHeader(InInfo, elemClassName);
+
+            // ## let code line
+            RefResultStrings.Add($"let {elemName} = new {elemClassName}({parentName});");
+            RefResultStrings.Add("{");
+
+            // named element: register to it's parent's element dictionary.
+            // TODO a better way to describe nameless Infos.
+            if (!elemName.StartsWith("Anonymous_"))
+            {
+                RefResultStrings.Add($"    {parentName}.{elemName} = {elemName};");
+            }
+
+
+            // ## Gather all override properties
+            List<string> memberSetCodes = new List<string>();
+            _GenerateOverrideProperties(memberSetCodes, InInfo, elemName);
+            foreach (var ln in memberSetCodes)
+            {
+                RefResultStrings.Add($"    {parentName}.{elemName} = {elemName};");
+            }
+
+            // ## data bindings
+            List<string> dbCodes = new List<string>();
+            InInfo.ForeachSubInfoByHeader<AttributeInfo>("db", attr =>
+            {
+                var stdb = attr.InitSyntaxTree as syntaxtree.STNodeDataBinding;
+                if (stdb == null)
+                {
+                    throw new InvalidProgramException();
+                }
+                dynamic jsdbs = _ConvertDBSettingsToJS(stdb.Settings);
+                dbCodes.Add($"{{");
+                dbCodes.Add($"    let dbSettings = DataBindingSettings.New(\"{jsdbs.srcType}\", \"{jsdbs.srcName}\",");
+                dbCodes.Add($"        \"{jsdbs.srcPath}\", ");
+                dbCodes.Add($"        \"{jsdbs.tarType}\", \"{jsdbs.tarName}\",");
+                dbCodes.Add($"        \"{jsdbs.tarPath}\"");
+                dbCodes.Add($"    );");
+                dbCodes.Add($"    {elemName}.dataBindings.push(DynamicDataBinding.New({elemName}, dbSettings));");
+                dbCodes.Add($"}}");
+            });
+            RefResultStrings.Add($"    // begin data bindings of {elemName}.");
+            foreach (var dbCode in dbCodes)
+            {
+                RefResultStrings.Add($"    {dbCode}");
+            }
+            RefResultStrings.Add($"    // ~ end data bindings of {elemName}.");
+
+
+            // ## Handle child code-gen and indents.
+            List<string> subCodes = new List<string>();
+            InInfo.ForeachSubInfo<Info>(subInfo =>
+            {
+                _GenerateElementCode(subInfo, subCodes, elemName);
+            });
+            foreach (var subCode in subCodes)
+            {
+                RefResultStrings.Add($"    {subCode}");
+            }
+
+            RefResultStrings.Add("}");
         }
 
-        private void _GenerateElementModel(Info InInfo, List<string> RefResultStrings, string InParentElemName)
+        private static void _GenerateOverrideProperties(List<string> RefCodes, Info InInfo, string elemName)
         {
-            // recursive
-            InInfo.ForeachSubInfo<Info>(elem =>
+            InInfo.ForeachSubInfo<MemberInfo>(member =>
             {
-                if (!_IsUIElement(elem))
-                { return; }
-
-                // parent which hold this element.
-                string parentName = InParentElemName;
-
-                // this element's name.
-                string elemName = elem.Name;
-
-                // header: determines class of the element
-                string elemClassName = "$ERROR_UICtrl_ClassName";
-                elemClassName = _GetElementClassNameFromHeader(elem, elemClassName);
-
-                // let code line
-                RefResultStrings.Add($"let {elemName} = new {elemClassName}({parentName});");
-                RefResultStrings.Add("{");
-
-                // named element: register to it's parent's element dictionary.
-                // TODO a better way to describe nameless Infos.
-                if (!elemName.StartsWith("Anonymous_"))
+                if (member.InitSyntax == null)
                 {
-                    RefResultStrings.Add($"    {parentName}.{elemName} = {elemName};");
+                    // TODO Find if it is an object, which can be overrided by object-template.
+                    string objTemplClassName = member.Archetype.Name;
+                    RefCodes.Add($"{elemName}.{member.Name} = new {objTemplClassName}();");
                 }
-
-                // TODO attributes
-
-
-                // data bindings
-                List<string> dbCodes = new List<string>();
-                elem.ForeachSubInfoByHeader<AttributeInfo>("db", attr =>
+                else
                 {
-                    var stdb = attr.InitSyntaxTree as syntaxtree.STNodeDataBinding;
-                    if (stdb == null)
-                    {
-                        throw new InvalidProgramException();
-                    }
-                    dynamic jsdbs = _ConvertDBSettingsToJS(stdb.Settings);
-                    dbCodes.Add($"{{");
-                    dbCodes.Add($"    let dbSettings = DataBindingSettings.New(\"{jsdbs.srcType}\", \"{jsdbs.srcName}\",");
-                    dbCodes.Add($"        \"{jsdbs.srcPath}\", ");
-                    dbCodes.Add($"        \"{jsdbs.tarType}\", \"{jsdbs.tarName}\",");
-                    dbCodes.Add($"        \"{jsdbs.tarPath}\"");
-                    dbCodes.Add($"    );");
-                    dbCodes.Add($"    {elemName}.dataBindings.push(DynamicDataBinding.New({elemName}, dbSettings));");
-                    dbCodes.Add($"}}");
-                });
-                RefResultStrings.Add($"    // begin data bindings of {elemName}.");
-                foreach (var dbCode in dbCodes)
-                {
-                    RefResultStrings.Add($"    {dbCode}");
+                    // TODO which context should fit?
+                    IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InInfo), member.InitSyntax);
+                    // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
+                    RefCodes.Add($"{elemName}.{member.Name} = {codes[0]};");
                 }
-                RefResultStrings.Add($"    // ~ end data bindings of {elemName}.");
-
-
-                // Handle child code-gen and indents.
-                List<string> subCodes = new List<string>();
-                _GenerateElementModel(elem, subCodes, elemName);
-                foreach (var subCode in subCodes)
-                {
-                    RefResultStrings.Add($"    {subCode}");
-                }
-
-                RefResultStrings.Add("}");
-
-            }
-            );
+            });
         }
 
         private static dynamic _ConvertDBSettingsToJS(DataBindingSettings InSettings)

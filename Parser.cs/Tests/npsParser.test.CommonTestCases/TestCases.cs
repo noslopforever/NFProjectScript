@@ -156,7 +156,7 @@ namespace nf.protoscript.test
             {
                 /// model testCharacterTemplate
                 ///     - HP = 100
-                ///     - TestNonBindingValue = Guid()
+                ///     - TestNonBindingValue = 100
                 TypeInfo characterType = new TypeInfo(testProj, "model", "testCharacterTemplate");
                 {
                     // int HP = 100
@@ -170,13 +170,20 @@ namespace nf.protoscript.test
 
 
                 // editor host
-                //     -SimpleWorld TestWorld
+                //     -Model: testCharacterTemplate
                 // ...
                 Info editor = new Info(testProj, "editor", "host");
                 {
+                    //     -Model: testCharacterTemplate
+                    // ----
+                    // Override base's Model by a new object-template.
+                    MemberInfo ovrModel = new MemberInfo(editor, "ovr", "Model", characterType, null);
+
                     //     +panel characterInfoPanel
                     //         -DataContext = $db"host:Model"
                     //         ...
+                    // ----
+                    // Sub element: UI panel.
                     Info panel = new Info(editor, "panel", "characterInfoPanel");
                     {
                         AttributeInfo dbAttr = new AttributeInfo(panel, "db", "Anonymous_db_0"
