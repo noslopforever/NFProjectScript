@@ -30,6 +30,11 @@ namespace nf.protoscript
         /// </summary>
         Resource,
 
+        /// <summary>
+        /// Host or parent element,
+        /// </summary>
+        Ancestor,
+
     }
 
 

@@ -388,9 +388,10 @@ namespace nf.protoscript.test
             switch (InObjType)
             {
                 case EDataBindingObjectType.This: return "this";
-                case EDataBindingObjectType.DataContext: return "dc";
-                case EDataBindingObjectType.StaticGlobal: return "g";
-                case EDataBindingObjectType.Resource: return "r";
+                case EDataBindingObjectType.DataContext: return "dataContext";
+                case EDataBindingObjectType.StaticGlobal: return "global";
+                case EDataBindingObjectType.Resource: return "resource";
+                case EDataBindingObjectType.Ancestor: return "ancestor";
             }
             return "";
         }
