@@ -179,6 +179,19 @@ class DynamicDataBinding
         else if (InType == "g") {
             return window[InName];
         }
+        else if (InType == "ancestor") {
+            let p = this.Host.parent;
+            if (InName == "") {
+                return p;
+            }
+            for (; p; p = p.parent) {
+                if (p.constructor.name == InName) {
+                    return p;
+                }
+            }
+            alert("Cannot find a valid ancestor.")
+            return null;
+        }
         else {
             alert("Unrecognized object type.")
         }
