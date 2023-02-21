@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>A simplest Html Page</title>
+        <title>Gearset BasicEditorTranslation Target</title>
         <script src = "https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
         <script src = "./GearsetDataBindingSample.js"></script>
         <script src = "./GearsetContentObjectSample.js"></script>
@@ -18,26 +18,46 @@
                     this.DSComp.Trigger("HP");
                 }
             }
-            $(document).ready(function(){
-                host = new Editor();
-                host.Model = new testCharacterTemplate();
-                let characterInfoPanel = new Panel(host.UIRoot);
-                {
-                    {
-                        let dbSettings = DataBindingSettings.New("g", "host", "Model", "this", "", "DataContext");
-                        characterInfoPanel.dataBindings.push(DynamicDataBinding.New(characterInfoPanel, dbSettings));
-                    }
-                    host.UIRoot.characterInfoPanel = characterInfoPanel;
-                    
-                    let Anonymous_label_0 = new Label(characterInfoPanel);
+
+            // CharacterEditor's inline type
+            class CharacterEditor extends Editor {
+                constructor() {
+                    super();
+                    this.Model = new testCharacterTemplate();
+
+                    let characterInfoPanel = new Panel(this.UIRoot);
                     {
                         {
-                            let dbSettings = DataBindingSettings.New("dc", "", "HP", "this", "", "Text");
-                            Anonymous_label_0.dataBindings.push(DynamicDataBinding.New(Anonymous_label_0, dbSettings));
+                            let dbSettings = DataBindingSettings.New("ancestor", "CharacterEditor", "Model", "this", "", "DataContext");
+                            characterInfoPanel.dataBindings.push(DynamicDataBinding.New(characterInfoPanel, dbSettings));
+                        }
+                        this.UIRoot.characterInfoPanel = characterInfoPanel;
+
+                        let Anonymous_label_0 = new Label(characterInfoPanel);
+                        {
+                            {
+                                let dbSettings = DataBindingSettings.New("dataContext", "", "HP", "this", "", "Text");
+                                Anonymous_label_0.dataBindings.push(DynamicDataBinding.New(Anonymous_label_0, dbSettings));
+                            }
                         }
                     }
                 }
-                $("#UIRoot")[0].appendChild(host.UIRoot.createElements());
+
+            }
+
+            // testApp(applet)'s inline type.
+            class InlineApplet_0 extends Applet {
+                constructor() {
+                    super();
+
+                    this.characterEditor = new CharacterEditor();
+                }
+            }
+
+            $(document).ready(function(){
+                // global-object: applet
+                mainApp = new InlineApplet_0();
+                mainApp.main();
             });
         </script>
     </head>

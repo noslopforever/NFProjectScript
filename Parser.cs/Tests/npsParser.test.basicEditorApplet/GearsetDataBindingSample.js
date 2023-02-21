@@ -94,7 +94,7 @@ class DataBindingSettings
 
     static NewSimple(InSourcePath, InTargetPath) {
         let settings = new DataBindingSettings();
-        settings.SourceType = "dc";
+        settings.SourceType = "dataContext";
         settings.SourcePath = InSourcePath;
         settings.TargetType = "this";
         settings.TargetPath = InTargetPath;
@@ -170,13 +170,13 @@ class DynamicDataBinding
     }
 
     _GetObjectFromSetting(InType, InName) {
-        if (InType == "dc") {
+        if (InType == "dataContext") {
             return this.Host.dataContext;
         }
         else if (InType == "this") {
             return this.Host;
         }
-        else if (InType == "g") {
+        else if (InType == "global") {
             return window[InName];
         }
         else if (InType == "ancestor") {

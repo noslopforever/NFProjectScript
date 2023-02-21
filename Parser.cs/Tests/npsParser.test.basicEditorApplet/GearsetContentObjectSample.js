@@ -2,7 +2,10 @@ class ContentObject {
     constructor(InParentContentObject) {
         // add this to parent's children
         this.parent = InParentContentObject;
-        if (InParentContentObject) {
+        if (InParentContentObject
+            && InParentContentObject.children 
+            && InParentContentObject.children instanceof Array
+            ) {
             InParentContentObject.children.push(this);
         }
 
@@ -13,9 +16,13 @@ class ContentObject {
         this.children = [];
 
         this.dataContext = null;
+
+        this.destroying = false;
     }
 
     destroy() {
+        this.destroying = true;
+
         // destroy all data-bindings
         for (let i = 0; i < this.dataBindings.length; i++) {
             let db = this.dataBindings[i];
@@ -36,8 +43,23 @@ class ContentObject {
         this.children = [];
 
         // mark this CO has already been destroyed.
+        this.destroying = false;
         this.destroyed = true;
 
+        // tell parent that I'm destoryed()
+        if (this.parent && this.removeChild) {
+            this.parent.removeChild(this);
+        }
+    }
+
+
+    removeChild(child) {
+        if (this.destoying) {
+            // do nothing because all children should be unreferenced soon in destroy()
+            return;
+        }
+        let index = this.children.indexOf(child);
+        this.children.slice(index, 1);
     }
 
     get dataContext() {
@@ -167,11 +189,33 @@ class Editor {
         this.Model = null;
 
         // UI root of the editor
-        this.UIRoot = new Panel(null);
+        this.UIRoot = new Panel(this);
 
         // Editor should always be a data source.
         this.DSComp = new DataSourceComponent();
 
+    }
+
+    // show this editor.
+    showUI(elem) {
+        elem.appendChild(this.UIRoot.createElements());
+    }
+
+}
+
+// nps app.applet conception.
+class Applet {
+    constructor() {
+    }
+    main() {
+        let showRoot = $("#UIRoot")[0];
+        for (const prop in this) {
+            const propObj = this[prop];
+            const showUIFn = propObj.showUI;
+            if (typeof showUIFn == "function") {
+                showUIFn.apply(propObj, [showRoot]);
+            }
+        }
     }
 
 }

@@ -137,17 +137,16 @@ namespace nf.protoscript.test
         ///     - HP = 100
         ///     - TestNonBindingValue = Guid()
         /// 
-        /// editor host
+        /// editor CharacterEditor
         ///     -Model = new testCharacterTemplate();
         ///     +panel CharacterInfoPanel
-        ///         -DataContext = $db"Src=g:host, Path=Model"
+        ///         -DataContext = $db"Src=ancestor:CharacterEditor, Path=Model"
         ///         +Label
         ///             -Text = $db"HP"
         ///             
-        /// applet
-        ///     + startup()
-        ///         host.startup();
-        ///     
+        /// $applet
+        //     -CharacterEditor characterEditor
+        ///
         /// </summary>
         /// <returns></returns>
         public static ProjectInfo BasicDataBinding()
@@ -168,28 +167,39 @@ namespace nf.protoscript.test
                         );
                 } // finish Character
 
+                //// TODO better way of internal types
+                //TypeInfo internalEditorType = new TypeInfo(null, "model", "Editor");
+                //{
+                //}
 
-                // editor host
-                //     -Model: testCharacterTemplate
+                // editor CharacterEditor
+                //     -Model = new testCharacterTemplate();
                 // ...
-                Info editor = new Info(testProj, "editor", "host");
+                // override properties of the host.
+                TypeInfo chrEditorInlineType = new TypeInfo(testProj, "editor", "CharacterEditor");
                 {
                     //     -Model: testCharacterTemplate
                     // ----
                     // Override base's Model by a new object-template.
-                    MemberInfo ovrModel = new MemberInfo(editor, "ovr", "Model", characterType, null);
+                    MemberInfo ovrModel = new MemberInfo(chrEditorInlineType, "override", "Model"
+                        , characterType
+                        , new STNodeNew(characterType)
+                        );
 
+                    //     ...
+                    //     -CharacterEditor characterEditor
                     //     +panel characterInfoPanel
-                    //         -DataContext = $db"host:Model"
+                    //         -DataContext = $db"Src=ancestor:CharacterEditor, Path=Model"
                     //         ...
                     // ----
+                    // Sub-Objects composite to the host
                     // Sub element: UI panel.
-                    Info panel = new Info(editor, "panel", "characterInfoPanel");
+                    Info panel = new Info(chrEditorInlineType, "panel", "characterInfoPanel");
                     {
                         AttributeInfo dbAttr = new AttributeInfo(panel, "db", "Anonymous_db_0"
                             , new STNodeDataBinding(
-                                    EDataBindingObjectType.StaticGlobal,
-                                    "host",
+                                    EDataBindingObjectType.Ancestor,
+                                    "CharacterEditor",
                                     "Model",
                                     EDataBindingObjectType.This,
                                     "",
@@ -210,6 +220,25 @@ namespace nf.protoscript.test
                     } // end panel 
 
                 }// end editor
+
+                // INTERNAL delegate void func_V_V_Type()
+                DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(testProj, "FuncType", "func_V_V_Type");
+
+                // $applet
+                //     -CharacterEditor characterEditor
+                //
+                // the testApp should be taken as 'main'
+                Info testApp = new Info(testProj, "", "$applet");
+                {
+                    // TODO Better way to describe an InlineType.
+                    TypeInfo testAppInlineType = new TypeInfo(testProj, "applet", "InlineApplet_0");
+                    {
+                        MemberInfo hostInstance = new MemberInfo(testAppInlineType, "CharacterEditor", "characterEditor"
+                            , chrEditorInlineType
+                            , new STNodeNew(chrEditorInlineType)
+                            );
+                    }
+                }
 
             }// end test proj
 
