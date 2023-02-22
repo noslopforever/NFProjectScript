@@ -10,19 +10,29 @@ namespace nf.protoscript
     /// Base class for all conceptions include in a proto: classes, members, datas, tables, plans, dead-lines, worlds, comments, attributes, etc.
     /// </summary>
     /// All infos will be organized as a tree which root is an project.
-    public class Info
+    public abstract class Info
     {
         /// <summary>
         /// A special info, the root of all other Infos.
         /// 
         /// Info without Parent (like Project, System) will always be the sub of this root info.
         /// </summary>
-        public static Info Root { get; } = new Info("", "$ROOT");
+        internal class InternalRootInfo
+            : Info
+        {
+            internal InternalRootInfo()
+                : base("", "$ROOT")
+            {
+
+            }
+        }
 
         /// <summary>
-        /// A special info that stores all system-types.
+        /// A special info, the root of all other Infos.
+        /// 
+        /// Info without Parent (like Project, System) will always be the sub of this root info.
         /// </summary>
-        public static Info SystemTypePackage { get; } = new Info(null, "", "__sys__");
+        public static Info Root { get; } = new InternalRootInfo();
 
 
         // ctor for the Root info.
@@ -63,7 +73,6 @@ namespace nf.protoscript
         /// Name: Name of the info.
         /// </summary>
         public string Name { get; }
-
 
         /// <summary>
         /// Sub infos of this node.

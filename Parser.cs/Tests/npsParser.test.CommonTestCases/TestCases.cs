@@ -1,11 +1,20 @@
-using nf.protoscript;
+﻿using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 
 namespace nf.protoscript.test
 {
+
     public static partial class TestCases
     {
+
+        public static TypeInfo __internal_PanelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "panel");
+        public static TypeInfo __internal_LabelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "label");
+        public static TypeInfo __internal_ButtonType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "button");
+
+        public static TypeInfo __internal_EditorType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "editor");
+        public static TypeInfo __internal_AppletType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "applet");
+
 
         /// <summary>
         /// Basic language test:
@@ -176,8 +185,13 @@ namespace nf.protoscript.test
                 //     -Model = new testCharacterTemplate();
                 // ...
                 // override properties of the host.
-                TypeInfo chrEditorInlineType = new TypeInfo(testProj, "editor", "CharacterEditor");
+                TypeInfo chrEditorInlineType = new TypeInfo(testProj, "model", "CharacterEditor");
                 {
+                    // Base type of the editor.
+                    AttributeInfo baseClassAttr = new AttributeInfo(chrEditorInlineType, "base", "base_0"
+                        , new STNodeConstant(__internal_EditorType)
+                        );
+
                     //     -Model: testCharacterTemplate
                     // ----
                     // Override base's Model by a new object-template.
@@ -194,7 +208,10 @@ namespace nf.protoscript.test
                     // ----
                     // Sub-Objects composite to the host
                     // Sub element: UI panel.
-                    Info panel = new Info(chrEditorInlineType, "panel", "characterInfoPanel");
+                    ElementInfo panel = new ElementInfo(chrEditorInlineType, "ui", "characterInfoPanel"
+                        , __internal_PanelType
+                        , new STNodeNew(__internal_PanelType)
+                        );
                     {
                         AttributeInfo dbAttr = new AttributeInfo(panel, "db", "Anonymous_db_0"
                             , new STNodeDataBinding(
@@ -209,7 +226,10 @@ namespace nf.protoscript.test
 
                         //         +Label
                         //             -Text=$db"HP"
-                        Info label = new Info(panel, "label", "Anonymous_label_0");
+                        ElementInfo label = new ElementInfo(panel, "ui", "Anonymous_label_0"
+                            , __internal_LabelType
+                            , new STNodeNew(__internal_LabelType)
+                            );
                         {
                             AttributeInfo lblDbAttr = new AttributeInfo(label, "db", "Anonymous_db_0"
                                 , new STNodeDataBinding("HP", "Text")
@@ -221,24 +241,29 @@ namespace nf.protoscript.test
 
                 }// end editor
 
-                // INTERNAL delegate void func_V_V_Type()
-                DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(testProj, "FuncType", "func_V_V_Type");
-
                 // $applet
                 //     -CharacterEditor characterEditor
                 //
-                // the testApp should be taken as 'main'
-                Info testApp = new Info(testProj, "", "$applet");
+                // The testApp which should be taken as 'main' entry.
+                TypeInfo testAppInlineType = new TypeInfo(testProj, "applet", "InlineApplet_0");
                 {
-                    // TODO Better way to describe an InlineType.
-                    TypeInfo testAppInlineType = new TypeInfo(testProj, "applet", "InlineApplet_0");
-                    {
-                        MemberInfo hostInstance = new MemberInfo(testAppInlineType, "CharacterEditor", "characterEditor"
-                            , chrEditorInlineType
-                            , new STNodeNew(chrEditorInlineType)
-                            );
-                    }
+                    // Base type of the editor.
+                    AttributeInfo baseClassAttr = new AttributeInfo(testAppInlineType, "base", "base_0"
+                        , new STNodeConstant(__internal_AppletType)
+                        );
+
+                    // ...
+                    //     -CharacterEditor characterEditor
+                    MemberInfo hostInstance = new MemberInfo(testAppInlineType, "CharacterEditor", "characterEditor"
+                        , chrEditorInlineType
+                        , new STNodeNew(chrEditorInlineType)
+                        );
                 }
+                ElementInfo testApp = new ElementInfo(testProj, "global", "applet"
+                    , testAppInlineType
+                    , new STNodeNew(testAppInlineType)
+                    );
+
 
             }// end test proj
 

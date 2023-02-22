@@ -4,23 +4,55 @@ using System.Text;
 
 namespace nf.protoscript
 {
+    /// <summary>
+    /// A special info that stores all system-types.
+    /// </summary>
+    public class SystemTypePackageInfo
+        : Info
+    {
+        private SystemTypePackageInfo()
+            : base(null, "__sys__", "system")
+        {
+        }
+
+        public static Info Instance { get; } = new SystemTypePackageInfo();
+
+    }
+
+
 
     /// <summary>
     /// Common TypeInfos like integer, 
     /// </summary>
     public static class CommonTypeInfos
     {
-        public static TypeInfo Unknown { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "unknown");
 
-        public static TypeInfo Any { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "any");
+        public static TypeInfo Unknown { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "unknown");
 
-        public static TypeInfo Integer { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "integer");
+        /// <summary>
+        /// The 'Any' type which can store any values and objects.
+        /// </summary>
+        public static TypeInfo Any { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "any");
 
-        public static TypeInfo Float { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "float");
+        /// <summary>
+        /// Integer numbers.
+        /// </summary>
+        public static TypeInfo Integer { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "integer");
 
-        public static TypeInfo String { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "string");
+        /// <summary>
+        /// Floating numbers.
+        /// </summary>
+        public static TypeInfo Float { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "float");
 
-        public static TypeInfo AsciiString { get; } = new TypeInfo(Info.SystemTypePackage, "systype", "ascii");
+        /// <summary>
+        /// Strings with encodes.
+        /// </summary>
+        public static TypeInfo String { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "string");
+
+        /// <summary>
+        /// Strings which only store ascii-codes.
+        /// </summary>
+        public static TypeInfo AsciiString { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "ascii");
 
         public static bool IsInteger32Type(TypeInfo InType)
         {
