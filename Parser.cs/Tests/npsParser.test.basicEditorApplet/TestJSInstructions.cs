@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -159,6 +159,19 @@ namespace nf.protoscript.test
                     SetCode = null,
                     RefCode = null,
                 };
+                return inst;
+            }
+
+            // New => Call new function
+            STNodeNew stnNew = InSTNode as STNodeNew;
+            if (stnNew != null)
+            {
+                List<JsInstruction> paramInsts = new List<JsInstruction>();
+                foreach (var param in stnNew.Params)
+                {
+                    paramInsts.Add(_ExactInstructions(InFunction, param));
+                }
+                var inst = new JsILInstruction_Call(InFunction, $"new {stnNew.Typename}", paramInsts.ToArray());
                 return inst;
             }
 
@@ -432,6 +445,47 @@ namespace nf.protoscript.test
             RhsInstruction.MarkModified();
         }
 
+    }
+
+    /// <summary>
+    /// Call instruction,
+    /// $R: Foo(p0,...pn) or new FooType(p0,...pn)
+    /// </summary>
+    class JsILInstruction_Call
+        :JsInstruction
+    {
+        public JsILInstruction_Call(JsFunction InHostFunction, string InCallCode, JsInstruction[] InParams)
+            : base(InHostFunction)
+        {
+            CallCode = InCallCode;
+        }
+
+        /// <summary>
+        /// Call code, should be function name "Foo", or "new FooType"
+        /// </summary>
+        public string CallCode { get; set; }
+
+        /// <summary>
+        /// Parameters.
+        /// </summary>
+        public JsInstruction[] Params { get; }
+
+        internal protected override string GenCode(IList<String> InCodeList)
+        {
+            string callCode = $"{CallCode}(";
+            for (int i = 0; i < Params.Length; i++)
+            {
+                var paramInst = Params[i].GenCode(InCodeList);
+                if (i > 0)
+                {
+                    callCode += " ,";
+                }
+
+                callCode += paramInst;
+            }
+            callCode += ")";
+            return callCode;
+        }
     }
 
 

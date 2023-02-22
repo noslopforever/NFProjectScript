@@ -243,6 +243,47 @@ namespace nf.protoscript.test
     }
 
 
+    /// <summary>
+    /// Call instruction,
+    /// $R: Foo(p0,...pn) or new FooType(p0,...pn)
+    /// </summary>
+    class CppILInstruction_Call
+        : CppILInstruction
+    {
+        public CppILInstruction_Call(CppFunction InHostFunction, string InCallCode, CppILInstruction[] InParams)
+            : base(InHostFunction)
+        {
+            CallCode = InCallCode;
+            RefInstructions = InParams;
+            Params = InParams;
+        }
+
+        /// <summary>
+        /// Call code, should be function name "Foo", or "new FooType"
+        /// </summary>
+        public string CallCode { get; set; }
+
+        /// <summary>
+        /// Parameters.
+        /// </summary>
+        public CppILInstruction[] Params { get; }
+
+        internal protected override string GenCode(IList<String> InCodeList)
+        {
+            string callCode = $"{CallCode}(";
+            for (int i = 0; i < Params.Length; i++)
+            {
+                var paramInst = Params[i].GenCode(InCodeList);
+                if (i > 0) {
+                    callCode += " ,";
+                }
+
+                callCode += paramInst;
+            }
+            callCode += ")";
+            return callCode;
+        }
+    }
 
     /// <summary>
     /// $R: (A = B)

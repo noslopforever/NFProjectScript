@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -403,6 +403,31 @@ namespace nf.protoscript.test
         /// <param name="InSTNode"></param>
         CppILInstruction _ExactInstructions(CppFunction InFunction, ISyntaxTreeNode InSTNode)
         {
+            STNodeCall stnCall = InSTNode as STNodeCall;
+            if (stnCall != null)
+            {
+                // TODO ref parameters.
+                List<CppILInstruction> paramInsts = new List<CppILInstruction>();
+                foreach (var param in stnCall.Params)
+                {
+                    paramInsts.Add(_ExactInstructions(InFunction, param));
+                }
+                var inst = new CppILInstruction_Call(InFunction, stnCall.FuncName, paramInsts.ToArray());
+                return inst;
+            }
+            STNodeNew stnNew = InSTNode as STNodeNew;
+            if (stnNew != null)
+            {
+                List<CppILInstruction> paramInsts = new List<CppILInstruction>();
+                foreach (var param in stnNew.Params)
+                {
+                    paramInsts.Add(_ExactInstructions(InFunction, param));
+                }
+                var inst = new CppILInstruction_Call(InFunction, $"new {stnNew.Typename}", paramInsts.ToArray());
+                return inst;
+            }
+
+
             // Assign => binop'='
             STNodeAssign stnAssign = InSTNode as STNodeAssign;
             if (stnAssign != null)
