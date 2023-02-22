@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -495,11 +495,13 @@ namespace nf.protoscript.test
             STNodeConstant stnConst = InSTNode as STNodeConstant;
             if (stnConst != null)
             {
+                string constString = _GetConstString(stnConst);
+
                 var inst = new CppILInstruction_Var(InFunction)
                 {
                     AccessType = CppILInstruction_Var.EAccessType.Value,
                     Constant = true,
-                    GetCode = stnConst.ValueString,
+                    GetCode = constString,
                     SetCode = null,
                     RefCode = null,
                 };
@@ -508,6 +510,21 @@ namespace nf.protoscript.test
 
             return null;
         }
+
+        private static string _GetConstString(STNodeConstant InConst)
+        {
+            string constString = "$ERR_UnknownConst";
+
+            if (InConst.Value == null)
+            { constString = "null"; }
+            else if (InConst.Value.GetType().IsValueType)
+            { constString = InConst.Value.ToString(); }
+            else if (InConst.Value is Info)
+            { constString = (InConst.Value as Info).Name; }
+
+            return constString;
+        }
+
 
         /// <summary>
         /// Generate code for a syntax-tree node.

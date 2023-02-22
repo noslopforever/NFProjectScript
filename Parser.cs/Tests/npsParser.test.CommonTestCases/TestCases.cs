@@ -1,4 +1,4 @@
-﻿using nf.protoscript;
+using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 
@@ -27,7 +27,7 @@ namespace nf.protoscript.test
                 {
                     // int propA = 100
                     MemberInfo propA = new MemberInfo(classA, "property", "propA", CommonTypeInfos.Integer
-                        , new STNodeConstant(STNodeConstant.Integer, "100")
+                        , new STNodeConstant(100)
                         );
                     {
                         AttributeInfo propAttr = new AttributeInfo(propA, "Property", "Anonymous_Property_Attribute");
@@ -37,7 +37,7 @@ namespace nf.protoscript.test
                     MemberInfo propB = new MemberInfo(classA, "property", "propB", CommonTypeInfos.Integer
                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
                             , new STNodeGetVar("propA")
-                            , new STNodeConstant(STNodeConstant.Integer, "100")
+                            , new STNodeConstant(100)
                             )
                         );
 
@@ -160,10 +160,10 @@ namespace nf.protoscript.test
                 {
                     // int HP = 100
                     MemberInfo hp = new MemberInfo(characterType, "property", "HP", CommonTypeInfos.Integer
-                        , new STNodeConstant(STNodeConstant.Integer, "100")
+                        , new STNodeConstant(100)
                         );
                     MemberInfo nbval = new MemberInfo(characterType, "property", "NonBindingValue", CommonTypeInfos.Integer
-                        , new STNodeConstant(STNodeConstant.Integer, "100")
+                        , new STNodeConstant(100)
                         );
                 } // finish Character
 

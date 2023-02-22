@@ -15,33 +15,29 @@ namespace nf.protoscript.syntaxtree
         {
         }
 
-        public STNodeConstant(string InValueTypeStr, string InValueString)
+        public STNodeConstant(string InValueString)
         {
-            ValueTypeString = InValueTypeStr;
-            ValueString = InValueString;
+            Value = InValueString;
+        }
+        public STNodeConstant(int InValue)
+        {
+            Value = InValue;
+        }
+        public STNodeConstant(float InValue)
+        {
+            Value = InValue;
+        }
+        public STNodeConstant(TypeInfo InTypeInfo)
+        {
+            Value = InTypeInfo;
         }
 
         /// <summary>
-        /// Common type definitions
-        /// </summary>
-        public const string Any = "any";
-        public const string Byte = "byte";
-        public const string Integer = "integer";
-        public const string Float = "float";
-        public const string String = "string";
-        public const string DateTime = "datetime";
-
-        /// <summary>
-        /// Type of the constant.
+        /// Value to save
         /// </summary>
         [Serialization.SerializableInfo]
-        public string ValueTypeString { get; set; } = "";
+        public object Value { get; set; } = null;
 
-        /// <summary>
-        /// String to save the constant.
-        /// </summary>
-        [Serialization.SerializableInfo]
-        public string ValueString { get; set; } = "";
 
     }
 
