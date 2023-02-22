@@ -393,15 +393,6 @@ namespace nf.protoscript.test
             return $"({lhs} {OpCode} {rhs})";
         }
 
-        protected internal override void MarkModified()
-        {
-            // Lhs's sub has been modified.
-            LhsInstruction.MarkSubModified();
-
-            // Only the rhs has been modified.
-            RhsInstruction.MarkModified();
-        }
-
     }
 
     class JsILInstruction_Sub
@@ -430,6 +421,15 @@ namespace nf.protoscript.test
             string lhs = LhsInstruction.GenCode(InCodeList);
             string rhs = RhsInstruction.GenCode(InCodeList);
             return $"({lhs}.{rhs})";
+        }
+
+        protected internal override void MarkModified()
+        {
+            // Lhs's sub has been modified.
+            LhsInstruction.MarkSubModified();
+
+            // Only the rhs has been modified.
+            RhsInstruction.MarkModified();
         }
 
     }
