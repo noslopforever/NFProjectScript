@@ -458,6 +458,7 @@ namespace nf.protoscript.test
             : base(InHostFunction)
         {
             CallCode = InCallCode;
+            Params = InParams;
         }
 
         /// <summary>
