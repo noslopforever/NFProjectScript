@@ -30,28 +30,53 @@ namespace nf.protoscript.test
                 DataBindingFeature.GatherDataSourceProperties(info);
             }
 
-            // Parse members/methods and fill Extras.
-            InProjInfo.ForeachSubInfo<TypeInfo>(typeInfo =>
-            {
-                _ParseMembersAndMethods(typeInfo);
-            });
-
-            // generate classes.
             List<string> classesCodes = new List<string>();
-            foreach (Info info in InProjInfo.SubInfos)
             {
-                // TypeInfo, generate class for it.
-                if (info is TypeInfo)
+                // Parse members/methods and fill Extras.
+                InProjInfo.ForeachSubInfo<TypeInfo>(typeInfo =>
                 {
-                    TypeInfo typeInfo = info as TypeInfo;
-                    var typeCodes = _GenerateClassForType(typeInfo);
-                    classesCodes.AddRange(typeCodes);
+                    _ParseType(typeInfo);
+                });
+                // generate classes.
+                foreach (Info info in InProjInfo.SubInfos)
+                {
+                    // TypeInfo, generate class for it.
+                    if (info is TypeInfo)
+                    {
+                        TypeInfo typeInfo = info as TypeInfo;
+                        var typeCodes = _GenerateClassForType(typeInfo);
+                        classesCodes.AddRange(typeCodes);
+                    }
+                }
+                foreach (var ln in classesCodes)
+                {
+                    System.Console.WriteLine(ln);
                 }
             }
 
-            foreach (var ln in classesCodes)
+            // Parse globals
+            List<string> globalCodes = new List<string>();
             {
-                System.Console.WriteLine(ln);
+                InProjInfo.ForeachSubInfo<ElementInfo>(elemInfo =>
+                {
+                    if (elemInfo.InitSyntax != null)
+                    {
+                        IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InProjInfo), elemInfo.InitSyntax);
+                        // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
+                        globalCodes.Add($"{elemInfo.Name} = {codes[0]};");
+                    }
+                    else
+                    {
+                        globalCodes.Add($"{elemInfo.Name} = null;");
+                    }
+
+                    // Special global applet: call it's main() to start the global applet
+                    if (elemInfo.Header == "global" && elemInfo.Name == "applet")
+                    {
+                        globalCodes.Add($"{elemInfo.Name}.main();");
+                    }
+                });
+
             }
 
 
@@ -74,53 +99,25 @@ namespace nf.protoscript.test
                     pageLns.Add("            " + ln);
                 }
 
+                // globals and startups.
                 pageLns.Add("            $(document).ready(function(){");
-                // editor conception:
-                Info editorInfo = InProjInfo.FindTheFirstSubInfo<Info>(i => i.Header == "editor" && !(i is TypeInfo));
-                string editorName = editorInfo.Name;
-                string editorClassName = editorInfo.IsExtraContains("InlineEditorTypeName") ? editorInfo.Extra.InlineEditorTypeName : "Editor";
-
-                // new editor instance
-                pageLns.Add($"                {editorName} = new {editorClassName}();");
-
-                // override properties
-                // TODO bad smell, merge it with the same call in _GenerateElementCode.
+                foreach (var ln in globalCodes)
                 {
-                    List<string> memberSetCodes = new List<string>();
-                    _GenerateOverrideProperties(memberSetCodes, editorInfo, editorName);
-                    foreach (var ln in memberSetCodes)
-                    {
-                        pageLns.Add($"                {ln}");
-                    }
+                    pageLns.Add("                " + ln);
                 }
-                // generate elements
-                {
-                    List<string> elemCodes = new List<string>();
-                    // editor controls
-                    editorInfo.ForeachSubInfo<Info>(editorSub => {
-                        _GenerateElementCode(editorSub, elemCodes, $"{editorName}.UIRoot");
-                    });
-                    foreach (var ln in elemCodes)
-                    {
-                        pageLns.Add($"                {ln}");
-                    }
-
-                }
-                pageLns.Add($"                $(\"#UIRoot\")[0].appendChild({editorName}.UIRoot.createElements());");
-
                 pageLns.Add("            });");
-
 
                 pageLns.Add($"        </script>");
                 pageLns.Add($"    </head>");
                 pageLns.Add($"    <body>");
-
-                string[] editorViewCodeLns = _GenerateEditorView(editorInfo);
-                foreach (var str in editorViewCodeLns)
-                {
-                    pageLns.Add("        " + str);
-                }
-
+                pageLns.Add($"        <div id=\"EditorViewRoot\">");
+                pageLns.Add($"            <div id=\"BackgroundRoot\">");
+                pageLns.Add($"            </div>");
+                pageLns.Add($"            <div id=\"UIRoot\">");
+                pageLns.Add($"            </div>");
+                pageLns.Add($"            <div id=\"FloatingRoot\">");
+                pageLns.Add($"            </div>");
+                pageLns.Add($"        </div>");
                 pageLns.Add("    </body>");
                 pageLns.Add("</html>");
 
@@ -158,10 +155,25 @@ namespace nf.protoscript.test
         /// Parse members/methods and fill Extras.
         /// </summary>
         /// <param name="InTypeInfo"></param>
-        private void _ParseMembersAndMethods(TypeInfo InTypeInfo)
+        private void _ParseType(TypeInfo InTypeInfo)
         {
             InTypeInfo.Extra.ClassName = InTypeInfo.Name;
 
+            AttributeInfo baseAttr = InTypeInfo.FindTheFirstSubInfoWithHeader<AttributeInfo>("base");
+            if (baseAttr != null)
+            {
+                var baseValConst = baseAttr.InitSyntaxTree as syntaxtree.STNodeConstant;
+                if (baseValConst != null)
+                {
+                    var baseType = baseValConst.Value as TypeInfo;
+                    if (baseType != null)
+                    {
+                        InTypeInfo.Extra.ClassBase = _GetTypeClassName(baseType);
+                    }
+                }
+            }
+
+            // Generate code for members.
             bool genDSForClass = false;
             InTypeInfo.ForeachSubInfo<MemberInfo>(m =>
             {
@@ -216,8 +228,30 @@ namespace nf.protoscript.test
             });
 
 
-            // TODO methods, states, others.
 
+
+            //// override properties
+            //// TODO bad smell, merge it with the same call in _GenerateElementCode.
+            //{
+            //    List<string> memberSetCodes = new List<string>();
+            //    _GenerateOverrideProperties(memberSetCodes, editorInfo, editorName);
+            //    foreach (var ln in memberSetCodes)
+            //    {
+            //        pageLns.Add($"                {ln}");
+            //    }
+            //}
+
+            // generate code for elements
+            InTypeInfo.ForeachSubInfo<ElementInfo>(elemInfo =>
+            {
+                // editor controls
+                List<string> elemLns = new List<string>();
+                _GenerateElementCode(elemInfo, elemLns, $"this.UIRoot");
+                elemInfo.Extra.JSDecls = elemLns;
+            }
+            );
+
+            // TODO methods, states, others.
         }
 
         /// <summary>
@@ -228,11 +262,26 @@ namespace nf.protoscript.test
         {
             List<string> resultLns = new List<string>();
 
-            resultLns.Add($"class {InTypeInfo.Extra.ClassName} {{");
+            bool hasBase = false;
+            if (InTypeInfo.IsExtraContains("ClassBase"))
+            {
+                resultLns.Add($"class {InTypeInfo.Extra.ClassName} extends {InTypeInfo.Extra.ClassBase} {{");
+                hasBase = true;
+            }
+            else
+            {
+                resultLns.Add($"class {InTypeInfo.Extra.ClassName} {{");
+            }
 
             // Constructor and member decl
             resultLns.Add($"    constructor() {{");
+            if (hasBase)
+            {
+                resultLns.Add($"        super();");
 
+            }
+
+            // Gather decls from sub infos.
             foreach (Info subInfo in InTypeInfo.SubInfos)
             {
                 if (!subInfo.IsExtraContains("JSDecls"))
@@ -275,7 +324,7 @@ namespace nf.protoscript.test
         /// Generate codes for editor's model
         /// </summary>
         /// <param name="InInfo"></param>
-        private void _GenerateElementCode(Info InInfo, List<string> RefResultStrings, string InParentElemName)
+        private void _GenerateElementCode(ElementInfo InInfo, List<string> RefResultStrings, string InParentElemName)
         {
             if (!_IsUIElement(InInfo))
             { return; }
@@ -287,8 +336,7 @@ namespace nf.protoscript.test
             string elemName = InInfo.Name;
 
             // header: determines class of the element
-            string elemClassName = "$ERROR_UICtrl_ClassName";
-            elemClassName = _GetElementClassNameFromHeader(InInfo, elemClassName);
+            string elemClassName = _GetTypeClassName(InInfo.ElementType);
 
             // ## let code line
             RefResultStrings.Add($"let {elemName} = new {elemClassName}({parentName});");
@@ -339,7 +387,7 @@ namespace nf.protoscript.test
 
             // ## Handle child code-gen and indents.
             List<string> subCodes = new List<string>();
-            InInfo.ForeachSubInfo<Info>(subInfo =>
+            InInfo.ForeachSubInfo<ElementInfo>(subInfo =>
             {
                 _GenerateElementCode(subInfo, subCodes, elemName);
             });
@@ -396,16 +444,15 @@ namespace nf.protoscript.test
             return "";
         }
 
-        private static bool _IsUIElement(Info InInfo)
+        private static bool _IsUIElement(ElementInfo InInfo)
         {
-            // ignore attributes.
-            if (InInfo is AttributeInfo
-                || InInfo is MemberInfo
-                || InInfo is MethodInfo
-                )
-            { return false; }
+            if (InInfo.ElementType == null
+                || InInfo.ElementType.ParentInfo != SystemTypePackageInfo.Instance)
+            {
+                return false;
+            }
 
-            var uiHeaders = new string[]
+            var uiCtrlNames = new string[]
             {
                 "panel",
                 "label",
@@ -417,67 +464,36 @@ namespace nf.protoscript.test
                 "tabview",
                 "treeview",
             };
-            if (-1 == Array.IndexOf(uiHeaders, InInfo.Header))
+            if (-1 == Array.IndexOf(uiCtrlNames, InInfo.ElementType.Name))
             {
                 return false;
             }
             return true;
         }
 
-        private static string _GetElementClassNameFromHeader(Info elem, string elemClassName)
+        private static string _GetTypeClassName(TypeInfo InType)
         {
-            switch (elem.Header)
+            if (InType.ParentInfo == SystemTypePackageInfo.Instance)
             {
-                case "panel": elemClassName = "Panel"; break;
-                case "label": elemClassName = "Label"; break;
-                case "button": elemClassName = "Button"; break;
-                case "checkbox": elemClassName = "CheckBox"; break;
-                case "radiobox": elemClassName = "RadioBox"; break;
-                case "selector": elemClassName = "Selector"; break;
-                case "listview": elemClassName = "ListView"; break;
-                case "tabview": elemClassName = "TabView"; break;
-                case "treeview": elemClassName = "TreeView"; break;
+                switch (InType.Name)
+                {
+                    case "panel": return "Panel";
+                    case "label": return "Label";
+                    case "button": return "Button";
+                    case "checkbox": return "CheckBox";
+                    case "radiobox": return "RadioBox";
+                    case "selector": return "Selector";
+                    case "listview": return "ListView";
+                    case "tabview": return "TabView";
+                    case "treeview": return "TreeView";
+                    case "editor": return "Editor";
+                    case "applet": return "Applet";
+                }
+                return "$ERROR_UICtrl_ClassName";
             }
 
+            string elemClassName = InType.Name;
             return elemClassName;
-        }
-
-        /// <summary>
-        /// Generate codes for editor's view-model
-        /// </summary>
-        /// <param name="InEditorInfo"></param>
-        private string[] _GenerateEditorView(Info InEditorInfo)
-        {
-            List<string> resultStringLns = new List<string>();
-
-            {
-                resultStringLns.Add("<div id=\"EditorViewRoot\">");
-
-                {
-                    resultStringLns.Add("    <div id=\"BackgroundRoot\">");
-
-                    // end BackgroundRoot
-                    resultStringLns.Add($"    </div>");
-                }
-
-                {
-                    resultStringLns.Add("    <div id=\"UIRoot\">");
-
-                    // end UIRoot
-                    resultStringLns.Add($"    </div>");
-                }
-
-                {
-                    resultStringLns.Add("    <div id=\"FloatingRoot\">");
-                    // end FloatingRoot
-                    resultStringLns.Add($"    </div>");
-                }
-
-                // end EditorViewRoot
-                resultStringLns.Add($"</div>");
-            }
-
-            return resultStringLns.ToArray();
         }
 
 
