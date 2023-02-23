@@ -146,7 +146,6 @@ class Label extends ContentObject {
 
         this._gscoElement.setAttribute("class", "colabel");
         {
-            // TODO bind Text to textNode's nodeValue.
             this.textNode = document.createTextNode(this.Text);
             this._gscoElement.appendChild(this.textNode);
         }
@@ -166,19 +165,37 @@ class Label extends ContentObject {
 
 }
 
-///// Button Control
-//class Button extends ContentObject {
-//    constructor(InParent) {
-//        super(InParent, [
-//                "<div class=\"cobutton\" id=\"{Name}\">",
-//                "    {Text}",
-//                "</div>",
-//            ]);
-//
-//        // TODO Select from Text and children.
-//    }
-//
-//}
+/// Button Control
+class Button extends ContentObject {
+   constructor(InParent) {
+       super(InParent);
+
+       this._Text = "Default Button Text";
+       // TODO Select from Text and children.
+    }
+    createElements() {
+        this._gscoElement = document.createElement("button");
+        this._gscoElement._gscoContentObject = this;
+
+        this._gscoElement.setAttribute("class", "cobutton");
+        {
+            this.textNode = document.createTextNode(this._Text);
+            this._gscoElement.appendChild(this.textNode);
+        }
+        return this._gscoElement;
+    }
+
+    get Text() {
+        return this._Text;
+    }
+
+    set Text(v) {
+        this._Text = v;
+        if (this.textNode) {
+            this.textNode.nodeValue = v;
+        }
+    }
+}
 
 
 // nps Editor conception.

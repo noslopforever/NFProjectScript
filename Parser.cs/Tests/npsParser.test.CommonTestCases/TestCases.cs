@@ -15,6 +15,9 @@ namespace nf.protoscript.test
         public static TypeInfo __internal_EditorType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "editor");
         public static TypeInfo __internal_AppletType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "applet");
 
+        public static DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(SystemTypePackageInfo.Instance, "FuncType", "func_V_V_Type");
+
+    
 
         /// <summary>
         /// Basic language test:
@@ -145,6 +148,8 @@ namespace nf.protoscript.test
         /// model testCharacterTemplate
         ///     - HP = 100
         ///     - TestNonBindingValue = Guid()
+        ///     +cmd HpUp()
+        ///         Hp += 1
         /// 
         /// editor CharacterEditor
         ///     -Model = new testCharacterTemplate();
@@ -152,7 +157,12 @@ namespace nf.protoscript.test
         ///         -DataContext = $db"Src=ancestor:CharacterEditor, Path=Model"
         ///         +Label
         ///             -Text = $db"HP"
-        ///             
+        ///         +Button upBtn
+        ///             -Click = $cb"HpUp"
+        ///         +Button downBtn
+        ///             -Click
+        ///                 HpUp -= 1
+        ///                 
         /// $applet
         //     -CharacterEditor characterEditor
         ///
@@ -165,6 +175,8 @@ namespace nf.protoscript.test
                 /// model testCharacterTemplate
                 ///     - HP = 100
                 ///     - TestNonBindingValue = 100
+                ///     +cmd HpUp()
+                ///         Hp += 1
                 TypeInfo characterType = new TypeInfo(testProj, "model", "testCharacterTemplate");
                 {
                     // int HP = 100
@@ -173,6 +185,20 @@ namespace nf.protoscript.test
                         );
                     MemberInfo nbval = new MemberInfo(characterType, "property", "NonBindingValue", CommonTypeInfos.Integer
                         , new STNodeConstant(100)
+                        );
+                    // +cmd HpUp()
+                    //     Hp += 1
+                    MethodInfo HpUp = new MethodInfo(characterType, "command", "HpUp"
+                        , func_V_V_Type
+                        , new STNodeSequence(new ISyntaxTreeNode[] {
+                            new STNodeAssign(
+                                new STNodeGetVar("Hp", true)
+                                , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
+                                    , new STNodeGetVar("Hp")
+                                    , new STNodeConstant(1)
+                                )
+                            )
+                        })
                         );
                 } // finish Character
 
@@ -210,7 +236,7 @@ namespace nf.protoscript.test
                     // Sub element: UI panel.
                     ElementInfo panel = new ElementInfo(chrEditorInlineType, "ui", "characterInfoPanel"
                         , __internal_PanelType
-                        , new STNodeNew(__internal_PanelType)
+                        , null
                         );
                     {
                         AttributeInfo dbAttr = new AttributeInfo(panel, "db", "Anonymous_db_0"
@@ -228,7 +254,7 @@ namespace nf.protoscript.test
                         //             -Text=$db"HP"
                         ElementInfo label = new ElementInfo(panel, "ui", "Anonymous_label_0"
                             , __internal_LabelType
-                            , new STNodeNew(__internal_LabelType)
+                            , null
                             );
                         {
                             AttributeInfo lblDbAttr = new AttributeInfo(label, "db", "Anonymous_db_0"
@@ -236,6 +262,41 @@ namespace nf.protoscript.test
                                 );
 
                         } // end label
+
+                        // +Button upBtn
+                        //     -Click = $cb"HpUp"
+                        ElementInfo upBtn = new ElementInfo(panel, "ui", "upBtn"
+                            , __internal_ButtonType
+                            , null
+                            );
+                        {
+                            //MemberInfo clickEvt = new MemberInfo(upBtn, "event-impl", "click"
+                            //    , __internal_CommandBindingType
+                            //    , new STNodeCmdBinding("HpUp")
+                            //    );
+                        }
+                        // +Button downBtn
+                        //     -Click
+                        //         HpUp -= 1
+                        ElementInfo downBtn = new ElementInfo(panel, "ui", "downBtn"
+                            , __internal_ButtonType
+                            , null
+                            );
+                        {
+                            MethodInfo clickMtd = new MethodInfo(downBtn, "event-impl", "click"
+                                , func_V_V_Type
+                                // Hp = Hp - 1
+                                , new STNodeSequence(new ISyntaxTreeNode[] {
+                                    new STNodeAssign(
+                                        new STNodeGetVar("Hp", true)
+                                        , new STNodeBinaryOp(STNodeBinaryOp.Def.Sub
+                                            , new STNodeGetVar("Hp")
+                                            , new STNodeConstant(1)
+                                        )
+                                    )
+                                })
+                                );
+                        }
 
                     } // end panel 
 
