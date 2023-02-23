@@ -231,6 +231,38 @@ namespace nf.protoscript
         }
 
         /// <summary>
+        /// Iterate all sub infos by type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        public void ForeachSubInfoExclude<T, TE0>(Func<T, bool> InFunc)
+            where T : Info
+            where TE0 : Info
+        {
+            var selectedInfos = from info in mSubInfos
+                                where !(info is TE0)
+                                select info as T;
+            foreach (T sub in selectedInfos)
+                if (!InFunc(sub))
+                    return;
+        }
+
+        /// <summary>
+        /// Iterate all sub infos by type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InFunc"></param>
+        public void ForeachSubInfoExclude<T, TE0>(Action<T> InFunc)
+            where T : Info
+            where TE0 : Info
+        {
+            ForeachSubInfoExclude<T, TE0>(sub => {
+                InFunc(sub);
+                return true;
+            });
+        }
+
+        /// <summary>
         /// Foreach sub infos with InSubName.
         /// </summary>
         /// <typeparam name="T"></typeparam>
