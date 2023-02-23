@@ -203,7 +203,7 @@ namespace nf.protoscript.test
                         );
                     // +cmd HpUp()
                     //     Hp += 1
-                    MethodInfo HpUp = new MethodInfo(characterType, "command", "HpUp"
+                    ElementInfo HpUp = new ElementInfo(characterType, "command", "HpUp"
                         , func_V_V_Type
                         , new STNodeSequence(new ISyntaxTreeNode[] {
                             new STNodeAssign(
@@ -293,7 +293,7 @@ namespace nf.protoscript.test
                             , null
                             );
                         {
-                            MethodInfo clickMtd = new MethodInfo(downBtn, "event-impl", "click"
+                            ElementInfo clickMtd = new ElementInfo(downBtn, "event-impl", "click"
                                 , func_V_V_Type
                                 // Hp = Hp - 1
                                 , new STNodeSequence(new ISyntaxTreeNode[] {
