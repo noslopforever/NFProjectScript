@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using nf.protoscript.syntaxtree;
 
@@ -57,19 +58,22 @@ namespace nf.protoscript.test
                     };
 
                     // Gen codes for member-inits
-                    InInfo.ForeachSubInfo<MemberInfo>(memberInfo =>
+                    InInfo.ForeachSubInfo<ElementInfo>(elemInfo =>
                     {
-                        // TODO fix bad smell.
-                        IList<string> initCodeList = _GenCodeForExpr(ctorFunc, memberInfo.InitSyntax);
-                        memberInfo.Extra.MemberInitExprCode = initCodeList[0];
+                        if (elemInfo.Header == "property")
+                        {
+                            // TODO fix bad smell.
+                            IList<string> initCodeList = _GenCodeForExpr(ctorFunc, elemInfo.InitSyntax);
+                            elemInfo.Extra.MemberInitExprCode = initCodeList[0];
+                        }
+                        // Gen codes for methods.
+                        else if (elemInfo.Header == "method")
+                        {
+                            TryGenExprCodesForMethod(InInfo, elemInfo);
+                        }
                     }
                     );
 
-                    // Gen codes for methods.
-                    InInfo.ForeachSubInfo<MethodInfo>(methodInfo =>
-                    {
-                        TryGenExprCodesForMethod(InInfo, methodInfo);
-                    });
                 }
             }
 
@@ -262,16 +266,20 @@ namespace nf.protoscript.test
             }
 
             // Handle members
-            InInfo.ForeachSubInfo<MemberInfo>(memberInfo =>
-            {
-                TryProcessInfoAsProperty(InInfo, memberInfo);
-            });
+            InInfo.ForeachSubInfo<ElementInfo>(elemInfo =>
+                {
+                    TryProcessInfoAsProperty(InInfo, elemInfo);
+                }
+                , elemInfo => elemInfo.Header == "property"
+                );
 
             // Handle methods
-            InInfo.ForeachSubInfo<MethodInfo>(methodInfo =>
-            {
-                TryProcessInfoAsFunction(InInfo, methodInfo);
-            });
+            InInfo.ForeachSubInfo<ElementInfo>(elemInfo =>
+                {
+                    TryProcessInfoAsFunction(InInfo, elemInfo);
+                }
+                , elemInfo => elemInfo.Header == "method"
+                );
 
             // TODO handle states, graphs, events
 
@@ -282,21 +290,24 @@ namespace nf.protoscript.test
         /// </summary>
         /// <param name="inInfo"></param>
         /// <param name="info"></param>
-        private void TryProcessInfoAsFunction(TypeInfo InParentTypeInfo, MethodInfo InMethodInfo)
+        private void TryProcessInfoAsFunction(TypeInfo InParentTypeInfo, ElementInfo InMethodInfo)
         {
             // # Exact signatures(name, parameters) of the function, but DO NOT translate any expression in the function body.
-            DelegateTypeInfo delegateType = InMethodInfo.MethodSignature as DelegateTypeInfo;
+            DelegateTypeInfo delegateType = InMethodInfo.ElementType as DelegateTypeInfo;
             System.Diagnostics.Debug.Assert(delegateType != null);
 
             // Exact the return-param and in/out parameters.
-            MemberInfo returnMember = null;
-            List<MemberInfo> inOutMembers = new List<MemberInfo>();
-            delegateType.ForeachSubInfo<MemberInfo>(member =>
+            ElementInfo returnMember = null;
+            List<ElementInfo> inOutMembers = new List<ElementInfo>();
+            delegateType.ForeachSubInfo<ElementInfo>(elem =>
             {
-                if (member.HasSubInfoWithHeader<AttributeInfo>("Return"))
-                { returnMember = member; }
+                // parameter-elements must be the param.
+                System.Diagnostics.Debug.Assert(elem.Header == "param");
+
+                if (elem.HasSubInfoWithHeader<AttributeInfo>("Return"))
+                { returnMember = elem; }
                 else
-                { inOutMembers.Add(member); }
+                { inOutMembers.Add(elem); }
             });
 
             InMethodInfo.Extra.MethodReturnMember = returnMember;
@@ -304,8 +315,8 @@ namespace nf.protoscript.test
             InMethodInfo.Extra.MethodReturnTypeCode = "void";
             if (returnMember != null)
             {
-                InMethodInfo.Extra.MethodReturnType = returnMember.Archetype;
-                InMethodInfo.Extra.MethodReturnTypeCode = _ExactCppTypeCodeFromInfo(returnMember.Archetype);
+                InMethodInfo.Extra.MethodReturnType = returnMember.ElementType;
+                InMethodInfo.Extra.MethodReturnTypeCode = _ExactCppTypeCodeFromInfo(returnMember.ElementType);
             }
 
             // generate C++ function decl by delegateType
@@ -316,9 +327,9 @@ namespace nf.protoscript.test
                 FuncConst = false,
             };
             // add parameters
-            foreach (MemberInfo param in inOutMembers)
+            foreach (ElementInfo param in inOutMembers)
             {
-                string typeCode = _ExactCppTypeCodeFromInfo(param.Archetype);
+                string typeCode = _ExactCppTypeCodeFromInfo(param.ElementType);
                 InMethodInfo.Extra.cppFuncCode.FuncParams.Add(new CppFunction.FuncParam($"{typeCode}", $"{param.Name}"));
             }
 
@@ -330,10 +341,10 @@ namespace nf.protoscript.test
         /// Try gather enough informations of a property.
         /// </summary>
         /// <param name="InInfo"></param>
-        private void TryProcessInfoAsProperty(TypeInfo InParentTypeInfo, MemberInfo InInfo)
+        private void TryProcessInfoAsProperty(TypeInfo InParentTypeInfo, ElementInfo InInfo)
         {
             // Generate different prop codes by info's type and attributes.
-            string typeCode = _ExactCppTypeCodeFromInfo(InInfo.Archetype);
+            string typeCode = _ExactCppTypeCodeFromInfo(InInfo.ElementType);
 
             InInfo.Extra.MemberTypeCode = typeCode;
             InInfo.Extra.MemberName = InInfo.Name;
@@ -474,7 +485,7 @@ namespace nf.protoscript.test
                 Info propInfo = InfoHelper.FindPropertyAlongScopeTree(InFunction.ContextInfo, stnVarGet.IDName);
                 if (propInfo != null)
                 {
-                    if (propInfo.Extra.MemberIndirectAccess)
+                    if (propInfo.IsExtraContains("MemberIndirectAccess") && propInfo.Extra.MemberIndirectAccess)
                     {
                         // indirect property, but with ref-access code like int& refFoo()
                         if (propInfo.IsExtraContains("MemberRefExprCode")
@@ -632,10 +643,10 @@ namespace nf.protoscript.test
         /// Try generate expression codes for method.
         /// </summary>
         /// <param name="InInfo"></param>
-        void TryGenExprCodesForMethod(Info InInfo, MethodInfo InMethodInfo)
+        void TryGenExprCodesForMethod(Info InInfo, ElementInfo InMethodInfo)
         {
             // generate C++ function codes
-            STNodeSequence exprSeq = InMethodInfo.ExecSequence as STNodeSequence;
+            STNodeSequence exprSeq = InMethodInfo.InitSyntax as STNodeSequence;
             System.Diagnostics.Debug.Assert(exprSeq != null);
 
             var returnMember = InMethodInfo.Extra.MethodReturnMember;

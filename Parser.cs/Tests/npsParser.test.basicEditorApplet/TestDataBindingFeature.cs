@@ -11,7 +11,7 @@ namespace nf.protoscript.test
     {
         public static List<string> DataBindingNames { get; } = new List<string>();
 
-        public static List<MemberInfo> DataSourceProperties { get; } = new List<MemberInfo>();
+        public static List<ElementInfo> DataSourceProperties { get; } = new List<ElementInfo>();
 
         /// <summary>
         /// Try find databinding attributes and gather all databinding names.
@@ -42,10 +42,10 @@ namespace nf.protoscript.test
             TypeInfo typeInfo = InInfo as TypeInfo;
             if (typeInfo != null)
             {
-                typeInfo.ForeachSubInfo<MemberInfo>(m => {
-                    if (DataBindingNames.Contains(m.Name))
+                typeInfo.ForeachSubInfo<ElementInfo>(elemInfo => {
+                    if (DataBindingNames.Contains(elemInfo.Name))
                     {
-                        DataSourceProperties.Add(m);
+                        DataSourceProperties.Add(elemInfo);
                     }
                 });
             }
@@ -74,7 +74,7 @@ namespace nf.protoscript.test
             }
         }
 
-        public static bool IsDataSourceProperty(MemberInfo InMember)
+        public static bool IsDataSourceProperty(ElementInfo InMember)
         {
             return DataSourceProperties.Contains(InMember);
         }
