@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace nf.protoscript
 {
@@ -85,25 +86,16 @@ namespace nf.protoscript
             Info contextInfo = InContextInfo;
             while (contextInfo != null)
             {
-                // find properties of the context
-                Info foundInfo = contextInfo.FindTheFirstSubInfoWithName<MemberInfo>(InIDName);
+                // find in context's properties.
+                Info foundInfo = contextInfo.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
                 if (foundInfo != null)
                 { return foundInfo; }
 
-                // if the context is a member, find properties in its archetype.
-                MemberInfo member = contextInfo as MemberInfo;
+                // If the context is a member, find properties in its archetype.
+                ElementInfo member = contextInfo as ElementInfo;
                 if (member != null)
                 {
-                    foundInfo = member.Archetype.FindTheFirstSubInfoWithName<MemberInfo>(InIDName);
-                    if (foundInfo != null)
-                    { return foundInfo; }
-                }
-
-                // if the context is a method, find properties in its signature.
-                MethodInfo method = contextInfo as MethodInfo;
-                if (method != null)
-                {
-                    foundInfo = method.MethodSignature.FindTheFirstSubInfoWithName<MemberInfo>(InIDName);
+                    foundInfo = member.ElementType.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
                     if (foundInfo != null)
                     { return foundInfo; }
                 }

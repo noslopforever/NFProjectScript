@@ -30,55 +30,76 @@ namespace nf.protoscript.test
                 DataBindingFeature.GatherDataSourceProperties(info);
             }
 
-            List<string> classesCodes = new List<string>();
+            // tier P1: Type parse.
+            // Parse elements recursively to gather Types used by next translation stages.
+            //         JSDecls: js member declaration and init in ctor
+            //         JSFuncs: js functions
+            // foreach non-attribute infos.
+            InProjInfo.ForeachSubInfoExclude<Info, AttributeInfo>(info =>
             {
-                // Parse members/methods and fill Extras.
-                InProjInfo.ForeachSubInfo<TypeInfo>(typeInfo =>
-                {
-                    _ParseType(typeInfo);
-                });
-                // generate classes.
-                foreach (Info info in InProjInfo.SubInfos)
-                {
-                    // TypeInfo, generate class for it.
-                    if (info is TypeInfo)
-                    {
-                        TypeInfo typeInfo = info as TypeInfo;
-                        var typeCodes = _GenerateClassForType(typeInfo);
-                        classesCodes.AddRange(typeCodes);
-                    }
-                }
-                foreach (var ln in classesCodes)
-                {
-                    System.Console.WriteLine(ln);
-                }
-            }
+                InProjInfo.Extra.GlobalCodes = new List<string>();
 
-            // Parse globals
-            List<string> globalCodes = new List<string>();
-            {
-                InProjInfo.ForeachSubInfo<ElementInfo>(elemInfo =>
+                if (info is TypeInfo
+                    && info.Header == "model"
+                    )
                 {
+                    // Parse info as a type
+                    _ParseType(info as TypeInfo);
+                }
+                else if (info is ElementInfo
+                    && info.Header == "global"
+                    )
+                {
+                    // Project's sub-object, take it as a global object.
+                    var elemInfo = info as ElementInfo;
+                    elemInfo.Extra.GlobalCodes = new List<string>();
+
                     if (elemInfo.InitSyntax != null)
                     {
                         IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InProjInfo), elemInfo.InitSyntax);
                         // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
-                        globalCodes.Add($"{elemInfo.Name} = {codes[0]};");
+                        InProjInfo.Extra.GlobalCodes.Add($"{elemInfo.Name} = {codes[0]};");
                     }
                     else
                     {
-                        globalCodes.Add($"{elemInfo.Name} = null;");
+                        InProjInfo.Extra.GlobalCodes.Add($"{elemInfo.Name} = null;");
                     }
 
                     // Special global applet: call it's main() to start the global applet
                     if (elemInfo.Header == "global" && elemInfo.Name == "applet")
                     {
-                        globalCodes.Add($"{elemInfo.Name}.main();");
+                        InProjInfo.Extra.GlobalCodes.Add($"{elemInfo.Name}.main();");
                     }
-                });
+                }
+                else
+                {
+                    // Unrecognize infos in this level.
+                    Console.WriteLine($"ERROR: Unrecognize info [{info.Header}:{info.Name}] in this level.");
+                }
+            });
 
+
+            // tier T1: generate class codes
+            //     Foreach type, generate class declarations.
+            //         For all subs of the type, gather JSDecls and JSFuncs, and generate member/methods.
+            List<string> classesCodes = new List<string>();
+            // generate classes.
+            foreach (Info info in InProjInfo.SubInfos)
+            {
+                // TypeInfo, generate class for it.
+                if (info is TypeInfo)
+                {
+                    TypeInfo typeInfo = info as TypeInfo;
+                    var typeCodes = _GenerateClassCodesForType(typeInfo);
+                    classesCodes.AddRange(typeCodes);
+                }
+            }
+            foreach (var ln in classesCodes)
+            {
+                System.Console.WriteLine(ln);
             }
 
+            // tier T2: generate page codes
 
             // generate Pages and applet codes for the 'Editor'.
             {
@@ -101,7 +122,7 @@ namespace nf.protoscript.test
 
                 // globals and startups.
                 pageLns.Add("            $(document).ready(function(){");
-                foreach (var ln in globalCodes)
+                foreach (var ln in InProjInfo.Extra.GlobalCodes)
                 {
                     pageLns.Add("                " + ln);
                 }
@@ -151,6 +172,96 @@ namespace nf.protoscript.test
             }
         }
 
+        private void _ParseElement(TypeInfo InTypeScope, ElementInfo InInfo)
+        {
+            // Generate code for members.
+            if (InInfo.Header == "property")
+            {
+                InInfo.Extra.JSDecls = new List<string>();
+                if (InInfo.InitSyntax != null)
+                {
+                    IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InTypeScope), InInfo.InitSyntax);
+                    // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
+                    InInfo.Extra.JSDecls.Add($"this.{InInfo.Name} = {codes[0]};");
+                }
+                else
+                {
+                    InInfo.Extra.JSDecls.Add($"this.{InInfo.Name} = null;");
+                }
+
+                // Filter element by DataBinding feature.
+                if (DataBindingFeature.IsDataSourceProperty(InInfo))
+                {
+                    // Generate DataSource codes for the class.
+                    if (!InTypeScope.Extra.DSGenerated)
+                    {
+                        InInfo.Extra.JSDecls.Add($"this.DSComp = new DataSourceComponent();");
+                        InTypeScope.Extra.DSGenerated = true;
+                    }
+
+                    // Special member-setter codes
+                    InInfo.Extra.MemberGetExprCode = $"{InInfo.Name}";
+                    InInfo.Extra.MemberSetExprCode = $"set{InInfo.Name}($RHS)";
+                    InInfo.Extra.MemberRefExprCode = $"{InInfo.Name}";
+
+                    InInfo.Extra.JSFuncs = new JsFunction[]
+                    {
+                            new JsFunction(InTypeScope)
+                            {
+                                Name = $"set{InInfo.Name}",
+                                Params = new string[]{ "val" },
+                                BodyLines = new string[]
+                                {
+                                    $"this.{InInfo.Name} = val;",
+                                    $"this.DSComp.Trigger(\"{InInfo.Name}\");"
+                                }
+                            },
+                    };
+                }
+                else
+                {
+                    InInfo.Extra.MemberGetExprCode = $"{InInfo.Name}";
+                    InInfo.Extra.MemberSetExprCode = $"{InInfo.Name} = ($RHS)";
+                    InInfo.Extra.MemberRefExprCode = $"{InInfo.Name}";
+                }
+            }
+            else if (InInfo.Header == "ovr-property")
+            {
+                InInfo.Extra.JSDecls = new List<string>();
+                string parentName = (InInfo.ParentInfo is TypeInfo) ? "this" : InInfo.ParentInfo.Name;
+                if (InInfo.InitSyntax == null)
+                {
+                    // TODO Find if it is an object, which can be overrided by object-template.
+                    string objTemplClassName = InInfo.ElementType.Name;
+                    InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = new {objTemplClassName}();");
+                }
+                else
+                {
+                    // TODO which context should fit?
+                    IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InTypeScope), InInfo.InitSyntax);
+                    // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
+                    InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = {codes[0]};");
+                }
+            }
+            else if (InInfo.Header == "method")
+            {
+                // TODO handle methods
+            }
+            else if (InInfo.Header == "ui")
+            {
+                string parentName = (InInfo.ParentInfo is TypeInfo) ? "this.UIRoot" : InInfo.ParentInfo.Name;
+
+                // handle UI sub-elements.
+                _GenerateElementCode(InInfo, parentName);
+            }
+
+            // TODO states, others.
+
+
+            // foreach sub and generate codes for them.
+            InInfo.ForeachSubInfo<ElementInfo>(sub => _ParseElement(InTypeScope, sub));
+        }
+
         /// <summary>
         /// Parse members/methods and fill Extras.
         /// </summary>
@@ -173,92 +284,15 @@ namespace nf.protoscript.test
                 }
             }
 
-            // Generate code for members.
-            bool genDSForClass = false;
-            InTypeInfo.ForeachSubInfo<MemberInfo>(m =>
-            {
-                m.Extra.JSDecls = new List<string>();
-                if (m.InitSyntax != null)
-                {
-                    IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InTypeInfo), m.InitSyntax);
-                    // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
-                    m.Extra.JSDecls.Add($"this.{m.Name} = {codes[0]};");
-                }
-                else
-                {
-                    m.Extra.JSDecls.Add($"this.{m.Name} = null;");
-                }
-
-
-                if (DataBindingFeature.IsDataSourceProperty(m))
-                {
-                    // Generate DataSource codes for the class.
-                    if (!genDSForClass)
-                    {
-                        m.Extra.JSDecls.Add($"this.DSComp = new DataSourceComponent();");
-                    }
-                    genDSForClass = true;
-
-                    // Special member-setter codes
-                    m.Extra.MemberGetExprCode = $"{m.Name}";
-                    m.Extra.MemberSetExprCode = $"set{m.Name}($RHS)";
-                    m.Extra.MemberRefExprCode = $"{m.Name}";
-
-                    m.Extra.JSFuncs = new JsFunction[]
-                    {
-                        new JsFunction(InTypeInfo)
-                        {
-                            Name = $"set{m.Name}",
-                            Params = new string[]{ "val" },
-                            BodyLines = new string[]
-                            {
-                                $"this.{m.Name} = val;",
-                                $"this.DSComp.Trigger(\"{m.Name}\");"
-                            }
-                        },
-                    };
-                }
-                else
-                {
-                    m.Extra.MemberGetExprCode = $"{m.Name}";
-                    m.Extra.MemberSetExprCode = $"{m.Name} = ($RHS)";
-                    m.Extra.MemberRefExprCode = $"{m.Name}";
-                }
-
-            });
-
-
-
-
-            //// override properties
-            //// TODO bad smell, merge it with the same call in _GenerateElementCode.
-            //{
-            //    List<string> memberSetCodes = new List<string>();
-            //    _GenerateOverrideProperties(memberSetCodes, editorInfo, editorName);
-            //    foreach (var ln in memberSetCodes)
-            //    {
-            //        pageLns.Add($"                {ln}");
-            //    }
-            //}
-
-            // generate code for elements
-            InTypeInfo.ForeachSubInfo<ElementInfo>(elemInfo =>
-            {
-                // editor controls
-                List<string> elemLns = new List<string>();
-                _GenerateElementCode(elemInfo, elemLns, $"this.UIRoot");
-                elemInfo.Extra.JSDecls = elemLns;
-            }
-            );
-
-            // TODO methods, states, others.
+            InTypeInfo.Extra.DSGenerated = false;
+            InTypeInfo.ForeachSubInfoExclude<ElementInfo, AttributeInfo>(elemInfo => _ParseElement(InTypeInfo, elemInfo));
         }
 
         /// <summary>
         /// Generate class codes.
         /// </summary>
         /// <param name="InTypeInfo"></param>
-        private string[] _GenerateClassForType(TypeInfo InTypeInfo)
+        private string[] _GenerateClassCodesForType(TypeInfo InTypeInfo)
         {
             List<string> resultLns = new List<string>();
 
@@ -281,18 +315,32 @@ namespace nf.protoscript.test
 
             }
 
-            // Gather decls from sub infos.
-            foreach (Info subInfo in InTypeInfo.SubInfos)
+            // Generate member declaration codes.
+            void _GenerateMemberDecls(List<string> RefCodes, ElementInfo InElementInfo, int InIndent)
             {
-                if (!subInfo.IsExtraContains("JSDecls"))
-                { continue; }
+                string indentStr = "";
+                for (int i = 0; i < InIndent; i++)
+                { indentStr += "    "; }
 
-                IEnumerable<string> decls = subInfo.Extra.JSDecls;
-                foreach (string decl in decls)
+                RefCodes.Add(indentStr + "{");
+
+                if (InElementInfo.IsExtraContains("JSDecls"))
                 {
-                    resultLns.Add("        " + decl);
+                    IEnumerable<string> decls = InElementInfo.Extra.JSDecls;
+                    foreach (string decl in decls)
+                    {
+                        // write indent
+                        RefCodes.Add(indentStr + "    " + decl);
+                    }
                 }
+                // recursive
+                InElementInfo.ForeachSubInfo<ElementInfo>(subSub => _GenerateMemberDecls(RefCodes, subSub, InIndent + 1));
+
+                RefCodes.Add(indentStr + "}");
             }
+
+            // Gather decls from sub infos.
+            InTypeInfo.ForeachSubInfo<ElementInfo>(elemInfo => _GenerateMemberDecls(resultLns, elemInfo, 2));
 
             resultLns.Add($"    }}");
 
@@ -324,10 +372,12 @@ namespace nf.protoscript.test
         /// Generate codes for editor's model
         /// </summary>
         /// <param name="InInfo"></param>
-        private void _GenerateElementCode(ElementInfo InInfo, List<string> RefResultStrings, string InParentElemName)
+        private void _GenerateElementCode(ElementInfo InInfo, string InParentElemName)
         {
             if (!_IsUIElement(InInfo))
             { return; }
+
+            InInfo.Extra.JSDecls = new List<string>();
 
             // parent which hold this element.
             string parentName = InParentElemName;
@@ -339,23 +389,13 @@ namespace nf.protoscript.test
             string elemClassName = _GetTypeClassName(InInfo.ElementType);
 
             // ## let code line
-            RefResultStrings.Add($"let {elemName} = new {elemClassName}({parentName});");
-            RefResultStrings.Add("{");
+            InInfo.Extra.JSDecls.Add($"let {elemName} = new {elemClassName}({parentName});");
 
             // named element: register to it's parent's element dictionary.
             // TODO a better way to describe nameless Infos.
             if (!elemName.StartsWith("Anonymous_"))
             {
-                RefResultStrings.Add($"    {parentName}.{elemName} = {elemName};");
-            }
-
-
-            // ## Gather all override properties
-            List<string> memberSetCodes = new List<string>();
-            _GenerateOverrideProperties(memberSetCodes, InInfo, elemName);
-            foreach (var ln in memberSetCodes)
-            {
-                RefResultStrings.Add($"    {parentName}.{elemName} = {elemName};");
+                InInfo.Extra.JSDecls.Add($"{parentName}.{elemName} = {elemName};");
             }
 
             // ## data bindings
@@ -377,46 +417,13 @@ namespace nf.protoscript.test
                 dbCodes.Add($"    {elemName}.dataBindings.push(DynamicDataBinding.New({elemName}, dbSettings));");
                 dbCodes.Add($"}}");
             });
-            RefResultStrings.Add($"    // begin data bindings of {elemName}.");
+            InInfo.Extra.JSDecls.Add($"// begin data bindings of {elemName}.");
             foreach (var dbCode in dbCodes)
             {
-                RefResultStrings.Add($"    {dbCode}");
+                InInfo.Extra.JSDecls.Add($"{dbCode}");
             }
-            RefResultStrings.Add($"    // ~ end data bindings of {elemName}.");
+            InInfo.Extra.JSDecls.Add($"// ~ end data bindings of {elemName}.");
 
-
-            // ## Handle child code-gen and indents.
-            List<string> subCodes = new List<string>();
-            InInfo.ForeachSubInfo<ElementInfo>(subInfo =>
-            {
-                _GenerateElementCode(subInfo, subCodes, elemName);
-            });
-            foreach (var subCode in subCodes)
-            {
-                RefResultStrings.Add($"    {subCode}");
-            }
-
-            RefResultStrings.Add("}");
-        }
-
-        private static void _GenerateOverrideProperties(List<string> RefCodes, Info InInfo, string elemName)
-        {
-            InInfo.ForeachSubInfo<MemberInfo>(member =>
-            {
-                if (member.InitSyntax == null)
-                {
-                    // TODO Find if it is an object, which can be overrided by object-template.
-                    string objTemplClassName = member.Archetype.Name;
-                    RefCodes.Add($"{elemName}.{member.Name} = new {objTemplClassName}();");
-                }
-                else
-                {
-                    // TODO which context should fit?
-                    IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InInfo), member.InitSyntax);
-                    // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
-                    RefCodes.Add($"{elemName}.{member.Name} = {codes[0]};");
-                }
-            });
         }
 
         private static dynamic _ConvertDBSettingsToJS(DataBindingSettings InSettings)

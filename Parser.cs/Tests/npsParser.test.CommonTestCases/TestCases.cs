@@ -35,7 +35,8 @@ namespace nf.protoscript.test
                 TypeInfo classA = new TypeInfo(testProj, "model", "classA");
                 {
                     // int propA = 100
-                    MemberInfo propA = new MemberInfo(classA, "property", "propA", CommonTypeInfos.Integer
+                    ElementInfo propA = new ElementInfo(classA, "property", "propA"
+                        , CommonTypeInfos.Integer
                         , new STNodeConstant(100)
                         );
                     {
@@ -43,7 +44,8 @@ namespace nf.protoscript.test
                     }
 
                     // int propB = propA + 100
-                    MemberInfo propB = new MemberInfo(classA, "property", "propB", CommonTypeInfos.Integer
+                    ElementInfo propB = new ElementInfo(classA, "property", "propB"
+                        , CommonTypeInfos.Integer
                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
                             , new STNodeGetVar("propA")
                             , new STNodeConstant(100)
@@ -53,18 +55,24 @@ namespace nf.protoscript.test
                     // delegate int func_I_I_Type(int InParam)
                     DelegateTypeInfo func_I_I_Type = new DelegateTypeInfo(testProj, "FuncType", "func_I_I_Type");
                     {
-                        MemberInfo retVal = new MemberInfo(func_I_I_Type, "param", "___return___", CommonTypeInfos.Integer, null);
+                        ElementInfo retVal = new ElementInfo(func_I_I_Type, "param", "___return___"
+                            , CommonTypeInfos.Integer
+                            , null
+                            );
                         {
                             AttributeInfo retAttr = new AttributeInfo(retVal, "Return", "__Anonymous_Return_Property__");
                         }
-                        MemberInfo inParam0 = new MemberInfo(func_I_I_Type, "param", "InParam", CommonTypeInfos.Integer, null);
+                        ElementInfo inParam0 = new ElementInfo(func_I_I_Type, "param", "InParam"
+                            , CommonTypeInfos.Integer
+                            , null
+                            );
                     }
 
                     // int TestMethodA(int InParam)
                     //      propA = propB + InParam
                     //      return propA
                     // which means TestMethodA = new func_I_I_Type { ... }
-                    MethodInfo funcA = new MethodInfo(classA, "method", "TestMethodA", func_I_I_Type
+                    ElementInfo funcA = new ElementInfo(classA, "method", "TestMethodA", func_I_I_Type
                         , new STNodeSequence(
                             // code ln 0: propA = propB + InParam.
                             new STNodeAssign(
@@ -86,13 +94,17 @@ namespace nf.protoscript.test
                     // delegate void func_V_IR_Type(int&)
                     DelegateTypeInfo func_V_IR_Type = new DelegateTypeInfo(testProj, "FuncType", "funcV_IR_Type");
                     {
-                        MemberInfo refParam0 = new MemberInfo(func_I_I_Type, "param", "RefParam", CommonTypeInfos.Integer, null);
+                        ElementInfo refParam0 = new ElementInfo(func_I_I_Type, "param", "RefParam"
+                            , CommonTypeInfos.Integer
+                            , null
+                            );
                     }
 
                     //
                     // void TestMethodB(int& RefParam)
                     //
-                    MethodInfo funcB = new MethodInfo(classA, "method", "TestMethodB", func_V_IR_Type
+                    ElementInfo funcB = new ElementInfo(classA, "method", "TestMethodB"
+                        , func_V_IR_Type
                         , new STNodeSequence(
                                 // code ln 0: propA = propA + RefParam
                                 new STNodeAssign(
@@ -123,7 +135,8 @@ namespace nf.protoscript.test
                     //      TestMethodB(tmp);
                     //      set_propA(tmp);
                     //
-                    MethodInfo funcC = new MethodInfo(classA, "method", "TestMethodC", func_V_V_Type
+                    ElementInfo funcC = new ElementInfo(classA, "method", "TestMethodC"
+                        , func_V_V_Type
                         , new STNodeSequence(
                             // code ln 0: TestMethodB(propA)
                             new STNodeCall("TestMethodB"
@@ -168,18 +181,15 @@ namespace nf.protoscript.test
                 TypeInfo characterType = new TypeInfo(testProj, "model", "testCharacterTemplate");
                 {
                     // int HP = 100
-                    MemberInfo hp = new MemberInfo(characterType, "property", "HP", CommonTypeInfos.Integer
+                    ElementInfo hp = new ElementInfo(characterType, "property", "HP"
+                        , CommonTypeInfos.Integer
                         , new STNodeConstant(100)
                         );
-                    MemberInfo nbval = new MemberInfo(characterType, "property", "NonBindingValue", CommonTypeInfos.Integer
+                    ElementInfo nbval = new ElementInfo(characterType, "property", "NonBindingValue"
+                        , CommonTypeInfos.Integer
                         , new STNodeConstant(100)
                         );
                 } // finish Character
-
-                //// TODO better way of internal types
-                //TypeInfo internalEditorType = new TypeInfo(null, "model", "Editor");
-                //{
-                //}
 
                 // editor CharacterEditor
                 //     -Model = new testCharacterTemplate();
@@ -195,7 +205,7 @@ namespace nf.protoscript.test
                     //     -Model: testCharacterTemplate
                     // ----
                     // Override base's Model by a new object-template.
-                    MemberInfo ovrModel = new MemberInfo(chrEditorInlineType, "override", "Model"
+                    ElementInfo ovrModel = new ElementInfo(chrEditorInlineType, "ovr-property", "Model"
                         , characterType
                         , new STNodeNew(characterType)
                         );
@@ -224,8 +234,8 @@ namespace nf.protoscript.test
                                 )
                             );
 
-                        //         +Label
-                        //             -Text=$db"HP"
+                        // +Label
+                        //     -Text=$db"HP"
                         ElementInfo label = new ElementInfo(panel, "ui", "Anonymous_label_0"
                             , __internal_LabelType
                             , new STNodeNew(__internal_LabelType)
@@ -245,7 +255,7 @@ namespace nf.protoscript.test
                 //     -CharacterEditor characterEditor
                 //
                 // The testApp which should be taken as 'main' entry.
-                TypeInfo testAppInlineType = new TypeInfo(testProj, "applet", "InlineApplet_0");
+                TypeInfo testAppInlineType = new TypeInfo(testProj, "model", "InlineApplet_0");
                 {
                     // Base type of the editor.
                     AttributeInfo baseClassAttr = new AttributeInfo(testAppInlineType, "base", "base_0"
@@ -254,7 +264,7 @@ namespace nf.protoscript.test
 
                     // ...
                     //     -CharacterEditor characterEditor
-                    MemberInfo hostInstance = new MemberInfo(testAppInlineType, "CharacterEditor", "characterEditor"
+                    ElementInfo hostInstance = new ElementInfo(testAppInlineType, "ovr-property", "characterEditor"
                         , chrEditorInlineType
                         , new STNodeNew(chrEditorInlineType)
                         );
