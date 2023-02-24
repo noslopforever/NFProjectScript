@@ -128,6 +128,7 @@ namespace nf.protoscript.test
                     {
                         AccessType = JsILInstruction_Var.EAccessType.Ref,
                         Constant = false,
+                        OwnerPrefix = "this.",
                         GetCode = propInfo.Extra.MemberGetExprCode,
                         RefCode = propInfo.Extra.MemberRefExprCode,
                         SetCode = propInfo.Extra.MemberSetExprCode,
@@ -139,6 +140,7 @@ namespace nf.protoscript.test
                 {
                     AccessType = JsILInstruction_Var.EAccessType.Ref,
                     Constant = false,
+                    OwnerPrefix = "",
                     GetCode = stnVarGet.IDName,
                     SetCode = $"{stnVarGet.IDName} = $RHS",
                     RefCode = stnVarGet.IDName,
@@ -155,6 +157,7 @@ namespace nf.protoscript.test
                 {
                     AccessType = JsILInstruction_Var.EAccessType.Value,
                     Constant = true,
+                    OwnerPrefix = "",
                     GetCode = constString,
                     SetCode = null,
                     RefCode = null,
@@ -305,6 +308,11 @@ namespace nf.protoscript.test
         /// </summary>
         public string TempVarName { get; private set; } = null;
 
+        /// <summary>
+        /// Owner prefix code: >this.< property = 100;
+        /// </summary>
+        public string OwnerPrefix { get; internal set; } = "";
+
         internal protected override void MarkModified()
         {
             IsModifyMarked = true;
@@ -316,14 +324,17 @@ namespace nf.protoscript.test
 
         internal protected override string GenCode(IList<String> InCodeList)
         {
+            string filtedGetCode = GetCode.Replace("$OWNER", $"{OwnerPrefix}");
+            string filtedRefCode = GetCode.Replace("$OWNER", $"{OwnerPrefix}");
+
             // not ref-required, return getter immediately.
             if (!IsRefRequired)
             {
-                return $"{GetCode}";
+                return filtedGetCode;
             }
 
             // if set, create a 'get/modify/set-back' routine.
-            if (IsModifyMarked)
+            if (!IsSupportRef && IsModifyMarked)
             {
                 // Trigger get/modify/set-back routine:
                 //      auto temp = get_Source();
@@ -333,19 +344,19 @@ namespace nf.protoscript.test
                 TempVarName = tmpVar;
 
                 // register preparation codes.
-                InCodeList.Add($"let {TempVarName} = {GetCode};");
+                InCodeList.Add($"let {TempVarName} = {filtedGetCode}");
 
-                return $"{TempVarName}";
+                return TempVarName;
             }
 
             // value object (constant), return getter-code.
             if (!IsSupportRef)
             {
                 // Use getter instead.
-                return $"{GetCode}";
+                return filtedGetCode;
             }
 
-            return $"{RefCode}";
+            return filtedRefCode;
         }
 
         internal protected override void ConditionalGenSetbackCode(IList<String> InCodeList)
@@ -356,8 +367,9 @@ namespace nf.protoscript.test
                 {
                     // Complete the 'get/modify/set-back' routine.
                     // See ConditionalGenPrepareCode for more informations.
-                    string setter = $"{SetCode};";
-                    setter = setter.Replace("$RHS", $"{TempVarName}");
+                    string setter = SetCode;
+                    setter = setter.Replace("$RHS", TempVarName);
+                    setter = setter.Replace("$OWNER", OwnerPrefix);
                     InCodeList.Add(setter);
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using nf.protoscript;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -178,15 +179,12 @@ namespace nf.protoscript.test
             if (InInfo.Header == "property")
             {
                 InInfo.Extra.JSDecls = new List<string>();
+                string initCode = "null";
                 if (InInfo.InitSyntax != null)
                 {
                     IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InTypeScope), InInfo.InitSyntax);
                     // TODO fix bad smell. codes[0], same as TestCppTranslator.cs
-                    InInfo.Extra.JSDecls.Add($"this.{InInfo.Name} = {codes[0]};");
-                }
-                else
-                {
-                    InInfo.Extra.JSDecls.Add($"this.{InInfo.Name} = null;");
+                    initCode = codes[0];
                 }
 
                 // Filter element by DataBinding feature.
@@ -199,30 +197,46 @@ namespace nf.protoscript.test
                         InTypeScope.Extra.DSGenerated = true;
                     }
 
-                    // Special member-setter codes
-                    InInfo.Extra.MemberGetExprCode = $"{InInfo.Name}";
-                    InInfo.Extra.MemberSetExprCode = $"set{InInfo.Name}($RHS)";
-                    InInfo.Extra.MemberRefExprCode = $"{InInfo.Name}";
+                    // internal member used by getter/setter
+                    InInfo.Extra.JSDecls.Add($"this._{InInfo.Name} = {initCode};");
 
+                    // getter/setter
                     InInfo.Extra.JSFuncs = new JsFunction[]
                     {
-                            new JsFunction(InTypeScope)
+                        new JsFunction(InTypeScope)
+                        {
+                            Name = $"get {InInfo.Name}",
+                            Params = new string[]{ "" },
+                            BodyLines = new string[]
                             {
-                                Name = $"set{InInfo.Name}",
-                                Params = new string[]{ "val" },
-                                BodyLines = new string[]
-                                {
-                                    $"this.{InInfo.Name} = val;",
-                                    $"this.DSComp.Trigger(\"{InInfo.Name}\");"
-                                }
-                            },
+                                $"return this._{InInfo.Name};"
+                            }
+                        },
+                        new JsFunction(InTypeScope)
+                        {
+                            Name = $"set {InInfo.Name}",
+                            Params = new string[]{ "val" },
+                            BodyLines = new string[]
+                            {
+                                $"this._{InInfo.Name} = val;",
+                                $"this.DSComp.Trigger(\"{InInfo.Name}\");"
+                            }
+                        },
                     };
+
+                    // Special member-setter codes
+                    InInfo.Extra.MemberGetExprCode = $"$OWNER{InInfo.Name}";
+                    InInfo.Extra.MemberSetExprCode = $"$OWNER{InInfo.Name} = ($RHS)";
+                    InInfo.Extra.MemberRefExprCode = $"$OWNER{InInfo.Name}";
                 }
                 else
                 {
-                    InInfo.Extra.MemberGetExprCode = $"{InInfo.Name}";
-                    InInfo.Extra.MemberSetExprCode = $"{InInfo.Name} = ($RHS)";
-                    InInfo.Extra.MemberRefExprCode = $"{InInfo.Name}";
+                    // use member directly.
+                    InInfo.Extra.JSDecls.Add($"this.{InInfo.Name} = null;");
+
+                    InInfo.Extra.MemberGetExprCode = $"$OWNER{InInfo.Name}";
+                    InInfo.Extra.MemberSetExprCode = $"$OWNER{InInfo.Name} = ($RHS)";
+                    InInfo.Extra.MemberRefExprCode = $"$OWNER{InInfo.Name}";
                 }
             }
             else if (InInfo.Header == "ovr-property")
@@ -243,9 +257,42 @@ namespace nf.protoscript.test
                     InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = {codes[0]};");
                 }
             }
-            else if (InInfo.Header == "method")
+            else if (InInfo.Header == "method"
+                || InInfo.Header == "command"
+                )
             {
-                // TODO handle methods
+                var jsFunc = new JsFunction(InInfo.ParentInfo);
+                jsFunc.Name = InInfo.Name;
+
+                // gather parameters
+                List<string> paramNames = new List<string>();
+                InInfo.ForeachSubInfoExclude<ElementInfo, AttributeInfo>(mtdSub =>
+                {
+                    if (mtdSub.Header != "param")
+                    { return; }
+
+                    paramNames.Add(mtdSub.Name);
+
+                    // TODO return handler
+                }
+                );
+                jsFunc.Params = paramNames.ToArray();
+ 
+                // translate sequences.
+                STNodeSequence exprSeq = InInfo.InitSyntax as STNodeSequence;
+                List<string> codeLns = new List<string>();
+                foreach (var stNode in exprSeq.NodeList)
+                {
+                    IList<string> codeList = JsInstruction.GenCodeForExpr(jsFunc, stNode);
+                    foreach (string code in codeList)
+                    {
+                        codeLns.Add(code + ";");
+                    }
+                }
+                jsFunc.BodyLines = codeLns.ToArray();
+
+                // register methods
+                InInfo.Extra.JSFuncs = new JsFunction[] { jsFunc };
             }
             else if (InInfo.Header == "ui")
             {
