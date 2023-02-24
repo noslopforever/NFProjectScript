@@ -83,19 +83,25 @@ namespace nf.protoscript
         /// <returns></returns>
         public static Info FindPropertyAlongScopeTree(Info InContextInfo, string InIDName)
         {
+            if (InContextInfo is TypeInfo)
+            { return FindPropertyOfType(InContextInfo as TypeInfo, InIDName); }
+
             Info contextInfo = InContextInfo;
             while (contextInfo != null)
             {
                 // find in context's properties.
+                // Most of times, the context should be a method.
+                // We can find local-parameters here.
                 Info foundInfo = contextInfo.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
                 if (foundInfo != null)
                 { return foundInfo; }
 
-                // If the context is a member, find properties in its archetype.
+                // If the context is a member/method, try find properties in its archetype.
+                // We can find parameters (of method) or subs (of members) here.
                 ElementInfo member = contextInfo as ElementInfo;
                 if (member != null)
                 {
-                    foundInfo = member.ElementType.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
+                    foundInfo = FindPropertyOfType(member.ElementType, InIDName);
                     if (foundInfo != null)
                     { return foundInfo; }
                 }
@@ -104,6 +110,30 @@ namespace nf.protoscript
             }
             return null;
         }
+
+        /// <summary>
+        /// Find property of Type.
+        /// </summary>
+        /// <param name="InContextInfo">The first scope to find the target property.</param>
+        /// <param name="InIDName"></param>
+        /// <returns></returns>
+        public static Info FindPropertyOfType(TypeInfo InTypeInfo, string InIDName)
+        {
+            // find in context's properties.
+            Info foundInfo = InTypeInfo.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
+            if (foundInfo != null)
+            { return foundInfo; }
+
+            if (InTypeInfo.BaseType != null)
+            {
+                foundInfo = FindPropertyOfType(InTypeInfo.BaseType, InIDName);
+                if (foundInfo != null)
+                { return foundInfo; }
+            }
+
+            return null;
+        }
+
     }
 
 }

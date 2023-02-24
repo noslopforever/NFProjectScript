@@ -1,4 +1,4 @@
-﻿using nf.protoscript;
+using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
@@ -317,19 +317,8 @@ namespace nf.protoscript.test
         {
             InTypeInfo.Extra.ClassName = InTypeInfo.Name;
 
-            AttributeInfo baseAttr = InTypeInfo.FindTheFirstSubInfoWithHeader<AttributeInfo>("base");
-            if (baseAttr != null)
-            {
-                var baseValConst = baseAttr.InitSyntaxTree as syntaxtree.STNodeConstant;
-                if (baseValConst != null)
-                {
-                    var baseType = baseValConst.Value as TypeInfo;
-                    if (baseType != null)
-                    {
-                        InTypeInfo.Extra.ClassBase = _GetTypeClassName(baseType);
-                    }
-                }
-            }
+            if (InTypeInfo.BaseType != null)
+            { InTypeInfo.Extra.ClassBase = _GetTypeClassName(InTypeInfo.BaseType); }
 
             InTypeInfo.Extra.DSGenerated = false;
             InTypeInfo.ForeachSubInfoExclude<ElementInfo, AttributeInfo>(elemInfo => _ParseElement(InTypeInfo, elemInfo));

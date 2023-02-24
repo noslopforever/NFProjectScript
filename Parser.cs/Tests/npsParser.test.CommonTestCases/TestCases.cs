@@ -1,4 +1,4 @@
-﻿using nf.protoscript;
+using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 
@@ -8,9 +8,11 @@ namespace nf.protoscript.test
     public static partial class TestCases
     {
 
-        public static TypeInfo __internal_PanelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "panel");
-        public static TypeInfo __internal_LabelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "label");
-        public static TypeInfo __internal_ButtonType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "button");
+        public static TypeInfo __internal_UIBaseType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "uibase");
+        public static TypeInfo __internal_PanelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "panel", __internal_UIBaseType);
+        public static TypeInfo __internal_LabelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "label", __internal_UIBaseType);
+        public static TypeInfo __internal_ButtonType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "button", __internal_UIBaseType);
+
 
         public static TypeInfo __internal_EditorType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "editor");
         public static TypeInfo __internal_AppletType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "applet");
@@ -221,13 +223,8 @@ namespace nf.protoscript.test
                 //     -Model = new testCharacterTemplate();
                 // ...
                 // override properties of the host.
-                TypeInfo chrEditorInlineType = new TypeInfo(testProj, "model", "CharacterEditor");
+                TypeInfo chrEditorInlineType = new TypeInfo(testProj, "model", "CharacterEditor", __internal_EditorType);
                 {
-                    // Base type of the editor.
-                    AttributeInfo baseClassAttr = new AttributeInfo(chrEditorInlineType, "base", "base_0"
-                        , new STNodeConstant(__internal_EditorType)
-                        );
-
                     //     -Model: testCharacterTemplate
                     // ----
                     // Override base's Model by a new object-template.
@@ -315,13 +312,8 @@ namespace nf.protoscript.test
                 //     -CharacterEditor characterEditor
                 //
                 // The testApp which should be taken as 'main' entry.
-                TypeInfo testAppInlineType = new TypeInfo(testProj, "model", "InlineApplet_0");
+                TypeInfo testAppInlineType = new TypeInfo(testProj, "model", "InlineApplet_0", __internal_AppletType);
                 {
-                    // Base type of the editor.
-                    AttributeInfo baseClassAttr = new AttributeInfo(testAppInlineType, "base", "base_0"
-                        , new STNodeConstant(__internal_AppletType)
-                        );
-
                     // ...
                     //     -CharacterEditor characterEditor
                     ElementInfo hostInstance = new ElementInfo(testAppInlineType, "ovr-property", "characterEditor"
