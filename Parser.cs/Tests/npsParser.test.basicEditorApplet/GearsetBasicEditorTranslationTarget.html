@@ -63,8 +63,8 @@
                             // ~ end override properties
                             // begin override events
                             {
-                                let fn = function (dc) {
-                                    dc.setHP(dc.HP - 1);
+                                let fn = function () {
+                                    this.dataContext.setHP(this.dataContext.HP - 1);
                                 }
                                 downBtn.click = fn;
                             }

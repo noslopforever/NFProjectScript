@@ -188,7 +188,7 @@ class Button extends ContentObject {
             // If click handler is valid, invoke it.
             if (co && co.click) {
                 if (typeof co.click == "function") {
-                    co.click.apply(co, [co.dataContext]);
+                    co.click.apply(co);
                 }
                 else if (co.click instanceof CommandBinding) {
                     co.click.apply(co.dataContext);
