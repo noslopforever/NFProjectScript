@@ -1,4 +1,4 @@
-using nf.protoscript;
+﻿using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
@@ -328,21 +328,23 @@ namespace nf.protoscript.test
             {
                 InInfo.Extra.JSDecls = new List<string>();
                 string parentName = (InInfo.ParentInfo is TypeInfo) ? "this" : InInfo.ParentInfo.Name;
-                if (InInfo.InitSyntax == null)
+                if (InInfo.InitSyntax != null)
                 {
-                    // TODO Find if it is an object, which can be overrided by object-template.
-                    string objTemplClassName = InInfo.ElementType.Name;
-                    InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = new {objTemplClassName}();");
-                }
-                else
-                {
+                    // override events, so find the origin event
+                    TypeInfo hostTypeOfEvent = InInfo.ParentInfo is TypeInfo ? (InInfo.ParentInfo as TypeInfo).BaseType : (InInfo.ParentInfo as ElementInfo).ElementType;
+                    ElementInfo originEventElem = InfoHelper.FindPropertyOfType(hostTypeOfEvent, InInfo.Name);
+                    string evtAttachExpr = EnsureEventAttachCodes(originEventElem);
+
                     // Inline function.
+                    List<string> initCodes = new List<string>();
                     if (InInfo.InitSyntax is STNodeSequence)
                     {
                         // scope type: global by default.
                         TypeInfo scopeType = null;
+                        // If generating inline-function for a Type, take the Type as it's scope.
                         if (InInfo.ParentInfo is TypeInfo)
                         { scopeType = InInfo.ParentInfo as TypeInfo; }
+                        // If generating inline-function for a element, take the element's Type as it's scope.
                         if (InInfo.ParentInfo is ElementInfo)
                         { scopeType = (InInfo.ParentInfo as ElementInfo).ElementType; }
 
@@ -353,26 +355,44 @@ namespace nf.protoscript.test
                         {
                             IList<string> codeList = JsInstruction.GenCodeForExpr(jsFunc, stNode);
                             foreach (string code in codeList)
-                            {
-                                codeLns.Add(code + ";");
-                            }
+                            { codeLns.Add(code + ";"); }
                         }
 
                         // gen code likes: 
                         // click = function () {
+                        //     ...
                         // }
-                        InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = function () {{");
+                        initCodes.Add("function() {");
                         foreach (var ln in codeLns)
-                        {
-                            InInfo.Extra.JSDecls.Add("    " + ln);
-                        }
-                        InInfo.Extra.JSDecls.Add($"}}");
+                        { initCodes.Add("    " + ln); }
+                        initCodes.Add("}");
                     }
                     // DataBindingCall or other functors.
                     else
                     {
-                        IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InInfo.ParentInfo), InInfo.InitSyntax);
-                        InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = {codes[0]};");
+                        initCodes = JsInstruction.GenCodeForExpr(new JsFunction(InInfo.ParentInfo), InInfo.InitSyntax);
+                    }
+
+                    // Regroup codes.
+                    string initCode = "";
+                    for (int i = 0; i < initCodes.Count; i++)
+                    {
+                        initCode += initCodes[i];
+                        if (i != initCodes.Count - 1)
+                        { initCode += Environment.NewLine; }
+                    }
+
+                    string evtAttachCode = evtAttachExpr;
+                    evtAttachCode = evtAttachCode.Replace("$OWNER", $"{parentName}.");
+                    evtAttachCode = evtAttachCode.Replace("$RHS", $"{initCode}");
+                    var resultLns = evtAttachCode.Split(Environment.NewLine);
+
+                    for (int i = 0; i < resultLns.Length; i++)
+                    {
+                        string lnCode = resultLns[i];
+                        if (i == resultLns.Length - 1)
+                        { lnCode += ";"; }
+                        InInfo.Extra.JSDecls.Add(lnCode);
                     }
                 }
             }

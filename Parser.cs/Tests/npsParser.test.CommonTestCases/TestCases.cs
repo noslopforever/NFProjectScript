@@ -28,6 +28,11 @@ namespace nf.protoscript.test
                     , CommonTypeInfos.Any
                     , null
                     );
+
+                ElementInfo click = new ElementInfo(__internal_UIBaseType, "event", "click"
+                    , func_V_V_Type
+                    , null
+                    );
             }
         }
 
