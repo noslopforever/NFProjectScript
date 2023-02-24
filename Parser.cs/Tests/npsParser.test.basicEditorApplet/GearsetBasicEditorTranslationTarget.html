@@ -51,7 +51,7 @@
 
                             // begin event handlers of upBtn.
                             {
-                                upBtn.click = new DataContextCall("HPUp");
+                                upBtn.addUIEventHandler("click", new DataContextCall("HPUp"));
                             }
                             // ~ end event handlers of upBtn.
                         }
@@ -63,10 +63,9 @@
 
                             // begin event handlers of downBtn.
                             {
-                                let fn = function () {
+                                downBtn.addUIEventHandler("click", function () {
                                     this.dataContext.setHP(this.dataContext.HP - 1);
-                                }
-                                downBtn.click = fn;
+                                });
                             }
                             // ~ end event handlers of downBtn.
                         }
