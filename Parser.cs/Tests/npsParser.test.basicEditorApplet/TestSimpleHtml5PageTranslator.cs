@@ -1,4 +1,4 @@
-using nf.protoscript;
+﻿using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
@@ -277,7 +277,7 @@ namespace nf.protoscript.test
                 }
                 );
                 jsFunc.Params = paramNames.ToArray();
- 
+
                 // translate sequences.
                 STNodeSequence exprSeq = InInfo.InitSyntax as STNodeSequence;
                 List<string> codeLns = new List<string>();
@@ -396,41 +396,45 @@ namespace nf.protoscript.test
             }
 
             // Constructor and member decl
-            resultLns.Add($"    constructor() {{");
-            if (hasBase)
             {
-                resultLns.Add($"        super();");
-
-            }
-
-            // Generate member declaration codes.
-            void _GenerateMemberDecls(List<string> RefCodes, ElementInfo InElementInfo, int InIndent)
-            {
-                string indentStr = "";
-                for (int i = 0; i < InIndent; i++)
-                { indentStr += "    "; }
-
-                RefCodes.Add(indentStr + "{");
-
-                if (InElementInfo.IsExtraContains("JSDecls"))
+                resultLns.Add($"    constructor() {{");
+                if (hasBase)
                 {
-                    IEnumerable<string> decls = InElementInfo.Extra.JSDecls;
-                    foreach (string decl in decls)
+                    resultLns.Add($"        super();");
+
+                }
+
+                // Generate member declaration codes.
+                void _GenerateMemberDecls(List<string> RefCodes, ElementInfo InElementInfo)
+                {
+                    if (InElementInfo.IsExtraContains("JSDecls"))
                     {
-                        // write indent
-                        RefCodes.Add(indentStr + "    " + decl);
+                        foreach (string decl in InElementInfo.Extra.JSDecls)
+                        { RefCodes.Add(decl); }
+                    }
+
+                    // recursive children
+                    List<string> subCodes = new List<string>();
+                    InElementInfo.ForeachSubInfo<ElementInfo>(sub => _GenerateMemberDecls(subCodes, sub));
+                    // write children
+                    if (subCodes.Count > 0)
+                    {
+                        RefCodes.Add("{");
+                        foreach (var subLn in subCodes)
+                        { RefCodes.Add("    " + subLn); }
+                        RefCodes.Add("}");
                     }
                 }
-                // recursive
-                InElementInfo.ForeachSubInfo<ElementInfo>(subSub => _GenerateMemberDecls(RefCodes, subSub, InIndent + 1));
 
-                RefCodes.Add(indentStr + "}");
+                // Gather decls from sub infos.
+                List<string> declCodes = new List<string>();
+                InTypeInfo.ForeachSubInfo<ElementInfo>(elemInfo => _GenerateMemberDecls(declCodes, elemInfo));
+                foreach (var declLn in declCodes)
+                { resultLns.Add("        " + declLn); }
+
+                resultLns.Add($"    }}");
             }
-
-            // Gather decls from sub infos.
-            InTypeInfo.ForeachSubInfo<ElementInfo>(elemInfo => _GenerateMemberDecls(resultLns, elemInfo, 2));
-
-            resultLns.Add($"    }}");
+            // ~ end ctor
 
             // Methods
             foreach (Info subInfo in InTypeInfo.SubInfos)
@@ -505,12 +509,14 @@ namespace nf.protoscript.test
                 dbCodes.Add($"    {elemName}.dataBindings.push(DynamicDataBinding.New({elemName}, dbSettings));");
                 dbCodes.Add($"}}");
             });
-            InInfo.Extra.JSDecls.Add($"// begin data bindings of {elemName}.");
-            foreach (var dbCode in dbCodes)
+            // write data-binding codes if have.
+            if (dbCodes.Count > 0)
             {
-                InInfo.Extra.JSDecls.Add($"{dbCode}");
+                InInfo.Extra.JSDecls.Add($"// begin data bindings of {elemName}.");
+                foreach (var dbCode in dbCodes)
+                { InInfo.Extra.JSDecls.Add($"{dbCode}"); }
+                InInfo.Extra.JSDecls.Add($"// ~ end data bindings of {elemName}.");
             }
-            InInfo.Extra.JSDecls.Add($"// ~ end data bindings of {elemName}.");
 
         }
 
