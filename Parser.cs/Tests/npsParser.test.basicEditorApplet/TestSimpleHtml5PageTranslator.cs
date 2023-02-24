@@ -36,7 +36,7 @@ namespace nf.protoscript.test
 
         internal static void FillDefaultEventAttachCodes(ElementInfo InInfo)
         {
-            InInfo.Extra.EventAttachExprCode = $"$OWNER{InInfo.Name} = $RHS;";
+            InInfo.Extra.EventAttachExprCode = $"$OWNER{InInfo.Name} = $RHS";
         }
         internal static string EnsureEventAttachCodes(ElementInfo InInfo)
         {
@@ -62,6 +62,13 @@ namespace nf.protoscript.test
                 // Gather data-binding properties.
                 DataBindingFeature.GatherDataSourceProperties(info);
             }
+
+            // Special translators: UI Event Listeners
+            TestCases.__internal_UIBaseType.ForeachSubInfoByHeader<ElementInfo>("event", elem =>
+            {
+                elem.Extra.EventAttachExprCode = $"$OWNER addUIEventHandler(\"{elem.Name}\", $RHS)";
+            }
+            );
 
             // tier P1: Type parse.
             // Parse elements recursively to gather Types used by next translation stages.
