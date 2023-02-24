@@ -184,8 +184,10 @@ namespace nf.protoscript.test
         ///         +Label
         ///             -Text = $db"HP"
         ///         +Button upBtn
+        ///             -Text = "+1"
         ///             -Click = new DataContextCall("HpUp")
         ///         +Button downBtn
+        ///             -Text = "-1"
         ///             -Click
         ///                 dataContext.HpUp -= 1
         ///                 
@@ -282,12 +284,18 @@ namespace nf.protoscript.test
                         } // end label
 
                         // +Button upBtn
+                        //     -Text = "+1"
                         //     -Click = new dataContextCall("HpUp")
                         ElementInfo upBtn = new ElementInfo(panel, "ui", "upBtn"
                             , __internal_ButtonType
                             , null
                             );
                         {
+                            ElementInfo text = new ElementInfo(upBtn, "ovr-property", "Text"
+                                , CommonTypeInfos.String
+                                , new STNodeConstant("+1")
+                                );
+
                             ElementInfo clickEvtHandler = new ElementInfo(upBtn, "event-impl", "click"
                                 , func_V_V_Type
                                 , new STNodeNew(__internal_DataContextCallType
@@ -299,6 +307,7 @@ namespace nf.protoscript.test
                                 );
                         }
                         // +Button downBtn
+                        //     -Text = "-1"
                         //     -Click
                         //         dataContext.HpUp -= 1
                         ElementInfo downBtn = new ElementInfo(panel, "ui", "downBtn"
@@ -306,6 +315,11 @@ namespace nf.protoscript.test
                             , null
                             );
                         {
+                            ElementInfo text = new ElementInfo(downBtn, "ovr-property", "Text"
+                                , CommonTypeInfos.String
+                                , new STNodeConstant("-1")
+                                );
+
                             ElementInfo clickMtd = new ElementInfo(downBtn, "event-impl", "click"
                                 , func_V_V_Type
                                 // dataContext.Hp = dataContext.Hp - 1
