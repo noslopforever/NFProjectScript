@@ -106,8 +106,8 @@ namespace nf.protoscript.test
             if (stnSub != null)
             {
                 // Exact Instructions of sub ST tree
-                var instLhs = _ExactInstructions(InFunction, stnBinOp.LHS);
-                var instRhs = _ExactInstructions(InFunction, stnBinOp.RHS);
+                var instLhs = _ExactInstructions(InFunction, stnSub.LHS);
+                var instRhs = _ExactInstructions(InFunction, stnSub.RHS);
                 var inst = new JsILInstruction_Sub(
                     InFunction
                     , instLhs
@@ -124,15 +124,35 @@ namespace nf.protoscript.test
                 Info propInfo = InfoHelper.FindPropertyAlongScopeTree(InFunction.ContextInfo, stnVarGet.IDName);
                 if (propInfo != null)
                 {
-                    return new JsILInstruction_Var(InFunction)
+                    if (propInfo.IsExtraContains("MemberGetExprCode"))
                     {
-                        AccessType = JsILInstruction_Var.EAccessType.Ref,
-                        Constant = false,
-                        OwnerPrefix = "this.",
-                        GetCode = propInfo.Extra.MemberGetExprCode,
-                        RefCode = propInfo.Extra.MemberRefExprCode,
-                        SetCode = propInfo.Extra.MemberSetExprCode,
-                    };
+                        // Property in translating Types.
+                        return new JsILInstruction_Var(InFunction)
+                        {
+                            AccessType = JsILInstruction_Var.EAccessType.Ref,
+                            Constant = false,
+                            OwnerPrefix = $"{InFunction.ContextName}.",
+                            GetCode = propInfo.Extra.MemberGetExprCode,
+                            RefCode = propInfo.Extra.MemberRefExprCode,
+                            SetCode = propInfo.Extra.MemberSetExprCode,
+                        };
+                    }
+                    else
+                    {
+                        // Properties in internal Types.
+
+                        // TODO better member-access codes
+                        return new JsILInstruction_Var(InFunction)
+                        {
+                            AccessType = JsILInstruction_Var.EAccessType.Ref,
+                            Constant = false,
+                            OwnerPrefix = $"{InFunction.ContextName}.",
+                            GetCode = $"$OWNER{propInfo.Name}",
+                            RefCode = $"$OWNER{propInfo.Name}",
+                            SetCode = $"$OWNER{propInfo.Name} = $RHS",
+                        };
+
+                    }
                 }
 
                 // direct property/local/global/member, ref it directly.
@@ -189,8 +209,10 @@ namespace nf.protoscript.test
             { constString = "null"; }
             else if (InConst.Value.GetType().IsValueType)
             { constString = InConst.Value.ToString(); }
+            else if (InConst.Value is string)
+            { constString = $"\"{InConst.Value as string}\""; }
             else if (InConst.Value is Info)
-            { constString = (InConst.Value as Info).Name; }
+            { constString = $"\"{(InConst.Value as Info).Name}\""; }
 
             return constString;
         }
@@ -455,6 +477,14 @@ namespace nf.protoscript.test
 
             // Only the rhs has been modified.
             RhsInstruction.MarkModified();
+        }
+
+        internal protected override void RequestRef()
+        {
+            foreach (var refInst in RefInstructions)
+            {
+                refInst.RequestRef();
+            }
         }
 
     }

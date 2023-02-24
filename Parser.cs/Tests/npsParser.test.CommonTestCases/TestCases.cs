@@ -19,7 +19,17 @@ namespace nf.protoscript.test
 
         public static DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(SystemTypePackageInfo.Instance, "FuncType", "func_V_V_Type");
 
-    
+        static TestCases()
+        {
+            // UIBase internal subinfos
+            {
+                ElementInfo dataContext = new ElementInfo(__internal_UIBaseType, "property", "dataContext"
+                    , CommonTypeInfos.Any
+                    , null
+                    );
+            }
+        }
+
 
         /// <summary>
         /// Basic language test:

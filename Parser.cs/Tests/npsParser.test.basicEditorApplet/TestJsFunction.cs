@@ -13,11 +13,17 @@ namespace nf.protoscript.test
         }
 
         /// <summary>
-        /// Context Info of the cpp. 
+        /// Context Info of the function. 
         /// Most of time, it will be the MethodInfo paired with the function.
         /// Sometimes may be the TypeInfo when describing a ctor/dtor or other special functions.
         /// </summary>
         public Info ContextInfo { get; }
+
+        /// <summary>
+        /// Context's name, for member-methods/ctors, it will always be "this".
+        /// But for StaticFunction(ThisObject), it should be changed to other names.
+        /// </summary>
+        public string ContextName { get; internal set; } = "this";
 
         /// <summary>
         /// Name of the function.
