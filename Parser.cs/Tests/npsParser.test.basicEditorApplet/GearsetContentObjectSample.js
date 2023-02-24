@@ -174,14 +174,29 @@ class Button extends ContentObject {
        // TODO Select from Text and children.
     }
     createElements() {
-        this._gscoElement = document.createElement("button");
-        this._gscoElement._gscoContentObject = this;
+        let btnEl = document.createElement("button");
+        btnEl._gscoContentObject = this;
 
-        this._gscoElement.setAttribute("class", "cobutton");
+        btnEl.setAttribute("class", "cobutton");
         {
             this.textNode = document.createTextNode(this._Text);
-            this._gscoElement.appendChild(this.textNode);
+            btnEl.appendChild(this.textNode);
         }
+        btnEl.addEventListener("click", function () {
+            let co = this._gscoContentObject;
+
+            // If click handler is valid, invoke it.
+            if (co && co.click) {
+                if (typeof co.click == "function") {
+                    co.click.apply(co, [co.dataContext]);
+                }
+                else if (co.click instanceof CommandBinding) {
+                    co.click.apply(co.dataContext);
+                }
+            }
+        });
+
+        this._gscoElement = btnEl;
         return this._gscoElement;
     }
 

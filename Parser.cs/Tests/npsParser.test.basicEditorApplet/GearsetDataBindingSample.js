@@ -239,3 +239,20 @@ class StaticDataBinding
         }
     }
 }
+
+
+
+class CommandBinding {
+    constructor(InCmdName) {
+        this.CommandName = InCmdName;
+    }
+
+    apply(InDataContext) {
+        if (InDataContext) {
+            let cmd = InDataContext[this.CommandName];
+            if (cmd) {
+                cmd.apply(InDataContext);
+            }
+        }
+    }
+}

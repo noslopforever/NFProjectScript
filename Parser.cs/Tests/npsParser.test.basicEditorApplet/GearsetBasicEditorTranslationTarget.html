@@ -17,6 +17,9 @@
                     this.HP = val;
                     this.DSComp.Trigger("HP");
                 }
+                HPUp() {
+                    this.setHP(this.HP + 1);
+                }
             }
 
             // CharacterEditor's inline type
@@ -39,6 +42,39 @@
                                 let dbSettings = DataBindingSettings.New("dataContext", "", "HP", "this", "", "Text");
                                 Anonymous_label_0.dataBindings.push(DynamicDataBinding.New(Anonymous_label_0, dbSettings));
                             }
+                        }
+                        {
+                            let upBtn = new Button(characterInfoPanel);
+                            characterInfoPanel.upBtn = upBtn;
+                            // begin data bindings of upBtn.
+                            // ~ end data bindings of upBtn.
+                            {
+                            }
+                            // begin command bindings of upBtn.
+                            {
+                                upBtn.click = new CommandBinding("HPUp");
+                            }
+                            // ~ end command bindings of upBtn.
+                        }
+                        {
+                            let downBtn = new Button(characterInfoPanel);
+                            characterInfoPanel.downBtn = downBtn;
+                            // begin override properties
+                            // ~ end override properties
+                            // begin override events
+                            {
+                                let fn = function (dc) {
+                                    dc.setHP(dc.HP - 1);
+                                }
+                                downBtn.click = fn;
+                            }
+                            // ~ end override events
+                            // begin data bindings of downBtn.
+                            // ~ end data bindings of downBtn.
+                            {
+                            }
+                            // begin command bindings of upBtn.
+                            // ~ end command bindings of upBtn.
                         }
                     }
                 }

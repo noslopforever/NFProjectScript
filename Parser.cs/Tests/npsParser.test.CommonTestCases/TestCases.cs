@@ -203,13 +203,13 @@ namespace nf.protoscript.test
                         );
                     // +cmd HpUp()
                     //     Hp += 1
-                    ElementInfo HpUp = new ElementInfo(characterType, "command", "HpUp"
+                    ElementInfo HpUp = new ElementInfo(characterType, "command", "HPUp"
                         , func_V_V_Type
                         , new STNodeSequence(new ISyntaxTreeNode[] {
                             new STNodeAssign(
-                                new STNodeGetVar("Hp", true)
+                                new STNodeGetVar("HP", true)
                                 , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                    , new STNodeGetVar("Hp")
+                                    , new STNodeGetVar("HP")
                                     , new STNodeConstant(1)
                                 )
                             )
@@ -280,10 +280,9 @@ namespace nf.protoscript.test
                             , null
                             );
                         {
-                            //MemberInfo clickEvt = new MemberInfo(upBtn, "event-impl", "click"
-                            //    , __internal_CommandBindingType
-                            //    , new STNodeCmdBinding("HpUp")
-                            //    );
+                            AttributeInfo lblDbAttr = new AttributeInfo(label, "cb", "Anonymous_cb_0"
+                                , new STNodeDataBinding("HPUp", "click")
+                                );
                         }
                         // +Button downBtn
                         //     -Click
@@ -298,9 +297,9 @@ namespace nf.protoscript.test
                                 // Hp = Hp - 1
                                 , new STNodeSequence(new ISyntaxTreeNode[] {
                                     new STNodeAssign(
-                                        new STNodeGetVar("Hp", true)
+                                        new STNodeGetVar("HP", true)
                                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Sub
-                                            , new STNodeGetVar("Hp")
+                                            , new STNodeGetVar("HP")
                                             , new STNodeConstant(1)
                                         )
                                     )
