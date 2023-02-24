@@ -33,7 +33,7 @@ namespace nf.protoscript.test
         /// <summary>
         /// Generate code for a syntax-tree node.
         /// </summary>
-        public static IList<String> GenCodeForExpr(JsFunction InFunction, ISyntaxTreeNode InSTNode)
+        public static List<String> GenCodeForExpr(JsFunction InFunction, ISyntaxTreeNode InSTNode)
         {
             List<string> strList = new List<string>();
 
@@ -121,38 +121,21 @@ namespace nf.protoscript.test
             STNodeGetVar stnVarGet = InSTNode as STNodeGetVar;
             if (stnVarGet != null)
             {
-                Info propInfo = InfoHelper.FindPropertyAlongScopeTree(InFunction.ContextInfo, stnVarGet.IDName);
+                ElementInfo propInfo = InfoHelper.FindPropertyAlongScopeTree(InFunction.ContextInfo, stnVarGet.IDName);
                 if (propInfo != null)
                 {
-                    if (propInfo.IsExtraContains("MemberGetExprCode"))
-                    {
-                        // Property in translating Types.
-                        return new JsILInstruction_Var(InFunction)
-                        {
-                            AccessType = JsILInstruction_Var.EAccessType.Ref,
-                            Constant = false,
-                            OwnerPrefix = $"{InFunction.ContextName}.",
-                            GetCode = propInfo.Extra.MemberGetExprCode,
-                            RefCode = propInfo.Extra.MemberRefExprCode,
-                            SetCode = propInfo.Extra.MemberSetExprCode,
-                        };
-                    }
-                    else
-                    {
-                        // Properties in internal Types.
+                    SimpleHtml5PageTranslator.EnsureMemberAccessCodes(propInfo);
 
-                        // TODO better member-access codes
-                        return new JsILInstruction_Var(InFunction)
-                        {
-                            AccessType = JsILInstruction_Var.EAccessType.Ref,
-                            Constant = false,
-                            OwnerPrefix = $"{InFunction.ContextName}.",
-                            GetCode = $"$OWNER{propInfo.Name}",
-                            RefCode = $"$OWNER{propInfo.Name}",
-                            SetCode = $"$OWNER{propInfo.Name} = $RHS",
-                        };
-
-                    }
+                    // Property in translating Types.
+                    return new JsILInstruction_Var(InFunction)
+                    {
+                        AccessType = JsILInstruction_Var.EAccessType.Ref,
+                        Constant = false,
+                        OwnerPrefix = $"{InFunction.ContextName}.",
+                        GetCode = propInfo.Extra.MemberGetExprCode,
+                        RefCode = propInfo.Extra.MemberRefExprCode,
+                        SetCode = propInfo.Extra.MemberSetExprCode,
+                    };
                 }
 
                 // direct property/local/global/member, ref it directly.
@@ -347,7 +330,7 @@ namespace nf.protoscript.test
         internal protected override string GenCode(IList<String> InCodeList)
         {
             string filtedGetCode = GetCode.Replace("$OWNER", $"{OwnerPrefix}");
-            string filtedRefCode = GetCode.Replace("$OWNER", $"{OwnerPrefix}");
+            string filtedRefCode = RefCode == null? RefCode: RefCode.Replace("$OWNER", $"{OwnerPrefix}");
 
             // not ref-required, return getter immediately.
             if (!IsRefRequired)
@@ -494,7 +477,7 @@ namespace nf.protoscript.test
     /// $R: Foo(p0,...pn) or new FooType(p0,...pn)
     /// </summary>
     class JsILInstruction_Call
-        :JsInstruction
+        : JsInstruction
     {
         public JsILInstruction_Call(JsFunction InHostFunction, string InCallCode, JsInstruction[] InParams)
             : base(InHostFunction)

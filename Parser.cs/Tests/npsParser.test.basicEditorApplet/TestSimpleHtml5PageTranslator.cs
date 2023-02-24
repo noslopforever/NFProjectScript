@@ -1,4 +1,4 @@
-﻿using nf.protoscript;
+using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,38 @@ namespace nf.protoscript.test
     /// </summary>
     class SimpleHtml5PageTranslator
     {
+        internal static void FillDefaultMemberAccessCodes(ElementInfo InInfo)
+        {
+            InInfo.Extra.MemberGetExprCode = $"$OWNER{InInfo.Name}";
+            InInfo.Extra.MemberSetExprCode = $"$OWNER{InInfo.Name} = ($RHS)";
+            InInfo.Extra.MemberRefExprCode = $"$OWNER{InInfo.Name}";
+        }
+        internal static void EnsureMemberAccessCodes(ElementInfo InInfo)
+        {
+            if (!InInfo.IsExtraContains("MemberGetExprCode"))
+            { InInfo.Extra.MemberGetExprCode = $"$OWNER{InInfo.Name}"; }
+
+            if (!InInfo.IsExtraContains("MemberSetExprCode"))
+            { InInfo.Extra.MemberSetExprCode = $"$OWNER{InInfo.Name} = $RHS"; }
+
+            if (!InInfo.IsExtraContains("MemberRefExprCode"))
+            { InInfo.Extra.MemberRefExprCode = $"$OWNER{InInfo.Name}"; }
+        }
+
+        internal static void FillDefaultEventAttachCodes(ElementInfo InInfo)
+        {
+            InInfo.Extra.EventAttachExprCode = $"$OWNER{InInfo.Name} = $RHS;";
+        }
+        internal static string EnsureEventAttachCodes(ElementInfo InInfo)
+        {
+            if (!InInfo.IsExtraContains("EventAttachExprCode"))
+            { InInfo.Extra.EventAttachExprCode = $"$OWNER{InInfo.Name} = $RHS"; }
+
+            return InInfo.Extra.EventAttachExprCode;
+        }
+
+
+
         public void Translate(ProjectInfo InProjInfo)
         {
             // DataBinding tier 1: gather all databinding names
@@ -234,9 +266,7 @@ namespace nf.protoscript.test
                     // use member directly.
                     InInfo.Extra.JSDecls.Add($"this.{InInfo.Name} = null;");
 
-                    InInfo.Extra.MemberGetExprCode = $"$OWNER{InInfo.Name}";
-                    InInfo.Extra.MemberSetExprCode = $"$OWNER{InInfo.Name} = ($RHS)";
-                    InInfo.Extra.MemberRefExprCode = $"$OWNER{InInfo.Name}";
+                    FillDefaultMemberAccessCodes(InInfo);
                 }
             }
             else if (InInfo.Header == "ovr-property")
