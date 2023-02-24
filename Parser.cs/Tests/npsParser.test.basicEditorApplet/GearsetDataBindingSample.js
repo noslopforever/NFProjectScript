@@ -242,7 +242,7 @@ class StaticDataBinding
 
 
 
-class CommandBinding {
+class DataContextCall {
     constructor(InCmdName) {
         this.CommandName = InCmdName;
     }

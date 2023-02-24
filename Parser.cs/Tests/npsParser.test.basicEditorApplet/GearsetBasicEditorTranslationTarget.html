@@ -48,33 +48,27 @@
                             characterInfoPanel.upBtn = upBtn;
                             // begin data bindings of upBtn.
                             // ~ end data bindings of upBtn.
+
+                            // begin event handlers of upBtn.
                             {
+                                upBtn.click = new DataContextCall("HPUp");
                             }
-                            // begin command bindings of upBtn.
-                            {
-                                upBtn.click = new CommandBinding("HPUp");
-                            }
-                            // ~ end command bindings of upBtn.
+                            // ~ end event handlers of upBtn.
                         }
                         {
                             let downBtn = new Button(characterInfoPanel);
                             characterInfoPanel.downBtn = downBtn;
-                            // begin override properties
-                            // ~ end override properties
-                            // begin override events
+                            // begin data bindings of downBtn.
+                            // ~ end data bindings of downBtn.
+
+                            // begin event handlers of downBtn.
                             {
                                 let fn = function () {
                                     this.dataContext.setHP(this.dataContext.HP - 1);
                                 }
                                 downBtn.click = fn;
                             }
-                            // ~ end override events
-                            // begin data bindings of downBtn.
-                            // ~ end data bindings of downBtn.
-                            {
-                            }
-                            // begin command bindings of upBtn.
-                            // ~ end command bindings of upBtn.
+                            // ~ end event handlers of downBtn.
                         }
                     }
                 }

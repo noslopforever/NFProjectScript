@@ -1,4 +1,4 @@
-using nf.protoscript;
+﻿using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 
@@ -13,6 +13,7 @@ namespace nf.protoscript.test
         public static TypeInfo __internal_LabelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "label", __internal_UIBaseType);
         public static TypeInfo __internal_ButtonType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "button", __internal_UIBaseType);
 
+        public static TypeInfo __internal_DataContextCallType = new TypeInfo(SystemTypePackageInfo.Instance, "data", "DataContextCall");
 
         public static TypeInfo __internal_EditorType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "editor");
         public static TypeInfo __internal_AppletType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "applet");
@@ -183,10 +184,10 @@ namespace nf.protoscript.test
         ///         +Label
         ///             -Text = $db"HP"
         ///         +Button upBtn
-        ///             -Click = $cb"HpUp"
+        ///             -Click = new DataContextCall("HpUp")
         ///         +Button downBtn
         ///             -Click
-        ///                 HpUp -= 1
+        ///                 dataContext.HpUp -= 1
         ///                 
         /// $applet
         //     -CharacterEditor characterEditor
@@ -281,19 +282,25 @@ namespace nf.protoscript.test
                         } // end label
 
                         // +Button upBtn
-                        //     -Click = $cb"HpUp"
+                        //     -Click = new dataContextCall("HpUp")
                         ElementInfo upBtn = new ElementInfo(panel, "ui", "upBtn"
                             , __internal_ButtonType
                             , null
                             );
                         {
-                            AttributeInfo lblDbAttr = new AttributeInfo(label, "cb", "Anonymous_cb_0"
-                                , new STNodeDataBinding("HPUp", "click")
+                            ElementInfo clickEvtHandler = new ElementInfo(upBtn, "event-impl", "click"
+                                , func_V_V_Type
+                                , new STNodeNew(__internal_DataContextCallType
+                                    , new ISyntaxTreeNode[]
+                                        {
+                                            new STNodeConstant("HPUp")
+                                        }
+                                    )
                                 );
                         }
                         // +Button downBtn
                         //     -Click
-                        //         HpUp -= 1
+                        //         dataContext.HpUp -= 1
                         ElementInfo downBtn = new ElementInfo(panel, "ui", "downBtn"
                             , __internal_ButtonType
                             , null
@@ -301,12 +308,18 @@ namespace nf.protoscript.test
                         {
                             ElementInfo clickMtd = new ElementInfo(downBtn, "event-impl", "click"
                                 , func_V_V_Type
-                                // Hp = Hp - 1
+                                // dataContext.Hp = dataContext.Hp - 1
                                 , new STNodeSequence(new ISyntaxTreeNode[] {
                                     new STNodeAssign(
-                                        new STNodeGetVar("HP", true)
+                                        new STNodeSub(
+                                            new STNodeGetVar("dataContext")
+                                            , new STNodeGetVar("HP", true)
+                                            )
                                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Sub
-                                            , new STNodeGetVar("HP")
+                                            , new STNodeSub(
+                                                new STNodeGetVar("dataContext")
+                                                , new STNodeGetVar("HP", true)
+                                                )
                                             , new STNodeConstant(1)
                                         )
                                     )

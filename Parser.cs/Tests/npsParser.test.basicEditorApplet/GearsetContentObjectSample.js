@@ -190,7 +190,7 @@ class Button extends ContentObject {
                 if (typeof co.click == "function") {
                     co.click.apply(co);
                 }
-                else if (co.click instanceof CommandBinding) {
+                else if (co.click instanceof DataContextCall) {
                     co.click.apply(co.dataContext);
                 }
             }

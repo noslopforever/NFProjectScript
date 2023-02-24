@@ -294,6 +294,58 @@ namespace nf.protoscript.test
                 // register methods
                 InInfo.Extra.JSFuncs = new JsFunction[] { jsFunc };
             }
+            else if (InInfo.Header == "event-impl")
+            {
+                InInfo.Extra.JSDecls = new List<string>();
+                string parentName = (InInfo.ParentInfo is TypeInfo) ? "this" : InInfo.ParentInfo.Name;
+                if (InInfo.InitSyntax == null)
+                {
+                    // TODO Find if it is an object, which can be overrided by object-template.
+                    string objTemplClassName = InInfo.ElementType.Name;
+                    InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = new {objTemplClassName}();");
+                }
+                else
+                {
+                    // Inline function.
+                    if (InInfo.InitSyntax is STNodeSequence)
+                    {
+                        // scope type: global by default.
+                        TypeInfo scopeType = null;
+                        if (InInfo.ParentInfo is TypeInfo)
+                        { scopeType = InInfo.ParentInfo as TypeInfo; }
+                        if (InInfo.ParentInfo is ElementInfo)
+                        { scopeType = (InInfo.ParentInfo as ElementInfo).ElementType; }
+
+                        var jsFunc = new JsFunction(scopeType);
+                        STNodeSequence exprSeq = InInfo.InitSyntax as STNodeSequence;
+                        List<string> codeLns = new List<string>();
+                        foreach (var stNode in exprSeq.NodeList)
+                        {
+                            IList<string> codeList = JsInstruction.GenCodeForExpr(jsFunc, stNode);
+                            foreach (string code in codeList)
+                            {
+                                codeLns.Add(code + ";");
+                            }
+                        }
+
+                        // gen code likes: 
+                        // click = function () {
+                        // }
+                        InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = function () {{");
+                        foreach (var ln in codeLns)
+                        {
+                            InInfo.Extra.JSDecls.Add("    " + ln);
+                        }
+                        InInfo.Extra.JSDecls.Add($"}}");
+                    }
+                    // DataBindingCall or other functors.
+                    else
+                    {
+                        IList<string> codes = JsInstruction.GenCodeForExpr(new JsFunction(InInfo.ParentInfo), InInfo.InitSyntax);
+                        InInfo.Extra.JSDecls.Add($"{parentName}.{InInfo.Name} = {codes[0]};");
+                    }
+                }
+            }
             else if (InInfo.Header == "ui")
             {
                 string parentName = (InInfo.ParentInfo is TypeInfo) ? "this.UIRoot" : InInfo.ParentInfo.Name;
