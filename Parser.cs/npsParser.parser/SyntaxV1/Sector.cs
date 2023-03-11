@@ -47,6 +47,15 @@ namespace nf.protoscript.parser.syntax1
         }
 
         /// <summary>
+        /// Try collect Type infos provided by this sector.
+        /// </summary>
+        /// <param name="InProjectInfo"></param>
+        /// <returns></returns>
+        public virtual void TryCollectTypes(ProjectInfo InProjectInfo)
+        {
+        }
+
+        /// <summary>
         /// Collect Infos contain in this sector.
         /// </summary>
         /// <param name="InProjectInfo"></param>

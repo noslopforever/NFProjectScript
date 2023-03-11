@@ -1,5 +1,4 @@
-﻿using nf.protoscript.parser.token;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1
@@ -13,7 +12,6 @@ namespace nf.protoscript.parser.syntax1
         public Parser()
         {
         }
-
 
         public enum ESystemDefault
         {
@@ -41,6 +39,11 @@ namespace nf.protoscript.parser.syntax1
         private List<Sector> _Sectors = null;
 
         /// <summary>
+        /// Root sectors.
+        /// </summary>
+        private List<Sector> _RootSectors = null;
+
+        /// <summary>
         /// States to parse root sectors.
         /// </summary>
         private List<SectorFactory> _RootFactories = new List<SectorFactory>();
@@ -49,16 +52,17 @@ namespace nf.protoscript.parser.syntax1
         /// States to parse non-root sectors.
         /// </summary>
         private List<SectorFactory> _NonRootFactories = new List<SectorFactory>();
-
+ 
         /// <summary>
         /// Parse a nps file into sectors.
         /// </summary>
         /// <param name="InReader"></param>
-        void Parse(ICodeContentReader InReader)
+        public void Parse(ProjectInfo InProjectInfo, ICodeContentReader InReader)
         {
             _Sectors = new List<Sector>();
+            _RootSectors = new List<Sector>();
 
-            // Parser states.
+            // Parse the file.
             while (!InReader.IsEndOfFile)
             {
                 // ## Reforge codes.
@@ -71,48 +75,63 @@ namespace nf.protoscript.parser.syntax1
                 if (codesTrimmed == "")
                 { continue; }
 
-                // ## Let states determine how to parse the element.
-
-
+                // ## Let factories determine how to parse the element.
                 Sector sector = null;
-                // If indent == 0, try parse the line with root-factories.
-                if (indent == 0)
+                // If indent == 0, use root-factories.
+                // else, use non-root-factories
+                var factories = _RootFactories;
+                if (indent != 0)
+                { factories = _NonRootFactories; }
+ 
+                // Try select a factory which can recognize the codes.
+                foreach (var secFactory in factories)
                 {
-                    // select the factory who can recognize sub elements.
-                    foreach (var secFactory in _RootFactories)
-                    {
-                        sector = secFactory.Parse(InReader, codesTrimmed);
-                        if (sector != null)
-                        { break; }
-                    }
-                }
-                // else, try parse the line with sub-factories
-                else
-                {
-                    foreach (var secFactory in _NonRootFactories)
-                    {
-                        sector = secFactory.Parse(InReader, codesTrimmed);
-                        if (sector != null)
-                        { break; }
-                    }
+                    sector = secFactory.Parse(InReader, codesTrimmed);
+                    if (sector != null)
+                    { break; }
                 }
 
+                // Unrecognized sector, error out.
                 if (sector == null)
                 {
-                    // Unrecognized sector
                     throw new NotImplementedException();
                 }
 
-
-                // Find the parent sector, and attach to it.
+                // Try attach the sector to its parent.
+                // If no-parent, attach it to the root.
                 Sector parentSector = FindLastOuterSector(indent);
-                parentSector._AddSubSector(sector);
+                if (parentSector != null)
+                { parentSector._AddSubSector(sector); }
+                else
+                { _RootSectors.Add(sector); }
+
                 // save indent and push sector.
                 sector.Indent = indent;
                 _Sectors.Add(sector);
 
                 // Move to the next line.
                 InReader.GoNextLine();
+            }
+
+            // ## Gather all types from these sectors
+            foreach (var sector in _Sectors)
+            {
+                sector.TryCollectTypes(InProjectInfo);
+            }
+
+            // ## Collect all infos recursively.
+            void _CollectSectorInfosRecursively(Sector InSec, Info InParentInfo)
+            {
+                Info thisSecInfo = InSec.CollectInfos(InProjectInfo, InParentInfo);
+                foreach (var subSec in InSec.SubSectors)
+                {
+                    _CollectSectorInfosRecursively(subSec, thisSecInfo);
+                }
+            }
+            foreach (var sector in _RootSectors)
+            {
+                _CollectSectorInfosRecursively(sector, InProjectInfo);
+                sector.CollectInfos(InProjectInfo, InProjectInfo);
             }
 
         }

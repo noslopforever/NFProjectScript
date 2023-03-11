@@ -21,6 +21,13 @@ namespace nf.protoscript.parser.syntax1
         /// </summary>
         public string SingletonName { get; }
 
+        // implement abstract methods
+        //
+        public override void TryCollectTypes(ProjectInfo InProjectInfo)
+        {
+            TypeInfo singletonType = new TypeInfo(InProjectInfo, "model", SingletonName);
+        }
+
         public override Info CollectInfos(ProjectInfo InProjectInfo, Info InParentInfo)
         {
             System.Diagnostics.Debug.Assert(InProjectInfo == InParentInfo);
@@ -57,6 +64,11 @@ namespace nf.protoscript.parser.syntax1
 
         // implement abstract methods
         //
+        public override void TryCollectTypes(ProjectInfo InProjectInfo)
+        {
+            TypeInfo singletonType = new TypeInfo(InProjectInfo, "model", TypeName);
+        }
+
         public override Info CollectInfos(ProjectInfo InProjectInfo, Info InParentInfo)
         {
             System.Diagnostics.Debug.Assert(InProjectInfo == InParentInfo);
