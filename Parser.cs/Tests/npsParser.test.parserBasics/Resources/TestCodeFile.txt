@@ -1,0 +1,7 @@
+$ThisIsASingleton
+
+$applet GApp
+
+unit tank
+
+unit tower

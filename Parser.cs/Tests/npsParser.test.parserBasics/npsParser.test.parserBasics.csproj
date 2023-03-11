@@ -10,4 +10,24 @@
     <ProjectReference Include="..\..\npsParser.utils.serialization.xml\npsParser.utils.serialization.xml.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="TextResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TextResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="TextResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>TextResources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>nf.protoscript.test</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
 </Project>

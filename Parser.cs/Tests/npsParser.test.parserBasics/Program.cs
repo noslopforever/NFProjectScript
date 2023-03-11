@@ -12,10 +12,11 @@ namespace nf.protoscript.test
     {
         static void Main(string[] args)
         {
-            parser.syntax1.Parser testParser = new parser.syntax1.Parser(parser.syntax1.Parser.ESystemDefault.On);
+            parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
 
-            ICodeContentReader reader = null;
             ProjectInfo testProj = new ProjectInfo("TestProject");
+            ICodeContentReader reader = StringCodeContentReader.LoadFromString(TextResources.TestCodeFile);
+
             testParser.Parse(testProj, reader);
 
             // Output infos parsed by the test-parser
