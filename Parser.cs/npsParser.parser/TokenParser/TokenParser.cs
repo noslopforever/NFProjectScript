@@ -24,6 +24,8 @@ namespace nf.protoscript.parser.token
             typeWithRegexes.Add((ETokenType.Unknown, new string[] { CommonTokenRegexes.ALL }));
 
             List<TokenTypeWithRegexes> tokenTypes = new List<TokenTypeWithRegexes>();
+
+            bool addVerticalBar = false;
             foreach (var tokenTypeWithRegexes in typeWithRegexes)
             {
                 ETokenType tokenType = tokenTypeWithRegexes.Item1;
@@ -31,9 +33,16 @@ namespace nf.protoscript.parser.token
 
                 for (int i = 0; i < regexes.Length; i++)
                 {
+                    // Add vertical bar except the first element.
+                    // E0|E1|E2|...
+                    if (addVerticalBar)
+                    { _TokenRegexPatterns += "|"; }
+                    addVerticalBar = true;
+
+                    string regexGroupName = _GenRegexCheckName(tokenType, i);
                     string regex = regexes[i];
                     _TokenRegexPatterns += string.Format("(?<{0}>{1})"
-                        , _GenRegexCheckName(tokenType, i)
+                        , regexGroupName
                         , regex
                         );
                 }
@@ -119,7 +128,7 @@ namespace nf.protoscript.parser.token
         /// </summary>
         string _GenRegexCheckName(ETokenType InType, int InRegexIndex)
         {
-            return string.Format("(N{0}_{1})", InType, InRegexIndex);
+            return string.Format("N{0}_{1}", InType, InRegexIndex);
         }
 
         /// <summary>
