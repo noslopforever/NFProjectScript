@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1
@@ -13,24 +13,22 @@ namespace nf.protoscript.parser.syntax1
         {
         }
 
-        public enum ESystemDefault
-        {
-            On,
-        }
         /// <summary>
-        /// We should use new Parser(Parser.ESystemDefault.On) to create a Parser with system default settings.
+        /// Create a Parser with system default settings.
         /// </summary>
-        public Parser(ESystemDefault InUseSystemDefault)
+        public static Parser CreateDefault()
         {
+            Parser parser = new Parser();
             // Register system factories
-            _RootFactories.Add(new SectorFactory_SingletonOrGlobal());
-            //_RootFactories.Add(new SectorFactory_Block());
-            _RootFactories.Add(new SectorFactory_Model());
+            parser._RootFactories.Add(new SectorFactory_SingletonOrGlobal());
+            //parser._RootFactories.Add(new SectorFactory_Block());
+            parser._RootFactories.Add(new SectorFactory_Model());
 
-            //_NonRootFactories.Add(new SectorFactory_Block());
-            //_NonRootFactories.Add(new SectorFactory_Links());
-            //_NonRootFactories.Add(new SectorFactory_Expression());
-            //_NonRootFactories.Add(new SectorFactory_Element());
+            //parser._NonRootFactories.Add(new SectorFactory_Block());
+            //parser._NonRootFactories.Add(new SectorFactory_Links());
+            //parser._NonRootFactories.Add(new SectorFactory_Expression());
+            //parser._NonRootFactories.Add(new SectorFactory_Element());
+            return parser;
         }
 
         /// <summary>
