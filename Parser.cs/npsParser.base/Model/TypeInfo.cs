@@ -28,6 +28,15 @@ namespace nf.protoscript
         [Serialization.SerializableInfo]
         public TypeInfo BaseType { get; private set; }
 
+        /// <summary>
+        /// Set Base Type internally.
+        /// </summary>
+        /// <param name="InBaseType"></param>
+        public void __Internal_SetBaseType(TypeInfo InBaseType)
+        {
+            BaseType = InBaseType;
+        }
+
     }
 
 }
