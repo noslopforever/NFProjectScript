@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
-using System.Xml;
-using System.Xml.Schema;
-using nf.protoscript.Serialization;
+﻿using nf.protoscript.Serialization;
 using System;
-using System.Reflection.PortableExecutable;
+using System.Collections.Generic;
+using System.Xml;
 
-namespace nf.protoscript.test
+namespace nf.protoscript.utils.serialization.xml
 {
 
+    /// <summary>
+    /// Helper to make conversion between SFD and XML-strings.
+    /// </summary>
     public static class SFDXmlSerializer
     {
         static SFDXmlSerializer()
@@ -26,14 +26,20 @@ namespace nf.protoscript.test
             _AddTypeAlias("c[]", typeof(char[]));
             _AddTypeAlias("SFD[]", typeof(SerializationFriendlyData[]));
 
-            _AutoFillNS.Add("System");
-            _AutoFillNS.Add("System.Collection");
             _AutoFillNS.Add("System.Collection.Generic");
-            _AutoFillNS.Add("nf.protoscript");
-            _AutoFillNS.Add("nf.protoscript.syntaxtree");
+            _AutoFillNS.Add("System.Collection");
+            _AutoFillNS.Add("System");
             _AutoFillNS.Add("nf.protoscript.Serialization");
+            _AutoFillNS.Add("nf.protoscript.syntaxtree");
+            _AutoFillNS.Add("nf.protoscript");
         }
 
+        /// <summary>
+        /// Write SFD properties to a Xml.
+        /// </summary>
+        /// <param name="InWriter"></param>
+        /// <param name="InName"></param>
+        /// <param name="InDataObj"></param>
         public static void WriteSFDProperty(XmlWriter InWriter, string InName, object InDataObj)
         {
             SerializationFriendlyData propData = InDataObj as SerializationFriendlyData;
@@ -117,6 +123,11 @@ namespace nf.protoscript.test
 
         }
 
+        /// <summary>
+        /// Read XmlNode as a SFD
+        /// </summary>
+        /// <param name="InNode"></param>
+        /// <returns></returns>
         public static SerializationFriendlyData ReadSFDNode(XmlNode InNode)
         {
             SerializationFriendlyData sfd = SerializationFriendlyData.NewEmpty();
@@ -167,10 +178,22 @@ namespace nf.protoscript.test
             }
         }
 
+        /// <summary>
+        /// Auto-fill namespaces. These namespaces should be used to ful-fill short type names automatically.
+        /// e.g. We got System.Collection.Array after ful-filling the 'Array' with 'System.Collection'.
+        /// </summary>
         private static List<string> _AutoFillNS = new List<string>();
 
+        /// <summary>
+        /// Find Type by its alias (short name)
+        /// </summary>
         private static Dictionary<string, Type> _AliasToTypeTable = new Dictionary<string, Type>();
+
+        /// <summary>
+        /// Find alias (short name) by Type.
+        /// </summary>
         private static Dictionary<Type, string> _TypeToAliasTable = new Dictionary<Type, string>();
+
         static void _AddTypeAlias(string InName, Type InType)
         {
             _AliasToTypeTable[InName] = InType;
@@ -282,35 +305,59 @@ namespace nf.protoscript.test
             return valInst;
         }
 
+        /// <summary>
+        /// Convert Type to string.
+        /// </summary>
+        /// <param name="InType"></param>
+        /// <returns></returns>
         private static string _ConvertTypeToString(Type InType)
         {
             string typeName = InType.FullName;
 
+            // Get alias from the Type.
             string alias = _GetTypeAlias(InType);
             if (alias != null)
             {
                 typeName = alias;
             }
+
+            // Remove auto-fill-NSs from string
+            foreach (var ns in _AutoFillNS)
+            {
+                if (typeName.StartsWith(ns)) {
+                    typeName = typeName.Substring(ns.Length + 1);
+                }
+            }
+
             return typeName;
         }
 
+        /// <summary>
+        /// Read string as a Type.
+        /// </summary>
+        /// <param name="InString"></param>
+        /// <returns></returns>
         private static Type _ParseTypeFromString(string InString)
         {
             Type type = Type.GetType(InString);
             if (type != null)
-            {
-                return type;
-            }
+            { return type; }
 
             type = _GetTypeByAlias(InString);
             if (type != null)
+            { return type; }
+
+            // Try auto-fill-NSs
+            foreach (var ns in _AutoFillNS)
             {
-                return type;
+                string fullName = ns + "." + InString;
+                type = Type.GetType(InString);
+                if (type != null)
+                { return type; }
             }
 
             return null;
         }
 
     }
-
 }
