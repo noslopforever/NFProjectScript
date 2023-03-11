@@ -98,7 +98,7 @@ namespace nf.protoscript.parser.syntax1
             string codesWithoutDollar = InCodesWithoutIndent.Substring(1);
 
             List<token.Token> tokens = new List<token.Token>();
-            token.TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, ref tokens);
+            token.TokenParser_CommonNps.Instance.ParseLine(codesWithoutDollar, ref tokens);
             if (tokens.Count == 1)
             {
                 if (tokens[0].TokenType == token.ETokenType.ID)

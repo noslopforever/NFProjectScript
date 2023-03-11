@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1
@@ -61,7 +61,7 @@ namespace nf.protoscript.parser.syntax1
             _RootSectors = new List<Sector>();
 
             // Parse the file.
-            while (!InReader.IsEndOfFile)
+            do
             {
                 // ## Reforge codes.
                 CodeLine codeLn = InReader.CurrentCodeLine;
@@ -84,9 +84,15 @@ namespace nf.protoscript.parser.syntax1
                 // Try select a factory which can recognize the codes.
                 foreach (var secFactory in factories)
                 {
-                    sector = secFactory.Parse(InReader, codesTrimmed);
-                    if (sector != null)
-                    { break; }
+                    try
+                    {
+                        sector = secFactory.Parse(InReader, codesTrimmed);
+                        if (sector != null)
+                        { break; }
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
 
                 // Unrecognized sector, error out.
@@ -108,8 +114,7 @@ namespace nf.protoscript.parser.syntax1
                 _Sectors.Add(sector);
 
                 // Move to the next line.
-                InReader.GoNextLine();
-            }
+            } while (InReader.GoNextLine());
 
             // ## Gather all types from these sectors
             foreach (var sector in _Sectors)
@@ -129,7 +134,6 @@ namespace nf.protoscript.parser.syntax1
             foreach (var sector in _RootSectors)
             {
                 _CollectSectorInfosRecursively(sector, InProjectInfo);
-                sector.CollectInfos(InProjectInfo, InProjectInfo);
             }
 
         }
@@ -141,7 +145,7 @@ namespace nf.protoscript.parser.syntax1
         /// <returns></returns>
         Sector FindLastOuterSector(int InCurrentIndent)
         {
-            for (int i = _Sectors.Count - 1; i >= 0; i++)
+            for (int i = _Sectors.Count - 1; i >= 0; i--)
             {
                 if (_Sectors[i].Indent < InCurrentIndent)
                 { return _Sectors[i]; }
