@@ -2,7 +2,10 @@
 
 namespace nf.protoscript.parser
 {
-    public class Class1
+
+    class ParserEnvironment
     {
+
     }
+
 }

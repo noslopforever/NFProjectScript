@@ -134,6 +134,17 @@ namespace nf.protoscript
             return null;
         }
 
+        /// <summary>
+        /// Find Type from ProjectInfo.
+        /// </summary>
+        /// <param name="InProjectInfo"></param>
+        /// <param name="InTypeName"></param>
+        /// <returns></returns>
+        public static TypeInfo FindType(ProjectInfo InProjectInfo, string InTypeName)
+        {
+            return InProjectInfo.FindTheFirstSubInfoWithName<TypeInfo>(InTypeName);
+        }
+
     }
 
 }

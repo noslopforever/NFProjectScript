@@ -5,4 +5,8 @@
     <RootNamespace>nf.protoscript.parser</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\npsParser.base\npsParser.base.csproj" />
+  </ItemGroup>
+
 </Project>
