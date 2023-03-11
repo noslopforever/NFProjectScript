@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Xml;
 using System.Text;
+using nf.protoscript.utils.serialization.xml;
 
 namespace nf.protoscript.test
 {
