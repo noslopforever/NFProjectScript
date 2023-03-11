@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.serializatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "npsParser.test.basicEditorApplet", "Tests\npsParser.test.basicEditorApplet\npsParser.test.basicEditorApplet.csproj", "{164086E2-FA8F-453C-84F4-EAFC6F582374}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "npsParser.test.parserBasics", "Tests\npsParser.test.parserBasics\npsParser.test.parserBasics.csproj", "{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.utils.serialization.xml", "npsParser.utils.serialization.xml\npsParser.utils.serialization.xml.csproj", "{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}"
 EndProject
 Global
@@ -65,6 +67,10 @@ Global
 		{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +80,7 @@ Global
 		{8B44CD5C-5915-40E1-A4B2-8ED91FF3A41A} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
 		{C474AFE3-BD0C-463B-A298-EDB4F0B99026} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
 		{164086E2-FA8F-453C-84F4-EAFC6F582374} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {236D9CCA-9A61-4950-92C8-9DD7EDEA4689}
