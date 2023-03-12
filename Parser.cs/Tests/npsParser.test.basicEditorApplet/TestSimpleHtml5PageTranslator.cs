@@ -407,7 +407,7 @@ namespace nf.protoscript.test
             {
                 string parentName = (InInfo.ParentInfo is TypeInfo) ? "this.UIRoot" : InInfo.ParentInfo.Name;
 
-                // handle UI sub-elements.
+                // handle UI child-elements.
                 _GenerateElementCode(InInfo, parentName);
             }
 

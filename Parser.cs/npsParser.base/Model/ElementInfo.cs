@@ -3,7 +3,7 @@
 namespace nf.protoscript
 {
     /// <summary>
-    /// Element which indicates global-objects, sub-elements of an object or archetype.
+    /// Element which indicates global-objects, child-elements of an object or archetype.
     /// 
     /// Common conceptions between 'Element' and 'Member':
     ///     - 
