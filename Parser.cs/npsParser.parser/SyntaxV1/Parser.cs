@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1
@@ -27,7 +27,7 @@ namespace nf.protoscript.parser.syntax1
             //parser._NonRootFactories.Add(new SectorFactory_Block());
             //parser._NonRootFactories.Add(new SectorFactory_Links());
             //parser._NonRootFactories.Add(new SectorFactory_Expression());
-            //parser._NonRootFactories.Add(new SectorFactory_Element());
+            parser._NonRootFactories.Add(new SectorFactory_Member());
             return parser;
         }
 

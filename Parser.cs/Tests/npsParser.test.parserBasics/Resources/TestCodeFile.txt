@@ -5,3 +5,17 @@ $applet GApp
 unit tank
 
 unit tower
+
+class testMemberDefs
+	-integer Number1
+	-integer Number2 = 100
+	- Number3 = 10
+	- Number4:integer = 20
+	-n NumberA1
+	-n NumberA2 = 100
+	- NumberA4:n = 20
+
+class testMethodDefs
+
+class testEvents
+
