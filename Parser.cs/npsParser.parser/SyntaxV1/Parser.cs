@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1
@@ -50,7 +50,7 @@ namespace nf.protoscript.parser.syntax1
         /// States to parse non-root sectors.
         /// </summary>
         private List<SectorFactory> _NonRootFactories = new List<SectorFactory>();
- 
+
         /// <summary>
         /// Parse a nps file into sectors.
         /// </summary>
@@ -80,25 +80,20 @@ namespace nf.protoscript.parser.syntax1
                 var factories = _RootFactories;
                 if (indent != 0)
                 { factories = _NonRootFactories; }
- 
+
                 // Try select a factory which can recognize the codes.
                 foreach (var secFactory in factories)
                 {
-                    try
-                    {
-                        sector = secFactory.Parse(InReader, codesTrimmed);
-                        if (sector != null)
-                        { break; }
-                    }
-                    catch (Exception ex)
-                    {
-                    }
+                    sector = secFactory.Parse(InReader, codesTrimmed);
+                    if (sector != null)
+                    { break; }
                 }
 
                 // Unrecognized sector, error out.
                 if (sector == null)
                 {
                     throw new NotImplementedException();
+                    continue;
                 }
 
                 // Try attach the sector to its parent.

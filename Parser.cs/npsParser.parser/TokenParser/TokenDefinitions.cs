@@ -10,62 +10,101 @@ namespace nf.protoscript.parser.token
     /// </summary>
     public enum ETokenType : int
     {
-        // Strings
+        /// <summary>
+        /// Unknown token type.
+        /// </summary>
+        Unknown = -1,
+
+        /// <summary>
+        /// Strings
+        /// </summary>
         String = 0,
 
-        // Floating number
+        /// <summary>
+        /// Floating number
+        /// </summary>
         Floating = 1,
 
-        // Integer number
+        /// <summary>
+        /// Integer number
+        /// </summary>
         Integer = 2,
 
-        // Identity
+        /// <summary>
+        /// Identity
+        /// </summary>
         ID = 100,
 
-        // ,
+        /// <summary>
+        /// ,
+        /// </summary>
         Comma = 200,
 
-        // \
+        /// <summary>
+        /// \
+        /// </summary>
         NextLine = 201,
 
-        // + - * / % += -= *= /= %= == != ! & | < > <= >= 
+        /// <summary>
+        /// + - * / % += -= *= /= %= == != ! & | < > <= >= 
+        /// </summary>
         Operator = 300,
 
-        // =
+        /// <summary>
+        /// =
+        /// </summary>
         Assign = 301,
 
-        // .
+        /// <summary>
+        /// .
+        /// </summary>
         Dot = 302,
 
-        // :
+        /// <summary>
+        /// :
+        /// </summary>
         Colon = 303,
 
-        // ...
+        /// <summary>
+        /// ...
+        /// </summary>
         Ellipsis = 304,
 
-        // (
+        /// <summary>
+        /// (
+        /// </summary>
         OpenParen = 401,
 
-        // )
+        /// <summary>
+        /// )
+        /// </summary>
         CloseParen = 402,
 
-        // [
+        /// <summary>
+        /// [
+        /// </summary>
         OpenBracket = 403,
 
-        // ]
+        /// <summary>
+        /// ]
+        /// </summary>
         CloseBracket = 404,
 
-        // {
+        /// <summary>
+        /// {
+        /// </summary>
         OpenBrace = 405,
 
-        // }
+        /// <summary>
+        /// }
+        /// </summary>
         CloseBrace = 406,
 
-        // $WhiteSpace
+        /// <summary>
+        /// $WhiteSpace
+        /// </summary>
         Skip = 10000,
 
-        // Internal Use
-        Unknown = -1
     }
 
 

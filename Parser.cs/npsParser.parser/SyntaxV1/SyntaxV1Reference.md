@@ -1,55 +1,90 @@
 ﻿# Brief
 
-# Sectors
+# Root Sectors
 
-## Root Sector
+## Model Define Sector
+```
+{BaseModelType} {ModelType}
+```
 
-### Syntaxes
+## Global Object Define Sector
+```
+${ModelType} {GlobalObjectName}
+```
 
-Model Define Syntax: {BaseModelType} {ModelType}
+## Singleton Sector
+```
+${ModelType}
+```
 
-Global Object Define Syntax: ${ModelType} {GlobalObjectName}
+# Non-Root Sectors
 
-Singleton Syntax: ${ModelType}
+## Member Sector
+```
+-{Type} {Name} |= {Expr}|
+-{Name} |= {Expr}|
+- {Name} |= {Expr}|
+-{Name}:{Type} |= {Expr}|
+- {Name}:{Type} |= {Expr}|
+```
 
-## Element Sector
+## Method Sector
+```
++{Name} |= {Expr}|
++ {Name} |= {Expr}|
++{ReturnType} {Name} |= {Expr}|
++{Name}({Param}...) |= {Expr}|
++ {Name}({Param}...) |= {Expr}|
++{ReturnType} {Name}({Param}...) |= {Expr}|
+```
 
-### Syntaxes
+## Component or Child-Element Sector
+```
+*{ComponentType} |= {Expr}|
+*{ComponentType} {ComponentName} |= {Expr}|
+--{ChildType} |= {Expr}|
+--{ChildType} {ChildName} |= {Expr}|
+```
 
-#### DefTags
+## Event Sector
+```
+>{EventName} |({Param}...)|
+> {EventName} |({Param}...)|
+```
 
-- Member/Method
+## Event Attach Sector
+```
+>{EventName} += {Expr}
+> {EventName} += {Expr}
 
-+ Components or Child-Element like UI-controls
+>+{EventName}
+>+ {EventName}
+    > {Expr} # Body or Multiline-body
+```
 
--& Reference to a Member/Method (Function Pointer)
 
-< Event
+## Flow Graph Sector
+```
+[]{Flowgraph Name}
+[] {Flowgraph Name}
+```
 
-<+ Event Attach
+## StateMachine Sector
+```
+o=o{StateMachine Name}
+o=o {StateMachine Name}
+    o- {State Name} # A state in StateMachine
+```
 
-> Function body
+## Codeblock sector
+\```
+```
+<<Multi lines>> 
+```
+\```
 
-``<<Multi lines>> `` : Code block
-
-{} Flow Graph
-
-o=o StateMachine
-
-o- A state in StateMachine
-
-#### Member/ChildElement syntaxes
-
-{DefTag}{ElementType}|[{Key0} ... {KeyN}]| {ElementName} |= {Expr}|
-{DefTag}{ElementName} |= {Expr}|
-{DefTag}{ElementName}:{ElementType}|[{Key0} ... {KeyN}]| |= {Expr}|
-
-#### Method/Event syntaxes
-
-{DefTag}{ReturnType} {ElementName}(%Param0% ... %ParamN%) |= {CodeBlocks}|
-{DefTag}{ElementName}(%Param0% ... %ParamN%) |= {CodeBlocks}|
-
-Where Param:
-|[Attr0=AttrVal0 ... AttrN=AttrValN]| {ParamName}:{ParamType}|[{Key0} ... {KeyN}]|
-
-#### Expression and Codeblock syntaxes
+## FunctionCall sector
+```
+>{Expression}
+> {Expression}
+```

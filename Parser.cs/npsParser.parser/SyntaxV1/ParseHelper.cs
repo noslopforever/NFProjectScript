@@ -108,28 +108,6 @@ namespace nf.protoscript.parser.syntax1
             return InCode.Trim();
         }
 
-        public static bool CheckRegexMatch(Match InRegMatch, ICollection<object> InMatchObjects, Func<object, string> InNameGetter, out object OutMatchObject, out Group OutMatchGroup)
-        {
-            foreach (object checkingObj in InMatchObjects)
-            {
-                string checkingGroupName = InNameGetter(checkingObj);
-                Group checkingMatchGroup = InRegMatch.Groups[checkingGroupName];
-                if (checkingGroupName == null)
-                    continue;
-
-                if (!checkingMatchGroup.Success)
-                    continue;
-
-                OutMatchObject = checkingObj;
-                OutMatchGroup = checkingMatchGroup;
-                return true;
-            }
-            OutMatchGroup = null;
-            OutMatchObject = null;
-            return false;
-        }
-
-
     }
 
 

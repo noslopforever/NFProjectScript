@@ -69,24 +69,24 @@ namespace nf.protoscript.parser.token
             string Codes = InLineCodes;
             while (true)
             {
-                Token token = ParseToken(Codes, out Codes);
-                if (token == null)
+                Token t = ParseToken(Codes, out Codes);
+                if (t == null)
                 { break; }
 
                 // Skip 'skip' tokens, do not save it.
                 if (true)
                 {
-                    if (token.TokenType == ETokenType.Skip)
+                    if (t.TokenType == ETokenType.Skip)
                     { continue; }
                 }
 
-                RefTokens.Add(token);
+                RefTokens.Add(t);
             }
         }
 
 
         /// <summary>
-        /// Try parse strings into token.
+        /// Try parse strings into tokens.
         /// </summary>
         /// <param name="InLineIndex"></param>
         /// <param name="InString"></param>

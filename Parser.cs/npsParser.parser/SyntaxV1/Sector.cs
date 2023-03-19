@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using nf.protoscript.parser.token;
 
 namespace nf.protoscript.parser.syntax1
 {
@@ -7,7 +9,7 @@ namespace nf.protoscript.parser.syntax1
     /// </summary>
     public abstract class Sector
     {
-        public Sector(token.Token[] InTokens)
+        public Sector(Token[] InTokens)
         {
             Tokens = InTokens;
         }
@@ -20,7 +22,7 @@ namespace nf.protoscript.parser.syntax1
         /// <summary>
         /// Tokens of the sector.
         /// </summary>
-        public IReadOnlyList<token.Token> Tokens { get; }
+        public IReadOnlyList<Token> Tokens { get; }
 
         /// <summary>
         /// Sub sectors of this sector.

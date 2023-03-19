@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using nf.protoscript.parser.token;
 
 namespace nf.protoscript.parser.syntax1
 {
@@ -17,8 +18,8 @@ namespace nf.protoscript.parser.syntax1
             // Try parse codes as a Model-Type or Attribute:
             //     {BaseType} {ModelName}
             //     [{AttributeName} = {Expr}]
-            List<token.Token> tokens = new List<token.Token>();
-            token.TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, ref tokens);
+            List<Token> tokens = new List<Token>();
+            TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, ref tokens);
 
             if (tokens.Count == 2)
             {

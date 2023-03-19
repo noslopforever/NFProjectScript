@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using nf.protoscript.parser.token;
 
 namespace nf.protoscript.parser.syntax1
 {
@@ -21,8 +22,8 @@ namespace nf.protoscript.parser.syntax1
             }
             string codesWithoutDollar = InCodesWithoutIndent.Substring(1);
 
-            List<token.Token> tokens = new List<token.Token>();
-            token.TokenParser_CommonNps.Instance.ParseLine(codesWithoutDollar, ref tokens);
+            List<Token> tokens = new List<Token>();
+            TokenParser_CommonNps.Instance.ParseLine(codesWithoutDollar, ref tokens);
             if (tokens.Count == 1)
             {
                 if (tokens[0].TokenType == token.ETokenType.ID)
