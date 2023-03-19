@@ -26,6 +26,10 @@ namespace nf.protoscript.parser.syntax1.analysis
         ASTParser_BlockElemDef _ElemParser = new ASTParser_BlockElemDef();
         ASTParser_BlockInitExpr _InitParser = new ASTParser_BlockInitExpr();
 
+        public bool OnlyCheckMember { get; set; } = false;
+
+        public bool OnlyCheckFunction { get; set; } = false;
+
         public override STNode_DefBase Parse(TokenList InTokenList)
         {
             // try parse attributes:
@@ -35,11 +39,18 @@ namespace nf.protoscript.parser.syntax1.analysis
             // -n getHP()
             //    ^-----^
             //
-            STNode_DefBase resultDef = _FuncDefParser.Parse(InTokenList);
+            STNode_DefBase resultDef = null;
+            if (!OnlyCheckMember)
+            {
+                resultDef = _FuncDefParser.Parse(InTokenList);
+            }
+
             // ... then try parse variable-def
             // -n HP
             //    ^^
-            if (resultDef == null)
+            if (resultDef == null
+                && !OnlyCheckFunction
+                )
             {
                 resultDef = _ElemParser.Parse(InTokenList);
             }

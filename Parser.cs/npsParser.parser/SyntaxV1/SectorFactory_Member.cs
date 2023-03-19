@@ -37,8 +37,11 @@ namespace nf.protoscript.parser.syntax1
                     )
                 )
             {
-                analysis.ASTParser_StatementDef defParser = new analysis.ASTParser_StatementDef();
-                analysis.STNode_ElementDef elemDef = defParser.Parse(tl) as analysis.STNode_ElementDef;
+                var defParser = new analysis.ASTParser_StatementDef()
+                {
+                    OnlyCheckMember = true
+                };
+                var elemDef = defParser.Parse(tl) as analysis.STNode_ElementDef;
                 if (elemDef != null)
                 {
                     return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
@@ -49,8 +52,12 @@ namespace nf.protoscript.parser.syntax1
                 // Try use InfoDefParser to handle pre-type definitions
                 // -{Type} {Name}
                 //
-                analysis.ASTParser_StatementInfoDef infoDefParser = new analysis.ASTParser_StatementInfoDef();
-                analysis.STNode_ElementDef elemDef = infoDefParser.Parse(tl) as analysis.STNode_ElementDef;
+                var infoDefParser = new analysis.ASTParser_StatementInfoDef()
+                {
+                    OnlyCheckMember = true
+                };
+
+                var elemDef = infoDefParser.Parse(tl) as analysis.STNode_ElementDef;
                 if (elemDef != null)
                 {
                     return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
@@ -59,7 +66,10 @@ namespace nf.protoscript.parser.syntax1
                 // Try use DefParser to handle member overrides
                 // -{Name} |= {Expr}|
                 // 
-                analysis.ASTParser_StatementDef defParser = new analysis.ASTParser_StatementDef();
+                var defParser = new analysis.ASTParser_StatementDef()
+                {
+                    OnlyCheckMember = true
+                };
                 elemDef = defParser.Parse(tl) as analysis.STNode_ElementDef;
                 if (elemDef != null)
                 {
