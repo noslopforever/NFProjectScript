@@ -26,13 +26,16 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         public class Def
         {
-            public const string Add = "add";
-            public const string Sub = "sub";
-            public const string Mul = "mul";
-            public const string Div = "div";
-            public const string Mod = "mod";
+            public const string Add = "+";
+            public const string Sub = "-";
+            public const string Mul = "*";
+            public const string Div = "/";
+            public const string Mod = "%";
         }
 
+        /// <summary>
+        /// Operator character
+        /// </summary>
         [Serialization.SerializableInfo]
         public string OpCode { get; private set; } = "";
 
