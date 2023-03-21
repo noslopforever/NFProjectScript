@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using nf.protoscript.parser.token;
 
@@ -164,12 +164,28 @@ namespace nf.protoscript.parser.syntax1.analysis
             // Try parse init-expressions.
             if (InTokenList.CheckToken(ETokenType.Assign))
             {
-                syntaxtree.STNodeBase initExpr = _InitParser.Parse(InTokenList);
-                if (initExpr == null)
+                syntaxtree.STNodeBase initExpr = null;
+                if (DefType == EDefType.Function)
                 {
-                    // TODO log error
-                    throw new NotImplementedException();
-                    return null;
+                    ASTParser_BlockInlineFunctionBody initFuncParser = new ASTParser_BlockInlineFunctionBody();
+                    initExpr = initFuncParser.Parse(InTokenList);
+                    if (initExpr == null)
+                    {
+                        // TODO log error
+                        throw new NotImplementedException();
+                        return null;
+                    }
+                }
+                else
+                {
+                    ASTParser_BlockInitExpr initExprParser = new ASTParser_BlockInitExpr();
+                    initExpr = initExprParser.Parse(InTokenList);
+                    if (initExpr == null)
+                    {
+                        // TODO log error
+                        throw new NotImplementedException();
+                        return null;
+                    }
                 }
 
                 // Assign init-expressions.

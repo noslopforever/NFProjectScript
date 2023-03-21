@@ -17,13 +17,30 @@ namespace nf.protoscript.parser.syntax1.analysis
 
         public override STNode_FunctionDef Parse(TokenList InTokenList)
         {
-            if (InTokenList.CheckToken(ETokenType.ID) && InTokenList.CheckToken(ETokenType.OpenParen))
+            if (InTokenList.CheckToken(ETokenType.ID))
             {
+                // Handle function name
+                // -n getSth(InParam0, InParam1)
+                //    ^----^
+                //
                 var funcNameToken = InTokenList.CurrentToken;
                 InTokenList.Consume();
 
-                // TODO dispatch Parser_BlockFunctionParams
-                throw new System.NotImplementedException();
+                // Handle parameter lists if have.
+                // -n getSth(InParam0, InParam1)
+                //          ^------------------^
+                //
+                var paramsParser = new ASTParser_BlockParamList();
+                var paramDefs = paramsParser.Parse(InTokenList);
+                if (paramDefs == null)
+                {
+                    // TODO log error
+                    throw new NotImplementedException();
+                }
+
+                // return the result function.
+                STNode_FunctionDef funcDef = new STNode_FunctionDef(funcNameToken.Code, paramDefs);
+                return funcDef;
             }
 
             return null;

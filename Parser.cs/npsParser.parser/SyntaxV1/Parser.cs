@@ -28,6 +28,7 @@ namespace nf.protoscript.parser.syntax1
             //parser._NonRootFactories.Add(new SectorFactory_Links());
             //parser._NonRootFactories.Add(new SectorFactory_Expression());
             parser._NonRootFactories.Add(new SectorFactory_Member());
+            parser._NonRootFactories.Add(new SectorFactory_Method());
             return parser;
         }
 

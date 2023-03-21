@@ -8,9 +8,10 @@ namespace nf.protoscript.parser.syntax1.analysis
     class STNode_FunctionDef
         : STNode_DefBase
     {
-        public STNode_FunctionDef(string InFunctionName)
+        public STNode_FunctionDef(string InFunctionName, List<STNode_ElementDef> InParamDefs)
             : base(InFunctionName)
         {
+            Params = InParamDefs;
         }
 
         /// <summary>

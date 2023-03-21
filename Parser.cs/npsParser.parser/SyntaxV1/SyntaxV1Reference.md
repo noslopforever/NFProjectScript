@@ -23,19 +23,20 @@ ${ModelType}
 ```
 -{Type} {Name} |= {Expr}|
 -{Name} |= {Expr}|
-- {Name} |= {Expr}|
 -{Name}:{Type} |= {Expr}|
-- {Name}:{Type} |= {Expr}|
+- {Name} |= {Expr}|
 ```
 
 ## Method Sector
 ```
 +{Name} |= {Expr}|
++{Name}({Param}...)} |= {Expr}|
++{Name}:{ReturnType} |= {Expr}|
++{Name}({Param}...)}:{ReturnType} |= {Expr}|
 + {Name} |= {Expr}|
++ {Name}({Param}...)} |= {Expr}|
 +{ReturnType} {Name} |= {Expr}|
-+{Name}({Param}...) |= {Expr}|
-+ {Name}({Param}...) |= {Expr}|
-+{ReturnType} {Name}({Param}...) |= {Expr}|
++{ReturnType} {Name}({Param}...)} |= {Expr}|
 ```
 
 ## Component or Child-Element Sector

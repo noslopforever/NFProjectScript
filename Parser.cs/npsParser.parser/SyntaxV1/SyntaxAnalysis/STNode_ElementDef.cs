@@ -1,4 +1,6 @@
-﻿namespace nf.protoscript.parser.syntax1.analysis
+﻿using System.Collections.Generic;
+
+namespace nf.protoscript.parser.syntax1.analysis
 {
     /// <summary>
     /// Element-Define statement (member/child-elements/globals/parameters). 
@@ -12,5 +14,16 @@
         }
 
     }
+
+
+    /// <summary>
+    /// Attribute-statements.
+    /// </summary>
+    class STNode_ElementDefs
+        : List<STNode_ElementDef>
+        , syntaxtree.ISyntaxTreeNode
+    {
+    }
+
 
 }
