@@ -46,6 +46,16 @@ namespace nf.protoscript.parser.token
         NextLine = 201,
 
         /// <summary>
+        /// #
+        /// </summary>
+        Sharp = 202,
+
+        /// <summary>
+        /// @
+        /// </summary>
+        At = 203,
+
+        /// <summary>
         /// + - * / % += -= *= /= %= == != ! & | < > <= >= 
         /// </summary>
         Operator = 300,
@@ -113,6 +123,16 @@ namespace nf.protoscript.parser.token
     /// </summary>
     public static class CommonTokenRegexes
     {
+        /// <summary>
+        /// Regex to check an at:
+        /// </summary>
+        public static string At { get; } = (@"@");
+
+        /// <summary>
+        /// Regex to check a sharp:
+        /// </summary>
+        public static string Sharp { get; } = (@"#");
+
         /// <summary>
         /// Regex to check "abc \"def\" ghi"
         /// </summary>

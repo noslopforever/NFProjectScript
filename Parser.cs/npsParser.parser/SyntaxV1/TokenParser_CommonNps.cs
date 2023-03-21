@@ -9,6 +9,8 @@ namespace nf.protoscript.parser.token
     {
         public TokenParser_CommonNps()
             : base(
+                  (ETokenType.At, new string[] { CommonTokenRegexes.At }),
+                  (ETokenType.Sharp, new string[] { CommonTokenRegexes.Sharp }),
                   (ETokenType.String, new string[]
                   {
                       CommonTokenRegexes.DoubleQuoteString,
