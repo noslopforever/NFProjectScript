@@ -57,7 +57,7 @@ namespace nf.protoscript.parser.syntax1.analysis
                 //List<model.Expression> exprs = new List<model.Expression>();
                 //ASTParser.ParseExpressions(exprs, InTokenList, ETokenType.CloseParen);
                 //syntaxtree.STNodeBaseConstColl exprList = new syntaxtree.STNodeBaseConstColl(exprs);
-                //if (!InTokenList.EnsureConsumeTheToken(ETokenType.CloseParen))
+                //if (!InTokenList.EnsureOrConsumeTo(ETokenType.CloseParen))
                 //{
                 //    // TODO log error
                 //    throw new NotImplementedException();
@@ -73,7 +73,7 @@ namespace nf.protoscript.parser.syntax1.analysis
                 //List<model.Expression> exprs = new List<model.Expression>();
                 //ASTParser.ParseExpressions(exprs, InTokenList, ETokenType.CloseBracket);
                 //syntaxtree.STNodeSequence exprList = new syntaxtree.STNodeSequence(exprs);
-                //if (!InTokenList.EnsureConsumeTheToken(ETokenType.CloseBracket))
+                //if (!InTokenList.EnsureOrConsumeTo(ETokenType.CloseBracket))
                 //{
                 //    // TODO log error
                 //    throw new NotImplementedException();
@@ -91,7 +91,7 @@ namespace nf.protoscript.parser.syntax1.analysis
 
                 //syntaxtree.STNodeBaseConstDict dict = new syntaxtree.STNodeBaseConstDict();
                 //dict.SetAssignments(assignments);
-                //if (!InTokenList.EnsureConsumeTheToken(ETokenType.CloseBrace))
+                //if (!InTokenList.EnsureOrConsumeTo(ETokenType.CloseBrace))
                 //{
                 //}
                 //return dict;

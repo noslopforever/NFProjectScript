@@ -59,6 +59,9 @@ namespace nf.protoscript.parser.token
         /// <returns></returns>
         public Token Consume()
         {
+            if (_TokenIndex >= Tokens.Count)
+            { return null; }
+
             var token = Tokens[_TokenIndex];
             _TokenIndex += 1;
             return token;
@@ -104,16 +107,16 @@ namespace nf.protoscript.parser.token
         }
 
         /// <summary>
-        /// Try consume the current token if it matches InToken.
-        /// If failed, consume all tokens until the current token equals to the InToken.
+        /// Check if the current token matches InToken.
+        /// If matches, return true immediately.
+        /// If not, consume all tokens until the current token matches to the InTokens, then return false.
         /// </summary>
         /// <param name="InToken"></param>
         /// <returns></returns>
-        public bool EnsureConsumeTheToken(ETokenType InToken)
+        public bool EnsureOrConsumeTo(ETokenType InToken)
         {
             if (CheckToken(InToken))
             {
-                Consume();
                 return true;
             }
 
@@ -121,6 +124,27 @@ namespace nf.protoscript.parser.token
             throw new NotImplementedException();
 
             ConsumeTo(InToken);
+            return false;
+        }
+
+        /// <summary>
+        /// Check if the current token contains in InTokens.
+        /// If contains, return true immediately.
+        /// If not, consume all tokens until the current token contains in InTokens, then return false.
+        /// </summary>
+        /// <param name="InToken"></param>
+        /// <returns></returns>
+        public bool EnsureOrConsumeTo(IEnumerable<ETokenType> InTokens)
+        {
+            if (CheckToken(InTokens))
+            {
+                return true;
+            }
+
+            // TODO log error: No expected tokens.
+            throw new NotImplementedException();
+
+            ConsumeTo(InTokens);
 
             return false;
         }
@@ -137,6 +161,22 @@ namespace nf.protoscript.parser.token
                 Consume();
             }
         }
+
+        /// <summary>
+        /// Consume all tokens until the current token contains in the InTokens.
+        /// </summary>
+        /// <param name="InToken"></param>
+        private void ConsumeTo(IEnumerable<ETokenType> InTokens)
+        {
+            // Consume to the next 'InToken' or the end.
+            while (CurrentToken != null
+                && !InTokens.Contains(CurrentToken.TokenType)
+                )
+            {
+                Consume();
+            }
+        }
+
 
 
     }
