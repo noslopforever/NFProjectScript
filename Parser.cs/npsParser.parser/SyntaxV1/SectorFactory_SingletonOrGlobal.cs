@@ -26,7 +26,7 @@ namespace nf.protoscript.parser.syntax1
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutDollar, ref tokens);
             if (tokens.Count == 1)
             {
-                if (tokens[0].TokenType == token.ETokenType.ID)
+                if (tokens[0].TokenType == ETokenType.ID)
                 {
                     string singletonName = tokens[0].Code;
                     var sector = new SingletonSector(singletonName);
@@ -41,8 +41,8 @@ namespace nf.protoscript.parser.syntax1
             }
             else if (tokens.Count == 2)
             {
-                if (tokens[0].TokenType == token.ETokenType.ID
-                    && tokens[1].TokenType == token.ETokenType.ID
+                if (tokens[0].TokenType == ETokenType.ID
+                    && tokens[1].TokenType == ETokenType.ID
                     )
                 {
                     string typename = tokens[0].Code;

@@ -13,7 +13,7 @@ namespace nf.protoscript.parser.syntax1.analysis
     {
         public override STNode_TypeSignature Parse(TokenList InTokenList)
         {
-            if (!InTokenList.CheckToken(token.ETokenType.ID))
+            if (!InTokenList.CheckToken(ETokenType.ID))
             {
                 // TODO log error
                 throw new NotImplementedException();

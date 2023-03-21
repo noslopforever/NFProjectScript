@@ -23,8 +23,8 @@ namespace nf.protoscript.parser.syntax1
 
             if (tokens.Count == 2)
             {
-                if (tokens[0].TokenType == token.ETokenType.ID
-                    && tokens[1].TokenType == token.ETokenType.ID
+                if (tokens[0].TokenType == ETokenType.ID
+                    && tokens[1].TokenType == ETokenType.ID
                     )
                 {
                     string baseTypeName = tokens[0].Code;
