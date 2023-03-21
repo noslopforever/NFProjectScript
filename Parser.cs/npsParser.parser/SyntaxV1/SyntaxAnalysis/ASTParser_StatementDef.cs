@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using nf.protoscript.parser.token;
 
@@ -7,7 +7,11 @@ namespace nf.protoscript.parser.syntax1.analysis
 
     /// <summary>
     /// Try parse tokens as a CommonDef statement.
+    /// 
     /// Like element definitions:
+    ///     -n [Min=0][Max=100] HP = 100
+    ///     -n [Pure] getHP() = return 100
+    ///     
     ///     - HP:n = 100
     ///     +OverrideHP = 100
     ///     -getHP():n = return 100
@@ -18,41 +22,121 @@ namespace nf.protoscript.parser.syntax1.analysis
     class ASTParser_StatementDef
         : ASTParser_Base<STNode_DefBase>
     {
-        // sub blocks.
+        public ASTParser_StatementDef(EDefType InDefType, ESyntaxType InParseMode = ESyntaxType.ParsePostType)
+        {
+            DefType = InDefType;
+            SyntaxType = InParseMode;
+        }
 
-        ASTParser_BlockType _TypeBlockParser = new ASTParser_BlockType();
-        ASTParser_BlockAttributes _AttributesParser = new ASTParser_BlockAttributes();
-        ASTParser_BlockFunctionDef _FuncDefParser = new ASTParser_BlockFunctionDef();
-        ASTParser_BlockElemDef _ElemParser = new ASTParser_BlockElemDef();
-        ASTParser_BlockInitExpr _InitParser = new ASTParser_BlockInitExpr();
+        /// <summary>
+        /// Result type of the definition.
+        /// </summary>
+        public enum EDefType
+        {
+            /// <summary>
+            /// Try parse an element definition.
+            /// </summary>
+            Element,
 
-        public bool OnlyCheckMember { get; set; } = false;
+            /// <summary>
+            /// Try parse a function definition.
+            /// </summary>
+            Function,
 
-        public bool OnlyCheckFunction { get; set; } = false;
+            /// <summary>
+            /// Try parse a parameter definition which appears in '()' blocks and does NOT have any line-end attributes and comments.
+            /// </summary>
+            Param,
+
+        }
+
+        /// <summary>
+        /// Result type of the definition.
+        /// </summary>
+        public EDefType DefType { get; }
+
+
+        /// <summary>
+        /// Type of the syntax parsed by this parser.
+        /// </summary>
+        public enum ESyntaxType
+        {
+            /// <summary>
+            /// Parse the definition in Pre-Type mode which starts with a type-block.
+            /// -integer HP = 100
+            ///  ^-----^
+            /// </summary>
+            ParseStartType,
+
+            /// <summary>
+            /// Parse the definition in Pre-Empty-Type mode.
+            /// - HP = 100
+            /// + getName() = return "Richard"
+            /// </summary>
+            EmptyStartType,
+
+            /// <summary>
+            /// Parse the definition in Post-Type mode:
+            /// -HP:integer = 100
+            /// +getName():string = return "Richard"
+            /// </summary>
+            ParsePostType,
+
+        }
+
+        /// <summary>
+        /// Mode of the parser.
+        /// </summary>
+        public ESyntaxType SyntaxType { get; }
+
 
         public override STNode_DefBase Parse(TokenList InTokenList)
         {
-            // try parse attributes:
-            STNode_AttributeDefs attrs = _AttributesParser.Parse(InTokenList);
+            // sub blocks.
+            ASTParser_BlockType typeBlockParser = new ASTParser_BlockType();
 
-            // try parse function-def
-            // -n getHP()
-            //    ^-----^
-            //
-            STNode_DefBase resultDef = null;
-            if (!OnlyCheckMember)
+            STNode_TypeSignature typeSig = null;
+
+            // If in Pre-Type mode, try parse type-block at first
+            // -n [Min=0][Max=100] HP = 100.
+            //  ^
+            if (SyntaxType == ESyntaxType.ParseStartType)
             {
-                resultDef = _FuncDefParser.Parse(InTokenList);
+                typeSig = typeBlockParser.Parse(InTokenList);
+                if (typeSig == null)
+                {
+                    // TODO log error
+                    throw new NotImplementedException();
+                    return null;
+                }
             }
 
-            // ... then try parse variable-def
-            // -n HP
-            //    ^^
-            if (resultDef == null
-                && !OnlyCheckFunction
+            // Try parse prefix attributes:
+            // -n [Min=0][Max=100] HP = 100.
+            //    ^--------------^
+            ASTParser_BlockAttributes attrsParser = new ASTParser_BlockAttributes();
+            STNode_AttributeDefs attrs = attrsParser.Parse(InTokenList);
+
+            // Try parse the definition body, switched by the desired DefType.
+            STNode_DefBase resultDef = null;
+            if (DefType == EDefType.Function)
+            {
+                // try parse function-def
+                // -n getHP()
+                //    ^-----^
+                //
+                ASTParser_BlockFunctionDef funcDefParser = new ASTParser_BlockFunctionDef();
+                resultDef = funcDefParser.Parse(InTokenList);
+            }
+            else if (DefType == EDefType.Element
+                || DefType == EDefType.Param
                 )
             {
-                resultDef = _ElemParser.Parse(InTokenList);
+                // ... then try parse element-def
+                // -n HP
+                //    ^^
+                ASTParser_BlockElemDef elemDefParser = new ASTParser_BlockElemDef();
+                resultDef = elemDefParser.Parse(InTokenList);
             }
 
             if (resultDef == null)
@@ -62,30 +146,23 @@ namespace nf.protoscript.parser.syntax1.analysis
                 return null;
             }
 
-            // Assign attributes which have already been parsed before.
-            if (attrs != null)
-            {
-                resultDef._Internal_SetAttributes(attrs);
-            }
-
-            // try parse type signature in postfix-mode.
+            // If Post-Type mode, try parse type signature here.
             // -HP:n
             //    ^^
-            if (InTokenList.CheckToken(token.ETokenType.Colon))
+            if (InTokenList.CheckToken(ETokenType.Colon))
             {
                 InTokenList.Consume();
-                STNode_TypeSignature typeSig = _TypeBlockParser.Parse(InTokenList);
+                typeSig = typeBlockParser.Parse(InTokenList);
                 if (typeSig == null)
                 {
                     // TODO log error
                     throw new NotImplementedException();
                     return null;
                 }
-                resultDef._Internal_SetType(typeSig);
             }
 
-            // try parse init-expressions
-            if (InTokenList.CheckToken(token.ETokenType.Assign))
+            // Try parse init-expressions.
+            if (InTokenList.CheckToken(ETokenType.Assign))
             {
                 syntaxtree.STNodeBase initExpr = _InitParser.Parse(InTokenList);
                 if (initExpr == null)
@@ -98,6 +175,36 @@ namespace nf.protoscript.parser.syntax1.analysis
                 // Assign init-expressions.
                 resultDef._Internal_SetInitExpr(initExpr);
             }
+
+            // If Non-Param mode, Try parse line-end attributes.
+            STNode_AttributeDefs postAttrs = null;
+            if (DefType != EDefType.Param)
+            {
+                if (InTokenList.CheckToken(ETokenType.At))
+                {
+                    // TODO impl
+                    throw new NotImplementedException();
+                    return null;
+                }
+
+                // Try parse line-end comments finally.
+                if (InTokenList.CheckToken(ETokenType.Sharp))
+                {
+                    // TODO impl
+                    throw new NotImplementedException();
+                    return null;
+                }
+            }
+
+            // Assign type and attributes which have already been parsed
+            if (typeSig != null)
+            { resultDef._Internal_SetType(typeSig); }
+            if (attrs != null)
+            { resultDef._Internal_AddAttributes(attrs); }
+            if (postAttrs != null)
+            { resultDef._Internal_AddAttributes(postAttrs); }
+            //if (comments != null)
+            //{ resultDef._Internal_AddComments(comments); }
 
             return resultDef;
         }

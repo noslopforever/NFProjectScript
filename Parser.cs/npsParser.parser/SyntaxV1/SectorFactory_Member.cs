@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using nf.protoscript.parser.token;
 
 namespace nf.protoscript.parser.syntax1
 {
+
     /// <summary>
     /// Try parse sector as a member
     /// </summary>
@@ -25,22 +25,17 @@ namespace nf.protoscript.parser.syntax1
 
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
-            var tl = new TokenList(tokens);
 
             // Use common DefParser to handle anonymous-type or post-type definitions.
             // - {Name} |= {Expr}|
-            // -{Name}:{Type}|= {Expr}|
             //
-            if (codesWithoutTags.StartsWith(" ")
-                || (tokens[0].TokenType == ETokenType.ID
-                    && tokens[1].TokenType == ETokenType.Colon
-                    )
-                )
+            if (codesWithoutTags.StartsWith(" "))
             {
-                var defParser = new analysis.ASTParser_StatementDef()
-                {
-                    OnlyCheckMember = true
-                };
+                var defParser = new analysis.ASTParser_StatementDef(
+                    analysis.ASTParser_StatementDef.EDefType.Element
+                    , analysis.ASTParser_StatementDef.ESyntaxType.EmptyStartType
+                    );
+                var tl = new TokenList(tokens);
                 var elemDef = defParser.Parse(tl) as analysis.STNode_ElementDef;
                 if (elemDef != null)
                 {
@@ -49,32 +44,45 @@ namespace nf.protoscript.parser.syntax1
             }
             else
             {
-                // Try use InfoDefParser to handle pre-type definitions
-                // -{Type} {Name}
-                //
-                var infoDefParser = new analysis.ASTParser_StatementInfoDef()
+                try
                 {
-                    OnlyCheckMember = true
-                };
+                    // Try use DefParser in Pre-Type mode to handle pre-type definitions:
+                    // -{Type} {Name}
+                    //
+                    var preTypeParser = new analysis.ASTParser_StatementDef(
+                        analysis.ASTParser_StatementDef.EDefType.Element
+                        , analysis.ASTParser_StatementDef.ESyntaxType.ParseStartType
+                        );
 
-                var elemDef = infoDefParser.Parse(tl) as analysis.STNode_ElementDef;
-                if (elemDef != null)
+                    var tl = new TokenList(tokens);
+                    var elemDef = preTypeParser.Parse(tl) as analysis.STNode_ElementDef;
+                    if (elemDef != null)
+                    {
+                        return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
+                    }
+                }
+                catch
                 {
-                    return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
+
                 }
 
-                // Try use DefParser to handle member overrides
+                // Try use DefParser in Post-Type mode to handle member overrides
                 // -{Name} |= {Expr}|
+                // -{Name}:{Type}|= {Expr}|
                 // 
-                var defParser = new analysis.ASTParser_StatementDef()
                 {
-                    OnlyCheckMember = true
-                };
-                elemDef = defParser.Parse(tl) as analysis.STNode_ElementDef;
-                if (elemDef != null)
-                {
-                    return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
+                    var postTypeParser = new analysis.ASTParser_StatementDef(
+                        analysis.ASTParser_StatementDef.EDefType.Element
+                        , analysis.ASTParser_StatementDef.ESyntaxType.ParsePostType
+                        );
+                    var tl = new TokenList(tokens);
+                    var elemDef = postTypeParser.Parse(tl) as analysis.STNode_ElementDef;
+                    if (elemDef != null)
+                    {
+                        return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
+                    }
                 }
+
             }
 
             return null;

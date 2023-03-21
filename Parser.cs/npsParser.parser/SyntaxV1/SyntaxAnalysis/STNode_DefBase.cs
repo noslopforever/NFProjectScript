@@ -44,9 +44,9 @@ namespace nf.protoscript.parser.syntax1.analysis
             InitExpression = InInitExpr;
         }
 
-        internal void _Internal_SetAttributes(STNode_AttributeDefs InAttrs)
+        internal void _Internal_AddAttributes(STNode_AttributeDefs InAttrs)
         {
-            Attributes = InAttrs;
+            Attributes.AddRange(InAttrs);
         }
 
     }
