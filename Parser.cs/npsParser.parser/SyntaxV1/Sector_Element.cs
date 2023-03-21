@@ -1,5 +1,6 @@
 ﻿using nf.protoscript.parser.syntax1.analysis;
 using nf.protoscript.parser.token;
+using System;
 
 namespace nf.protoscript.parser.syntax1
 {
@@ -13,6 +14,7 @@ namespace nf.protoscript.parser.syntax1
         {
             Unknown,
             Member,
+            Method,
             ComponentOrChild,
             EventAttachment,
             Event,
@@ -29,6 +31,11 @@ namespace nf.protoscript.parser.syntax1
         internal static ElementSector NewMemberSector(Token[] InTokens, analysis.STNode_ElementDef InElemDef)
         {
             return new ElementSector(InTokens, EType.Member, InElemDef);
+        }
+
+        internal static Sector NewMethodSector(Token[] InTokens, STNode_FunctionDef InFuncDef)
+        {
+            return new ElementSector(InTokens, EType.Method, InFuncDef);
         }
 
         /// <summary>
@@ -64,9 +71,36 @@ namespace nf.protoscript.parser.syntax1
                 ElementInfo elemInfo = new ElementInfo(InParentInfo, "member", elemDef.DefName, typeInfo, elemDef.InitExpression);
                 return elemInfo;
             }
+            else if (Type == EType.Method)
+            {
+                var funcDef = ParsedResult as STNode_FunctionDef;
+
+                // Let TypeSig to find the target TypeInfo.
+                TypeInfo typeInfo = CommonTypeInfos.Any;
+                if (funcDef.TypeSig != null)
+                {
+                    typeInfo = funcDef.TypeSig.LocateTypeInfo(InProjectInfo, InParentInfo);
+                }
+                // New MethodInfo.
+                ElementInfo mtdInfo = new ElementInfo(InParentInfo, "method", funcDef.DefName, typeInfo, funcDef.InitExpression);
+
+                // Handle parameters of the Method.
+                foreach (var paramDef in funcDef.Params)
+                {
+                    TypeInfo paramTypeInfo = CommonTypeInfos.Any;
+                    if (paramDef.TypeSig != null)
+                    {
+                        paramTypeInfo = paramDef.TypeSig.LocateTypeInfo(InProjectInfo, InParentInfo);
+                    }
+                    ElementInfo paramInfo = new ElementInfo(mtdInfo, "param", paramDef.DefName, paramTypeInfo, paramDef.InitExpression);
+                }
+
+                return mtdInfo;
+            }
 
             return null;
         }
+
     }
 
 
