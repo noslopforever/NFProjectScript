@@ -10,12 +10,20 @@ class testMemberDefs
 	-integer Number1
 	-integer Number2 = 100
 	- Number3 = 10
-	- Number4:integer = 20
+	-Number4:integer = 20
 	-n NumberA1
 	-n NumberA2 = 100
-	- NumberA4:n = 20
+	-NumberA4:n = 20
 
 class testMethodDefs
+	+FuncVV0 = cout "hello world!"
+	+FuncVI0(InP0:integer) = cout InP0
+	+FuncIV0:integer = return 99
+	+FuncII0(InP0:integer):integer = return InP0
+	+ FuncVV1 = cout "hello world too!"
+	+ FuncVI1(InP0:n) = cout InP0
+	+n FuncIV1 = return 199
+	+n FuncII1(InP0:n) = return InP0 + 1
 
 class testEvents
 
