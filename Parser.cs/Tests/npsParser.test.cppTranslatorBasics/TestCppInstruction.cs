@@ -258,10 +258,24 @@ namespace nf.protoscript.test
             Params = InParams;
         }
 
+        public CppILInstruction_Call(CppFunction InHostFunction, CppILInstruction InFuncExpr, CppILInstruction[] InParams)
+            : base(InHostFunction)
+        {
+            CallCode = "$ERR_USE_FUNC_EXPR";
+            FuncExpr = InFuncExpr;
+            RefInstructions = InParams;
+            Params = InParams;
+        }
+
         /// <summary>
         /// Call code, should be function name "Foo", or "new FooType"
         /// </summary>
         public string CallCode { get; set; }
+
+        /// <summary>
+        /// Function expression: getFn()(), the getFn() will be the Function expression.
+        /// </summary>
+        public CppILInstruction FuncExpr { get; } = null;
 
         /// <summary>
         /// Parameters.
@@ -270,11 +284,22 @@ namespace nf.protoscript.test
 
         internal protected override string GenCode(IList<String> InCodeList)
         {
+            // Default call-code
             string callCode = $"{CallCode}(";
+
+            // Modify the call-code by the function-expression.
+            if (FuncExpr != null)
+            {
+                string lhs = FuncExpr.GenCode(InCodeList);
+                callCode = $"{lhs}(";
+            }
+
+            // Push parameters
             for (int i = 0; i < Params.Length; i++)
             {
                 var paramInst = Params[i].GenCode(InCodeList);
-                if (i > 0) {
+                if (i > 0)
+                {
                     callCode += " ,";
                 }
 

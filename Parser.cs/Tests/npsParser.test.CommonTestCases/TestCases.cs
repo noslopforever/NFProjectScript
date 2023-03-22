@@ -160,7 +160,8 @@ namespace nf.protoscript.test
                         , func_V_V_Type
                         , new STNodeSequence(
                             // code ln 0: TestMethodB(propA)
-                            new STNodeCall("TestMethodB"
+                            new STNodeCall(
+                                new STNodeGetVar("TestMethodB")
                                 , new STNodeGetVar("propA", true))
                             )
                         );

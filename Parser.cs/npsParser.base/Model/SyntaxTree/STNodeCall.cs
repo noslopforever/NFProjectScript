@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace nf.protoscript.syntaxtree
 {
@@ -15,28 +15,34 @@ namespace nf.protoscript.syntaxtree
         {
         }
 
-        public STNodeCall(string InFuncName)
+        public STNodeCall(STNodeBase InLhs)
         {
-            FuncName = InFuncName;
+            FuncExpr = InLhs;
         }
 
-        public STNodeCall(string InFuncName, ISyntaxTreeNode InParam0)
+        public STNodeCall(STNodeBase InLhs, ISyntaxTreeNode InParam0)
         {
-            FuncName = InFuncName;
+            FuncExpr = InLhs;
             Params = new ISyntaxTreeNode[1] { InParam0 };
         }
 
-        public STNodeCall(string InFuncName, ISyntaxTreeNode[] InParams)
+        public STNodeCall(STNodeBase InLhs, ISyntaxTreeNode[] InParams)
         {
-            FuncName = InFuncName;
+            FuncExpr = InLhs;
             Params = InParams;
+        }
+
+        public STNodeCall(STNodeBase InLhs, IEnumerable<ISyntaxTreeNode> InParams)
+        {
+            FuncExpr = InLhs;
+            Params = InParams.ToArray();
         }
 
         /// <summary>
         /// Function name
         /// </summary>
         [Serialization.SerializableInfo]
-        public string FuncName { get; private set; }
+        public ISyntaxTreeNode FuncExpr { get; private set; }
 
         /// <summary>
         /// Parameters

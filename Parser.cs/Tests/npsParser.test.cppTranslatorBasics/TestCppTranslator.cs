@@ -423,8 +423,20 @@ namespace nf.protoscript.test
                 {
                     paramInsts.Add(_ExactInstructions(InFunction, param));
                 }
-                var inst = new CppILInstruction_Call(InFunction, stnCall.FuncName, paramInsts.ToArray());
-                return inst;
+
+                if (stnCall.FuncExpr is STNodeGetVar)
+                {
+                    string funcName = (stnCall.FuncExpr as STNodeGetVar).IDName;
+                    var inst = new CppILInstruction_Call(InFunction, funcName, paramInsts.ToArray());
+                    return inst;
+                }
+                else
+                {
+                    // handle getFn()() : let tmpFn = getFn(); tmpFn();
+                    CppILInstruction funcInst = _ExactInstructions(InFunction, stnCall.FuncExpr);
+                    var inst = new CppILInstruction_Call(InFunction, funcInst, paramInsts.ToArray());
+                    return inst;
+                }
             }
             STNodeNew stnNew = InSTNode as STNodeNew;
             if (stnNew != null)
