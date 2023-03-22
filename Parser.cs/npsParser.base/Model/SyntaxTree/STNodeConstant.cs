@@ -25,6 +25,10 @@ namespace nf.protoscript.syntaxtree
         }
         public STNodeConstant(float InValue)
         {
+            Value = (double)InValue;
+        }
+        public STNodeConstant(double InValue)
+        {
             Value = InValue;
         }
         public STNodeConstant(TypeInfo InTypeInfo)
@@ -36,7 +40,7 @@ namespace nf.protoscript.syntaxtree
         /// Value to save
         /// </summary>
         [Serialization.SerializableInfo]
-        public object Value { get; set; } = null;
+        public object Value { get; private set; } = null;
 
 
     }

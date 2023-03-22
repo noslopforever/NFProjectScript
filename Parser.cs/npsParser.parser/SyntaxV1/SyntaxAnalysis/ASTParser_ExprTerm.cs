@@ -38,7 +38,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             }
             else if (InTokenList.CheckToken(ETokenType.Floating))
             {
-                syntaxtree.STNodeConstant stConst = new syntaxtree.STNodeConstant(float.Parse(InTokenList.CurrentToken.Code));
+                syntaxtree.STNodeConstant stConst = new syntaxtree.STNodeConstant(double.Parse(InTokenList.CurrentToken.Code));
                 InTokenList.Consume();
                 return stConst;
             }
