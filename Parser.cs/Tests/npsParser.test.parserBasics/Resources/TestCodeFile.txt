@@ -16,12 +16,12 @@ class testMemberDefs
 	-NumberA4:n = 20
 
 class testMethodDefs
-	+FuncVV0 = cout "hello world!"
-	+FuncVI0(InP0:integer) = cout InP0
+	+FuncVV0 = cout("hello world!")
+	+FuncVI0(InP0:integer) = cout(InP0)
 	+FuncIV0:integer = return 99
 	+FuncII0(InP0:integer):integer = return InP0
-	+ FuncVV1 = cout "hello world too!"
-	+ FuncVI1(InP0:n) = cout InP0
+	+ FuncVV1 = cout("hello world too!")
+	+ FuncVI1(InP0:n) = cout(InP0)
 	+n FuncIV1 = return 199
 	+n FuncII1(InP0:n) = return InP0 + 1
 

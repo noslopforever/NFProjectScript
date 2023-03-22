@@ -17,16 +17,17 @@ namespace nf.protoscript.parser.syntax1.analysis
 
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)
         {
-            // < Number > | < ID > | (EXPRs) | [EXPRs] | { STATEMENT }
+            // < Number > | < ID > | (EXPR) | [EXPRs] | { EXPR_STATEMENT }
             // EXPR (EXPRS) | EXPR [EXPRS]
 
             // <ID>
             if (InTokenList.CheckToken(ETokenType.ID))
             {
                 Token idToken = InTokenList.CurrentToken;
+                var idNode = new syntaxtree.STNodeGetVar(idToken.Code);
                 InTokenList.Consume();
 
-                return ParseTermWithID(idToken, InTokenList);
+                return TryParseFuncCallOrCollAccess(idNode, InTokenList);
             }
             // <Number>
             else if (InTokenList.CheckToken(ETokenType.Integer))
@@ -48,37 +49,36 @@ namespace nf.protoscript.parser.syntax1.analysis
                 InTokenList.Consume();
                 return stConst;
             }
-            // Collection: (EXPRs)
+
+            // paren-blocks: (EXPR)
+            // c * (a + b)
+            //     ^-----^
             else if (InTokenList.CheckToken(ETokenType.OpenParen))
             {
-                throw new NotImplementedException();
-                //InTokenList.Consume();
+                // Consume the open-paren (
+                InTokenList.Consume();
 
-                //List<model.Expression> exprs = new List<model.Expression>();
-                //ASTParser.ParseExpressions(exprs, InTokenList, ETokenType.CloseParen);
-                //syntaxtree.STNodeBaseConstColl exprList = new syntaxtree.STNodeBaseConstColl(exprs);
-                //if (!InTokenList.EnsureOrConsumeTo(ETokenType.CloseParen))
-                //{
-                //    // TODO log error
-                //    throw new NotImplementedException();
-                //}
-                //return exprList;
+                // Handle inner expression.
+                ASTParser_Expression exprParser = new ASTParser_Expression();
+                var subExpr = exprParser.Parse(InTokenList);
+
+                // Try consume the close-paren ).
+                if (!InTokenList.EnsureOrConsumeTo(ETokenType.CloseParen))
+                {
+                    // TODO log error
+                    throw new NotImplementedException();
+                }
+                InTokenList.Consume();
+
+                return subExpr;
             }
             // Collection: [ EXPRs ]
             else if (InTokenList.CheckToken(ETokenType.OpenBracket))
             {
-                throw new NotImplementedException();
-                //InTokenList.Consume();
+                ASTParser_BlockExpressionList exprListParser = new ASTParser_BlockExpressionList(ETokenType.OpenBracket, ETokenType.CloseBracket);
+                syntaxtree.STNodeSequence exprList = exprListParser.Parse(InTokenList);
 
-                //List<model.Expression> exprs = new List<model.Expression>();
-                //ASTParser.ParseExpressions(exprs, InTokenList, ETokenType.CloseBracket);
-                //syntaxtree.STNodeSequence exprList = new syntaxtree.STNodeSequence(exprs);
-                //if (!InTokenList.EnsureOrConsumeTo(ETokenType.CloseBracket))
-                //{
-                //    // TODO log error
-                //    throw new NotImplementedException();
-                //}
-                //return exprList;
+                return exprList;
             }
             // Const Dict: { STATEMENT }
             else if (InTokenList.CheckToken(ETokenType.OpenBrace))
@@ -102,40 +102,36 @@ namespace nf.protoscript.parser.syntax1.analysis
             return null;
         }
 
-        private syntaxtree.STNodeBase ParseTermWithID(Token InIDToken, TokenList InTokenList)
+        private syntaxtree.STNodeBase TryParseFuncCallOrCollAccess(syntaxtree.STNodeBase InPreSTNode, TokenList InTokenList)
         {
-            // <ID> (EXPRs)
+            // <ID> (EXPRs)(EXPRs)(EXPRs)
             if (InTokenList.CheckToken(ETokenType.OpenParen))
             {
-                throw new NotImplementedException();
-                //var exprListParser = new ASTParser_ExpressionList(ETokenType.OpenParen, ETokenType.CloseParen);
-                //var exprList = exprListParser.Parse(InTokenList);
-                //if (exprList == null)
-                //{
-                //    return null;
-                //}
+                var exprListParser = new ASTParser_BlockExpressionList(ETokenType.OpenParen, ETokenType.CloseParen);
+                var stnodeSeq = exprListParser.Parse(InTokenList);
+                if (stnodeSeq == null)
+                {
+                    return null;
+                }
 
-                //var exprSTNodeList = ParseHelper.ConvertExprListToSTNodeList(exprList);
-                //syntaxtree.STNodeCall call = new syntaxtree.STNodeCall(InIDToken.Code, exprSTNodeList.ToArray());
-                //return call;
+                var call = new syntaxtree.STNodeCall(InPreSTNode, stnodeSeq.NodeList);
+                return TryParseFuncCallOrCollAccess(call, InTokenList);
             }
-            // <ID> [EXPRs]
+            // <ID> [EXPRs][EXPRs][EXPRs]
             else if (InTokenList.CheckToken(ETokenType.OpenBracket))
             {
-                throw new NotImplementedException();
-                //var exprListParser = new ASTParser_ExpressionList(ETokenType.OpenBracket, ETokenType.CloseBracket);
-                //var exprList = exprListParser.Parse(InTokenList);
-                //if (exprList == null)
-                //{
-                //    return null;
-                //}
+                var exprListParser = new ASTParser_BlockExpressionList(ETokenType.OpenBracket, ETokenType.CloseBracket);
+                var stnodeSeq = exprListParser.Parse(InTokenList);
+                if (stnodeSeq == null)
+                {
+                    return null;
+                }
 
-                //var exprSTNodeList = ParseHelper.ConvertExprListToSTNodeList(exprList);
-                //syntaxtree.STNodeAccessCollection accessColl = new syntaxtree.STNodeAccessCollection(InIDToken.Code, exprSTNodeList.ToArray());
-                //return accessColl;
+                var accessColl = new syntaxtree.STNodeCollectionAccess(InPreSTNode, stnodeSeq.NodeList);
+                return TryParseFuncCallOrCollAccess(accessColl, InTokenList);
             }
 
-            return new syntaxtree.STNodeGetVar(InIDToken.Code);
+            return InPreSTNode;
         }
 
     }
