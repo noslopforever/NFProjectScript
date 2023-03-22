@@ -22,12 +22,24 @@ namespace nf.protoscript.parser.syntax1.analysis
         public ASTParser_ExprOperator(ETokenType InTokenType, string InOp, ASTParser_ExprBase InNextExprParser)
             : base(InNextExprParser)
         {
-            Ops = new string[] { InOp };
             TokenType = InTokenType;
+            Ops = new string[] { InOp };
+        }
+        public ASTParser_ExprOperator(ETokenType InTokenType, string[] InOps, ASTParser_ExprBase InNextExprParser)
+            : base(InNextExprParser)
+        {
+            TokenType = InTokenType;
+            Ops = InOps;
         }
 
+        /// <summary>
+        /// Operators
+        /// </summary>
         public string[] Ops { get; private set; }
 
+        /// <summary>
+        /// TokenType
+        /// </summary>
         public ETokenType TokenType { get; private set; } = ETokenType.Operator;
 
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)

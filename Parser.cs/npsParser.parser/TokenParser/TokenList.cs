@@ -68,42 +68,102 @@ namespace nf.protoscript.parser.token
         }
 
         /// <summary>
+        /// Check if token matches the InType/InCheckCodes.
+        /// </summary>
+        /// <param name="InCheckingToken"></param>
+        /// <param name="InType"></param>
+        /// <param name="InCheckCodes"></param>
+        /// <returns></returns>
+        public static bool CheckTokenMatch(Token InCheckingToken, ETokenType InType, string[] InCheckCodes)
+        {
+            if (InCheckingToken.TokenType == InType)
+            {
+                if (InCheckCodes == null || InCheckCodes.Length == 0)
+                {
+                    return true;
+                }
+
+                return InCheckCodes.Contains(InCheckingToken.Code);
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Check if the target token matches InCheckTypes.
+        /// </summary>
+        /// <param name="InCheckTypes"></param>
+        /// <param name="InCodes"></param>
+        /// <param name="InDelta"></param>
+        /// <returns></returns>
+        public bool CheckTokens(IEnumerable<(ETokenType, string[])> InCheckTypeAndCodes, int InDelta = 0)
+        {
+            Token curToken = GetToken(InDelta);
+            if (curToken == null)
+            {
+                return false;
+            }
+
+            foreach (var tnc in InCheckTypeAndCodes)
+            {
+                if (CheckTokenMatch(curToken, tnc.Item1, tnc.Item2))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check types
         /// </summary>
         /// <param name="InCheckTypes"></param>
         /// <param name="InDelta"></param>
         /// <returns></returns>
-        public bool CheckToken(IEnumerable<ETokenType> InCheckTypes, int InDelta = 0)
+        public bool CheckTokens(IEnumerable<ETokenType> InCheckTypes, int InDelta = 0)
         {
-            Token curToken = GetToken(InDelta);
-            if (curToken == null)
-            { return false; }
-
-            if (InCheckTypes.Contains(curToken.TokenType))
-            { return true; }
-
-            return false;
+            var checkTypeAndCodes = new List<(ETokenType, string[])>();
+            foreach (var ct in InCheckTypes)
+            {
+                checkTypeAndCodes.Add((ct, new string[0]));
+            }
+            return CheckTokens(checkTypeAndCodes, InDelta);
         }
 
         /// <summary>
         /// Check if the target token matches the InTokenType.
         /// </summary>
         /// <param name="InTokenType"></param>
+        /// <param name="InCodes"></param>
         /// <param name="InDelta"></param>
         /// <returns></returns>
-        public bool CheckToken(ETokenType InTokenType, int InDelta = 0)
+        public bool CheckToken(ETokenType InTokenType, string[] InCodes, int InDelta = 0)
         {
-            return CheckToken(new ETokenType[] { InTokenType }, InDelta);
+            return CheckTokens(new (ETokenType, string[])[] { (InTokenType, InCodes) }, InDelta);
+        }
+
+        /// <summary>
+        /// Check if the target token matches the InTokenType.
+        /// </summary>
+        /// <param name="InTokenType"></param>
+        /// <param name="InCode"></param>
+        /// <param name="InDelta"></param>
+        /// <returns></returns>
+        public bool CheckToken(ETokenType InTokenType, string InCode = null, int InDelta = 0)
+        {
+            var checkCodes = InCode != null ? new string[] { InCode } : new string[0];
+            return CheckToken(InTokenType, checkCodes, InDelta);
         }
 
         /// <summary>
         /// Check if the next token matches the InTokenType
         /// </summary>
         /// <param name="InTokenType"></param>
+        /// <param name="InCode"></param>
         /// <returns></returns>
-        public bool CheckNextToken(ETokenType InTokenType)
+        public bool CheckNextToken(ETokenType InTokenType, string InCode = null)
         {
-            return CheckToken(InTokenType, 1);
+            return CheckToken(InTokenType, InCode, 1);
         }
 
         /// <summary>
@@ -136,7 +196,7 @@ namespace nf.protoscript.parser.token
         /// <returns></returns>
         public bool EnsureOrConsumeTo(IEnumerable<ETokenType> InTokens)
         {
-            if (CheckToken(InTokens))
+            if (CheckTokens(InTokens))
             {
                 return true;
             }
@@ -165,7 +225,7 @@ namespace nf.protoscript.parser.token
         /// <summary>
         /// Consume all tokens until the current token contains in the InTokens.
         /// </summary>
-        /// <param name="InToken"></param>
+        /// <param name="InToken"></param>B
         private void ConsumeTo(IEnumerable<ETokenType> InTokens)
         {
             // Consume to the next 'InToken' or the end.

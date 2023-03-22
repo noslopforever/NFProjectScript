@@ -15,7 +15,7 @@ namespace nf.protoscript.parser.syntax1.analysis
         /// Operator parsers sorted by prorities (from LOW to HIGH).
         /// </summary>
         static ASTParser_ExprBase GDefaultOpExprParsers =
-            new ASTParser_ExprOperator(ETokenType.Assign, "="
+            new ASTParser_ExprAssign(new string[] { "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=" }
             , new ASTParser_ExprOperator("|"
             , new ASTParser_ExprOperator("&"
             , new ASTParser_ExprOperator(new string[] { "==", "!=" }

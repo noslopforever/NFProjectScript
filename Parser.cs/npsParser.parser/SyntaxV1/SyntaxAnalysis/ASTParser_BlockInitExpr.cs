@@ -16,7 +16,7 @@ namespace nf.protoscript.parser.syntax1.analysis
     {
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)
         {
-            if (!InTokenList.CheckToken(ETokenType.Assign))
+            if (!InTokenList.CheckToken(ETokenType.Assign, "="))
             {
                 return null;
             }

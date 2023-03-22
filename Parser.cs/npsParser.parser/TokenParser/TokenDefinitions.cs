@@ -196,19 +196,19 @@ namespace nf.protoscript.parser.token
         /// Regex to check an operator (mathmatic and logic)
         /// DONOT use this regex with OperatorsAndDot.
         /// </summary>
-        public static string Operators { get; } = @"[+\-*/%!<>&|]=?|==";
+        public static string Operators { get; } = @"[+\-*/%&|]|[!<>]=?|==";
 
         /// <summary>
         /// Regex to check an operator (mathmatic and logic) and a dot.
         /// DONOT use this regex with Operators.
         /// </summary>
-        public static string OperatorsAndDot { get; } = @"[+\-*/%!<>&|]=?|==|\.";
+        public static string OperatorsAndDot { get; } = @"[+\-*/%&|]|[!<>]=?|==|\.";
 
         /// <summary>
         /// Regex to check an assign
         /// This regex's priority must be lower than Operators/OperatorsAndDot.
         /// </summary>
-        public static string Assign { get; } = (@"=");
+        public static string Assign { get; } = (@"[+\-*/%&|]?=");
 
         /// <summary>
         /// Regex to check an open-paren (

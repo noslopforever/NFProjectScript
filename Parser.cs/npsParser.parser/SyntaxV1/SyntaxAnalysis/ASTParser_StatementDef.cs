@@ -162,7 +162,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             }
 
             // Try parse init-expressions.
-            if (InTokenList.CheckToken(ETokenType.Assign))
+            if (InTokenList.CheckToken(ETokenType.Assign, "="))
             {
                 syntaxtree.STNodeBase initExpr = null;
                 if (DefType == EDefType.Function)
