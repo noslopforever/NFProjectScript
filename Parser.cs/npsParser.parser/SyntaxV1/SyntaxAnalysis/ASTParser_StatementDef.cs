@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using nf.protoscript.parser.token;
 
@@ -192,24 +192,16 @@ namespace nf.protoscript.parser.syntax1.analysis
                 resultDef._Internal_SetInitExpr(initExpr);
             }
 
-            // If Non-Param mode, Try parse line-end attributes.
+            // If Non-Param mode, Try parse line-end attributes and comment.
             STNode_AttributeDefs postAttrs = null;
+            STNode_Comment comment = null;
             if (DefType != EDefType.Param)
             {
-                if (InTokenList.CheckToken(ETokenType.At))
-                {
-                    // TODO impl
-                    throw new NotImplementedException();
-                    return null;
-                }
-
-                // Try parse line-end comments finally.
-                if (InTokenList.CheckToken(ETokenType.Sharp))
-                {
-                    // TODO impl
-                    throw new NotImplementedException();
-                    return null;
-                }
+                ASTParser_BlockLineEndAttributes leAttrsParser = new ASTParser_BlockLineEndAttributes();
+                postAttrs = leAttrsParser.Parse(InTokenList);
+                
+                ASTParser_BlockLineEndComments lecmtsParser = new ASTParser_BlockLineEndComments();
+                comment = lecmtsParser.Parse(InTokenList);
             }
 
             // Assign type and attributes which have already been parsed
@@ -219,8 +211,8 @@ namespace nf.protoscript.parser.syntax1.analysis
             { resultDef._Internal_AddAttributes(attrs); }
             if (postAttrs != null)
             { resultDef._Internal_AddAttributes(postAttrs); }
-            //if (comments != null)
-            //{ resultDef._Internal_AddComments(comments); }
+            if (comment != null)
+            { resultDef._Internal_AddComments(comment); }
 
             return resultDef;
         }
