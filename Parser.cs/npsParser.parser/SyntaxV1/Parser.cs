@@ -26,7 +26,7 @@ namespace nf.protoscript.parser.syntax1
 
             //parser._NonRootFactories.Add(new SectorFactory_Block());
             //parser._NonRootFactories.Add(new SectorFactory_Links());
-            //parser._NonRootFactories.Add(new SectorFactory_Expression());
+            parser._NonRootFactories.Add(new SectorFactory_Expression());
             parser._NonRootFactories.Add(new SectorFactory_Member());
             parser._NonRootFactories.Add(new SectorFactory_Method());
             return parser;
@@ -112,6 +112,12 @@ namespace nf.protoscript.parser.syntax1
                 // Move to the next line.
             } while (InReader.GoNextLine());
 
+            // ## Analyze sectors
+            foreach (var sector in _Sectors)
+            {
+                sector.AnalyzeSector();
+            }
+
             // ## Gather all types from these sectors
             foreach (var sector in _Sectors)
             {
@@ -119,17 +125,17 @@ namespace nf.protoscript.parser.syntax1
             }
 
             // ## Collect all infos recursively.
-            void _CollectSectorInfosRecursively(Sector InSec, Info InParentInfo)
+            void _CollectSectorInfosRecursively(Sector InSec, ProjectInfo InProjectInfo, Sector InParentSector)
             {
-                Info thisSecInfo = InSec.CollectInfos(InProjectInfo, InParentInfo);
+                InSec.CollectInfos(InProjectInfo, InParentSector);
                 foreach (var subSec in InSec.SubSectors)
                 {
-                    _CollectSectorInfosRecursively(subSec, thisSecInfo);
+                    _CollectSectorInfosRecursively(subSec, InProjectInfo, InSec);
                 }
             }
             foreach (var sector in _RootSectors)
             {
-                _CollectSectorInfosRecursively(sector, InProjectInfo);
+                _CollectSectorInfosRecursively(sector, InProjectInfo, null);
             }
 
         }

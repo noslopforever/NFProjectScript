@@ -1,6 +1,7 @@
 ﻿using nf.protoscript.parser.syntax1.analysis;
 using nf.protoscript.parser.token;
 using System;
+using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1
 {
@@ -14,11 +15,9 @@ namespace nf.protoscript.parser.syntax1
         {
             Unknown,
             Member,
-            Method,
             ComponentOrChild,
-            EventAttachment,
             Event,
-            Reference,
+            Parameter,
         }
 
         internal ElementSector(Token[] InTokens, EType InType, object InParsedResult)
@@ -33,15 +32,10 @@ namespace nf.protoscript.parser.syntax1
             return new ElementSector(InTokens, EType.Member, InElemDef);
         }
 
-        internal static Sector NewMethodSector(Token[] InTokens, STNode_FunctionDef InFuncDef)
-        {
-            return new ElementSector(InTokens, EType.Method, InFuncDef);
-        }
-
         /// <summary>
         /// Type of the element.
         /// </summary>
-        EType Type { get; }
+        public EType Type { get; set; }
 
         /// <summary>
         /// Result parsed
@@ -51,13 +45,28 @@ namespace nf.protoscript.parser.syntax1
         /// <summary>
         /// Name of the element.
         /// </summary>
-        string Name { get; }
+        public string Name { get; }
 
-        public override Info CollectInfos(ProjectInfo InProjectInfo, Info InParentInfo)
+
+        protected override Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector)
         {
-            var tl = new TokenList(this.Tokens);
+            Info parentInfo = InParentSector.CollectedInfo;
+            if (parentInfo == null)
+            {
+                // TODO log error.
+                throw new NotImplementedException();
+                return null;
+            }
 
-            if (Type == EType.Member)
+            // Skip some elements because they should be handled by other processes.
+            // For example:
+            // - parameters should be handled by their host methods.
+            // - members of inline-type should be handled by the element which introduces the inline-type.
+            if (Type == EType.Parameter)
+            {
+                return null;
+            }
+            else if (Type == EType.Member)
             {
                 var elemDef = ParsedResult as STNode_ElementDef;
 
@@ -65,43 +74,19 @@ namespace nf.protoscript.parser.syntax1
                 TypeInfo typeInfo = CommonTypeInfos.Any;
                 if (elemDef.TypeSig != null)
                 {
-                    typeInfo = elemDef.TypeSig.LocateTypeInfo(InProjectInfo, InParentInfo);
+                    typeInfo = elemDef.TypeSig.LocateTypeInfo(InProjectInfo, parentInfo);
                 }
 
-                ElementInfo elemInfo = new ElementInfo(InParentInfo, "member", elemDef.DefName, typeInfo, elemDef.InitExpression);
+                var elemInfo = new ElementInfo(parentInfo, "member", elemDef.DefName, typeInfo, elemDef.InitExpression);
                 return elemInfo;
-            }
-            else if (Type == EType.Method)
-            {
-                var funcDef = ParsedResult as STNode_FunctionDef;
-
-                // Let TypeSig to find the target TypeInfo.
-                TypeInfo typeInfo = CommonTypeInfos.Any;
-                if (funcDef.TypeSig != null)
-                {
-                    typeInfo = funcDef.TypeSig.LocateTypeInfo(InProjectInfo, InParentInfo);
-                }
-                // New MethodInfo.
-                ElementInfo mtdInfo = new ElementInfo(InParentInfo, "method", funcDef.DefName, typeInfo, funcDef.InitExpression);
-
-                // Handle parameters of the Method.
-                foreach (var paramDef in funcDef.Params)
-                {
-                    TypeInfo paramTypeInfo = CommonTypeInfos.Any;
-                    if (paramDef.TypeSig != null)
-                    {
-                        paramTypeInfo = paramDef.TypeSig.LocateTypeInfo(InProjectInfo, InParentInfo);
-                    }
-                    ElementInfo paramInfo = new ElementInfo(mtdInfo, "param", paramDef.DefName, paramTypeInfo, paramDef.InitExpression);
-                }
-
-                return mtdInfo;
             }
 
             return null;
         }
 
+
     }
+
 
 
 }

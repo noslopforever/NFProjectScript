@@ -30,10 +30,8 @@
             TypeInfo singletonType = new TypeInfo(InProjectInfo, "model", TypeName);
         }
 
-        public override Info CollectInfos(ProjectInfo InProjectInfo, Info InParentInfo)
+        protected override Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector)
         {
-            System.Diagnostics.Debug.Assert(InProjectInfo == InParentInfo);
-
             TypeInfo typeInfo = InfoHelper.FindType(InProjectInfo, TypeName);
             ElementInfo globalObject = new ElementInfo(InProjectInfo, "object", ObjectName, typeInfo, null);
             return globalObject;

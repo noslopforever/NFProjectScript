@@ -31,6 +31,11 @@ namespace nf.protoscript.parser.syntax1
         List<Sector> _SubSectors = new List<Sector>();
 
         /// <summary>
+        /// Collected Info of this sector.
+        /// </summary>
+        public Info CollectedInfo { get; private set; }
+
+        /// <summary>
         /// Does this sector contains TypeInfo?
         /// </summary>
         /// <returns></returns>
@@ -49,20 +54,57 @@ namespace nf.protoscript.parser.syntax1
         }
 
         /// <summary>
+        /// Get all sub sectors with type T.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public IList<T> GetSubSectors<T>() where T: Sector
+        {
+            List<T> results = new List<T>();
+            foreach (var sec in _SubSectors)
+            {
+                if (sec is T)
+                {
+                    results.Add(sec as T);
+                }
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// Analyze sector.
+        /// </summary>
+        public virtual void AnalyzeSector()
+        {
+        }
+
+        /// <summary>
         /// Try collect Type infos provided by this sector.
         /// </summary>
         /// <param name="InProjectInfo"></param>
-        /// <returns></returns>
+        /// 
         public virtual void TryCollectTypes(ProjectInfo InProjectInfo)
         {
         }
 
         /// <summary>
-        /// Collect Infos contain in this sector.
+        /// Collect Info contains in this sector.
         /// </summary>
         /// <param name="InProjectInfo"></param>
-        /// <param name="InParentInfo"></param>
-        public abstract Info CollectInfos(ProjectInfo InProjectInfo, Info InParentInfo);
+        /// <param name="InParentSector"></param>
+        public void CollectInfos(ProjectInfo InProjectInfo, Sector InParentSector)
+        {
+            CollectedInfo = CollectInfosImpl(InProjectInfo, InParentSector);
+        }
+
+        /// <summary>
+        /// Abstract method which implements the CollectInfos.
+        /// </summary>
+        /// <param name="InProjectInfo"></param>
+        /// <param name="InParentSector"></param>
+        /// 
+        /// <returns></returns>
+        protected abstract Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector);
 
     }
 

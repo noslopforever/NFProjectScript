@@ -34,7 +34,7 @@ namespace nf.protoscript.parser.syntax1
                 var funcDef = defParser.Parse(tl) as analysis.STNode_FunctionDef;
                 if (funcDef != null)
                 {
-                    return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
+                    return new FunctionSector(tokens.ToArray(), funcDef);
                 }
             }
             else
@@ -53,7 +53,7 @@ namespace nf.protoscript.parser.syntax1
                     var funcDef = preTypeParser.Parse(tl) as analysis.STNode_FunctionDef;
                     if (funcDef != null)
                     {
-                        return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
+                        return new FunctionSector(tokens.ToArray(), funcDef);
                     }
                 }
                 catch
@@ -75,7 +75,7 @@ namespace nf.protoscript.parser.syntax1
                     var funcDef = postTypeParser.Parse(tl) as analysis.STNode_FunctionDef;
                     if (funcDef != null)
                     {
-                        return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
+                        return new FunctionSector(tokens.ToArray(), funcDef);
                     }
                 }
 
