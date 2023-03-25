@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace nf.protoscript.parser.syntax1
 {
     /// <summary>
-    /// SectorFactory_Expression to parse and generate SectorExpression.
+    /// SectorFactory_Expression to parse and generate ExpressionSector.
     /// </summary>
     class SectorFactory_Expression
         : SectorFactory
