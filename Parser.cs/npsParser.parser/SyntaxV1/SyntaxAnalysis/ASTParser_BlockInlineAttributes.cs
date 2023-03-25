@@ -12,7 +12,7 @@ namespace nf.protoscript.parser.syntax1.analysis
     ///    ^--------------^
     ///    
     /// </summary>
-    internal class ASTParser_BlockAttributes
+    internal class ASTParser_BlockInlineAttributes
         : ASTParser_Base<STNode_AttributeDefs>
     {
         public override STNode_AttributeDefs Parse(TokenList InTokenList)

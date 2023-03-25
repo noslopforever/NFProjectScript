@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using nf.protoscript.parser.token;
 
@@ -114,7 +114,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             // Try parse prefix attributes:
             // -n [Min=0][Max=100] HP = 100.
             //    ^--------------^
-            ASTParser_BlockAttributes attrsParser = new ASTParser_BlockAttributes();
+            ASTParser_BlockInlineAttributes attrsParser = new ASTParser_BlockInlineAttributes();
             STNode_AttributeDefs attrs = attrsParser.Parse(InTokenList);
 
             // Try parse the definition body, switched by the desired DefType.
