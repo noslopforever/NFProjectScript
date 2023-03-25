@@ -16,7 +16,7 @@ namespace nf.protoscript.parser.syntax1.analysis
                 return null;
             }
 
-            throw new System.NotImplementedException();
+            return null;
         }
     }
 

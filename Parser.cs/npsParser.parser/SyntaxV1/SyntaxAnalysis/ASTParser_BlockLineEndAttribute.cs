@@ -14,7 +14,41 @@ namespace nf.protoscript.parser.syntax1.analysis
     {
         public override STNode_AttributeDef Parse(TokenList InTokenList)
         {
-            throw new System.NotImplementedException();
+            // @Attr = InitExpr
+            // ^
+            if (InTokenList.CheckToken(ETokenType.At))
+            {
+                InTokenList.Consume();
+
+                // @Attr = InitExpr
+                //  ^--^
+                if (InTokenList.CheckToken(ETokenType.ID))
+                {
+                    var idToken = InTokenList.CurrentToken;
+                    InTokenList.Consume();
+
+                    // New attribute Def
+                    STNode_AttributeDef attrDef = new STNode_AttributeDef(idToken.Code);
+
+                    // Try parse init-expr
+                    // @Attr = InitExpr
+                    //       ^--------^
+                    if (InTokenList.CheckToken(ETokenType.Assign, "="))
+                    {
+                        InTokenList.Consume();
+                        var exprParser = new ASTParser_Expression();
+                        var expr = exprParser.Parse(InTokenList);
+                        attrDef._Internal_SetInitExpr(expr);
+                    }
+                    return attrDef;
+                }
+                else
+                {
+                    // TODO log error unexpected token.
+                    throw new NotImplementedException();
+                }
+            }
+            return null;
         }
     }
 
@@ -29,14 +63,15 @@ namespace nf.protoscript.parser.syntax1.analysis
     {
         public override STNode_AttributeDefs Parse(TokenList InTokenList)
         {
-            if (InTokenList.CheckToken(ETokenType.At))
+            STNode_AttributeDefs attrDefs = new STNode_AttributeDefs();
+            while (InTokenList.CheckToken(ETokenType.At))
             {
-                // TODO impl
-                throw new NotImplementedException();
-                return null;
+                ASTParser_BlockLineEndAttribute attrParser = new ASTParser_BlockLineEndAttribute();
+                var attrDef = attrParser.Parse(InTokenList);
+                attrDefs.Add(attrDef);
             }
 
-            throw new System.NotImplementedException();
+            return attrDefs;
         }
     }
 

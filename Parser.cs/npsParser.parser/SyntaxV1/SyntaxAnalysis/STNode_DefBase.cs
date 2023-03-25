@@ -17,7 +17,7 @@ namespace nf.protoscript.parser.syntax1.analysis
         /// <summary>
         /// Attributes to decorate the definition.
         /// </summary>
-        public STNode_AttributeDefs Attributes { get; private set; }
+        public STNode_AttributeDefs Attributes { get; } = new STNode_AttributeDefs();
 
         /// <summary>
         /// Name of the definition.

@@ -81,6 +81,11 @@ namespace nf.protoscript.parser.syntax1
 
             // ## New MethodInfo instance.
             ElementInfo mtdInfo = new ElementInfo(parentInfo, "method", FuncDef.DefName, typeInfo, stSeq);
+            // Register inline and line-end attributes
+            foreach (var attrDef in FuncDef.Attributes)
+            {
+                var attrInfo = new AttributeInfo(parentInfo, attrDef.DefName, attrDef.DefName, attrDef.InitExpression);
+            }
 
             // ## Fill parameters by this sector
             foreach (var paramDef in FuncDef.Params)

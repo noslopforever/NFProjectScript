@@ -47,7 +47,6 @@ namespace nf.protoscript.parser.syntax1
         /// </summary>
         public string Name { get; }
 
-
         protected override Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector)
         {
             Info parentInfo = InParentSector.CollectedInfo;
@@ -78,6 +77,13 @@ namespace nf.protoscript.parser.syntax1
                 }
 
                 var elemInfo = new ElementInfo(parentInfo, "member", elemDef.DefName, typeInfo, elemDef.InitExpression);
+
+                // Register inline and line-end attributes
+                foreach (var attrDef in elemDef.Attributes)
+                {
+                    var attrInfo = new AttributeInfo(elemInfo, attrDef.DefName, attrDef.DefName, attrDef.InitExpression);
+                }
+
                 return elemInfo;
             }
 
