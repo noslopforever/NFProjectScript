@@ -180,25 +180,25 @@ namespace nf.protoscript.test
         /// model testCharacterTemplate
         ///     - HP = 100
         ///     - TestNonBindingValue = Guid()
-        ///     +cmd HpUp()
+        ///     +[cmd] HpUp()
         ///         Hp += 1
         /// 
         /// editor CharacterEditor
         ///     -Model = new testCharacterTemplate();
         ///     +panel CharacterInfoPanel
         ///         -DataContext = $db"Src=ancestor:CharacterEditor, Path=Model"
-        ///         +Label
+        ///         --Label
         ///             -Text = $db"HP"
-        ///         +Button upBtn
+        ///         --Button upBtn
         ///             -Text = "+1"
-        ///             -Click = new DataContextCall("HpUp")
-        ///         +Button downBtn
+        ///             ~Click += new DataContextCall("HpUp")
+        ///         --Button downBtn
         ///             -Text = "-1"
-        ///             -Click
+        ///             ~Click
         ///                 dataContext.HpUp -= 1
         ///                 
         /// $applet
-        //     -CharacterEditor characterEditor
+        ///     -CharacterEditor characterEditor
         ///
         /// </summary>
         /// <returns></returns>

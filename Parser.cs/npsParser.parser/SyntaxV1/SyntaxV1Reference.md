@@ -49,18 +49,28 @@ ${ModelType}
 
 ## Event Sector
 ```
->{EventName} |({Param}...)|
-> {EventName} |({Param}...)|
+~{EventName}({Param}...)
+~ {EventName}({Param}...)
+>>{EventName}({Param}...)
+>> {EventName}({Param}...)
 ```
 
 ## Event Attach Sector
 ```
->{EventName} += {Expr}
-> {EventName} += {Expr}
+>>{EventName} += {Expr}
+>> {EventName} += {Expr}
+~{EventName} += {Expr}
+~ {EventName} += {Expr}
 
->+{EventName}
->+ {EventName}
-    > {Expr} # Body or Multiline-body
+~{EventName}
+    {Expr} # Body or Multiline-body
+>>{EventName}
+    {Expr} # Body or Multiline-body
+
+~ {EventName}
+    {Expr} # Body or Multiline-body
+>> {EventName}
+    {Expr} # Body or Multiline-body
 ```
 
 
@@ -88,4 +98,6 @@ o=o {StateMachine Name}
 ```
 >{Expression}
 > {Expression}
+>Tag:{Expression}
+> Tag:{Expression}
 ```
