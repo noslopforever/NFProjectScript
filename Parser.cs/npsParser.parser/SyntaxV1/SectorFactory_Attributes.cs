@@ -12,7 +12,8 @@ namespace nf.protoscript.parser.syntax1
     {
         protected override Sector ParseImpl(ICodeContentReader InReader, string InCodesWithoutIndent)
         {
-            if (!InCodesWithoutIndent.StartsWith("@"))
+            string codesWithoutTags = "";
+            if (!ParseHelper.CheckAndRemoveStartCode(InCodesWithoutIndent, "@", out codesWithoutTags))
             {
                 return null;
             }

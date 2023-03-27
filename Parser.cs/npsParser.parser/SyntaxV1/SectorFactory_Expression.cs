@@ -13,8 +13,8 @@ namespace nf.protoscript.parser.syntax1
         protected override Sector ParseImpl(ICodeContentReader InReader, string InCodesWithoutIndent)
         {
             // Only handle "> EXPR_STATEMENT"
-            if (!InCodesWithoutIndent.StartsWith(">")
-                || InCodesWithoutIndent.StartsWith(">>"))
+            string codesWithoutDefTag = "";
+            if (!ParseHelper.CheckAndRemoveStartCode(InCodesWithoutIndent, ">", out codesWithoutDefTag))
             {
                 return null;
             }

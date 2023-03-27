@@ -108,6 +108,44 @@ namespace nf.protoscript.parser.syntax1
             return InCode.Trim();
         }
 
+        /// <summary>
+        /// Check if InCode starts with InStartCodes. If yes, remove the StartCode and return the other codes by OutOtherCode.
+        /// </summary>
+        /// <param name="InCode"></param>
+        /// <param name="InStartCodes"></param>
+        /// <param name="OutOtherCode"></param>
+        /// <returns></returns>
+        public static bool CheckAndRemoveStartCode(string InCode, string InStartCode, out string OutOtherCode)
+        {
+            if (InCode.StartsWith(InStartCode))
+            {
+                OutOtherCode = InCode.Substring(InStartCode.Length);
+                return true;
+            }
+            OutOtherCode = InCode;
+            return false;
+        }
+
+        /// <summary>
+        /// Check if InCode starts with InStartCodes. If yes, remove the StartCode and return the other codes by OutOtherCode.
+        /// </summary>
+        /// <param name="InCode"></param>
+        /// <param name="InStartCodes"></param>
+        /// <param name="OutOtherCode"></param>
+        /// <returns></returns>
+        public static bool CheckAndRemoveStartCodes(string InCode, out string OutOtherCode, params string[] InStartCodes)
+        {
+            foreach (string sc in InStartCodes)
+            {
+                if (CheckAndRemoveStartCode(InCode, sc, out OutOtherCode))
+                {
+                    return true;
+                }
+            }
+            OutOtherCode = InCode;
+            return false;
+        }
+
     }
 
 

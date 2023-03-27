@@ -18,10 +18,11 @@ namespace nf.protoscript.parser.syntax1
             //- {Name} |= {Expr}|
             //-{Name}:{Type} |= {Expr}|
             //
-            if (!InCodesWithoutIndent.StartsWith("-"))
+
+            string codesWithoutTags = "";
+            if (!ParseHelper.CheckAndRemoveStartCode(InCodesWithoutIndent, "-", out codesWithoutTags))
             { return null; }
 
-            string codesWithoutTags = InCodesWithoutIndent.Substring(1);
 
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
