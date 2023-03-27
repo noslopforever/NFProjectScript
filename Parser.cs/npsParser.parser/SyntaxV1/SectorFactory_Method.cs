@@ -1,4 +1,4 @@
-using nf.protoscript.parser.token;
+﻿using nf.protoscript.parser.token;
 using System;
 using System.Collections.Generic;
 
@@ -33,7 +33,7 @@ namespace nf.protoscript.parser.syntax1
                 var funcDef = defParser.Parse(tl) as analysis.STNode_FunctionDef;
                 if (funcDef != null)
                 {
-                    return new FunctionSector(tokens.ToArray(), funcDef);
+                    return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
                 }
             }
             else
@@ -52,7 +52,7 @@ namespace nf.protoscript.parser.syntax1
                     var funcDef = preTypeParser.Parse(tl) as analysis.STNode_FunctionDef;
                     if (funcDef != null)
                     {
-                        return new FunctionSector(tokens.ToArray(), funcDef);
+                        return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
                     }
                 }
                 catch
@@ -74,7 +74,7 @@ namespace nf.protoscript.parser.syntax1
                     var funcDef = postTypeParser.Parse(tl) as analysis.STNode_FunctionDef;
                     if (funcDef != null)
                     {
-                        return new FunctionSector(tokens.ToArray(), funcDef);
+                        return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
                     }
                 }
 

@@ -7,9 +7,10 @@ unit tank
 unit tower
 
 class testMemberDefs
-	-integer Number1
-	-integer Number2 = 100
+	-integer Number1 @TestAttr
+	-integer Number2 = 100 @TestAttr=100
 	- Number3 = 10
+		@TestAttr=10
 	-Number4:integer = 20
 	-n NumberA1
 	-n NumberA2 = 100
@@ -23,7 +24,11 @@ class testMethodDefs
 	+ FuncVV1 = cout("hello world too!")
 	+ FuncVI1(InP0:n) = cout(InP0)
 	+n FuncIV1 = return 199
-	+n FuncII1(InP0:n) = return InP0 + 1
+	+n FuncII1(InP0:n) = return InP0 + InP1
+		-n InP1 = 20
+	+integer Square(InP0:integer, InP1:integer)
+	    > tmp = InP0 * InP1;
+		> return tmp;
 
 class testEvents
 
