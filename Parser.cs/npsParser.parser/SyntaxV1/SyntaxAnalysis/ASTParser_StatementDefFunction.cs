@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nf.protoscript.parser.token;
+using System;
 
 namespace nf.protoscript.parser.syntax1.analysis
 {
@@ -16,69 +17,73 @@ namespace nf.protoscript.parser.syntax1.analysis
     /// 
     /// </summary>
     class ASTParser_StatementDefFunction
-        : ASTParser_Composite<STNode_FunctionDef>
+        : ASTParser_Base<STNode_FunctionDef>
     {
         /// <summary>
         /// Ctor
         /// </summary>
-        /// <param name="InStartTypeCode">
-        /// The start type like 'integer' in "-integer HP = 100".
-        /// Pass null means there are no start type codes. e.g. "- HP = 100" or "-HP = 100".
-        /// </param>
-        /// <param name="InParseLineEndBlocks">
-        /// Determine if the parser handles line-end attributes and line-end comments.
-        /// like "-HP = 100 @Min=0 # Health point."
-        /// </param>
-        /// <exception cref="NotImplementedException"></exception>
         public ASTParser_StatementDefFunction(STNode_TypeSignature InStartType)
         {
-            // - getHP  (     )      :integer     = return 100        @Min=0 @Max=100        # Health-point
-            //   ^^     ^-----^      ^------^     ^----------^        ^-------------^        ^------------^
-            // BlockID  [o]Params    [o]TypeSig   [o]Expr-Statement   [o]LineEndAttributes   [o]LineEndComments
-            //
-            AddSubParsers(new ASTParser_BlockID(),
-                stnGetVar => _Name = stnGetVar.IDName,
-                () =>
-                {
-                    // TODO log error
-                    throw new NotImplementedException();
-                    return false;
-                }
-                );
-
-            AddSubParsers(new ASTParser_BlockParamList(),
-                paramList =>
-                {
-                    _Result = new STNode_FunctionDef(_Name, paramList);
-
-                    if (InStartType != null)
-                    { _Result._Internal_SetType(InStartType); }
-                }
-                );
-
-            if (InStartType == null)
-            {
-                AddSubParsers(new ASTParser_BlockTypeDef(),
-                    typeSig => _Result._Internal_SetType(typeSig)
-                    );
-            }
-
-            AddSubParsers(new ASTParser_BlockInitExpr(),
-                expr => _Result._Internal_SetInitExpr(expr)
-                );
-
-            AddSubParsers(new ASTParser_BlockLineEndAttributes(),
-                attrs => _Result._Internal_AddAttributes(attrs)
-                );
-
-            AddSubParsers(new ASTParser_BlockLineEndComments(),
-                comments => _Result._Internal_AddComments(comments)
-                );
-
+            StartType = InStartType;
         }
 
-        private string _Name;
+        /// <summary>
+        /// The start type like 'integer' in "-integer HP = 100".
+        /// Pass null means there are no start type codes. e.g. "- HP = 100" or "-HP = 100".
+        /// </summary>
+        public STNode_TypeSignature StartType { get; }
 
+        public override STNode_FunctionDef Parse(TokenList InTokenList)
+        {
+            // - getHP  (     )      :integer     = return 100        @Min=0 @Max=100        # Health-point
+            //   ^------------^      ^------^     ^----------^        ^-------------^        ^------------^
+            //   BlockFunctionDef    [o]TypeSig   [o]Expr-Statement   [o]LineEndAttributes   [o]LineEndComments
+            //
+            if (!InTokenList.CheckToken(ETokenType.ID))
+            {
+                return null;
+            }
+
+            // Parse function def
+            STNode_FunctionDef result = new ASTParser_BlockFunctionDef().Parse(InTokenList);
+            if (result == null)
+            {
+                // TODO log error
+                throw new NotImplementedException();
+            }
+
+            // Handle StartType/PostType.
+            if (StartType != null)
+            {
+                result._Internal_SetType(StartType);
+            }
+            else
+            {
+                if (InTokenList.CheckToken(ETokenType.Colon))
+                {
+                    InTokenList.Consume();
+                    StaticParseAST(new ASTParser_BlockType(), InTokenList,
+                        typeSig => result._Internal_SetType(typeSig)
+                        );
+                }
+            }
+
+            // Parse inline function body (expression statement)
+            StaticParseAST(new ASTParser_BlockInlineFunctionBody(), InTokenList,
+                expr => result._Internal_SetInitExpr(expr)
+                );
+
+            // Parse line-end blocks
+            StaticParseAST(new ASTParser_BlockLineEndAttributes(), InTokenList,
+                attrs => result._Internal_AddAttributes(attrs)
+                );
+
+            StaticParseAST(new ASTParser_BlockLineEndComments(), InTokenList,
+                comments => result._Internal_AddComments(comments)
+                );
+
+            return result;
+        }
     }
 
 }

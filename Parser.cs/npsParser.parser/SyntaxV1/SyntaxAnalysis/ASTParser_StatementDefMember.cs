@@ -1,7 +1,9 @@
-﻿using System;
+﻿using nf.protoscript.parser.token;
+using System;
 
 namespace nf.protoscript.parser.syntax1.analysis
 {
+
 
     /// <summary>
     /// Try parse tokens as a member-def statement.
@@ -15,63 +17,78 @@ namespace nf.protoscript.parser.syntax1.analysis
     ///                ^-------------^  ^---------------^
     /// </summary>
     class ASTParser_StatementDefMember
-        : ASTParser_Composite<STNode_ElementDef>
+        : ASTParser_Base<STNode_ElementDef>
     {
         /// <summary>
         /// Ctor
         /// </summary>
-        /// <param name="InStartTypeCode">
+        public ASTParser_StatementDefMember(STNode_TypeSignature InStartType, bool InParseLineEndBlocks)
+        {
+            StartType = InStartType;
+            ParseLineEndBlocks = InParseLineEndBlocks;
+        }
+
+        /// <summary>
         /// The start type like 'integer' in "-integer HP = 100".
         /// Pass null means there are no start type codes. e.g. "- HP = 100" or "-HP = 100".
-        /// </param>
-        /// <param name="InParseLineEndBlocks">
+        /// </summary>
+        public STNode_TypeSignature StartType { get; }
+
+        /// <summary>
         /// Determine if the parser handles line-end attributes and line-end comments.
         /// like "-HP = 100 @Min=0 # Health point."
-        /// </param>
-        /// <exception cref="NotImplementedException"></exception>
-        public ASTParser_StatementDefMember(STNode_TypeSignature InStartType, bool InParseLineEndBlocks)
+        /// </summary>
+        public bool ParseLineEndBlocks { get; }
+
+
+        public override STNode_ElementDef Parse(TokenList InTokenList)
         {
             // - HP    :integer = 100 @Min=0 @Max=100     # Health-point
             //   ^^    ^------^ ^---^ ^-------------^     ^------------^
             // BlockID  TypeSig  Expr LineEndAttributes   LineEndComments
 
-            AddSubParsers(new ASTParser_BlockID(),
-                stnGetVar =>
+            if (!InTokenList.CheckToken(ETokenType.ID))
+            {
+                return null;
+            }
+
+            // Parse block ID
+            var idToken = InTokenList.Consume();
+            var result = new STNode_ElementDef(idToken.Code);
+            if (StartType != null)
+            {
+                result._Internal_SetType(StartType);
+            }
+            // Try parse TypeSig
+            else
+            {
+                if (InTokenList.CheckToken(ETokenType.Colon))
                 {
-                    _Result = new STNode_ElementDef(stnGetVar.IDName);
-                    if (InStartType != null)
-                    { _Result._Internal_SetType(InStartType); }
-                },
-                () =>
-                {
-                    // TODO log error
-                    throw new NotImplementedException();
-                    return false;
+                    InTokenList.Consume();
+                    StaticParseAST(new ASTParser_BlockType(), InTokenList,
+                        typeSig => result._Internal_SetType(typeSig)
+                        );
                 }
+            }
+
+            // Try parse expr
+            StaticParseAST(new ASTParser_BlockInitExpr(), InTokenList,
+                expr => result._Internal_SetInitExpr(expr)
                 );
 
-            if (InStartType == null)
+            // Try parse line-end blocks if needed.
+            if (ParseLineEndBlocks)
             {
-                AddSubParsers(new ASTParser_BlockTypeDef(),
-                    typeSig => _Result._Internal_SetType(typeSig)
+                StaticParseAST(new ASTParser_BlockLineEndAttributes(), InTokenList,
+                    attrs => result._Internal_AddAttributes(attrs)
+                    );
+
+                StaticParseAST(new ASTParser_BlockLineEndComments(), InTokenList,
+                    comments => result._Internal_AddComments(comments)
                     );
             }
 
-            AddSubParsers(new ASTParser_BlockInitExpr(),
-                expr => _Result._Internal_SetInitExpr(expr)
-                );
-
-            if (InParseLineEndBlocks)
-            {
-                AddSubParsers(new ASTParser_BlockLineEndAttributes(),
-                    attrs => _Result._Internal_AddAttributes(attrs)
-                    );
-
-                AddSubParsers(new ASTParser_BlockLineEndComments(),
-                    comments => _Result._Internal_AddComments(comments)
-                    );
-            }
-
+            return result;
         }
     }
 
