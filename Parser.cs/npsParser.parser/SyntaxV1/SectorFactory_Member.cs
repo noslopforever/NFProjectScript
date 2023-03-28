@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using nf.protoscript.parser.syntax1.analysis;
 using nf.protoscript.parser.token;
 
 namespace nf.protoscript.parser.syntax1
@@ -23,69 +25,47 @@ namespace nf.protoscript.parser.syntax1
             if (!ParseHelper.CheckAndRemoveStartCode(InCodesWithoutIndent, "-", out codesWithoutTags))
             { return null; }
 
-
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
 
-            // Use common DefParser to handle anonymous-type or post-type definitions.
-            // - {Name} |= {Expr}|
-            //
-            if (codesWithoutTags.StartsWith(" "))
+            // Try Handle StartType
+            var tl = new TokenList(tokens);
+            ASTParser_BlockType blockTypeParser = new ASTParser_BlockType();
+            var startTypeSig = blockTypeParser.Parse(tl);
+
+            // Try parse as StartType member define:
+            // -{Type} {Name}
+            try
             {
-                var defParser = new analysis.ASTParser_StatementDef(
-                    analysis.ASTParser_StatementDef.EDefType.Element
-                    , analysis.ASTParser_StatementDef.ESyntaxType.EmptyStartType
-                    );
-                var tl = new TokenList(tokens);
-                var elemDef = defParser.Parse(tl) as analysis.STNode_ElementDef;
+                // If there is {Name} after {Type}
+                if (tl.CheckToken(ETokenType.ID))
+                {
+                    var startTypeDefParser = new ASTParser_StatementDefMember(startTypeSig, true);
+                    var elemDef = startTypeDefParser.Parse(tl);
+                    if (elemDef != null)
+                    {
+                        return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            // If fail, Seek back to the start and try parse Non-StartType member define:
+            // - {Name} or -{Name}
+            {
+                tl.Seek(0);
+                var defParser = new ASTParser_StatementDefMember(null, true);
+                var elemDef = defParser.Parse(tl);
                 if (elemDef != null)
                 {
                     return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
                 }
             }
-            else
-            {
-                try
-                {
-                    // Try use DefParser in Pre-Type mode to handle pre-type definitions:
-                    // -{Type} {Name}
-                    //
-                    var preTypeParser = new analysis.ASTParser_StatementDef(
-                        analysis.ASTParser_StatementDef.EDefType.Element
-                        , analysis.ASTParser_StatementDef.ESyntaxType.ParseStartType
-                        );
 
-                    var tl = new TokenList(tokens);
-                    var elemDef = preTypeParser.Parse(tl) as analysis.STNode_ElementDef;
-                    if (elemDef != null)
-                    {
-                        return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
-                    }
-                }
-                catch
-                {
-
-                }
-
-                // Try use DefParser in Post-Type mode to handle member overrides
-                // -{Name} |= {Expr}|
-                // -{Name}:{Type}|= {Expr}|
-                // 
-                {
-                    var postTypeParser = new analysis.ASTParser_StatementDef(
-                        analysis.ASTParser_StatementDef.EDefType.Element
-                        , analysis.ASTParser_StatementDef.ESyntaxType.ParsePostType
-                        );
-                    var tl = new TokenList(tokens);
-                    var elemDef = postTypeParser.Parse(tl) as analysis.STNode_ElementDef;
-                    if (elemDef != null)
-                    {
-                        return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
-                    }
-                }
-
-            }
-
+            // TODO log error
+            throw new NotImplementedException();
             return null;
         }
 

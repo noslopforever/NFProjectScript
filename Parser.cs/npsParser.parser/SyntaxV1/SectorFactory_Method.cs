@@ -1,4 +1,5 @@
-﻿using nf.protoscript.parser.token;
+﻿using nf.protoscript.parser.syntax1.analysis;
+using nf.protoscript.parser.token;
 using System;
 using System.Collections.Generic;
 
@@ -20,66 +21,44 @@ namespace nf.protoscript.parser.syntax1
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
 
-            // Handle empty-type functions
-            // + {Name}({Param})
-            //
-            if (codesWithoutTags.StartsWith(" "))
+            // Try Handle StartType
+            var tl = new TokenList(tokens);
+            ASTParser_BlockType blockTypeParser = new ASTParser_BlockType();
+            var startTypeSig = blockTypeParser.Parse(tl);
+
+            // Try parse as StartType member define:
+            // -{Type} {Name}
+            try
             {
-                var defParser = new analysis.ASTParser_StatementDef(
-                    analysis.ASTParser_StatementDef.EDefType.Function
-                    , analysis.ASTParser_StatementDef.ESyntaxType.EmptyStartType
-                    );
-                var tl = new TokenList(tokens);
-                var funcDef = defParser.Parse(tl) as analysis.STNode_FunctionDef;
+                // If there is {Name} after {Type}
+                if (tl.CheckToken(ETokenType.ID))
+                {
+                    var startTypeDefParser = new ASTParser_StatementDefFunction(startTypeSig);
+                    var funcDef = startTypeDefParser.Parse(tl);
+                    if (funcDef != null)
+                    {
+                        return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            // If fail, Seek back to the start and try parse Non-StartType member define:
+            // - {Name} or -{Name}
+            {
+                tl.Seek(0);
+                var defParser = new ASTParser_StatementDefFunction(null);
+                var funcDef = defParser.Parse(tl);
                 if (funcDef != null)
                 {
                     return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
                 }
             }
-            else
-            {
-                // Try use DefParser in Pre-Type mode to handle handle function-defs with return values:
-                // +{ReturnType} {Name} |= {Expr}|
-                // +{ReturnType} {Name}({Param}...)} |= {Expr}|
-                //
-                try
-                {
-                    var preTypeParser = new analysis.ASTParser_StatementDef(
-                        analysis.ASTParser_StatementDef.EDefType.Function
-                        , analysis.ASTParser_StatementDef.ESyntaxType.ParseStartType
-                        );
-                    var tl = new TokenList(tokens);
-                    var funcDef = preTypeParser.Parse(tl) as analysis.STNode_FunctionDef;
-                    if (funcDef != null)
-                    {
-                        return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
-                    }
-                }
-                catch
-                {
-                }
 
-                // Try use DefParser in Post-Type mode to handle function-defs with non return values
-                // +{Name} |= {Expr}|
-                // +{Name}({Param}...)} |= {Expr}|
-                // +{ Name}:{ReturnType} |= {Expr}|
-                // +{ Name}({Param}...)}:{ReturnType} |= {Expr}|
-                // 
-                {
-                    var postTypeParser = new analysis.ASTParser_StatementDef(
-                        analysis.ASTParser_StatementDef.EDefType.Function
-                        , analysis.ASTParser_StatementDef.ESyntaxType.ParsePostType
-                        );
-                    var tl = new TokenList(tokens);
-                    var funcDef = postTypeParser.Parse(tl) as analysis.STNode_FunctionDef;
-                    if (funcDef != null)
-                    {
-                        return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
-                    }
-                }
-
-            }
-
+            // TODO log error
+            throw new NotImplementedException();
             return null;
         }
 

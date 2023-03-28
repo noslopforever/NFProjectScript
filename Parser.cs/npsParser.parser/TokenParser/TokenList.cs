@@ -8,7 +8,7 @@ namespace nf.protoscript.parser.token
     /// <summary>
     /// TokenList: to help accessing and iterating tokens.
     /// </summary>
-    class TokenList
+    public class TokenList
     {
         public TokenList(IReadOnlyList<Token> InTokens)
         {
@@ -39,6 +39,17 @@ namespace nf.protoscript.parser.token
         /// Get the next token
         /// </summary>
         public Token NextToken { get { return GetToken(1); } }
+
+        /// <summary>
+        /// Seek to the target index.
+        /// </summary>
+        /// <param name="InIndex"></param>
+        /// <returns></returns>
+        public Token Seek(int InIndex)
+        {
+            _TokenIndex = InIndex;
+            return CurrentToken;
+        }
 
         /// <summary>
         /// Get token with delta

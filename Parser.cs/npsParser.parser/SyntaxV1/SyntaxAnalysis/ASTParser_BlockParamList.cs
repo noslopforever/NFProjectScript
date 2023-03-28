@@ -3,8 +3,9 @@ using nf.protoscript.parser.token;
 
 namespace nf.protoscript.parser.syntax1.analysis
 {
+
     /// <summary>
-    /// Parse to parse parameter-list.
+    /// Parser to parse parameter-list.
     /// 
     /// -n [Pure] getHP(InParam0, InParam1) = return 100
     ///                ^------------------^
@@ -40,11 +41,8 @@ namespace nf.protoscript.parser.syntax1.analysis
                         break;
                     }
 
-                    ASTParser_StatementDef paramDefParser = new ASTParser_StatementDef(
-                        ASTParser_StatementDef.EDefType.Param
-                        , ASTParser_StatementDef.ESyntaxType.ParsePostType
-                        );
-                    var paramDef = paramDefParser.Parse(InTokenList) as STNode_ElementDef;
+                    ASTParser_StatementDefMember paramDefParser = new ASTParser_StatementDefMember(null, false);
+                    var paramDef = paramDefParser.Parse(InTokenList);
                     if (paramDef == null)
                     {
                         // If param parse failed, clear all params and break the loop.
