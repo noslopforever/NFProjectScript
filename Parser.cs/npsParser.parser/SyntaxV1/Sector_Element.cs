@@ -61,7 +61,9 @@ namespace nf.protoscript.parser.syntax1
         {
             get
             {
-                if (Type == EType.Method)
+                if (Type == EType.Method
+                    || Type == EType.Event
+                    )
                 { return _ParsedResult as STNode_FunctionDef; }
 
                 throw new InvalidCastException();
@@ -144,7 +146,9 @@ namespace nf.protoscript.parser.syntax1
                 // new the result element.
                 chiefInfo = new ElementInfo(parentInfo, headerName, elemDef.DefName, typeInfo, elemDef.InitExpression);
             }
-            else if (Type == EType.Method)
+            else if (Type == EType.Method
+                || Type == EType.Event
+                )
             {
                 // ## Let TypeSig to find the method's return TypeInfo.
                 TypeInfo typeInfo = CommonTypeInfos.Any;
@@ -168,14 +172,22 @@ namespace nf.protoscript.parser.syntax1
                 syntaxtree.STNodeSequence mergedSTSeq = new syntaxtree.STNodeSequence(subExprs.ToArray());
 
                 // ## New MethodInfo instance.
-                chiefInfo = new ElementInfo(parentInfo, "method", FuncDef.DefName, typeInfo, mergedSTSeq);
+                string headerName = "";
+                switch (Type)
+                {
+                    case EType.Method: headerName = "method"; break;
+                    case EType.Event: headerName = "event"; break;
+                    default:
+                        throw new InvalidProgramException();
+                        break;
+                }
+                chiefInfo = new ElementInfo(parentInfo, headerName, FuncDef.DefName, typeInfo, mergedSTSeq);
 
                 // ## Fill parameters by this sector
                 foreach (var paramDef in FuncDef.Params)
                 {
                     _GenerateParamByDef(InProjectInfo, chiefInfo, paramDef);
                 }
-
             }
 
             if (chiefInfo != null)

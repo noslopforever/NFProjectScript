@@ -38,7 +38,7 @@ namespace nf.protoscript.parser.syntax1
                 var startTypeSig = blockTypeParser.Parse(tl);
 
                 // If there is {Name} after {Type}
-                var startTypeDefParser = new ASTParser_StatementDefMember(startTypeSig, true);
+                var startTypeDefParser = new ASTParser_StatementDefMember(startTypeSig);
                 var elemDef = startTypeDefParser.Parse(tl);
                 if (elemDef != null)
                 {
@@ -53,7 +53,7 @@ namespace nf.protoscript.parser.syntax1
             // - {Name} or -{Name}
             {
                 var tl = new TokenList(tokens);
-                var defParser = new ASTParser_StatementDefMember(null, true);
+                var defParser = new ASTParser_StatementDefMember(null);
                 var elemDef = defParser.Parse(tl);
                 if (elemDef != null)
                 {

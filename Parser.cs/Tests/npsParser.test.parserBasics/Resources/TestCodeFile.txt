@@ -14,7 +14,7 @@ class testMemberDefs
 	-Number4:integer = 20
 	-n NumberA1
 	-n NumberA2 = 100
-	-NumberA4:n = 20
+	- NumberA4:n = 20
 
 class testMethodDefs
 	+FuncVV0 = cout("hello world!")
@@ -31,4 +31,13 @@ class testMethodDefs
 		> return tmp;
 
 class testEvents
+	~Event0()
+	>>Event1(InP0:integer)
 
+	~ Event0 += cout("Event0 Called!")
+	>> Event1
+	    > cout(InP0)
+	>> Event2(MousePt)
+		- Ray
+		- Hit
+		> cout(MousePt)
