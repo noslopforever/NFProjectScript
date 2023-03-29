@@ -8,12 +8,8 @@ namespace nf.protoscript.parser.syntax1.analysis
     /// Try parse tokens as a function-def statement.
     /// 
     /// Like method definitions:
-    ///     +n [Min=0][Max=100] getHP = return 100
+    ///     +n getHP = return 100
     ///     + getHP():n = return 100
-    /// 
-    /// or event definitions:
-    ///     >> OnClick(MousePt, Ray, Hit)
-    ///     >> OnNotify
     /// 
     /// </summary>
     class ASTParser_StatementDefFunction

@@ -21,24 +21,21 @@ namespace nf.protoscript.parser.syntax1
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
 
-            // Try Handle StartType
-            var tl = new TokenList(tokens);
-            ASTParser_BlockType blockTypeParser = new ASTParser_BlockType();
-            var startTypeSig = blockTypeParser.Parse(tl);
-
             // Try parse as StartType member define:
             // -{Type} {Name}
             try
             {
+                // Try Handle StartType
+                var tl = new TokenList(tokens);
+                ASTParser_BlockType blockTypeParser = new ASTParser_BlockType();
+                var startTypeSig = blockTypeParser.Parse(tl);
+
                 // If there is {Name} after {Type}
-                if (tl.CheckToken(ETokenType.ID))
+                var startTypeDefParser = new ASTParser_StatementDefFunction(startTypeSig);
+                var funcDef = startTypeDefParser.Parse(tl);
+                if (funcDef != null)
                 {
-                    var startTypeDefParser = new ASTParser_StatementDefFunction(startTypeSig);
-                    var funcDef = startTypeDefParser.Parse(tl);
-                    if (funcDef != null)
-                    {
-                        return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
-                    }
+                    return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
                 }
             }
             catch
@@ -48,7 +45,7 @@ namespace nf.protoscript.parser.syntax1
             // If fail, Seek back to the start and try parse Non-StartType member define:
             // - {Name} or -{Name}
             {
-                tl.Seek(0);
+                var tl = new TokenList(tokens);
                 var defParser = new ASTParser_StatementDefFunction(null);
                 var funcDef = defParser.Parse(tl);
                 if (funcDef != null)

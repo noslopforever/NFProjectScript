@@ -22,10 +22,9 @@ namespace nf.protoscript.parser.syntax1.analysis
         /// <summary>
         /// Ctor
         /// </summary>
-        public ASTParser_StatementDefMember(STNode_TypeSignature InStartType, bool InParseLineEndBlocks)
+        public ASTParser_StatementDefMember(STNode_TypeSignature InStartType)
         {
             StartType = InStartType;
-            ParseLineEndBlocks = InParseLineEndBlocks;
         }
 
         /// <summary>
@@ -34,27 +33,32 @@ namespace nf.protoscript.parser.syntax1.analysis
         /// </summary>
         public STNode_TypeSignature StartType { get; }
 
-        /// <summary>
-        /// Determine if the parser handles line-end attributes and line-end comments.
-        /// like "-HP = 100 @Min=0 # Health point."
-        /// </summary>
-        public bool ParseLineEndBlocks { get; }
-
-
         public override STNode_ElementDef Parse(TokenList InTokenList)
         {
-            // - HP    :integer = 100 @Min=0 @Max=100     # Health-point
-            //   ^^    ^------^ ^---^ ^-------------^     ^------------^
-            // BlockID  TypeSig  Expr LineEndAttributes   LineEndComments
-
-            if (!InTokenList.CheckToken(ETokenType.ID))
+            // - [UIMin = 0][UIMax = 100]   HP    :integer = 100 @Min=0 @Max=100     # Health-point
+            //   ^----------------------^   ^^    ^------^ ^---^ ^-------------^     ^------------^
+            //   InlineAttributes        BlockID  TypeSig  Expr  LineEndAttributes   LineEndComments
+            if (!InTokenList.CheckToken(ETokenType.ID)
+                && !InTokenList.CheckToken(ETokenType.OpenBracket)
+                )
             {
                 return null;
             }
 
-            // Parse block ID
+            // Try parse inline-attributes
+            STNode_AttributeDefs inlineAttrs = null;
+            StaticParseAST(new ASTParser_BlockInlineAttributes(), InTokenList,
+                attrs => inlineAttrs = attrs
+                );
+
+            // Parse block ID, create element-definition by it, and set inline-attributes/StartType
             var idToken = InTokenList.Consume();
             var result = new STNode_ElementDef(idToken.Code);
+            if (inlineAttrs != null)
+            {
+                result._Internal_AddAttributes(inlineAttrs);
+            }
+
             if (StartType != null)
             {
                 result._Internal_SetType(StartType);
@@ -76,17 +80,15 @@ namespace nf.protoscript.parser.syntax1.analysis
                 expr => result._Internal_SetInitExpr(expr)
                 );
 
-            // Try parse line-end blocks if needed.
-            if (ParseLineEndBlocks)
-            {
-                StaticParseAST(new ASTParser_BlockLineEndAttributes(), InTokenList,
-                    attrs => result._Internal_AddAttributes(attrs)
-                    );
+            // Try parse line-end attributes.
+            StaticParseAST(new ASTParser_BlockLineEndAttributes(), InTokenList,
+                attrs => result._Internal_AddAttributes(attrs)
+                );
 
-                StaticParseAST(new ASTParser_BlockLineEndComments(), InTokenList,
-                    comments => result._Internal_AddComments(comments)
-                    );
-            }
+            // Try parse line-end comments.
+            StaticParseAST(new ASTParser_BlockLineEndComments(), InTokenList,
+                comments => result._Internal_AddComments(comments)
+                );
 
             return result;
         }
