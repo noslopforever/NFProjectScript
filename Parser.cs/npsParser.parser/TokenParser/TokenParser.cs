@@ -4,57 +4,61 @@ using System.Text.RegularExpressions;
 
 namespace nf.protoscript.parser.token
 {
-    using TokenTypeWithRegexes = KeyValuePair<ETokenType, string[]>;
+    using TokenTypeWithRegex = KeyValuePair<ETokenType, string>;
 
     /// <summary>
     /// Token factory to create tokens.
     /// </summary>
     internal class TokenParser
     {
+        const string RegexAll = ".";
 
         /// <summary>
         /// Construct with tokens which should be checked by this parser and regexes which are used to check these tokens.
         /// </summary>
         /// <param name="InTypeByPriority"></param>
-        internal TokenParser(params (ETokenType, string[])[] InTypeByPriority)
+        internal TokenParser(params (ETokenType, string)[] InTypeByPriority)
         {
             // Push the 'fallback' regex.
-            var typeWithRegexes = new List<(ETokenType, string[])>();
-            typeWithRegexes.AddRange(InTypeByPriority);
-            typeWithRegexes.Add((ETokenType.Unknown, new string[] { CommonTokenRegexes.ALL }));
+            var typeWithRegexList = new List<(ETokenType, string)>();
+            typeWithRegexList.AddRange(InTypeByPriority);
+            typeWithRegexList.Add((ETokenType.Unknown, RegexAll));
 
-            List<TokenTypeWithRegexes> tokenTypes = new List<TokenTypeWithRegexes>();
+            List<TokenTypeWithRegex> tokenTypes = new List<TokenTypeWithRegex>();
 
             bool addVerticalBar = false;
-            foreach (var tokenTypeWithRegexes in typeWithRegexes)
+            for (int i = 0; i < typeWithRegexList.Count; i++)
             {
-                ETokenType tokenType = tokenTypeWithRegexes.Item1;
-                string[] regexes = tokenTypeWithRegexes.Item2;
+                var tokenTypeWithRegex = typeWithRegexList[i];
+                ETokenType tokenType = tokenTypeWithRegex.Item1;
+                string regex = tokenTypeWithRegex.Item2;
 
-                for (int i = 0; i < regexes.Length; i++)
-                {
-                    // Add vertical bar except the first element.
-                    // E0|E1|E2|...
-                    if (addVerticalBar)
-                    { _TokenRegexPatterns += "|"; }
-                    addVerticalBar = true;
+                // Add vertical bar except the first element.
+                // E0|E1|E2|...
+                if (addVerticalBar)
+                { _TokenRegexPatterns += "|"; }
+                addVerticalBar = true;
 
-                    string regexGroupName = _GenRegexCheckName(tokenType, i);
-                    string regex = regexes[i];
-                    _TokenRegexPatterns += string.Format("(?<{0}>{1})"
-                        , regexGroupName
-                        , regex
-                        );
-                }
-                tokenTypes.Add(new TokenTypeWithRegexes(tokenType, regexes));
+                // register group name: (?<r0>{regex})|(?<r1>{regex})|...
+                string regexGroupName = _GenRegexGroupNameForIndex(i);
+                _TokenRegexPatterns += string.Format("(?<{0}>{1})"
+                    , regexGroupName
+                    , regex
+                    );
+                tokenTypes.Add(new TokenTypeWithRegex(tokenType, regex));
             }
             _TokenTypes_SortByPriority = tokenTypes.ToArray();
+        }
+
+        private static string _GenRegexGroupNameForIndex(int i)
+        {
+            return $"r{i}";
         }
 
         /// <summary>
         /// TokenType sorted by priority.
         /// </summary>
-        TokenTypeWithRegexes[] _TokenTypes_SortByPriority = new TokenTypeWithRegexes[] { };
+        TokenTypeWithRegex[] _TokenTypes_SortByPriority = new TokenTypeWithRegex[] { };
 
         /// <summary>
         /// Merged regex pattern.
@@ -98,18 +102,16 @@ namespace nf.protoscript.parser.token
             var regMatch = Regex.Match(InString, _TokenRegexPatterns);
 
             // check which token has been matched.
-            TokenTypeWithRegexes result;
+            ETokenType result = ETokenType.Unknown;
             Group resultGroup = null;
             if (_CheckRegexMatch(
                     regMatch
-                    , _TokenTypes_SortByPriority
-                    , tokenTypeWithRegex => _GenRegexesCheckNames(tokenTypeWithRegex)
                     , out result
                     , out resultGroup
                     )
                 )
             {
-                ETokenType tokenType = result.Key;
+                ETokenType tokenType = result;
                 string code = resultGroup.Value;
                 Token token = new Token(tokenType, code);
 
@@ -124,53 +126,32 @@ namespace nf.protoscript.parser.token
         }
 
         /// <summary>
-        /// Generate regex-check-name which should be used as the name of MatchGroup
-        /// </summary>
-        string _GenRegexCheckName(ETokenType InType, int InRegexIndex)
-        {
-            return string.Format("N{0}_{1}", InType, InRegexIndex);
-        }
-
-        /// <summary>
-        /// Generate regex-check-names which should be used as names of MatchGroups.
-        /// </summary>
-        string[] _GenRegexesCheckNames(TokenTypeWithRegexes InTypeWithRegexes)
-        {
-            ETokenType tokenType = InTypeWithRegexes.Key;
-            string[] regexes = InTypeWithRegexes.Value;
-            string[] result = new string[regexes.Length];
-            for (int i = 0; i < regexes.Length; i++)
-            {
-                result[i] = _GenRegexCheckName(tokenType, i);
-            }
-            return result;
-        }
-
-        /// <summary>
         /// Do check regexes by priority
         /// </summary>
-        bool _CheckRegexMatch<T>(Match InRegMatch, ICollection<T> InMatchObjects, Func<T, string[]> InNameGetter, out T OutMatchObject, out Group OutMatchGroup)
+        bool _CheckRegexMatch(Match InRegMatch
+            , out ETokenType OutMatchToken
+            , out Group OutMatchGroup
+            )
         {
             // Find and return the first match object.
-            foreach (T checkingObj in InMatchObjects)
+            for (int i = 0; i < _TokenTypes_SortByPriority.Length; ++i)
             {
-                string[] checkingGroupNames = InNameGetter(checkingObj);
-                foreach (string checkingGroupName in checkingGroupNames)
-                {
-                    Group checkingMatchGroup = InRegMatch.Groups[checkingGroupName];
-                    if (checkingGroupName == null)
-                        continue;
+                var checkingObj = _TokenTypes_SortByPriority[i];
+                string checkingGroupName = _GenRegexGroupNameForIndex(i);
 
-                    if (!checkingMatchGroup.Success)
-                        continue;
+                Group checkingMatchGroup = InRegMatch.Groups[checkingGroupName];
+                if (checkingGroupName == null)
+                    continue;
 
-                    OutMatchObject = checkingObj;
-                    OutMatchGroup = checkingMatchGroup;
-                    return true;
-                }
+                if (!checkingMatchGroup.Success)
+                    continue;
+
+                OutMatchToken = checkingObj.Key;
+                OutMatchGroup = checkingMatchGroup;
+                return true;
             }
             OutMatchGroup = null;
-            OutMatchObject = default(T);
+            OutMatchToken = ETokenType.Unknown;
             return false;
         }
 
