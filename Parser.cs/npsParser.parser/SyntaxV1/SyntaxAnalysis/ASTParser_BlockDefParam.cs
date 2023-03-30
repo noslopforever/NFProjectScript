@@ -10,13 +10,13 @@ namespace nf.protoscript.parser.syntax1.analysis
     /// + SomeMethod(InParam0:n = 10, InParam1:s = "id")
     ///              ^-------------^  ^---------------^
     /// </summary>
-    class ASTParser_StatementDefParam
+    class ASTParser_BlockDefParam
         : ASTParser_Base<STNode_ElementDef>
     {
         /// <summary>
         /// Ctor
         /// </summary>
-        public ASTParser_StatementDefParam()
+        public ASTParser_BlockDefParam()
         {
         }
 

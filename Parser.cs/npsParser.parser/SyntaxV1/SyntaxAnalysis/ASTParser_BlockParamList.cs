@@ -41,7 +41,7 @@ namespace nf.protoscript.parser.syntax1.analysis
                         break;
                     }
 
-                    var paramDefParser = new ASTParser_StatementDefParam();
+                    var paramDefParser = new ASTParser_BlockDefParam();
                     var paramDef = paramDefParser.Parse(InTokenList);
                     if (paramDef == null)
                     {
