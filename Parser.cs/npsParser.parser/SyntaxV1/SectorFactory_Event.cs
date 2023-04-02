@@ -42,7 +42,7 @@ namespace nf.protoscript.parser.syntax1
             var funcDef = defParser.Parse(tl);
             if (funcDef != null)
             {
-                return ElementSector.NewEventSector(tokens.ToArray(), funcDef);
+                return ElementSector.NewEventSector(InReader.CurrentCodeLine, funcDef);
             }
 
             return null;

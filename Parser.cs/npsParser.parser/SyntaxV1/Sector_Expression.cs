@@ -14,8 +14,8 @@ namespace nf.protoscript.parser.syntax1
     public class ExpressionSector
         : Sector
     {
-        public ExpressionSector(Token[] InTokens, int InLineIndex, syntaxtree.STNodeBase InExpr, string InTag = "")
-            : base(InTokens)
+        public ExpressionSector(CodeLine InCodeLn, int InLineIndex, syntaxtree.STNodeBase InExpr, string InTag = "")
+            : base(InCodeLn)
         {
             LineIndex = InLineIndex;
             Tag = InTag;

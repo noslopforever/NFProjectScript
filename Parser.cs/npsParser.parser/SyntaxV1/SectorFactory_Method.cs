@@ -35,7 +35,7 @@ namespace nf.protoscript.parser.syntax1
                 var funcDef = startTypeDefParser.Parse(tl);
                 if (funcDef != null)
                 {
-                    return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
+                    return ElementSector.NewMethodSector(InReader.CurrentCodeLine, funcDef);
                 }
             }
             catch
@@ -50,7 +50,7 @@ namespace nf.protoscript.parser.syntax1
                 var funcDef = defParser.Parse(tl);
                 if (funcDef != null)
                 {
-                    return ElementSector.NewMethodSector(tokens.ToArray(), funcDef);
+                    return ElementSector.NewMethodSector(InReader.CurrentCodeLine, funcDef);
                 }
             }
 

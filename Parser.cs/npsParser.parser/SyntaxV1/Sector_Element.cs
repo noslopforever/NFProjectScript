@@ -22,26 +22,26 @@ namespace nf.protoscript.parser.syntax1
             InlineTypeMember,
         }
 
-        internal ElementSector(Token[] InTokens, EType InType, STNode_DefBase InParsedResult)
-            : base(InTokens)
+        internal ElementSector(CodeLine InCodeLn, EType InType, STNode_DefBase InParsedResult)
+            : base(InCodeLn)
         {
             Type = InType;
             _ParsedResult = InParsedResult;
         }
 
-        internal static ElementSector NewMemberSector(Token[] InTokens, STNode_ElementDef InElemDef)
+        internal static ElementSector NewMemberSector(CodeLine InCodeLn, STNode_ElementDef InElemDef)
         {
-            return new ElementSector(InTokens, EType.Member, InElemDef);
+            return new ElementSector(InCodeLn, EType.Member, InElemDef);
         }
 
-        internal static ElementSector NewMethodSector(Token[] InTokens, STNode_FunctionDef InFuncDef)
+        internal static ElementSector NewMethodSector(CodeLine InCodeLn, STNode_FunctionDef InFuncDef)
         {
-            return new ElementSector(InTokens, EType.Method, InFuncDef);
+            return new ElementSector(InCodeLn, EType.Method, InFuncDef);
         }
 
-        internal static ElementSector NewEventSector(Token[] InTokens, STNode_FunctionDef InElemDef)
+        internal static ElementSector NewEventSector(CodeLine InCodeLn, STNode_FunctionDef InElemDef)
         {
-            return new ElementSector(InTokens, EType.Event, InElemDef);
+            return new ElementSector(InCodeLn, EType.Event, InElemDef);
         }
 
         /// <summary>
@@ -116,6 +116,7 @@ namespace nf.protoscript.parser.syntax1
             // - members of inline-type should be handled by the element which introduces the inline-type.
             if (Type == EType.InlineTypeMember)
             {
+                // TODO impl
                 throw new NotImplementedException();
             }
             else if (Type == EType.Member

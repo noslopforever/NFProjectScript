@@ -41,7 +41,7 @@ namespace nf.protoscript.parser.syntax1
             ASTParser_ExpressionStatement exprStmtParser = new ASTParser_ExpressionStatement();
             var expr = exprStmtParser.Parse(tl);
 
-            var secExpr = new ExpressionSector(tokens.ToArray(), InReader.CurrentCodeLine.LineNumber, expr, tag);
+            var secExpr = new ExpressionSector(InReader.CurrentCodeLine, InReader.CurrentCodeLine.LineNumber, expr, tag);
             return secExpr;
         }
     }

@@ -6,8 +6,8 @@
     public class ModelSector
         : Sector
     {
-        public ModelSector(string InBaseTypeName, string InTypeName)
-            : base(null)
+        public ModelSector(CodeLine InCodeLn, string InBaseTypeName, string InTypeName)
+            : base(InCodeLn)
         {
             BaseTypeName = InBaseTypeName;
             TypeName = InTypeName;

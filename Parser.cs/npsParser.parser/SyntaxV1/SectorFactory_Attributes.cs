@@ -29,7 +29,7 @@ namespace nf.protoscript.parser.syntax1
             ASTParser_BlockLineEndComments leCmtParser = new ASTParser_BlockLineEndComments();
             STNode_Comment comment = leCmtParser.Parse(tl);
 
-            return new AttributesSector(tokens.ToArray(), attrs, comment);
+            return new AttributesSector(InReader.CurrentCodeLine, attrs, comment);
         }
     }
 

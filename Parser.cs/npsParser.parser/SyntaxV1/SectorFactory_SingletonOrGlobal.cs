@@ -29,7 +29,7 @@ namespace nf.protoscript.parser.syntax1
                 if (tokens[0].TokenType == ETokenType.ID)
                 {
                     string singletonName = tokens[0].Code;
-                    var sector = new SingletonSector(singletonName);
+                    var sector = new SingletonSector(InReader.CurrentCodeLine, singletonName);
                     return sector;
                 }
                 else
@@ -47,7 +47,7 @@ namespace nf.protoscript.parser.syntax1
                 {
                     string typename = tokens[0].Code;
                     string objectName = tokens[1].Code;
-                    var sector = new GlobalSector(typename, objectName);
+                    var sector = new GlobalSector(InReader.CurrentCodeLine, typename, objectName);
                     return sector;
                 }
                 else

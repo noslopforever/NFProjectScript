@@ -29,9 +29,11 @@ namespace nf.protoscript.parser.syntax1
                 {
                     string baseTypeName = tokens[0].Code;
                     string typeName = tokens[1].Code;
-                    return new ModelSector(baseTypeName, typeName);
+                    return new ModelSector(InReader.CurrentCodeLine, baseTypeName, typeName);
                 }
             }
+
+            // TODO log error
             throw new NotImplementedException();
         }
     }

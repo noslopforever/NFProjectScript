@@ -6,8 +6,8 @@
     public class GlobalSector
         : Sector
     {
-        public GlobalSector(string InTypeName, string InObjectName)
-            : base(null)
+        public GlobalSector(CodeLine InCodeLn, string InTypeName, string InObjectName)
+            : base(InCodeLn)
         {
             TypeName = InTypeName;
             ObjectName = InObjectName;

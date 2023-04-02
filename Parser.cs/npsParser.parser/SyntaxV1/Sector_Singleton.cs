@@ -6,8 +6,8 @@
     public class SingletonSector
         : Sector
     {
-        public SingletonSector(string InSingletonName)
-            : base(null)
+        public SingletonSector(CodeLine InCodeLn, string InSingletonName)
+            : base(InCodeLn)
         {
             SingletonName = InSingletonName;
         }

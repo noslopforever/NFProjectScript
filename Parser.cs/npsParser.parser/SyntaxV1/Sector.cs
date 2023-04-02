@@ -9,9 +9,9 @@ namespace nf.protoscript.parser.syntax1
     /// </summary>
     public abstract class Sector
     {
-        public Sector(Token[] InTokens)
+        public Sector(CodeLine InCodeLn)
         {
-            Tokens = InTokens;
+            CodeLn = InCodeLn;
         }
 
         /// <summary>
@@ -20,9 +20,9 @@ namespace nf.protoscript.parser.syntax1
         public int Indent { get; internal set; }
 
         /// <summary>
-        /// Tokens of the sector.
+        /// The codeline which has been used to generate the sector.
         /// </summary>
-        public IReadOnlyList<Token> Tokens { get; }
+        public CodeLine CodeLn { get; }
 
         /// <summary>
         /// Sub sectors of this sector.

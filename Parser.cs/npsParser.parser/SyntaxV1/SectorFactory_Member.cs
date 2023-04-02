@@ -42,7 +42,7 @@ namespace nf.protoscript.parser.syntax1
                 var elemDef = startTypeDefParser.Parse(tl);
                 if (elemDef != null)
                 {
-                    return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
+                    return ElementSector.NewMemberSector(InReader.CurrentCodeLine, elemDef);
                 }
             }
             catch
@@ -57,7 +57,7 @@ namespace nf.protoscript.parser.syntax1
                 var elemDef = defParser.Parse(tl);
                 if (elemDef != null)
                 {
-                    return ElementSector.NewMemberSector(tokens.ToArray(), elemDef);
+                    return ElementSector.NewMemberSector(InReader.CurrentCodeLine, elemDef);
                 }
             }
 

@@ -11,8 +11,8 @@ namespace nf.protoscript.parser.syntax1
     class AttributesSector
         : Sector
     {
-        public AttributesSector(Token[] InTokens, STNode_AttributeDefs InAttrs, STNode_Comment InComment)
-            : base(InTokens)
+        public AttributesSector(CodeLine InCodeLn, STNode_AttributeDefs InAttrs, STNode_Comment InComment)
+            : base(InCodeLn)
         {
             AttrDefs = InAttrs;
             CommentDefs = InComment;
