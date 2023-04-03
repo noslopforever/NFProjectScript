@@ -70,13 +70,11 @@ namespace nf.protoscript.parser.syntax1.analysis
                 );
 
             // Parse line-end blocks
-            StaticParseAST(new ASTParser_BlockLineEndAttributes(), InTokenList,
-                attrs => result._Internal_AddAttributes(attrs)
-                );
-
-            StaticParseAST(new ASTParser_BlockLineEndComments(), InTokenList,
-                comments => result._Internal_AddComments(comments)
-                );
+            ParseHelper.TryParseLineEndBlocks(InTokenList, (attrs, comments) =>
+            {
+                result._Internal_AddAttributes(attrs);
+                result._Internal_AddComments(comments);
+            });
 
             // if not end, there is an unexpected token
             if (!InTokenList.IsEnd)

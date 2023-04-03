@@ -1,5 +1,4 @@
-﻿using nf.protoscript.parser.syntax1.analysis;
-using nf.protoscript.parser.token;
+﻿using nf.protoscript.parser.token;
 using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1
@@ -23,13 +22,10 @@ namespace nf.protoscript.parser.syntax1
             TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, ref tokens);
             TokenList tl = new TokenList(tokens);
 
-            ASTParser_BlockLineEndAttributes leAttrsParser = new ASTParser_BlockLineEndAttributes();
-            STNode_AttributeDefs attrs = leAttrsParser.Parse(tl);
-
-            ASTParser_BlockLineEndComments leCmtParser = new ASTParser_BlockLineEndComments();
-            STNode_Comment comment = leCmtParser.Parse(tl);
-
-            return new AttributesSector(InReader.CurrentCodeLine, attrs, comment);
+            return ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
+            {
+                return new AttributesSector(InReader.CurrentCodeLine, attrs, comments);
+            });
         }
     }
 
