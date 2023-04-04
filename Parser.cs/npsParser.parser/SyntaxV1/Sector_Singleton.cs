@@ -21,13 +21,11 @@
         //
         public override void TryCollectTypes(ProjectInfo InProjectInfo)
         {
-            TypeInfo singletonType = new TypeInfo(InProjectInfo, "model", SingletonName);
         }
 
         protected override Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector)
         {
-            TypeInfo typeInfo = InfoHelper.FindType(InProjectInfo, SingletonName);
-            ElementInfo singleton = new ElementInfo(InProjectInfo, "singleton", SingletonName, typeInfo, null);
+            ElementInfo singleton = new ElementInfo(InProjectInfo, "singleton", SingletonName, null, null);
             return singleton;
         }
 
