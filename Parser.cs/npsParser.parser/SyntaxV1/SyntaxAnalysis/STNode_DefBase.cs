@@ -49,10 +49,6 @@ namespace nf.protoscript.parser.syntax1.analysis
             Attributes.AddRange(InAttrs);
         }
 
-        internal void _Internal_AddComments(STNode_Comment comment)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 }
