@@ -49,12 +49,16 @@ namespace nf.protoscript.parser.syntax1.analysis
                     }
 
                     ASTParser_Expression exprParser = new ASTParser_Expression();
+                    var exprStartToken = InTokenList.CurrentToken;
                     var expr = exprParser.Parse(InTokenList) as syntaxtree.STNodeBase;
                     if (expr == null)
                     {
-                        // If expr parse failed, clear all params and break the loop.
-                        exprList = null;
-                        break;
+                        // If expr parse failed, throw error
+                        throw new ParserException(
+                            ParserErrorType.AST_InvalidExpression
+                            , InTokenList.SourceCodeLine
+                            , exprStartToken
+                            );
                     }
                     exprList.Add(expr);
 
@@ -68,12 +72,6 @@ namespace nf.protoscript.parser.syntax1.analysis
                 InTokenList.EnsureOrConsumeTo(EndToken);
                 // consume the EndToken.
                 InTokenList.Consume();
-
-                if (exprList == null)
-                {
-                    // TODO log error
-                    throw new NotImplementedException();
-                }
 
                 return new syntaxtree.STNodeSequence(exprList.ToArray());
             }

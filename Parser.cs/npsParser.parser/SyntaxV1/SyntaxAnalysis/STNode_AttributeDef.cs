@@ -16,8 +16,7 @@ namespace nf.protoscript.parser.syntax1.analysis
 
         internal override void _Internal_SetType(STNode_TypeSignature InTypeSig)
         {
-            // TODO log error: The type of an attribute cannot be set.
-            throw new InvalidProgramException();
+            throw new InvalidProgramException("InvalidCall: Cannot set the type of attribute-definition");
         }
 
     }

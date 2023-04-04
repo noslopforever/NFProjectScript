@@ -42,11 +42,6 @@ namespace nf.protoscript.parser.syntax1.analysis
 
             // Parse function def
             STNode_FunctionDef result = new ASTParser_BlockFunctionDef().Parse(InTokenList);
-            if (result == null)
-            {
-                // TODO log error
-                throw new NotImplementedException();
-            }
 
             // Handle StartType/PostType.
             if (StartType != null)

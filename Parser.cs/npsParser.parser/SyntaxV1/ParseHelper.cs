@@ -200,7 +200,7 @@ namespace nf.protoscript.parser.syntax1
         {
             if (!InTokenList.IsEnd)
             {
-                throw new ParserException(ParserErrorType.UnexpectedToken
+                throw new ParserException(ParserErrorType.Factory_UnexpectedToken
                     , InCodeLine
                     , InTokenList.CurrentToken
                     );

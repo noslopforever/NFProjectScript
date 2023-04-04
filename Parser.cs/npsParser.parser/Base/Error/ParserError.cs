@@ -30,17 +30,33 @@ namespace nf.protoscript.parser
         // pre-defined error types.
         //
 
-        public static ParserErrorType UnexpectedToken { get; }
-            = new ParserErrorType(100, "Unexpected token");
+        public static ParserErrorType Parser_UnrecognizedSector { get; }
+            = new ParserErrorType(100, "Unrecognized sector");
 
-        public static ParserErrorType UnrecognizedSector { get; }
-            = new ParserErrorType(101, "Unrecognized sector");
+        public static ParserErrorType Factory_UnexpectedToken { get; }
+            = new ParserErrorType(110, "Unexpected token {0}");
 
-        public static ParserErrorType UnrecognizedElement { get; }
+        public static ParserErrorType Factory_UnrecognizedElement { get; }
             = new ParserErrorType(200, "Unrecognized element");
 
-        public static ParserErrorType UnrecognizedMethod { get; }
+        public static ParserErrorType Factory_UnrecognizedMethod { get; }
             = new ParserErrorType(210, "Unrecognized method");
+
+        public static ParserErrorType Collect_NoParentInfo { get; }
+            = new ParserErrorType(300, "No Parent Info When Collecting.");
+
+        public static ParserErrorType AST_UnexpectedToken { get; }
+            = new ParserErrorType(400, "Unexpected token {0}, (expect: {1})");
+
+        public static ParserErrorType AST_UnexpectedTermToken { get; }
+            = new ParserErrorType(401, "Unexpected term token {0}");
+
+        public static ParserErrorType AST_InvalidExpression { get; }
+            = new ParserErrorType(420, "Invalid expression : {0}");
+
+        public static ParserErrorType AST_InvalidParam { get; }
+            = new ParserErrorType(421, "Invalid param: {0}");
+
 
     }
 

@@ -100,9 +100,10 @@ namespace nf.protoscript.parser.syntax1
             Info parentInfo = InParentSector.CollectedInfo;
             if (parentInfo == null)
             {
-                // TODO log error.
-                throw new NotImplementedException();
-                return null;
+                throw new ParserException(
+                    ParserErrorType.Collect_NoParentInfo
+                    , CodeLn
+                    );
             }
 
             Info chiefInfo = null;

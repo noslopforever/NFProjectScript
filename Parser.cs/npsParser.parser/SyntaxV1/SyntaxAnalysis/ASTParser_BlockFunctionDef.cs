@@ -31,12 +31,8 @@ namespace nf.protoscript.parser.syntax1.analysis
                 //          ^------------------^
                 //
                 var paramsParser = new ASTParser_BlockParamList();
+                var paramDefStartToken = InTokenList.CurrentToken;
                 var paramDefs = paramsParser.Parse(InTokenList);
-                if (paramDefs == null)
-                {
-                    // TODO log error
-                    throw new NotImplementedException();
-                }
 
                 // return the result function.
                 STNode_FunctionDef funcDef = new STNode_FunctionDef(funcNameToken.Code, paramDefs);

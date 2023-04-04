@@ -15,9 +15,12 @@ namespace nf.protoscript.parser.syntax1.analysis
         {
             if (!InTokenList.CheckToken(ETokenType.ID))
             {
-                // TODO log error
-                throw new NotImplementedException();
-                return null;
+                throw new ParserException(
+                    ParserErrorType.AST_UnexpectedToken
+                    , InTokenList.SourceCodeLine
+                    , InTokenList.CurrentToken
+                    , ETokenType.ID.ToString()
+                    );
             }
 
             var typeCodeToken = InTokenList.CurrentToken;

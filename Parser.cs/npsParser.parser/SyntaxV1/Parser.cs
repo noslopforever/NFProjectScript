@@ -119,7 +119,7 @@ namespace nf.protoscript.parser.syntax1
                 if (sector == null)
                 {
                     Logger.Instance.Log(ELoggerType.Error, "Parser"
-                        , ParserErrorType.UnrecognizedSector.UniqueID
+                        , ParserErrorType.Parser_UnrecognizedSector.UniqueID
                             , $"{codeLn.SiteString} : Unexpected error occurred."
                         );
                     sector = new ErrorSector(codeLn);

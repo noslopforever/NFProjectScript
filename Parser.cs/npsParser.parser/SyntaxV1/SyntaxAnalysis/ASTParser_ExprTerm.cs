@@ -65,8 +65,12 @@ namespace nf.protoscript.parser.syntax1.analysis
                 // Try consume the close-paren ).
                 if (!InTokenList.EnsureOrConsumeTo(ETokenType.CloseParen))
                 {
-                    // TODO log error
-                    throw new NotImplementedException();
+                    throw new ParserException(
+                        ParserErrorType.AST_UnexpectedToken
+                        , InTokenList.SourceCodeLine
+                        , InTokenList.CurrentToken
+                        , ETokenType.CloseParen.ToString()
+                        );
                 }
                 InTokenList.Consume();
 
@@ -83,6 +87,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             // Const Dict: { STATEMENT }
             else if (InTokenList.CheckToken(ETokenType.OpenBrace))
             {
+                // TODO impl
                 throw new NotImplementedException();
                 //InTokenList.Consume();
 
@@ -97,9 +102,11 @@ namespace nf.protoscript.parser.syntax1.analysis
                 //return dict;
             }
 
-            // TODO log error: "Unexpected token "
-            throw new NotImplementedException();
-            return null;
+            throw new ParserException(
+                ParserErrorType.AST_UnexpectedTermToken
+                , InTokenList.SourceCodeLine
+                , InTokenList.CurrentToken
+                );
         }
 
         private syntaxtree.STNodeBase TryParseFuncCallOrCollAccess(syntaxtree.STNodeBase InPreSTNode, TokenList InTokenList)

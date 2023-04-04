@@ -20,7 +20,7 @@ namespace nf.protoscript.parser.syntax1
             // Parse line-end attributes from codes.
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, ref tokens);
-            TokenList tl = new TokenList(tokens);
+            TokenList tl = new TokenList(tokens, InCodeLine);
 
             return ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
             {

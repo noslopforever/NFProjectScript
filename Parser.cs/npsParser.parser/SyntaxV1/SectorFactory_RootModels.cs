@@ -27,7 +27,7 @@ namespace nf.protoscript.parser.syntax1
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, ref tokens);
 
-            TokenList tl = new TokenList(tokens);
+            TokenList tl = new TokenList(tokens, InCodeLine);
             var sector = _ParseModelSector(InCodeLine, tl);
             
             // If parsed a sector, try parse line-end attributes and check line-end.

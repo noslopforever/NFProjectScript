@@ -9,11 +9,16 @@ namespace nf.protoscript.parser
     public class ParserException
         : Exception
     {
-        public ParserException(ParserErrorType InErrorType, CodeLine InCodeLn, Token InErrorToken = null)
+        public ParserException(ParserErrorType InErrorType
+            , CodeLine InCodeLn
+            , Token InErrorToken = null
+            , params object[] InAppends
+            )
         {
             ErrorType = InErrorType;
             ErrorCodeLine = InCodeLn;
             ErrorToken = InErrorToken;
+            AppendData = InAppends;
         }
 
         /// <summary>
@@ -30,6 +35,11 @@ namespace nf.protoscript.parser
         /// Error token.
         /// </summary>
         public Token ErrorToken { get; }
+
+        /// <summary>
+        /// Append data
+        /// </summary>
+        public object[] AppendData { get; }
 
         /// <summary>
         /// Column index of the error token.
@@ -67,7 +77,15 @@ namespace nf.protoscript.parser
         {
             get
             {
-                return $"{ErrorSiteString} : {ErrorType.AsciiMessage}";
+                object[] parms = new object[AppendData.Length + 1];
+                parms[0] = ErrorToken != null ? ErrorToken.ToString() : "<null>";
+                for (int i = 0; i < AppendData.Length; i++)
+                {
+                    var appData = AppendData[i];
+                    parms[i] = appData != null ? appData : "<null>";
+                }
+
+                return string.Format($"{ErrorSiteString} : {ErrorType.AsciiMessage}", parms);
             }
         }
 

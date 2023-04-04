@@ -17,7 +17,12 @@ namespace nf.protoscript.parser.syntax1.analysis
             {
                 if (InTokenList.CurrentToken.Code.ToLower() != "return")
                 {
-                    throw new NotImplementedException();
+                    throw new ParserException(
+                        ParserErrorType.AST_UnexpectedToken
+                        , InTokenList.SourceCodeLine
+                        , InTokenList.CurrentToken
+                        , "ID:Return"
+                        );
                 }
                 // Consume "return" keyword.
                 InTokenList.Consume();

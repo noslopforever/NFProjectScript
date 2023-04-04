@@ -44,8 +44,12 @@ namespace nf.protoscript.parser.syntax1.analysis
                 }
                 else
                 {
-                    // TODO log error unexpected token.
-                    throw new NotImplementedException();
+                    throw new ParserException(
+                        ParserErrorType.AST_UnexpectedToken
+                        , InTokenList.SourceCodeLine
+                        , InTokenList.CurrentToken
+                        , ETokenType.ID.ToString()
+                        );
                 }
             }
             return null;

@@ -38,8 +38,10 @@ namespace nf.protoscript.parser.syntax1
             Info parentInfo = InParentSector.CollectedInfo;
             if (parentInfo == null)
             {
-                // TODO log error
-                throw new NotImplementedException();
+                throw new ParserException(
+                    ParserErrorType.Collect_NoParentInfo
+                    , CodeLn
+                    );
             }
 
             // register attributes to the parent Info.

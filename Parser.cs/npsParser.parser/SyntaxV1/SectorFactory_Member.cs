@@ -35,7 +35,7 @@ namespace nf.protoscript.parser.syntax1
             try
             {
                 // Try Handle StartType
-                var tl = new TokenList(tokens);
+                var tl = new TokenList(tokens, InCodeLine);
                 ASTParser_BlockType blockTypeParser = new ASTParser_BlockType();
                 var startTypeSig = blockTypeParser.Parse(tl);
 
@@ -66,7 +66,7 @@ namespace nf.protoscript.parser.syntax1
             // If fail, Seek back to the start and try parse Non-StartType member define:
             // - {Name} or -{Name}
             {
-                var tl = new TokenList(tokens);
+                var tl = new TokenList(tokens, InCodeLine);
                 var defParser = new ASTParser_StatementDefMember(null);
                 var elemDef = defParser.Parse(tl);
                 if (elemDef != null)
@@ -87,7 +87,7 @@ namespace nf.protoscript.parser.syntax1
             }
 
             // Throw exception
-            throw new ParserException(ParserErrorType.UnrecognizedElement
+            throw new ParserException(ParserErrorType.Factory_UnrecognizedElement
                 , InCodeLine
                 );
         }

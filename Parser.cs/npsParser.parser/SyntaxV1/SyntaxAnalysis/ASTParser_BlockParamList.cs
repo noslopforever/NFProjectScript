@@ -41,13 +41,16 @@ namespace nf.protoscript.parser.syntax1.analysis
                         break;
                     }
 
+                    var paramDefStartToken = InTokenList.CurrentToken;
                     var paramDefParser = new ASTParser_BlockDefParam();
                     var paramDef = paramDefParser.Parse(InTokenList);
                     if (paramDef == null)
                     {
-                        // If param parse failed, clear all params and break the loop.
-                        paramDefs = null;
-                        break;
+                        throw new ParserException(
+                            ParserErrorType.AST_InvalidParam
+                            , InTokenList.SourceCodeLine
+                            , paramDefStartToken
+                            );
                     }
                     paramDefs.Add(paramDef);
 
@@ -61,12 +64,6 @@ namespace nf.protoscript.parser.syntax1.analysis
                 InTokenList.EnsureOrConsumeTo(ETokenType.CloseParen);
                 // consume the 'close-paren'.
                 InTokenList.Consume();
-
-                if (paramDefs == null)
-                {
-                    // TODO log error
-                    throw new NotImplementedException();
-                }
             }
 
             return paramDefs;
