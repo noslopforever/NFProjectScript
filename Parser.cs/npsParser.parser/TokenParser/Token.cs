@@ -5,10 +5,11 @@
     /// </summary>
     public class Token
     {
-        public Token(ETokenType InTokenType, string InCode)
+        public Token(ETokenType InTokenType, string InCode, int InLenToTheEnd)
         {
             TokenType = InTokenType;
             Code = InCode;
+            LengthToTheEnd = InLenToTheEnd;
         }
 
         /// <summary>
@@ -21,9 +22,14 @@
         /// </summary>
         public string Code { get; }
 
+        /// <summary>
+        /// Length to the string's end.
+        /// </summary>
+        public int LengthToTheEnd { get; }
+
         public override string ToString()
         {
-            return string.Format("{0}, CODES={1}", TokenType.ToString(), Code);
+            return string.Format("{0}['{1}']", TokenType.ToString(), Code);
         }
     }
 

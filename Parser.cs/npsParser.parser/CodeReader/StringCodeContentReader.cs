@@ -15,8 +15,9 @@ namespace nf.protoscript.parser
         /// Construct a reader by string array.
         /// </summary>
         /// <param name="InFilelines"></param>
-        public StringCodeContentReader(string[] InFilelines)
+        public StringCodeContentReader(string InFilename, string[] InFilelines)
         {
+            Filename = InFilename;
             _FileLines = InFilelines;
             Goto(0);
         }
@@ -32,7 +33,7 @@ namespace nf.protoscript.parser
             {
                 var fileLns = File.ReadAllLines(InFilename);
 
-                return new StringCodeContentReader(fileLns);
+                return new StringCodeContentReader(InFilename, fileLns);
             }
             catch (Exception ex)
             {
@@ -45,7 +46,7 @@ namespace nf.protoscript.parser
         /// </summary>
         /// <param name="InFlag"></param>
         /// <param name="InFilename"></param>
-        public static StringCodeContentReader LoadFromString(string InString)
+        public static StringCodeContentReader LoadFromString(string InFilename, string InString)
         {
             try
             {
@@ -55,7 +56,7 @@ namespace nf.protoscript.parser
                 while ((ln = sr.ReadLine()) != null)
                 { result.Add(ln); }
 
-                return new StringCodeContentReader(result.ToArray());
+                return new StringCodeContentReader(InFilename, result.ToArray());
             }
             catch (Exception ex)
             {
@@ -63,13 +64,15 @@ namespace nf.protoscript.parser
             return null;
         }
 
+        public string Filename { get; private set; }
+
         public CodeLine CurrentCodeLine
         {
             get
             {
                 if (_ActualLineIndex >= _FileLines.Length)
                 { return null; }
-                return new CodeLine(_ActualLineIndex, _FileLines[_ActualLineIndex]);
+                return new CodeLine(this, _ActualLineIndex + 1, _FileLines[_ActualLineIndex]);
             }
         }
 

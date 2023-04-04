@@ -9,11 +9,17 @@ namespace nf.protoscript.parser
     /// </summary>
     public class CodeLine
     {
-        public CodeLine(int InIndex, string InContent)
+        public CodeLine(ICodeContentReader InReader, int InIndex, string InContent)
         {
+            Reader = InReader;
             LineNumber = InIndex;
             Content = InContent;
         }
+
+        /// <summary>
+        /// Reader of the code.
+        /// </summary>
+        public ICodeContentReader Reader { get; }
 
         /// <summary>
         /// Current line's row index.
@@ -25,14 +31,28 @@ namespace nf.protoscript.parser
         /// </summary>
         public string Content { get; }
 
-    }
+        /// <summary>
+        /// The site string which indicates the place of the codeline.
+        /// </summary>
+        public string SiteString
+        {
+            get
+            {
+                return $"{Reader.Filename}[{LineNumber}]";
+            }
+        }
 
+    }
 
     /// <summary>
     /// Code content reader.
     /// </summary>
     public interface ICodeContentReader
     {
+        /// <summary>
+        /// Name of the file readed by the reader.
+        /// </summary>
+        public string Filename { get; }
 
         /// <summary>
         /// Code line

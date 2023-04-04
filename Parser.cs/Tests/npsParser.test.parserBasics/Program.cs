@@ -15,7 +15,7 @@ namespace nf.protoscript.test
             parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
 
             ProjectInfo testProj = new ProjectInfo("TestProject");
-            ICodeContentReader reader = StringCodeContentReader.LoadFromString(TextResources.TestCodeFile);
+            ICodeContentReader reader = StringCodeContentReader.LoadFromString("TestCodeFile", TextResources.TestCodeFile);
 
             testParser.Parse(testProj, reader);
 

@@ -113,8 +113,9 @@ namespace nf.protoscript.parser.token
             {
                 ETokenType tokenType = result;
                 string code = resultGroup.Value;
-                Token token = new Token(tokenType, code);
+                Token token = new Token(tokenType, code, InString.Length);
 
+                // Get strings after this token.
                 int consumeCodeLen = resultGroup.Index + resultGroup.Value.Length;
                 OutOtherString = InString.Substring(consumeCodeLen);
 
