@@ -191,17 +191,13 @@ namespace nf.protoscript.parser.syntax1
                 }
             }
 
+            // Register inline attributes
             if (chiefInfo != null)
             {
-                // Register inline and line-end attributes
                 foreach (var attrDef in _ParsedResult.Attributes)
                 {
                     var attrInfo = new AttributeInfo(chiefInfo, attrDef.DefName, attrDef.DefName, attrDef.InitExpression);
                 }
-
-                // TODO Comments
-                // throw new NotImplementedException();
-
             }
 
             return chiefInfo;

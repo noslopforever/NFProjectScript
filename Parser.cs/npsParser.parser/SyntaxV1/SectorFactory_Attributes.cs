@@ -9,7 +9,7 @@ namespace nf.protoscript.parser.syntax1
     class SectorFactory_Attributes
         : SectorFactory
     {
-        protected override Sector ParseImpl(ICodeContentReader InReader, string InCodesWithoutIndent)
+        protected override Sector ParseImpl(CodeLine InCodeLine, string InCodesWithoutIndent)
         {
             string codesWithoutTags = "";
             if (!ParseHelper.CheckAndRemoveStartCode(InCodesWithoutIndent, "@", out codesWithoutTags))
@@ -24,7 +24,7 @@ namespace nf.protoscript.parser.syntax1
 
             return ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
             {
-                return new AttributesSector(InReader.CurrentCodeLine, attrs, comments);
+                return new AttributesSector(InCodeLine, attrs, comments);
             });
         }
     }

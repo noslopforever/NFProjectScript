@@ -23,9 +23,9 @@ namespace nf.protoscript.parser.syntax1.analysis
 
         public override STNode_FunctionDef Parse(TokenList InTokenList)
         {
-            // >> OnClick(MousePt, Ray, Hit)       += cout(MousePt)     @uicommand            # comment
-            //    ^------------------------^       ^--------------^     ^----------^          ^-------------^
-            //    BlockFunctionDef    [o]TypeSig   [o]EventAttach      [o]LineEndAttributes   [o]LineEndComments
+            // >> OnClick(MousePt, Ray, Hit)       += cout(MousePt)
+            //    ^------------------------^       ^--------------^
+            //    BlockFunctionDef    [o]TypeSig   [o]EventAttach
             //
             if (!InTokenList.CheckToken(ETokenType.ID))
             {
@@ -44,21 +44,6 @@ namespace nf.protoscript.parser.syntax1.analysis
             StaticParseAST(new ASTParser_BlockInlineEventAttach(), InTokenList,
                 expr => result._Internal_SetInitExpr(expr)
                 );
-
-            // Parse line-end blocks
-            ParseHelper.TryParseLineEndBlocks(InTokenList, (attrs, comments) =>
-            {
-                result._Internal_AddAttributes(attrs);
-                result._Internal_AddComments(comments);
-            });
-
-            // if not end, there is an unexpected token
-            if (!InTokenList.IsEnd)
-            {
-                // TODO log error
-                throw new NotImplementedException();
-                return null;
-            }
 
             return result;
         }

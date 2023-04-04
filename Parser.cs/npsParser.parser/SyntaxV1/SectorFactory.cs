@@ -13,13 +13,13 @@
         /// <param name="InIndent"></param>
         /// <param name="InCodesWithoutIndent"></param>
         /// <returns></returns>
-        public Sector Parse(ICodeContentReader InReader, string InCodesWithoutIndent)
+        public Sector Parse(CodeLine InCodeLine, string InCodesWithoutIndent)
         {
-            Sector result = ParseImpl(InReader, InCodesWithoutIndent);
+            Sector result = ParseImpl(InCodeLine, InCodesWithoutIndent);
             return result;
         }
 
-        protected abstract Sector ParseImpl(ICodeContentReader InReader, string InCodesWithoutIndent);
+        protected abstract Sector ParseImpl(CodeLine InCodeLine, string InCodesWithoutIndent);
 
     }
 

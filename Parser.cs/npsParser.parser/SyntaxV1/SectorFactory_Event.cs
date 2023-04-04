@@ -27,7 +27,7 @@ namespace nf.protoscript.parser.syntax1
     public class SectorFactory_Event
         : SectorFactory
     {
-        protected override Sector ParseImpl(ICodeContentReader InReader, string InCodesWithoutIndent)
+        protected override Sector ParseImpl(CodeLine InCodeLine, string InCodesWithoutIndent)
         {
             string codesWithoutTags = "";
             if (!ParseHelper.CheckAndRemoveStartCodes(InCodesWithoutIndent, out codesWithoutTags, "~", ">>"))
@@ -36,13 +36,25 @@ namespace nf.protoscript.parser.syntax1
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
 
+            var tl = new TokenList(tokens);
+
             // Try parse Event definitions.
             var defParser = new analysis.ASTParser_StatementDefEvent();
-            var tl = new TokenList(tokens);
             var funcDef = defParser.Parse(tl);
             if (funcDef != null)
             {
-                return ElementSector.NewEventSector(InReader.CurrentCodeLine, funcDef);
+                var sector = ElementSector.NewEventSector(InCodeLine, funcDef);
+                // Try parse line-end attributes.
+                ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
+                {
+                    sector._SetAttributes(attrs);
+                    sector._SetComment(comments);
+                });
+
+                // if not end, there is an unexpected token
+                ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);
+
+                return sector;
             }
 
             return null;

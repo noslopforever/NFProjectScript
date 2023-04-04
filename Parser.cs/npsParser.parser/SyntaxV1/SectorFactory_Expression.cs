@@ -10,7 +10,7 @@ namespace nf.protoscript.parser.syntax1
     class SectorFactory_Expression
         : SectorFactory
     {
-        protected override Sector ParseImpl(ICodeContentReader InReader, string InCodesWithoutIndent)
+        protected override Sector ParseImpl(CodeLine InCodeLine, string InCodesWithoutIndent)
         {
             // Only handle "> EXPR_STATEMENT"
             string codesWithoutDefTag = "";
@@ -41,7 +41,7 @@ namespace nf.protoscript.parser.syntax1
             ASTParser_ExpressionStatement exprStmtParser = new ASTParser_ExpressionStatement();
             var expr = exprStmtParser.Parse(tl);
 
-            var secExpr = new ExpressionSector(InReader.CurrentCodeLine, InReader.CurrentCodeLine.LineNumber, expr, tag);
+            var secExpr = new ExpressionSector(InCodeLine, expr, tag);
             return secExpr;
         }
     }

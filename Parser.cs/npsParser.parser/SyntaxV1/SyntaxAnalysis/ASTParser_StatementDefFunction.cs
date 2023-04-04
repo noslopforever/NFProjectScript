@@ -69,21 +69,6 @@ namespace nf.protoscript.parser.syntax1.analysis
                 expr => result._Internal_SetInitExpr(expr)
                 );
 
-            // Parse line-end blocks
-            ParseHelper.TryParseLineEndBlocks(InTokenList, (attrs, comments) =>
-            {
-                result._Internal_AddAttributes(attrs);
-                result._Internal_AddComments(comments);
-            });
-
-            // if not end, there is an unexpected token
-            if (!InTokenList.IsEnd)
-            {
-                // TODO log error
-                throw new NotImplementedException();
-                return null;
-            }
-
             return result;
         }
     }

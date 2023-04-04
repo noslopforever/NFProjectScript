@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using nf.protoscript.parser.syntax1.analysis;
 using nf.protoscript.parser.token;
 
 namespace nf.protoscript.parser.syntax1
@@ -36,12 +37,32 @@ namespace nf.protoscript.parser.syntax1
         public Info CollectedInfo { get; private set; }
 
         /// <summary>
+        /// Attributes registered to the sector.
+        /// </summary>
+        internal STNode_AttributeDefs Attributes { get; private set; }
+
+        /// <summary>
+        /// Comments registered to the sector.
+        /// </summary>
+        internal STNode_Comment Comment { get; private set; }
+
+        /// <summary>
         /// Does this sector contains TypeInfo?
         /// </summary>
         /// <returns></returns>
         public virtual bool ContainsTypeInfo()
         {
             return false;
+        }
+
+        internal void _SetAttributes(STNode_AttributeDefs InAttrs)
+        {
+            Attributes = InAttrs;
+        }
+
+        internal void _SetComment(STNode_Comment InComments)
+        {
+            Comment = InComments;
         }
 
         /// <summary>
@@ -95,6 +116,22 @@ namespace nf.protoscript.parser.syntax1
         public void CollectInfos(ProjectInfo InProjectInfo, Sector InParentSector)
         {
             CollectedInfo = CollectInfosImpl(InProjectInfo, InParentSector);
+
+            // Register attributes
+            if (Attributes != null)
+            {
+                foreach (var attrDef in Attributes)
+                {
+                    var attrInfo = new AttributeInfo(CollectedInfo, attrDef.DefName, attrDef.DefName, attrDef.InitExpression);
+                }
+            }
+
+            // TODO register comments
+            if (Comment != null)
+            {
+                // throw new NotImplementedException();
+            }
+
         }
 
         /// <summary>

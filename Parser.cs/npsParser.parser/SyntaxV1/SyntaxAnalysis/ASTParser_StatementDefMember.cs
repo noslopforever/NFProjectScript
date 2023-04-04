@@ -35,9 +35,9 @@ namespace nf.protoscript.parser.syntax1.analysis
 
         public override STNode_ElementDef Parse(TokenList InTokenList)
         {
-            // - [UIMin = 0][UIMax = 100]   HP    :integer = 100 @Min=0 @Max=100     # Health-point
-            //   ^----------------------^   ^^    ^------^ ^---^ ^-------------^     ^------------^
-            //   InlineAttributes        BlockID  TypeSig  Expr  LineEndAttributes   LineEndComments
+            // - [UIMin = 0][UIMax = 100]   HP    :integer = 100
+            //   ^----------------------^   ^^    ^------^ ^---^
+            //   InlineAttributes        BlockID  TypeSig  Expr
             if (!InTokenList.CheckToken(ETokenType.ID)
                 && !InTokenList.CheckToken(ETokenType.OpenBracket)
                 )
@@ -79,21 +79,6 @@ namespace nf.protoscript.parser.syntax1.analysis
             StaticParseAST(new ASTParser_BlockInitExpr(), InTokenList,
                 expr => result._Internal_SetInitExpr(expr)
                 );
-
-            // Try parse line-end attributes.
-            ParseHelper.TryParseLineEndBlocks(InTokenList, (attrs, comments) =>
-            {
-                result._Internal_AddAttributes(attrs);
-                result._Internal_AddComments(comments);
-            });
-
-            // if not end, there is an unexpected token
-            if (!InTokenList.IsEnd)
-            {
-                // TODO log error
-                throw new NotImplementedException();
-                return null;
-            }
 
             return result;
         }

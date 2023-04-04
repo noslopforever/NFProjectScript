@@ -14,18 +14,12 @@ namespace nf.protoscript.parser.syntax1
     public class ExpressionSector
         : Sector
     {
-        public ExpressionSector(CodeLine InCodeLn, int InLineIndex, syntaxtree.STNodeBase InExpr, string InTag = "")
+        public ExpressionSector(CodeLine InCodeLn, syntaxtree.STNodeBase InExpr, string InTag = "")
             : base(InCodeLn)
         {
-            LineIndex = InLineIndex;
             Tag = InTag;
             Expr = InExpr;
         }
-
-        /// <summary>
-        /// Line index of the expression
-        /// </summary>
-        public int LineIndex { get; }
 
         /// <summary>
         /// Tag of the statement.

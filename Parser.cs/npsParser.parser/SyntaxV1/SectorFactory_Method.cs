@@ -11,7 +11,7 @@ namespace nf.protoscript.parser.syntax1
     public class SectorFactory_Method
         : SectorFactory
     {
-        protected override Sector ParseImpl(ICodeContentReader InReader, string InCodesWithoutIndent)
+        protected override Sector ParseImpl(CodeLine InCodeLine, string InCodesWithoutIndent)
         {
             // all method sectors start with a '+'.
             string codesWithoutTags = "";
@@ -35,7 +35,18 @@ namespace nf.protoscript.parser.syntax1
                 var funcDef = startTypeDefParser.Parse(tl);
                 if (funcDef != null)
                 {
-                    return ElementSector.NewMethodSector(InReader.CurrentCodeLine, funcDef);
+                    var sector = ElementSector.NewMethodSector(InCodeLine, funcDef);
+                    // Parse line-end blocks
+                    ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
+                    {
+                        sector._SetAttributes(attrs);
+                        sector._SetComment(comments);
+                    });
+
+                    // if not end, there is an unexpected token
+                    ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);
+
+                    return sector;
                 }
             }
             catch
@@ -43,20 +54,32 @@ namespace nf.protoscript.parser.syntax1
             }
 
             // If fail, Seek back to the start and try parse Non-StartType member define:
-            // - {Name} or -{Name}
+            // + {Name} or +{Name}
             {
                 var tl = new TokenList(tokens);
                 var defParser = new ASTParser_StatementDefFunction(null);
                 var funcDef = defParser.Parse(tl);
                 if (funcDef != null)
                 {
-                    return ElementSector.NewMethodSector(InReader.CurrentCodeLine, funcDef);
+                    var sector = ElementSector.NewMethodSector(InCodeLine, funcDef);
+                    // Parse line-end blocks
+                    ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
+                    {
+                        sector._SetAttributes(attrs);
+                        sector._SetComment(comments);
+                    });
+
+                    // if not end, there is an unexpected token
+                    ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);
+
+                    return sector;
                 }
             }
 
-            // TODO log error
-            throw new NotImplementedException();
-            return null;
+            // Throw exception
+            throw new ParserException(ParserErrorType.UnrecognizedMethod
+                , InCodeLine
+                );
         }
 
     }

@@ -191,6 +191,22 @@ namespace nf.protoscript.parser.syntax1
             return InFunc(attrs, comment);
         }
 
+        /// <summary>
+        /// Check if the InTokenList has been finished. If not, throw ParserException.
+        /// </summary>
+        /// <param name="InTokenList"></param>
+        /// <param name="InCodeLine"></param>
+        public static void CheckFinishedAndThrow(TokenList InTokenList, CodeLine InCodeLine)
+        {
+            if (!InTokenList.IsEnd)
+            {
+                throw new ParserException(ParserErrorType.UnexpectedToken
+                    , InCodeLine
+                    , InTokenList.CurrentToken
+                    );
+            }
+        }
+
     }
 
 

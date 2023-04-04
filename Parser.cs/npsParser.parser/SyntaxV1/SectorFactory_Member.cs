@@ -13,7 +13,7 @@ namespace nf.protoscript.parser.syntax1
         : SectorFactory
     {
 
-        protected override Sector ParseImpl(ICodeContentReader InReader, string InCodesWithoutIndent)
+        protected override Sector ParseImpl(CodeLine InCodeLine, string InCodesWithoutIndent)
         {
             //
             //-{Type} {Name} |= {Expr}|
@@ -27,6 +27,8 @@ namespace nf.protoscript.parser.syntax1
 
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
+
+            Exception tryExcp = null;
 
             // Try parse as StartType member define:
             // -{Type} {Name}
@@ -42,11 +44,23 @@ namespace nf.protoscript.parser.syntax1
                 var elemDef = startTypeDefParser.Parse(tl);
                 if (elemDef != null)
                 {
-                    return ElementSector.NewMemberSector(InReader.CurrentCodeLine, elemDef);
+                    Sector sector = ElementSector.NewMemberSector(InCodeLine, elemDef);
+
+                    // Try parse line-end attributes.
+                    ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
+                    {
+                        sector._SetAttributes(attrs);
+                        sector._SetComment(comments);
+                    });
+
+                    // if not end, there is an unexpected token
+                    ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);
+                    return sector;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                tryExcp = ex;
             }
 
             // If fail, Seek back to the start and try parse Non-StartType member define:
@@ -57,13 +71,25 @@ namespace nf.protoscript.parser.syntax1
                 var elemDef = defParser.Parse(tl);
                 if (elemDef != null)
                 {
-                    return ElementSector.NewMemberSector(InReader.CurrentCodeLine, elemDef);
+                    var sector = ElementSector.NewMemberSector(InCodeLine, elemDef);
+                    // Parse line-end blocks
+                    ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
+                    {
+                        sector._SetAttributes(attrs);
+                        sector._SetComment(comments);
+                    });
+
+                    // if not end, there is an unexpected token
+                    ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);
+
+                    return sector;
                 }
             }
 
-            // TODO log error
-            throw new NotImplementedException();
-            return null;
+            // Throw exception
+            throw new ParserException(ParserErrorType.UnrecognizedElement
+                , InCodeLine
+                );
         }
 
     }

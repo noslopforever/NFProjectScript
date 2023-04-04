@@ -20,9 +20,8 @@ namespace nf.protoscript.parser.syntax1
         {
             Parser parser = new Parser();
             // Register system factories
-            parser._RootFactories.Add(new SectorFactory_SingletonOrGlobal());
             //parser._RootFactories.Add(new SectorFactory_Block());
-            parser._RootFactories.Add(new SectorFactory_Model());
+            parser._RootFactories.Add(new SectorFactory_RootModels());
 
             //parser._NonRootFactories.Add(new SectorFactory_Block());
             //parser._NonRootFactories.Add(new SectorFactory_Links());
@@ -87,15 +86,43 @@ namespace nf.protoscript.parser.syntax1
                 // Try select a factory which can recognize the codes.
                 foreach (var secFactory in factories)
                 {
-                    sector = secFactory.Parse(InReader, codesTrimmed);
-                    if (sector != null)
-                    { break; }
+                    try
+                    {
+                        sector = secFactory.Parse(codeLn, codesTrimmed);
+                        if (sector != null)
+                        {
+                            break;
+                        }
+                    }
+                    catch (ParserException pex)
+                    {
+                        // TODO find error message by UniqueID in different locales.
+                        string msg = pex.ErrorType.AsciiMessage;
+
+                        // write to log
+                        Logger.Instance.Log(ELoggerType.Error, "Parser"
+                            , pex.ErrorType.UniqueID
+                            , $"{pex.ErrorSiteString} : {msg}"
+                            );
+                    }
+                    catch (Exception ex)
+                    {
+                        // write to log
+                        Logger.Instance.Log(ELoggerType.Error, "Parser"
+                            , -1
+                            , $"{codeLn.SiteString} : Unexpected error occurred. {ex.Message}"
+                            );
+                    }
                 }
 
-                // Unrecognized sector, error out.
+                // Unrecognized sector, error out and register a 'Error' sector.
                 if (sector == null)
                 {
-                    throw new NotImplementedException();
+                    Logger.Instance.Log(ELoggerType.Error, "Parser"
+                        , ParserErrorType.UnrecognizedSector.UniqueID
+                            , $"{codeLn.SiteString} : Unexpected error occurred."
+                        );
+                    sector = new ErrorSector(codeLn);
                     continue;
                 }
 
