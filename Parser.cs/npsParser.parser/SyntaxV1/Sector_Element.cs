@@ -1,4 +1,4 @@
-﻿using nf.protoscript.parser.syntax1.analysis;
+using nf.protoscript.parser.syntax1.analysis;
 using nf.protoscript.parser.token;
 using System;
 using System.Collections.Generic;
@@ -141,8 +141,7 @@ namespace nf.protoscript.parser.syntax1
                     case EType.ComponentOrChild: headerName = "child"; break;
                     case EType.MethodSubParam: headerName = "param"; break;
                     default:
-                        throw new InvalidProgramException();
-                        break;
+                        throw new InvalidProgramException("Unexpected Element Type");
                 }
 
                 // new the result element.
@@ -180,8 +179,7 @@ namespace nf.protoscript.parser.syntax1
                     case EType.Method: headerName = "method"; break;
                     case EType.Event: headerName = "event"; break;
                     default:
-                        throw new InvalidProgramException();
-                        break;
+                        throw new InvalidProgramException("Unexpected Method Type");
                 }
                 chiefInfo = new ElementInfo(parentInfo, headerName, FuncDef.DefName, typeInfo, mergedSTSeq);
 

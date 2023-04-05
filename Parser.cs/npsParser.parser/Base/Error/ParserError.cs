@@ -30,6 +30,9 @@ namespace nf.protoscript.parser
         // pre-defined error types.
         //
 
+        public static ParserErrorType Parser_LoadFileError { get; }
+            = new ParserErrorType(1, "Load file error");
+
         public static ParserErrorType Parser_UnrecognizedSector { get; }
             = new ParserErrorType(100, "Unrecognized sector");
 

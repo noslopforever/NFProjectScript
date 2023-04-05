@@ -37,6 +37,10 @@ namespace nf.protoscript.parser
             }
             catch (Exception ex)
             {
+                Logger.Instance.Log(ELoggerType.Error, "Parser"
+                    , ParserErrorType.Parser_LoadFileError.UniqueID
+                    , $"{ex.TargetSite} : {ParserErrorType.Parser_LoadFileError.AsciiMessage} : {ex.Message}"
+                    );
             }
             return null;
         }
@@ -60,6 +64,10 @@ namespace nf.protoscript.parser
             }
             catch (Exception ex)
             {
+                Logger.Instance.Log(ELoggerType.Error, "Parser"
+                    , ParserErrorType.Parser_LoadFileError.UniqueID
+                    , $"{ex.TargetSite} : {ParserErrorType.Parser_LoadFileError.AsciiMessage} : {ex.Message}"
+                    );
             }
             return null;
         }

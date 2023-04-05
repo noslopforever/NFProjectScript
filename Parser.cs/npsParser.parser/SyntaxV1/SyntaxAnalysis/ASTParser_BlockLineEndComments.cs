@@ -13,7 +13,6 @@ namespace nf.protoscript.parser.syntax1.analysis
             {
                 // TODO impl
                 throw new NotImplementedException();
-                return null;
             }
 
             return null;
