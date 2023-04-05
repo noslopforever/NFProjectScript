@@ -1,0 +1,28 @@
+map chess
+	@tile
+		-state = EState.Null
+
+	+set(tile, tagState)
+		> tile.state = tagState
+
+player chessplayer
+	- state
+
+# player A and B will be automatically registered to a game session.
+
+chessplayer $playerA
+	- state = EState.Circle
+chessplayer $playerB
+	- state = EState.Cross
+
+	
+rule
+	@turnbased
+	[] OnTurn(player)
+		<> on<player.hit>(tile)
+			# event in a graph will be automatically detached when the graph ends.
+			> if (tile.state != EState.Null)
+				> error "must hit empty tiles"
+			> else
+				> map.set(tile, player.state)
+				> endturn() # call endturn to drop and wait for other players.

@@ -8,4 +8,23 @@
     <ProjectReference Include="..\..\npsParser.base\npsParser.base.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="TestNpsScripts.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestNpsScripts.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="TestNpsScripts.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TestNpsScripts.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
 </Project>

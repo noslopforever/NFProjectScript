@@ -1,0 +1,39 @@
+massunit bullet
+	@placement=2d
+	@movemen=simulate
+	-speed = 128
+
+unit ship
+	@placement=2d
+	@movement=kinetic
+	@controllable
+	@battleunit
+		-HP
+	+controller = kinetic2d
+	+fire
+		> spawn(bullet, dir)
+	+hurt(hp)
+		> HP -= hp 
+	[] explode
+		> self.inactivate()
+		> play 'explode'
+			> end: destory(self)
+
+unit asteroid
+	@placement=2d
+	@movement=simulate
+	@Hit=bullet, ship
+	-speed=32
+	+OnHit(Other)
+		> this.explode()
+	[] explode
+		> self.inactivate()
+		> play 'explode'
+			> end: destroy(self)
+
+rule
+	>> OnHit(Ast:asteroid, Ship:ship)
+		> ship.hurt(10)
+		> if ship.HP <= 0
+			> ship.explode
+			> player.gamefail

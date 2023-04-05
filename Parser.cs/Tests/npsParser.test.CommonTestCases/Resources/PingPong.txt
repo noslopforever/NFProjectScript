@@ -1,0 +1,22 @@
+unit ball
+    @placement=2d
+    @move=simulate
+    @hit=[plate, brick]
+    >> OnHit(Other)
+        > vel -= Other.vel
+        > vel.swapY()
+
+unit plate
+    @placement=2d
+    @move=simulate
+    @controllable
+    +move
+        -n dir @range=[-1, 1]
+        > vel = dir * speed
+
+unit brick
+    @placement=2d
+
+world gameworld
+    >> OnHit(Ball:ball, Other)
+        > Other<brick>.destroy()
