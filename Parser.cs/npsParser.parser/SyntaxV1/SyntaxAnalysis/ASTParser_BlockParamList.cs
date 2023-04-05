@@ -48,7 +48,6 @@ namespace nf.protoscript.parser.syntax1.analysis
                     {
                         throw new ParserException(
                             ParserErrorType.AST_InvalidParam
-                            , InTokenList.SourceCodeLine
                             , paramDefStartToken
                             );
                     }
@@ -56,13 +55,27 @@ namespace nf.protoscript.parser.syntax1.analysis
 
                     // -n getSth(InParam0, InParam1)
                     //                   ^         ^
-                    InTokenList.EnsureOrConsumeTo(new ETokenType[] { ETokenType.Comma, ETokenType.CloseParen });
+                    if (!InTokenList.EnsureOrConsumeTo(new ETokenType[] { ETokenType.Comma, ETokenType.CloseParen }))
+                    {
+                        throw new ParserException(
+                            ParserErrorType.AST_UnexpectedToken
+                            , InTokenList.CurrentToken
+                            , $"{ETokenType.Comma}|{ETokenType.CloseParen}"
+                            );
+                    }
                     if (InTokenList.CheckToken(ETokenType.Comma))
                     { InTokenList.Consume(); }
                 }
 
-                InTokenList.EnsureOrConsumeTo(ETokenType.CloseParen);
-                // consume the 'close-paren'.
+                // Ensure and consume the 'close-paren'.
+                if (!InTokenList.EnsureOrConsumeTo(ETokenType.CloseParen))
+                {
+                    throw new ParserException(
+                        ParserErrorType.AST_UnexpectedToken
+                        , InTokenList.CurrentToken
+                        , ETokenType.CloseParen
+                        );
+                }
                 InTokenList.Consume();
             }
 

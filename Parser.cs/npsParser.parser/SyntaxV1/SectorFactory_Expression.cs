@@ -24,7 +24,7 @@ namespace nf.protoscript.parser.syntax1
             // Parse expression statement from codes.
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
-            TokenList tl = new TokenList(tokens, InCodeLine);
+            TokenList tl = new TokenList(tokens);
 
             // Parse tag and consume tag tokens.
             string tag = "";

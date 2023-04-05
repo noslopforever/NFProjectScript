@@ -19,7 +19,6 @@ namespace nf.protoscript.parser.syntax1.analysis
                 {
                     throw new ParserException(
                         ParserErrorType.AST_UnexpectedToken
-                        , InTokenList.SourceCodeLine
                         , InTokenList.CurrentToken
                         , "ID:Return"
                         );

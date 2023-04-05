@@ -26,7 +26,7 @@ namespace nf.protoscript.parser.syntax1
             try
             {
                 // Try Handle StartType
-                var tl = new TokenList(tokens, InCodeLine);
+                var tl = new TokenList(tokens);
                 ASTParser_BlockType blockTypeParser = new ASTParser_BlockType();
                 var startTypeSig = blockTypeParser.Parse(tl);
 
@@ -56,7 +56,7 @@ namespace nf.protoscript.parser.syntax1
             // If fail, Seek back to the start and try parse Non-StartType member define:
             // + {Name} or +{Name}
             {
-                var tl = new TokenList(tokens, InCodeLine);
+                var tl = new TokenList(tokens);
                 var defParser = new ASTParser_StatementDefFunction(null);
                 var funcDef = defParser.Parse(tl);
                 if (funcDef != null)
@@ -77,9 +77,7 @@ namespace nf.protoscript.parser.syntax1
             }
 
             // Throw exception
-            throw new ParserException(ParserErrorType.Factory_UnrecognizedMethod
-                , InCodeLine
-                );
+            throw new ParserException(ParserErrorType.Factory_UnrecognizedMethod);
         }
 
     }

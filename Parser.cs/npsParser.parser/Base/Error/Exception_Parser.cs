@@ -10,13 +10,11 @@ namespace nf.protoscript.parser
         : Exception
     {
         public ParserException(ParserErrorType InErrorType
-            , CodeLine InCodeLn
             , Token InErrorToken = null
             , params object[] InAppends
             )
         {
             ErrorType = InErrorType;
-            ErrorCodeLine = InCodeLn;
             ErrorToken = InErrorToken;
             AppendData = InAppends;
         }
@@ -25,11 +23,6 @@ namespace nf.protoscript.parser
         /// Error type
         /// </summary>
         public ParserErrorType ErrorType { get; }
-
-        /// <summary>
-        /// Site of the error.
-        /// </summary>
-        public CodeLine ErrorCodeLine { get; private set; }
 
         /// <summary>
         /// Error token.
@@ -42,34 +35,14 @@ namespace nf.protoscript.parser
         public object[] AppendData { get; }
 
         /// <summary>
-        /// Column index of the error token.
+        /// Localized error message.
         /// </summary>
-        public int ErrorTokenColumnIndex
+        public string GetLocalizedMessage()
         {
-            get
-            {
-                if (ErrorToken == null)
-                { return -1; }
+            // TODO find error message by UniqueID in different locales.
+            object[] parms = _GetMessageAppendDatas();
 
-                int totalLen = ErrorCodeLine.Content.TrimEnd().Length;
-                int colIndex = totalLen - ErrorToken.LengthToTheEnd;
-                return colIndex;
-            }
-        }
-
-        /// <summary>
-        /// Get the string which indicates the place where the error occurred in.
-        /// </summary>
-        public string ErrorSiteString
-        {
-            get
-            {
-                if (ErrorToken != null)
-                {
-                    return $"{ErrorCodeLine.Reader.Filename}[{ErrorCodeLine.LineNumber}:{ErrorTokenColumnIndex}]";
-                }
-                return $"{ErrorCodeLine.SiteString}";
-            }
+            return Message;
         }
 
         // override error message.
@@ -77,18 +50,27 @@ namespace nf.protoscript.parser
         {
             get
             {
-                object[] parms = new object[AppendData.Length + 1];
-                parms[0] = ErrorToken != null ? ErrorToken.ToString() : "<null>";
-                for (int i = 0; i < AppendData.Length; i++)
-                {
-                    var appData = AppendData[i];
-                    parms[i] = appData != null ? appData : "<null>";
-                }
-
-                return string.Format($"{ErrorSiteString} : {ErrorType.AsciiMessage}", parms);
+                object[] parms = _GetMessageAppendDatas();
+                return string.Format($"{ErrorType.AsciiMessage}", parms);
             }
         }
 
+        /// <summary>
+        /// Merge AppendData with ErrorToken-string.
+        /// </summary>
+        /// <returns></returns>
+        private object[] _GetMessageAppendDatas()
+        {
+            object[] parms = new object[AppendData.Length + 1];
+            parms[0] = ErrorToken != null ? ErrorToken.ToString() : "<null>";
+            for (int i = 0; i < AppendData.Length; i++)
+            {
+                var appData = AppendData[i];
+                parms[i] = appData != null ? appData : "<null>";
+            }
+
+            return parms;
+        }
     }
 
 }

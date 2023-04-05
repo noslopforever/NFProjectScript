@@ -36,7 +36,7 @@ namespace nf.protoscript.parser.syntax1
             List<Token> tokens = new List<Token>();
             TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
 
-            var tl = new TokenList(tokens, InCodeLine);
+            var tl = new TokenList(tokens);
 
             // Try parse Event definitions.
             var defParser = new analysis.ASTParser_StatementDefEvent();

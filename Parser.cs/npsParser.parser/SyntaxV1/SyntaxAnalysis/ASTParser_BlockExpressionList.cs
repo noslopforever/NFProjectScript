@@ -41,10 +41,9 @@ namespace nf.protoscript.parser.syntax1.analysis
                     if (InTokenList.CheckToken(EndToken))
                     { break; }
 
-                    // If matches the end of the TL, mark failed and break.
+                    // If matches the end of the TL, failed and break.
                     if (InTokenList.IsEnd)
                     {
-                        exprList = null;
                         break;
                     }
 
@@ -56,7 +55,6 @@ namespace nf.protoscript.parser.syntax1.analysis
                         // If expr parse failed, throw error
                         throw new ParserException(
                             ParserErrorType.AST_InvalidExpression
-                            , InTokenList.SourceCodeLine
                             , exprStartToken
                             );
                     }
@@ -64,13 +62,27 @@ namespace nf.protoscript.parser.syntax1.analysis
 
                     // (a + b, 10 / 5)
                     //       ^       ^
-                    InTokenList.EnsureOrConsumeTo(new ETokenType[] { ETokenType.Comma, ETokenType.CloseParen });
+                    if (!InTokenList.EnsureOrConsumeTo(new ETokenType[] { ETokenType.Comma, ETokenType.CloseParen }))
+                    {
+                        throw new ParserException(
+                            ParserErrorType.AST_UnexpectedToken
+                            , InTokenList.CurrentToken
+                            , $"{ETokenType.Comma}|{ETokenType.CloseParen}"
+                            );
+                    }
                     if (InTokenList.CheckToken(ETokenType.Comma))
                     { InTokenList.Consume(); }
                 }
 
-                InTokenList.EnsureOrConsumeTo(EndToken);
-                // consume the EndToken.
+                // Ensure and consume the EndToken.
+                if (!InTokenList.EnsureOrConsumeTo(EndToken))
+                {
+                    throw new ParserException(
+                        ParserErrorType.AST_UnexpectedToken
+                        , InTokenList.CurrentToken
+                        , EndToken
+                        );
+                }
                 InTokenList.Consume();
 
                 return new syntaxtree.STNodeSequence(exprList.ToArray());

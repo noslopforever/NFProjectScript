@@ -67,7 +67,6 @@ namespace nf.protoscript.parser.syntax1.analysis
                 {
                     throw new ParserException(
                         ParserErrorType.AST_UnexpectedToken
-                        , InTokenList.SourceCodeLine
                         , InTokenList.CurrentToken
                         , ETokenType.CloseParen.ToString()
                         );
@@ -104,7 +103,6 @@ namespace nf.protoscript.parser.syntax1.analysis
 
             throw new ParserException(
                 ParserErrorType.AST_UnexpectedTermToken
-                , InTokenList.SourceCodeLine
                 , InTokenList.CurrentToken
                 );
         }

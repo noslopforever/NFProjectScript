@@ -10,16 +10,10 @@ namespace nf.protoscript.parser.token
     /// </summary>
     public class TokenList
     {
-        public TokenList(IReadOnlyList<Token> InTokens, CodeLine InCodeLine)
+        public TokenList(IReadOnlyList<Token> InTokens)
         {
             Tokens = InTokens;
-            SourceCodeLine = InCodeLine;
         }
-
-        /// <summary>
-        /// Source code line of the tokens.
-        /// </summary>
-        public CodeLine SourceCodeLine { get; }
 
         /// <summary>
         /// Tokens
@@ -196,14 +190,6 @@ namespace nf.protoscript.parser.token
             {
                 return true;
             }
-
-            throw new ParserException(
-                ParserErrorType.AST_UnexpectedToken
-                , SourceCodeLine
-                , CurrentToken
-                , InToken.ToString()
-                );
-
             ConsumeTo(InToken);
             return false;
         }
@@ -222,21 +208,7 @@ namespace nf.protoscript.parser.token
                 return true;
             }
 
-            string tokensStr = "";
-            foreach (var t in InTokens)
-            {
-                tokensStr += $"{t.ToString()}; ";
-            }
-
-            throw new ParserException(
-                ParserErrorType.AST_UnexpectedToken
-                , SourceCodeLine
-                , CurrentToken
-                , tokensStr
-                );
-
             ConsumeTo(InTokens);
-
             return false;
         }
 

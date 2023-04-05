@@ -1,4 +1,4 @@
-using nf.protoscript.parser.syntax1.analysis;
+﻿using nf.protoscript.parser.syntax1.analysis;
 using nf.protoscript.parser.token;
 using System;
 using System.Collections.Generic;
@@ -100,10 +100,7 @@ namespace nf.protoscript.parser.syntax1
             Info parentInfo = InParentSector.CollectedInfo;
             if (parentInfo == null)
             {
-                throw new ParserException(
-                    ParserErrorType.Collect_NoParentInfo
-                    , CodeLn
-                    );
+                throw new ParserException(ParserErrorType.Collect_NoParentInfo);
             }
 
             Info chiefInfo = null;

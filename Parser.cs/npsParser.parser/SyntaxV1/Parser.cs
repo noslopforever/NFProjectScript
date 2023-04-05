@@ -97,12 +97,20 @@ namespace nf.protoscript.parser.syntax1
                     catch (ParserException pex)
                     {
                         // TODO find error message by UniqueID in different locales.
-                        string msg = pex.ErrorType.AsciiMessage;
+                        string msg = pex.GetLocalizedMessage();
+
+                        // line site string.
+                        string lineSiteStr = codeLn.SiteString;
+                        if (pex.ErrorToken != null)
+                        {
+                            int columnIndex = codeLn.Content.TrimEnd().Length - pex.ErrorToken.LengthToTheEnd;
+                            lineSiteStr += $"[{columnIndex}]";
+                        }
 
                         // write to log
                         Logger.Instance.Log(ELoggerType.Error, "Parser"
                             , pex.ErrorType.UniqueID
-                            , $"{pex.ErrorSiteString} : {msg}"
+                            , $"{lineSiteStr} : {msg}"
                             );
                     }
                     catch (Exception ex)
