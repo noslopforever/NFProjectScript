@@ -14,6 +14,7 @@ namespace nf.protoscript.syntaxtree
     {
         public STNodeUnaryOp(string InUnaryOpStr, ISyntaxTreeNode InRhs)
         {
+            OpCode = InUnaryOpStr;
             RHS = InRhs;
         }
 

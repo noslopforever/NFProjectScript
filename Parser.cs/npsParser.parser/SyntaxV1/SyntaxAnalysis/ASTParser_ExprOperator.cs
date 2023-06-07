@@ -48,7 +48,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             var lhs = NextParser.Parse(InTokenList);
 
             // Parse and consume 'op'
-            if (InTokenList.CheckToken(TokenType)
+            while (InTokenList.CheckToken(TokenType)
                 && Ops.Contains(InTokenList.CurrentToken.Code)
                 )
             {
@@ -59,8 +59,7 @@ namespace nf.protoscript.parser.syntax1.analysis
                 // All 'Ops' must have the rhs.
                 var rhs = NextParser.Parse(InTokenList);
 
-                syntaxtree.STNodeBinaryOp op = new syntaxtree.STNodeBinaryOp(opToken.Code, lhs, rhs);
-                return op;
+                lhs = new syntaxtree.STNodeBinaryOp(opToken.Code, lhs, rhs);
             }
             return lhs;
         }

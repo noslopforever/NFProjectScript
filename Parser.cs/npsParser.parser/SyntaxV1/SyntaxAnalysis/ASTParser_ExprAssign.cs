@@ -1,5 +1,6 @@
 ﻿using nf.protoscript.parser.token;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace nf.protoscript.parser.syntax1.analysis
@@ -27,7 +28,11 @@ namespace nf.protoscript.parser.syntax1.analysis
 
             // Parse and consume 'op'
             var opToken = InTokenList.CurrentToken;
-            if (InTokenList.CheckToken(TokenType)
+
+            // op and rhs list.
+            List<(string, syntaxtree.STNodeBase)> opAndRhsList = new List<(string, syntaxtree.STNodeBase)>();
+
+            while (InTokenList.CheckToken(TokenType)
                 && Ops.Contains(opToken.Code)
                 )
             {
@@ -36,19 +41,57 @@ namespace nf.protoscript.parser.syntax1.analysis
                 // All 'Ops' have rhs.
                 var rhs = NextParser.Parse(InTokenList);
 
-                // Create Assign nodes instead of op nodes.
+                opAndRhsList.Add((opToken.Code, rhs));
+            }
+
+            // No assign op, return lhs immediately.
+            if (opAndRhsList.Count == 0)
+            {
+                return lhs;
+            }
+
+            // Insert lhs to the first entry
+            opAndRhsList.Insert(0, ("ERROR", lhs));
+
+            // Create STNodeAssign from right to left.
+            //
+            // Step0:
+            // LHS, E0, E1, E2
+            //          ^   ^
+            //          i   lastOp/STNode
+            // O2(E1, E2)
+            //
+            // Step1:
+            // LHS, E0, E1, E2
+            //      ^   ^
+            //      i   lastOp/STNode
+            // O1(E0, O2(E1, E2))
+            //
+            // Step END:
+            // LHS, E0, E1, E2
+            // ^    ^
+            // i    lastOp/STNode
+            // O0(LHS, O1(E0, E1))
+            //
+            var lastOpCode = opAndRhsList[opAndRhsList.Count - 1].Item1;
+            var lastSTNode = opAndRhsList[opAndRhsList.Count - 1].Item2;
+            for (int i = opAndRhsList.Count - 2; i >= 0; i--)
+            {
+                var lhsSTNode = opAndRhsList[i].Item2;
+
                 if (opToken.Code == "=")
                 {
-                    syntaxtree.STNodeAssign op = new syntaxtree.STNodeAssign(lhs, rhs);
-                    return op;
+                    lastSTNode = new syntaxtree.STNodeAssign(lhsSTNode, lastSTNode);
                 }
                 else
                 {
-                    syntaxtree.STNodeCompoundAssign op = new syntaxtree.STNodeCompoundAssign(opToken.Code, lhs, rhs);
-                    return op;
+                    lastSTNode = new syntaxtree.STNodeCompoundAssign(opToken.Code, lhsSTNode, lastSTNode);
                 }
+
+                lastOpCode = opAndRhsList[i].Item1;
             }
-            return lhs;
+
+            return lastSTNode;
         }
 
     }

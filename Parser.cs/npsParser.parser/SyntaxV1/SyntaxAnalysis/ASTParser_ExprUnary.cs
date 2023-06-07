@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using nf.protoscript.parser.token;
 
@@ -19,22 +20,27 @@ namespace nf.protoscript.parser.syntax1.analysis
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)
         {
             // Try parse and consume Unary 'op'
-            if (InTokenList.CheckToken(ETokenType.Operator)
+            List<string> unaryTokens = new List<string>();
+            while (InTokenList.CheckToken(ETokenType.Operator)
                 && UnaryOps.Contains(InTokenList.CurrentToken.Code)
                 )
             {
                 var opToken = InTokenList.CurrentToken;
                 InTokenList.Consume();
 
-                // All 'Op's have rhs.
-                var rhs = NextParser.Parse(InTokenList);
-
-                syntaxtree.STNodeUnaryOp op = new syntaxtree.STNodeUnaryOp(opToken.Code, rhs);
-                return op;
+                unaryTokens.Add(opToken.Code);
             }
 
-            // No unary, next.
-            return NextParser.Parse(InTokenList);
+            // rhs value
+            var rhs = NextParser.Parse(InTokenList);
+
+            // parse unary operators from end to start.
+            var lastNode = rhs;
+            for (int i = unaryTokens.Count - 1; i >= 0; i--)
+            {
+                lastNode = new syntaxtree.STNodeUnaryOp(unaryTokens[i], lastNode);
+            }
+            return lastNode;
         }
     }
 

@@ -25,7 +25,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             var lhs = NextParser.Parse(InTokenList);
 
             // Parse and consume 'op'
-            if (InTokenList.CheckToken(TokenType)
+            while (InTokenList.CheckToken(TokenType)
                 && Ops.Contains(InTokenList.CurrentToken.Code)
                 )
             {
@@ -34,8 +34,7 @@ namespace nf.protoscript.parser.syntax1.analysis
                 // All 'Ops' have rhs.
                 var rhs = NextParser.Parse(InTokenList);
 
-                syntaxtree.STNodeSub op = new syntaxtree.STNodeSub(lhs, rhs);
-                return op;
+                lhs = new syntaxtree.STNodeSub(lhs, rhs);
             }
             return lhs;
         }

@@ -29,6 +29,16 @@ class testMethodDefs
 	+integer Square(InP0:integer, InP1:integer)
 	    > tmp = InP0 * InP1;
 		> return tmp;
+	+ Func()
+		> A = 1 + 2 - 3 + 4
+		> A = 1 * 2 / 3 * 4
+		> A = !!B
+		> A = -+-B
+		> A = 1 + (3 + 5) * 9 - 12 / 3
+		> A.B.C = D.E.F
+		> A.B.foo(C.D.E).F.G = 1
+		> A = B = 1 + 2 * 3
+		> A = B.C = 1 + 2
 
 class testEvents
 	~Event0()
