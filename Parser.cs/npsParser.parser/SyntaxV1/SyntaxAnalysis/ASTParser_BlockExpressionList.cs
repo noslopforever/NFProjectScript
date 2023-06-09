@@ -62,12 +62,12 @@ namespace nf.protoscript.parser.syntax1.analysis
 
                     // (a + b, 10 / 5)
                     //       ^       ^
-                    if (!InTokenList.EnsureOrConsumeTo(new ETokenType[] { ETokenType.Comma, ETokenType.CloseParen }))
+                    if (!InTokenList.EnsureOrConsumeTo(new ETokenType[] { ETokenType.Comma, EndToken }))
                     {
                         throw new ParserException(
                             ParserErrorType.AST_UnexpectedToken
                             , InTokenList.CurrentToken
-                            , $"{ETokenType.Comma}|{ETokenType.CloseParen}"
+                            , $"{ETokenType.Comma}|{EndToken}"
                             );
                     }
                     if (InTokenList.CheckToken(ETokenType.Comma))
