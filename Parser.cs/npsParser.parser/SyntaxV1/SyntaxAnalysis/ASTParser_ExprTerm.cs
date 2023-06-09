@@ -27,7 +27,7 @@ namespace nf.protoscript.parser.syntax1.analysis
                 var idNode = new syntaxtree.STNodeGetVar(idToken.Code);
                 InTokenList.Consume();
 
-                return TryParseFuncCallOrCollAccess(idNode, InTokenList);
+                return idNode;
             }
             // <Number>
             else if (InTokenList.CheckToken(ETokenType.Integer))
@@ -107,37 +107,6 @@ namespace nf.protoscript.parser.syntax1.analysis
                 );
         }
 
-        private syntaxtree.STNodeBase TryParseFuncCallOrCollAccess(syntaxtree.STNodeBase InPreSTNode, TokenList InTokenList)
-        {
-            // <ID> (EXPRs)(EXPRs)(EXPRs)
-            if (InTokenList.CheckToken(ETokenType.OpenParen))
-            {
-                var exprListParser = new ASTParser_BlockExpressionList(ETokenType.OpenParen, ETokenType.CloseParen);
-                var stnodeSeq = exprListParser.Parse(InTokenList);
-                if (stnodeSeq == null)
-                {
-                    return null;
-                }
-
-                var call = new syntaxtree.STNodeCall(InPreSTNode, stnodeSeq.NodeList);
-                return TryParseFuncCallOrCollAccess(call, InTokenList);
-            }
-            // <ID> [EXPRs][EXPRs][EXPRs]
-            else if (InTokenList.CheckToken(ETokenType.OpenBracket))
-            {
-                var exprListParser = new ASTParser_BlockExpressionList(ETokenType.OpenBracket, ETokenType.CloseBracket);
-                var stnodeSeq = exprListParser.Parse(InTokenList);
-                if (stnodeSeq == null)
-                {
-                    return null;
-                }
-
-                var accessColl = new syntaxtree.STNodeCollectionAccess(InPreSTNode, stnodeSeq.NodeList);
-                return TryParseFuncCallOrCollAccess(accessColl, InTokenList);
-            }
-
-            return InPreSTNode;
-        }
 
     }
 

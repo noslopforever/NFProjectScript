@@ -23,7 +23,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             , new ASTParser_ExprOperator(new string[] { "+", "-" }
             , new ASTParser_ExprOperator(new string[] { "*", "/", "%" }
             , new ASTParser_ExprUnary(new string[] { "~", "+", "-", "!" }
-            , new ASTParser_ExprAccess(new ASTParser_ExprTerm())
+            , new ASTParser_ExprAccessOrCall(new ASTParser_ExprTerm())
             ))))))));
 
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)
