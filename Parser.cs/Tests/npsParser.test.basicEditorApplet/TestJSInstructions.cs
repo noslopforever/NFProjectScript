@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -118,7 +118,7 @@ namespace nf.protoscript.test
             }
 
             // VarGet => ref
-            STNodeGetVar stnVarGet = InSTNode as STNodeGetVar;
+            STNodeVar stnVarGet = InSTNode as STNodeVar;
             if (stnVarGet != null)
             {
                 ElementInfo propInfo = InfoHelper.FindPropertyAlongScopeTree(InFunction.ContextInfo, stnVarGet.IDName);
@@ -330,7 +330,7 @@ namespace nf.protoscript.test
         internal protected override string GenCode(IList<String> InCodeList)
         {
             string filtedGetCode = GetCode.Replace("$OWNER", $"{OwnerPrefix}");
-            string filtedRefCode = RefCode == null? RefCode: RefCode.Replace("$OWNER", $"{OwnerPrefix}");
+            string filtedRefCode = RefCode == null ? RefCode : RefCode.Replace("$OWNER", $"{OwnerPrefix}");
 
             // not ref-required, return getter immediately.
             if (!IsRefRequired)

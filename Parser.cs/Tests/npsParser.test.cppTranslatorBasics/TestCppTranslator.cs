@@ -424,9 +424,9 @@ namespace nf.protoscript.test
                     paramInsts.Add(_ExactInstructions(InFunction, param));
                 }
 
-                if (stnCall.FuncExpr is STNodeGetVar)
+                if (stnCall.FuncExpr is STNodeVar)
                 {
-                    string funcName = (stnCall.FuncExpr as STNodeGetVar).IDName;
+                    string funcName = (stnCall.FuncExpr as STNodeVar).IDName;
                     var inst = new CppILInstruction_Call(InFunction, funcName, paramInsts.ToArray());
                     return inst;
                 }
@@ -491,7 +491,7 @@ namespace nf.protoscript.test
             }
 
             // VarGet => ref
-            STNodeGetVar stnVarGet = InSTNode as STNodeGetVar;
+            STNodeVar stnVarGet = InSTNode as STNodeVar;
             if (stnVarGet != null)
             {
                 Info propInfo = InfoHelper.FindPropertyAlongScopeTree(InFunction.ContextInfo, stnVarGet.IDName);

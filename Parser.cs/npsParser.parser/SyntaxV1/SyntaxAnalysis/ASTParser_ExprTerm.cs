@@ -24,7 +24,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             if (InTokenList.CheckToken(ETokenType.ID))
             {
                 Token idToken = InTokenList.CurrentToken;
-                var idNode = new syntaxtree.STNodeGetVar(idToken.Code);
+                var idNode = new syntaxtree.STNodeVar(idToken.Code);
                 InTokenList.Consume();
 
                 return idNode;
