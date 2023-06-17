@@ -68,7 +68,7 @@ namespace nf.protoscript.test
                     ElementInfo propB = new ElementInfo(classA, "property", "propB"
                         , CommonTypeInfos.Integer
                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                            , new STNodeGetVar("propA")
+                            , new STNodeVar("propA")
                             , new STNodeConstant(100)
                             )
                         );
@@ -97,17 +97,17 @@ namespace nf.protoscript.test
                         , new STNodeSequence(
                             // code ln 0: propA = propB + InParam.
                             new STNodeAssign(
-                                new STNodeGetVar("propA", true)
+                                new STNodeVar("propA", true)
                                 , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                    , new STNodeGetVar("propB")
-                                    , new STNodeGetVar("InParam")
+                                    , new STNodeVar("propB")
+                                    , new STNodeVar("InParam")
                                     )
                                 ),
                             // code ln 1: return propA (return = propA)
                             // TODO a better __return__ var
                             new STNodeAssign(
-                                new STNodeGetVar("___return___", true)
-                                , new STNodeGetVar("propA")
+                                new STNodeVar("___return___", true)
+                                , new STNodeVar("propA")
                                 )
                             )
                         );
@@ -129,16 +129,16 @@ namespace nf.protoscript.test
                         , new STNodeSequence(
                                 // code ln 0: propA = propA + RefParam
                                 new STNodeAssign(
-                                    new STNodeGetVar("propA", true)
+                                    new STNodeVar("propA", true)
                                     , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                        , new STNodeGetVar("propA", false)
-                                        , new STNodeGetVar("RefParam")
+                                        , new STNodeVar("propA", false)
+                                        , new STNodeVar("RefParam")
                                         )
                                     ),
                                 // code ln 1: RefParam = propA
                                 new STNodeAssign(
-                                    new STNodeGetVar("RefParam", true)
-                                    , new STNodeGetVar("propA")
+                                    new STNodeVar("RefParam", true)
+                                    , new STNodeVar("propA")
                                     )
                             )
                         );
@@ -161,8 +161,8 @@ namespace nf.protoscript.test
                         , new STNodeSequence(
                             // code ln 0: TestMethodB(propA)
                             new STNodeCall(
-                                new STNodeGetVar("TestMethodB")
-                                , new STNodeGetVar("propA", true))
+                                new STNodeVar("TestMethodB")
+                                , new STNodeVar("propA", true))
                             )
                         );
 
@@ -228,9 +228,9 @@ namespace nf.protoscript.test
                         , func_V_V_Type
                         , new STNodeSequence(new ISyntaxTreeNode[] {
                             new STNodeAssign(
-                                new STNodeGetVar("HP", true)
+                                new STNodeVar("HP", true)
                                 , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                    , new STNodeGetVar("HP")
+                                    , new STNodeVar("HP")
                                     , new STNodeConstant(1)
                                 )
                             )
@@ -332,13 +332,13 @@ namespace nf.protoscript.test
                                 , new STNodeSequence(new ISyntaxTreeNode[] {
                                     new STNodeAssign(
                                         new STNodeSub(
-                                            new STNodeGetVar("dataContext")
-                                            , new STNodeGetVar("HP", true)
+                                            new STNodeVar("dataContext")
+                                            , new STNodeVar("HP", true)
                                             )
                                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Sub
                                             , new STNodeSub(
-                                                new STNodeGetVar("dataContext")
-                                                , new STNodeGetVar("HP", true)
+                                                new STNodeVar("dataContext")
+                                                , new STNodeVar("HP", true)
                                                 )
                                             , new STNodeConstant(1)
                                         )

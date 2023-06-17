@@ -5,13 +5,15 @@ namespace nf.protoscript.syntaxtree
     /// <summary>
     /// expr node: identifier.
     /// </summary>
-    public class STNodeGetVar : STNodeBase
+    public class STNodeVar
+        : STNodeBase
+        , ISyntaxTreeNode_Variable
     {
-        internal STNodeGetVar()
+        internal STNodeVar()
         {
         }
 
-        public STNodeGetVar(string InIdName, bool InLeftHand = false)
+        public STNodeVar(string InIdName)
         {
             IDName = InIdName;
         }
@@ -22,6 +24,10 @@ namespace nf.protoscript.syntaxtree
         [Serialization.SerializableInfo]
         public string IDName { get; private set; }
 
+        public string VariableName
+        {
+            get { return IDName; }
+        }
 
     }
 }
