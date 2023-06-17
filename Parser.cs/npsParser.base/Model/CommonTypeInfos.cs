@@ -54,6 +54,22 @@ namespace nf.protoscript
         /// </summary>
         public static TypeInfo AsciiString { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "ascii");
 
+        /// <summary>
+        /// Info-references
+        /// </summary>
+        public static TypeInfo InfoRef { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "info_ref");
+
+        /// <summary>
+        /// Type-references
+        /// </summary>
+        public static TypeInfo TypeRef { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "type_ref");
+
+        /// <summary>
+        /// Nullable types
+        /// </summary>
+        public static TypeInfo Nullable { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "nullable");
+
+
         public static bool IsInteger32Type(TypeInfo InType)
         {
             if (InType == Integer
