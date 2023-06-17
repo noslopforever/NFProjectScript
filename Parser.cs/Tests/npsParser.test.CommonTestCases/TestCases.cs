@@ -10,6 +10,7 @@ namespace nf.protoscript.test
 
         public static TypeInfo __internal_UIBaseType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "uibase");
         public static TypeInfo __internal_PanelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "panel", __internal_UIBaseType);
+
         public static TypeInfo __internal_LabelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "label", __internal_UIBaseType);
         public static TypeInfo __internal_ButtonType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "button", __internal_UIBaseType);
 
@@ -173,6 +174,53 @@ namespace nf.protoscript.test
             return testProj;
         }
 
+
+        /// <summary>
+        /// Basic expression test:
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static TypeInfo BasicExpressions()
+        {
+            ProjectInfo testProj = new ProjectInfo("TestProj");
+            TypeInfo testType = new TypeInfo(testProj, "model", "Expressions");
+            {
+                ElementInfo member0 = new ElementInfo(testType, "member"
+                    , "member0"
+                    , CommonTypeInfos.Integer
+                    , new STNodeConstant(100)
+                    );
+
+                ElementInfo getset0 = new ElementInfo(testType, "setterproperty"
+                    , "getset0"
+                    , CommonTypeInfos.Integer
+                    , null
+                    );
+            }
+
+            {
+                // member0 = 0
+                ElementInfo member_assign_by_const = new ElementInfo(testType, "method"
+                    , "member_assign_by_const"
+                    , func_V_V_Type
+                    , new STNodeAssign(
+                        new STNodeVar("member0")
+                        , new STNodeConstant(0)
+                        )
+                    );
+
+                // member0 = member0
+                ElementInfo member_assign_by_member = new ElementInfo(testType, "method"
+                    , "member_assign_by_member"
+                    , func_V_V_Type
+                    , new STNodeAssign(
+                        new STNodeVar("member0")
+                        , new STNodeVar("member0")
+                        )
+                    );
+            }
+            return testType;
+        }
 
         /// <summary>
         /// Basic data-binding test:
