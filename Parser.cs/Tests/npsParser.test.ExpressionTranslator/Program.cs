@@ -19,7 +19,7 @@ namespace npsParser.test.ExpressionTranslator
                     Console.WriteLine($"Write Codes for {mtdInfo.Name}:");
 
                     IExprCodeEmitter emitter = new ExprCodeEmitter_Log();
-                    CodeEmitVisitor emitVisitor = new CodeEmitVisitor(mtdInfo, emitter);
+                    ExprCodeEmitVisitor emitVisitor = new ExprCodeEmitVisitor(mtdInfo, emitter);
                     VisitByReflectionHelper.FindAndCallVisit(mtdInfo.InitSyntax, emitVisitor);
 
                     foreach(string codeLn in emitVisitor.EmittedCode.Codes)
