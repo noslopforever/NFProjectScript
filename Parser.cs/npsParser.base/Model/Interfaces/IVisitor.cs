@@ -52,7 +52,13 @@ namespace nf.protoscript.syntaxtree
                 return true;
             }
 
-            // TODO Find the method with the parameter which implements IVisitable interface.
+            // Find the method with the parameter which implements IVisitable interface.
+            MethodInfo bestVisitInterface = _FindTheFirstVisitInterface(visits, thisType);
+            if (bestVisitInterface != null)
+            {
+                bestVisitInterface.Invoke(InVisitor, new object[] { InThis });
+                return true;
+            }
 
             return false;
         }
@@ -66,6 +72,35 @@ namespace nf.protoscript.syntaxtree
         /// <param name="InVisitMethods"></param>
         /// <param name="InThisType"></param>
         /// <returns></returns>
+        private static MethodInfo _FindTheFirstVisitInterface(IEnumerable<MethodInfo> InVisitMethods, Type InThisType)
+        {
+            foreach (var visitMtd in InVisitMethods)
+            {
+                var visitParams = visitMtd.GetParameters();
+
+                // Ignore Visits with the wrong numbers of parameters.
+                if (visitParams.Length != 1)
+                { continue; }
+
+                // If interface Type: Visit(ISomeInterface)
+                if (visitParams[0].ParameterType.IsInterface)
+                {
+                    try
+                    {
+                        // Check if ThisType implements the ISomeInterface.
+                        var interfMap = InThisType.GetInterfaceMap(visitParams[0].ParameterType);
+                        return visitMtd;
+                    }
+                    catch
+                    {
+                    }
+                    continue;
+                }
+            }
+
+            return null;
+        }
+
         private static MethodInfo _FindTheBestVisit(IEnumerable<MethodInfo> InVisitMethods, Type InThisType)
         {
             List<(int, MethodInfo)> matchingMethods = new List<(int, MethodInfo)>();
