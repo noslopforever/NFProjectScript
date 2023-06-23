@@ -76,47 +76,10 @@ namespace nf.protoscript.translator.expression
         public virtual IReadOnlyList<string> GenFunctionCodes(string InFuncName, Info InScopeInfo, ISyntaxTreeNode InBodySyntax)
         {
             Scope = InScopeInfo;
-
-            BeginFunction();
-
-            ValueNodeVisitor visitor = new ValueNodeVisitor(this);
+            FunctionBodyVisitor visitor = new FunctionBodyVisitor(this);
             VisitByReflectionHelper.FindAndCallVisit(InBodySyntax, visitor);
 
-            EndFunction();
-
             return Results;
-        }
-
-        protected virtual void BeginFunction()
-        {
-        }
-
-        protected virtual void EndFunction()
-        {
-        }
-
-        protected virtual void BeginSubBlock(ISTNodeCodeSnippet InSnippet)
-        {
-        }
-
-        protected virtual void EndSubBlock(ISTNodeCodeSnippet InSnippet)
-        {
-        }
-
-        protected virtual void BeginSet(ISTNodeCodeSnippet InSnippet)
-        {
-        }
-
-        protected virtual void EndSet(ISTNodeCodeSnippet InSnippet)
-        {
-        }
-
-        protected virtual void BeginLoad(ISTNodeCodeSnippet InSnippet)
-        {
-        }
-
-        protected virtual void EndLoad(ISTNodeCodeSnippet InSnippet)
-        {
         }
 
         //public string[] GenInitExprCodes(ISyntaxTreeNode InExpression)
@@ -208,6 +171,85 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         protected abstract ISTNodeCodeSnippet EmitNew(Info InArchetype, ISTNodeCodeSnippet[] InParamCodes);
 
+        /// <summary>
+        /// Called before generating codes for a function.
+        /// </summary>
+        protected virtual void BeginFunction()
+        {
+        }
+
+        /// <summary>
+        /// Called after generated codes for a function.
+        /// </summary>
+        /// <param name="InSubSnippets"></param>
+        protected virtual void EndFunction(IReadOnlyList<ISTNodeCodeSnippet> InSubSnippets)
+        {
+        }
+
+        /// <summary>
+        /// Called before generating statement codes.
+        /// </summary>
+        protected virtual void BeginStatement()
+        {
+        }
+
+        /// <summary>
+        /// Called after generated codes for a statement.
+        /// </summary>
+        /// <param name="InStatementSnippet"></param>
+        protected virtual void EndStatement(ISTNodeCodeSnippet InStatementSnippet)
+        {
+        }
+
+        /// <summary>
+        /// Called before generating codes for a sub-block.
+        /// </summary>
+        protected virtual void BeginSubBlock()
+        {
+        }
+
+        /// <summary>
+        /// Called after generated codes for a sub-block.
+        /// </summary>
+        /// <param name="InSubSnippets"></param>
+        protected virtual void EndSubBlock(IReadOnlyList<ISTNodeCodeSnippet> InSubSnippets)
+        {
+        }
+
+        /// <summary>
+        /// Called before using a variable with 'set' context.
+        /// </summary>
+        /// <param name="InSnippet"></param>
+        protected virtual void BeginSetSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        {
+        }
+
+        /// <summary>
+        /// Called after use a variable with 'set' context.
+        /// </summary>
+        /// <param name="InSnippet"></param>
+        protected virtual void EndSetSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        {
+        }
+
+        /// <summary>
+        /// Called before using a variable with 'load' context.
+        /// </summary>
+        /// <param name="InSnippet"></param>
+        protected virtual void BeginLoadSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        {
+        }
+
+        /// <summary>
+        /// Called after use a variable with 'load' context.
+        /// </summary>
+        /// <param name="InSnippet"></param>
+        protected virtual void EndLoadSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        {
+        }
+
+
+
         class ValueNodeVisitor
         {
             public ValueNodeVisitor(ExprCodeGenerator InHostGenerator)
@@ -263,11 +305,11 @@ namespace nf.protoscript.translator.expression
                 VisitByReflectionHelper.FindAndCallVisit(InAssignNode.LHS, lhsVisitor);
                 var lhsSnippet = lhsVisitor.EmittedCode;
 
-                HostGenerator.BeginLoad(rhsSnippet);
-                HostGenerator.BeginSet(lhsSnippet);
+                HostGenerator.BeginLoadSnippetAccess(rhsSnippet);
+                HostGenerator.BeginSetSnippetAccess(lhsSnippet);
                 EmittedCode = HostGenerator.EmitAssign(lhsSnippet, rhsSnippet);
-                HostGenerator.EndSet(lhsSnippet);
-                HostGenerator.EndLoad(rhsSnippet);
+                HostGenerator.EndSetSnippetAccess(lhsSnippet);
+                HostGenerator.EndLoadSnippetAccess(rhsSnippet);
             }
             public virtual void Visit(STNodeBinaryOp InBinOpNode)
             {
@@ -279,11 +321,11 @@ namespace nf.protoscript.translator.expression
                 VisitByReflectionHelper.FindAndCallVisit(InBinOpNode.RHS, subVisitor_R);
                 var rSnippet = subVisitor_R.EmittedCode;
 
-                HostGenerator.BeginLoad(lSnippet);
-                HostGenerator.BeginLoad(rSnippet);
+                HostGenerator.BeginLoadSnippetAccess(lSnippet);
+                HostGenerator.BeginLoadSnippetAccess(rSnippet);
                 EmittedCode = HostGenerator.EmitBinOp(InBinOpNode.OpCode, lSnippet, rSnippet);
-                HostGenerator.EndLoad(rSnippet);
-                HostGenerator.EndLoad(lSnippet);
+                HostGenerator.EndLoadSnippetAccess(rSnippet);
+                HostGenerator.EndLoadSnippetAccess(lSnippet);
             }
             public virtual void Visit(STNodeCall InCallNode)
             {
@@ -319,6 +361,88 @@ namespace nf.protoscript.translator.expression
             }
 
 
+        }
+
+        /// <summary>
+        /// Visitor to visit a statement code.
+        /// </summary>
+        class StatementNodeVisitor
+        {
+            public StatementNodeVisitor(ExprCodeGenerator InHostGenerator)
+            {
+                HostGenerator = InHostGenerator;
+            }
+
+            public ExprCodeGenerator HostGenerator { get; }
+
+            /// <summary>
+            /// Emitted code for the syntax-tree node.
+            /// </summary>
+            public ISTNodeCodeSnippet EmittedCode { get; protected set; }
+
+            public void Visit(ISyntaxTreeNode InOtherSTNode)
+            {
+                HostGenerator.BeginStatement();
+
+                ValueNodeVisitor valueNodeVisitor = new ValueNodeVisitor(HostGenerator);
+                VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, valueNodeVisitor);
+                EmittedCode = valueNodeVisitor.EmittedCode;
+
+                HostGenerator.EndStatement(EmittedCode);
+            }
+
+            public void Visit(STNodeSequence InNodes)
+            {
+                HostGenerator.BeginSubBlock();
+
+                List<ISTNodeCodeSnippet> snippets = new List<ISTNodeCodeSnippet>();
+                foreach (var subNode in InNodes.NodeList)
+                {
+                    StatementNodeVisitor statementNodeVisitor = new StatementNodeVisitor(HostGenerator);
+                    VisitByReflectionHelper.FindAndCallVisit(subNode, statementNodeVisitor);
+                    snippets.Add(statementNodeVisitor.EmittedCode);
+                }
+
+                HostGenerator.EndSubBlock(snippets);
+            }
+        }
+
+        /// <summary>
+        /// Visitor to visit a function body.
+        /// </summary>
+        class FunctionBodyVisitor
+        {
+            public FunctionBodyVisitor(ExprCodeGenerator InHostGenerator)
+            {
+                HostGenerator = InHostGenerator;
+            }
+
+            public ExprCodeGenerator HostGenerator { get; }
+
+            public void Visit(ISyntaxTreeNode InOtherSTNode)
+            {
+                HostGenerator.BeginFunction();
+
+                StatementNodeVisitor stmtVisitor = new StatementNodeVisitor(HostGenerator);
+                VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, stmtVisitor);
+
+                HostGenerator.EndFunction(new ISTNodeCodeSnippet[] { stmtVisitor.EmittedCode });
+            }
+
+            public void Visit(STNodeSequence InNodes)
+            {
+                HostGenerator.BeginFunction();
+
+                List<ISTNodeCodeSnippet> snippets = new List<ISTNodeCodeSnippet>();
+                foreach (var subNode in InNodes.NodeList)
+                {
+                    StatementNodeVisitor statementNodeVisitor = new StatementNodeVisitor(HostGenerator);
+                    VisitByReflectionHelper.FindAndCallVisit(subNode, statementNodeVisitor);
+                    snippets.Add(statementNodeVisitor.EmittedCode);
+                }
+
+                HostGenerator.EndFunction(snippets);
+            }
         }
 
 

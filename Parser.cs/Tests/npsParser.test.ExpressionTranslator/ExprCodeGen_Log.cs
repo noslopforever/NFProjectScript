@@ -30,6 +30,48 @@ namespace npsParser.test.ExpressionTranslator
         }
         List<string> _Results = new List<string>();
 
+
+        protected override void BeginFunction()
+        {
+            _Results.Add("BeginFunction");
+        }
+        protected override void EndFunction(IReadOnlyList<ISTNodeCodeSnippet> InSubSnippets)
+        {
+            _Results.Add("EndFunction");
+        }
+        protected override void BeginStatement()
+        {
+            _Results.Add("BeginStatement");
+        }
+        protected override void EndStatement(ISTNodeCodeSnippet InStatementSnippet)
+        {
+            _Results.Add("EndStatement");
+        }
+        protected override void BeginSubBlock()
+        {
+            _Results.Add("BeginSubBlock");
+        }
+        protected override void EndSubBlock(IReadOnlyList<ISTNodeCodeSnippet> InSubSnippets)
+        {
+            _Results.Add("EndSubBlock");
+        }
+        protected override void BeginLoadSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        {
+            _Results.Add($"BeginLoad ({InSnippet.PresentCode})");
+        }
+        protected override void EndLoadSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        {
+            _Results.Add($"EndLoad ({InSnippet.PresentCode})");
+        }
+        protected override void BeginSetSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        {
+            _Results.Add($"BeginSet ({InSnippet.PresentCode})");
+        }
+        protected override void EndSetSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        {
+            _Results.Add($"EndSet ({InSnippet.PresentCode})");
+        }
+
         protected override ISTNodeCodeSnippet EmitConstString(TypeInfo InValueType, string InTextString)
         {
             string code = $"\"{InTextString}\"";
