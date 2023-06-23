@@ -218,6 +218,49 @@ namespace nf.protoscript.test
                         , new STNodeVar("member0")
                         )
                     );
+
+                // member0 = member0 + 10
+                ElementInfo member_binop_const = new ElementInfo(testType, "method"
+                    , "member_binop_const"
+                    , func_V_V_Type
+                    , new STNodeAssign(
+                        new STNodeVar("member0")
+                        , new STNodeBinaryOp(
+                            "+"
+                            , new STNodeVar("member0")
+                            , new STNodeConstant(10)
+                            )
+                        )
+                    );
+
+                // member0 = member0 - member0
+                ElementInfo member_binop_member = new ElementInfo(testType, "method"
+                    , "member_binop_member"
+                    , func_V_V_Type
+                    , new STNodeAssign(
+                        new STNodeVar("member0")
+                        , new STNodeBinaryOp(
+                            "+"
+                            , new STNodeVar("member0")
+                            , new STNodeVar("member0")
+                            )
+                        )
+                    );
+
+                // member0 = 20 * 30
+                ElementInfo const_binop_const = new ElementInfo(testType, "method"
+                    , "const_binop_const"
+                    , func_V_V_Type
+                    , new STNodeAssign(
+                        new STNodeVar("member0")
+                        , new STNodeBinaryOp(
+                            "+"
+                            , new STNodeConstant(20)
+                            , new STNodeConstant(30)
+                            )
+                        )
+                    );
+
             }
             return testType;
         }
