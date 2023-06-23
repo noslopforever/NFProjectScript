@@ -16,13 +16,12 @@ namespace npsParser.test.ExpressionTranslator
             TypeInfo testExprs = TestCases.BasicExpressions();
             testExprs.ForeachSubInfoByHeader<ElementInfo>("method", mtdInfo =>
                 {
-                    Console.WriteLine($"Write Codes for {mtdInfo.Name}:");
+                    Console.WriteLine($"Code emit sequences for {mtdInfo.Name}:");
 
-                    IExprCodeEmitter emitter = new ExprCodeEmitter_Log();
-                    ExprCodeEmitVisitor emitVisitor = new ExprCodeEmitVisitor(mtdInfo, emitter);
-                    VisitByReflectionHelper.FindAndCallVisit(mtdInfo.InitSyntax, emitVisitor);
-
-                    foreach(string codeLn in emitVisitor.EmittedCode.Codes)
+                    var generator = new ExprCodeGen_Log();
+                    generator.GenFunctionCodes(mtdInfo.Name, mtdInfo, mtdInfo.InitSyntax);
+ 
+                    foreach (string codeLn in generator.Results)
                     {
                         Console.WriteLine("    " + codeLn);
                     }
