@@ -7,17 +7,23 @@ namespace nf.protoscript.translator.expression
 
 
     /// <summary>
-    /// Code snippet generated for a syntax-tree node.
+    /// Retrieve results of a sub node.
     /// </summary>
-    public interface ISTNodeCodeSnippet
+    public interface ISTNodeResultPlaceholder
     {
+        /// <summary>
+        /// Usage of the sub-node.
+        /// </summary>
+        EInstructionUsage Usage { get; }
 
         /// <summary>
-        /// Present code that can be used as name or identity of this snippet.
+        /// Present code that can be used as name or identity of sub node.
         /// </summary>
         string PresentCode { get; }
 
     }
+
+
 
 
     /// <summary>
@@ -92,203 +98,217 @@ namespace nf.protoscript.translator.expression
         //}
 
         /// <summary>
-        /// Emit codes for constant string.
+        /// Emit codes for constant string and write results to the InTargetPlaceholder.
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
+        /// <param name="InValueType"></param>
         /// <param name="InTextString"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitConstString(TypeInfo InValueType, string InTextString);
+        protected abstract void EmitConstString(ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, string InTextString);
 
         /// <summary>
         /// Emit codes for constant value-string (like integer, floating, structure ...).
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InConstValueString"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitConstValueCode(TypeInfo InValueType, string InConstValueString);
+        protected abstract void EmitConstValueCode(ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, string InConstValueString);
 
         /// <summary>
         /// Emit codes for constant Info-object
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InConstInfo"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitConstInfo(TypeInfo InValueType, Info InConstInfo);
+        protected abstract void EmitConstInfo(ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, Info InConstInfo);
 
         /// <summary>
         /// Emit a global/local variable's reference for loading or overwriting its content in future.
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InScope"></param>
         /// <param name="InVarID"></param>
-        /// <param name="InLoadValue">Determine if </param>
+        /// <param name="InUsage">Determine which way to use the variable in the future.</param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitVarRef(Info InScope, string InVarID, EInstructionUsage InUsage);
+        protected abstract void EmitVarRef(ISTNodeResultPlaceholder InTargetPlaceholder, Info InScope, string InVarID, EInstructionUsage InUsage);
 
         /// <summary>
         /// Emit the member's reference for loading or overwriting its content in future.
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InHost"></param>
         /// <param name="InMemberId"></param>
         /// <param name="InUsage"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitMemberRef(ISTNodeCodeSnippet InHost, string InMemberId, EInstructionUsage InUsage);
+        protected abstract void EmitMemberRef(ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InHost, string InMemberId, EInstructionUsage InUsage);
 
         /// <summary>
         /// Emit codes for assignment.
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InLhsCode"></param>
         /// <param name="InRhsCode"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitAssign(ISTNodeCodeSnippet InLhsCode, ISTNodeCodeSnippet InRhsCode);
+        protected abstract void EmitAssign(ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InLhsCode, ISTNodeResultPlaceholder InRhsCode);
 
         /// <summary>
         /// Emit codes for binary-operations.
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InOpCode"></param>
         /// <param name="InLeftCode"></param>
         /// <param name="InRightCode"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitBinOp(string InOpCode, ISTNodeCodeSnippet InLeftCode, ISTNodeCodeSnippet InRightCode);
+        protected abstract void EmitBinOp(ISTNodeResultPlaceholder InTargetPlaceholder, string InOpCode, ISTNodeResultPlaceholder InLeftCode, ISTNodeResultPlaceholder InRightCode);
 
         /// <summary>
         /// Emit codes for unary-operations.
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InOpCode"></param>
         /// <param name="InRhsCode"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitUnaryOp(string InOpCode, ISTNodeCodeSnippet InRhsCode);
+        protected abstract void EmitUnaryOp(ISTNodeResultPlaceholder InTargetPlaceholder, string InOpCode, ISTNodeResultPlaceholder InRhsCode);
 
         /// <summary>
         /// Emit codes for function call.
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InSourceCode"></param>
         /// <param name="InParamCodes"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitCall(ISTNodeCodeSnippet InSourceCode, ISTNodeCodeSnippet[] InParamCodes);
+        protected abstract void EmitCall(ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InSourceCode, ISTNodeResultPlaceholder[] InParamCodes);
 
         /// <summary>
         /// Emit codes for creating an object.
         /// </summary>
+        /// <param name="InTargetPlaceholder">Should be null, see <see cref="ISTNodeResultPlaceholder"/> for more informations. </param>
         /// <param name="InArchetype"></param>
         /// <param name="InParamCodes"></param>
         /// <returns></returns>
-        protected abstract ISTNodeCodeSnippet EmitNew(Info InArchetype, ISTNodeCodeSnippet[] InParamCodes);
+        protected abstract void EmitNew(ISTNodeResultPlaceholder InTargetPlaceholder, Info InArchetype, ISTNodeResultPlaceholder[] InParamCodes);
 
         /// <summary>
         /// Called before generating codes for a function.
         /// </summary>
-        protected virtual void BeginFunction()
+        protected virtual void BeginFunction(ISyntaxTreeNode InFunctionRoot)
         {
         }
 
         /// <summary>
         /// Called after generated codes for a function.
         /// </summary>
-        /// <param name="InSubSnippets"></param>
-        protected virtual void EndFunction(IReadOnlyList<ISTNodeCodeSnippet> InSubSnippets)
+        protected virtual void EndFunction(ISyntaxTreeNode InFunctionRoot)
         {
         }
 
         /// <summary>
         /// Called before generating statement codes.
         /// </summary>
-        protected virtual void BeginStatement()
+        protected virtual void BeginStatement(ISyntaxTreeNode InStatementNode)
         {
         }
 
         /// <summary>
         /// Called after generated codes for a statement.
         /// </summary>
-        /// <param name="InStatementSnippet"></param>
-        protected virtual void EndStatement(ISTNodeCodeSnippet InStatementSnippet)
+        protected virtual void EndStatement(ISyntaxTreeNode InStatementNode)
         {
         }
 
         /// <summary>
         /// Called before generating codes for a sub-block.
         /// </summary>
-        protected virtual void BeginSubBlock()
+        protected virtual void BeginSubBlock(STNodeSequence InBlockNodes)
         {
         }
 
         /// <summary>
         /// Called after generated codes for a sub-block.
         /// </summary>
-        /// <param name="InSubSnippets"></param>
-        protected virtual void EndSubBlock(IReadOnlyList<ISTNodeCodeSnippet> InSubSnippets)
+        protected virtual void EndSubBlock(STNodeSequence InBlockNodes)
         {
         }
 
         /// <summary>
-        /// Called before using a variable with 'set' context.
+        /// Called before generating codes for a syntax node in a statement.
         /// </summary>
-        /// <param name="InSnippet"></param>
-        protected virtual void BeginSetSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        /// <param name="InNode"></param>
+        protected virtual void BeginNode(ISyntaxTreeNode InNode)
         {
         }
 
         /// <summary>
-        /// Called after use a variable with 'set' context.
+        /// Called after generated codes for a syntax node in a statement.
         /// </summary>
-        /// <param name="InSnippet"></param>
-        protected virtual void EndSetSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        /// <param name="InNode"></param>
+        protected virtual void EndNode(ISyntaxTreeNode InNode)
         {
         }
 
         /// <summary>
-        /// Called before using a variable with 'load' context.
+        /// Alloc placeholder for sub-nodes to retrieve their results in future.
         /// </summary>
-        /// <param name="InSnippet"></param>
-        protected virtual void BeginLoadSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        /// <param name="InUsage"></param>
+        protected abstract ISTNodeResultPlaceholder AllocPlaceholderForSubNode(EInstructionUsage InUsage);
+
+        /// <summary>
+        /// Called before accessing placeholder of a sub-node.
+        /// </summary>
+        /// <param name="InPlaceholder"></param>
+        protected virtual void PreAccessPlaceholder(ISTNodeResultPlaceholder InPlaceholder)
         {
         }
 
         /// <summary>
-        /// Called after use a variable with 'load' context.
+        /// Called after a sub-node's placeholder has been used.
         /// </summary>
-        /// <param name="InSnippet"></param>
-        protected virtual void EndLoadSnippetAccess(ISTNodeCodeSnippet InSnippet)
+        /// <param name="InPlaceholder"></param>
+        protected virtual void PostAccessPlaceholder(ISTNodeResultPlaceholder InPlaceholder)
         {
         }
-
 
 
         class ValueNodeVisitor
         {
-            public ValueNodeVisitor(ExprCodeGenerator InHostGenerator)
+            public ValueNodeVisitor(ExprCodeGenerator InHostGenerator, ISTNodeResultPlaceholder InTargetPlaceholder)
             {
                 HostGenerator = InHostGenerator;
+                TargetPlaceholder = InTargetPlaceholder;
             }
 
             public ExprCodeGenerator HostGenerator { get; }
 
             /// <summary>
-            /// Emitted code for the syntax-tree node.
+            /// Placeholder which retrieves result from the current visiting node.
             /// </summary>
-            public ISTNodeCodeSnippet EmittedCode { get; protected set; }
+            public ISTNodeResultPlaceholder TargetPlaceholder { get; }
 
             public virtual void Visit(STNodeConstant InConst)
             {
                 if (InConst.Value == null)
                 {
-                    EmittedCode = HostGenerator.EmitConstValueCode(InConst.Type, "null");
+                    HostGenerator.EmitConstValueCode(TargetPlaceholder, InConst.Type, "null");
                 }
                 else if (InConst.Value.GetType().IsValueType)
                 {
                     Type valueType = InConst.Value.GetType();
 
-                    EmittedCode = HostGenerator.EmitConstValueCode(InConst.Type, InConst.Value.ToString());
+                    HostGenerator.EmitConstValueCode(TargetPlaceholder, InConst.Type, InConst.Value.ToString());
                 }
                 else if (InConst.Value is string)
                 {
-                    EmittedCode = HostGenerator.EmitConstString(InConst.Type, InConst.Value as string);
+                    HostGenerator.EmitConstString(TargetPlaceholder, InConst.Type, InConst.Value as string);
                 }
                 else if (InConst.Value is Info)
                 {
-                    EmittedCode = HostGenerator.EmitConstInfo(InConst.Type, InConst.Value as Info);
+                    HostGenerator.EmitConstInfo(TargetPlaceholder, InConst.Type, InConst.Value as Info);
                 }
             }
 
             public virtual void Visit(STNodeVar InVarNode)
             {
-                EmittedCode = HostGenerator.EmitVarRef(HostGenerator.Scope, InVarNode.IDName, EInstructionUsage.Load);
+                HostGenerator.EmitVarRef(TargetPlaceholder, HostGenerator.Scope, InVarNode.IDName, EInstructionUsage.Load);
             }
 
             public virtual void Visit(STNodeSub InSubNode)
@@ -297,35 +317,41 @@ namespace nf.protoscript.translator.expression
             }
             public virtual void Visit(STNodeAssign InAssignNode)
             {
-                ValueNodeVisitor rhsVisitor = new ValueNodeVisitor(HostGenerator);
+                HostGenerator.BeginNode(InAssignNode);
+
+                var lhsPlaceholder = HostGenerator.AllocPlaceholderForSubNode(EInstructionUsage.Set);
+                var rhsPlaceholder = HostGenerator.AllocPlaceholderForSubNode(EInstructionUsage.Load);
+
+                ValueNodeVisitor rhsVisitor = new ValueNodeVisitor(HostGenerator, rhsPlaceholder);
                 VisitByReflectionHelper.FindAndCallVisit(InAssignNode.RHS, rhsVisitor);
-                var rhsSnippet = rhsVisitor.EmittedCode;
 
-                LHSNodeVisitor lhsVisitor = new LHSNodeVisitor(HostGenerator);
+                LHSNodeVisitor lhsVisitor = new LHSNodeVisitor(HostGenerator, lhsPlaceholder);
                 VisitByReflectionHelper.FindAndCallVisit(InAssignNode.LHS, lhsVisitor);
-                var lhsSnippet = lhsVisitor.EmittedCode;
 
-                HostGenerator.BeginLoadSnippetAccess(rhsSnippet);
-                HostGenerator.BeginSetSnippetAccess(lhsSnippet);
-                EmittedCode = HostGenerator.EmitAssign(lhsSnippet, rhsSnippet);
-                HostGenerator.EndSetSnippetAccess(lhsSnippet);
-                HostGenerator.EndLoadSnippetAccess(rhsSnippet);
+                HostGenerator.PreAccessPlaceholder(rhsPlaceholder);
+                HostGenerator.PreAccessPlaceholder(lhsPlaceholder);
+                HostGenerator.EmitAssign(TargetPlaceholder, lhsPlaceholder, rhsPlaceholder);
+                HostGenerator.PostAccessPlaceholder(lhsPlaceholder);
+                HostGenerator.PostAccessPlaceholder(rhsPlaceholder);
+
+                HostGenerator.EndNode(InAssignNode);
             }
             public virtual void Visit(STNodeBinaryOp InBinOpNode)
             {
-                ValueNodeVisitor subVisitor_L = new ValueNodeVisitor(HostGenerator);
+                var lPlaceholder = HostGenerator.AllocPlaceholderForSubNode(EInstructionUsage.Load);
+                var rPlaceholder = HostGenerator.AllocPlaceholderForSubNode(EInstructionUsage.Load);
+
+                ValueNodeVisitor subVisitor_L = new ValueNodeVisitor(HostGenerator, lPlaceholder);
                 VisitByReflectionHelper.FindAndCallVisit(InBinOpNode.LHS, subVisitor_L);
-                var lSnippet = subVisitor_L.EmittedCode;
 
-                ValueNodeVisitor subVisitor_R = new ValueNodeVisitor(HostGenerator);
+                ValueNodeVisitor subVisitor_R = new ValueNodeVisitor(HostGenerator, rPlaceholder);
                 VisitByReflectionHelper.FindAndCallVisit(InBinOpNode.RHS, subVisitor_R);
-                var rSnippet = subVisitor_R.EmittedCode;
 
-                HostGenerator.BeginLoadSnippetAccess(lSnippet);
-                HostGenerator.BeginLoadSnippetAccess(rSnippet);
-                EmittedCode = HostGenerator.EmitBinOp(InBinOpNode.OpCode, lSnippet, rSnippet);
-                HostGenerator.EndLoadSnippetAccess(rSnippet);
-                HostGenerator.EndLoadSnippetAccess(lSnippet);
+                HostGenerator.PreAccessPlaceholder(rPlaceholder);
+                HostGenerator.PreAccessPlaceholder(lPlaceholder);
+                HostGenerator.EmitBinOp(TargetPlaceholder, InBinOpNode.OpCode, lPlaceholder, rPlaceholder);
+                HostGenerator.PostAccessPlaceholder(lPlaceholder);
+                HostGenerator.PostAccessPlaceholder(rPlaceholder);
             }
             public virtual void Visit(STNodeCall InCallNode)
             {
@@ -345,14 +371,14 @@ namespace nf.protoscript.translator.expression
         class LHSNodeVisitor
             : ValueNodeVisitor
         {
-            public LHSNodeVisitor(ExprCodeGenerator InHostGenerator)
-                : base(InHostGenerator)
+            public LHSNodeVisitor(ExprCodeGenerator InHostGenerator, ISTNodeResultPlaceholder InTargetPlaceholder)
+                : base(InHostGenerator, InTargetPlaceholder)
             {
             }
 
             public override void Visit(STNodeVar InVarNode)
             {
-                EmittedCode = HostGenerator.EmitVarRef(HostGenerator.Scope, InVarNode.IDName, EInstructionUsage.Set);
+                HostGenerator.EmitVarRef(TargetPlaceholder, HostGenerator.Scope, InVarNode.IDName, EInstructionUsage.Set);
             }
 
             public override void Visit(STNodeSub InSubNode)
@@ -375,35 +401,29 @@ namespace nf.protoscript.translator.expression
 
             public ExprCodeGenerator HostGenerator { get; }
 
-            /// <summary>
-            /// Emitted code for the syntax-tree node.
-            /// </summary>
-            public ISTNodeCodeSnippet EmittedCode { get; protected set; }
-
             public void Visit(ISyntaxTreeNode InOtherSTNode)
             {
-                HostGenerator.BeginStatement();
+                HostGenerator.BeginStatement(InOtherSTNode);
 
-                ValueNodeVisitor valueNodeVisitor = new ValueNodeVisitor(HostGenerator);
+                ValueNodeVisitor valueNodeVisitor = new ValueNodeVisitor(HostGenerator, null);
                 VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, valueNodeVisitor);
-                EmittedCode = valueNodeVisitor.EmittedCode;
 
-                HostGenerator.EndStatement(EmittedCode);
+                HostGenerator.EndStatement(InOtherSTNode);
             }
 
             public void Visit(STNodeSequence InNodes)
             {
-                HostGenerator.BeginSubBlock();
+                HostGenerator.BeginSubBlock(InNodes);
 
-                List<ISTNodeCodeSnippet> snippets = new List<ISTNodeCodeSnippet>();
+                //List<ISTNodeCodeSnippet> snippets = new List<ISTNodeCodeSnippet>();
                 foreach (var subNode in InNodes.NodeList)
                 {
                     StatementNodeVisitor statementNodeVisitor = new StatementNodeVisitor(HostGenerator);
                     VisitByReflectionHelper.FindAndCallVisit(subNode, statementNodeVisitor);
-                    snippets.Add(statementNodeVisitor.EmittedCode);
+                    //snippets.Add(statementNodeVisitor.EmittedCode);
                 }
 
-                HostGenerator.EndSubBlock(snippets);
+                HostGenerator.EndSubBlock(InNodes);
             }
         }
 
@@ -419,30 +439,21 @@ namespace nf.protoscript.translator.expression
 
             public ExprCodeGenerator HostGenerator { get; }
 
+            /// <summary>
+            /// Visit a single syntax-tree as function-body.
+            /// </summary>
+            /// <param name="InOtherSTNode"></param>
             public void Visit(ISyntaxTreeNode InOtherSTNode)
             {
-                HostGenerator.BeginFunction();
+                HostGenerator.BeginFunction(InOtherSTNode);
 
                 StatementNodeVisitor stmtVisitor = new StatementNodeVisitor(HostGenerator);
                 VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, stmtVisitor);
 
-                HostGenerator.EndFunction(new ISTNodeCodeSnippet[] { stmtVisitor.EmittedCode });
+                //HostGenerator.EndFunction(new ISTNodeCodeSnippet[] { stmtVisitor.EmittedCode });
+                HostGenerator.EndFunction(InOtherSTNode);
             }
 
-            public void Visit(STNodeSequence InNodes)
-            {
-                HostGenerator.BeginFunction();
-
-                List<ISTNodeCodeSnippet> snippets = new List<ISTNodeCodeSnippet>();
-                foreach (var subNode in InNodes.NodeList)
-                {
-                    StatementNodeVisitor statementNodeVisitor = new StatementNodeVisitor(HostGenerator);
-                    VisitByReflectionHelper.FindAndCallVisit(subNode, statementNodeVisitor);
-                    snippets.Add(statementNodeVisitor.EmittedCode);
-                }
-
-                HostGenerator.EndFunction(snippets);
-            }
         }
 
 
