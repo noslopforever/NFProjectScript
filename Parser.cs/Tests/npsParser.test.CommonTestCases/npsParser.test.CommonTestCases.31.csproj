@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\npsParser.base\npsParser.base.csproj" />
+    <ProjectReference Include="..\..\npsParser.base\npsParser.base.31.csproj" />
   </ItemGroup>
 
   <ItemGroup>

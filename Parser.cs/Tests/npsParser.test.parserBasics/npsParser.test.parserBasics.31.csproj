@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\npsParser.parser\npsParser.parser.csproj" />
-    <ProjectReference Include="..\..\npsParser.utils.serialization.xml\npsParser.utils.serialization.xml.csproj" />
+    <ProjectReference Include="..\..\npsParser.parser\npsParser.parser.31.csproj" />
+    <ProjectReference Include="..\..\npsParser.utils.serialization.xml\npsParser.utils.serialization.xml.31.csproj" />
   </ItemGroup>
 
   <ItemGroup>

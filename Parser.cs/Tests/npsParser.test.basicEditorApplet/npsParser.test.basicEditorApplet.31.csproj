@@ -6,8 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\npsParser.translator\npsParser.translator.csproj" />
-    <ProjectReference Include="..\npsParser.test.CommonTestCases\npsParser.test.CommonTestCases.csproj" />
+    <ProjectReference Include="..\npsParser.test.CommonTestCases\npsParser.test.CommonTestCases.31.csproj" />
   </ItemGroup>
 
 </Project>

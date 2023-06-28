@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\npsParser.base\npsParser.base.csproj" />
-    <ProjectReference Include="..\npsParser.parser\npsParser.parser.csproj" />
-    <ProjectReference Include="..\npsParser.translator\npsParser.translator.csproj" />
+    <ProjectReference Include="..\npsParser.base\npsParser.base.31.csproj" />
+    <ProjectReference Include="..\npsParser.parser\npsParser.parser.31.csproj" />
+    <ProjectReference Include="..\npsParser.translator\npsParser.translator.31.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>nf.protoscript.parser</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\npsParser.base\npsParser.base.csproj" />
+    <ProjectReference Include="..\npsParser.base\npsParser.base.31.csproj" />
   </ItemGroup>
 
 </Project>
