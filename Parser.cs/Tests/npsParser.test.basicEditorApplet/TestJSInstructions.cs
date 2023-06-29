@@ -102,15 +102,15 @@ namespace nf.protoscript.test
                 return inst;
             }
             // Sub => binOp .
-            STNodeSub stnSub = InSTNode as STNodeSub;
-            if (stnSub != null)
+            STNodeMemberAccess stnMemberAccess = InSTNode as STNodeMemberAccess;
+            if (stnMemberAccess != null)
             {
                 // Exact Instructions of sub ST tree
-                var instLhs = _ExactInstructions(InFunction, stnSub.LHS);
+                var instLhs = _ExactInstructions(InFunction, stnMemberAccess.LHS);
                 var inst = new JsILInstruction_Sub(
                     InFunction
                     , instLhs
-                    , stnSub.MemberID
+                    , stnMemberAccess.MemberID
                     );
 
                 return inst;

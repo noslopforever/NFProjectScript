@@ -4,13 +4,13 @@ namespace nf.protoscript.syntaxtree
     /// <summary>
     /// Access sub properties of composite objects.
     /// </summary>
-    public class STNodeSub : STNodeBase
+    public class STNodeMemberAccess : STNodeBase
     {
-        internal STNodeSub()
+        internal STNodeMemberAccess()
         {
         }
 
-        public STNodeSub(ISyntaxTreeNode InLhs, string InMemberID)
+        public STNodeMemberAccess(ISyntaxTreeNode InLhs, string InMemberID)
         {
             LHS = InLhs;
             MemberID = InMemberID;

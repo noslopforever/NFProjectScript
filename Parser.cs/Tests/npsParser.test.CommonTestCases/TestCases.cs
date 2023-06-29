@@ -422,12 +422,12 @@ namespace nf.protoscript.test
                                 // dataContext.Hp = dataContext.Hp - 1
                                 , new STNodeSequence(new ISyntaxTreeNode[] {
                                     new STNodeAssign(
-                                        new STNodeSub(
+                                        new STNodeMemberAccess(
                                             new STNodeVar("dataContext")
                                             , "HP"
                                             )
                                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Sub
-                                            , new STNodeSub(
+                                            , new STNodeMemberAccess(
                                                 new STNodeVar("dataContext")
                                                 , "HP"
                                                 )

@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
@@ -291,7 +291,7 @@ namespace nf.protoscript.translator.expression
                 HostGenerator.EmitVarRef(TargetPlaceholder, HostGenerator.Scope, InVarNode.IDName, EInstructionUsage.Load);
             }
 
-            public virtual void Visit(STNodeSub InSubNode)
+            public virtual void Visit(STNodeMemberAccess InSubNode)
             {
                 throw new NotImplementedException();
             }
@@ -361,7 +361,7 @@ namespace nf.protoscript.translator.expression
                 HostGenerator.EmitVarRef(TargetPlaceholder, HostGenerator.Scope, InVarNode.IDName, EInstructionUsage.Set);
             }
 
-            public override void Visit(STNodeSub InSubNode)
+            public override void Visit(STNodeMemberAccess InSubNode)
             {
                 throw new NotImplementedException();
             }

@@ -41,8 +41,8 @@ namespace nf.protoscript.parser.syntax1.analysis
                     var nextTerm = NextParser.Parse(InTokenList);
                     if (nextTerm is STNodeVar)
                     {
-                        var sub = new syntaxtree.STNodeSub(lhs, (nextTerm as STNodeVar).IDName);
-                        lhs = sub;
+                        var memberAccess = new syntaxtree.STNodeMemberAccess(lhs, (nextTerm as STNodeVar).IDName);
+                        lhs = memberAccess;
                     }
                     else
                     {
