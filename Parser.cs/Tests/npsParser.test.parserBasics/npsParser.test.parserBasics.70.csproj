@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="resx31\**" />
+    <EmbeddedResource Remove="resx31\**" />
+    <None Remove="resx31\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\npsParser.parser\npsParser.parser.70.csproj" />
     <ProjectReference Include="..\..\npsParser.utils.serialization.xml\npsParser.utils.serialization.xml.70.csproj" />
   </ItemGroup>
@@ -15,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="TextResources.Designer.cs">
+    <Compile Update="resx70\TextResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TextResources.resx</DependentUpon>
@@ -23,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="TextResources.resx">
+    <EmbeddedResource Update="resx70\TextResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <CustomToolNamespace>nf.protoscript.test</CustomToolNamespace>
       <LastGenOutput>TextResources.Designer.cs</LastGenOutput>
