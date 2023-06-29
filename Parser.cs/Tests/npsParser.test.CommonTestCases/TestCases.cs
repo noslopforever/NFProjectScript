@@ -424,12 +424,12 @@ namespace nf.protoscript.test
                                     new STNodeAssign(
                                         new STNodeSub(
                                             new STNodeVar("dataContext")
-                                            , new STNodeVar("HP")
+                                            , "HP"
                                             )
                                         , new STNodeBinaryOp(STNodeBinaryOp.Def.Sub
                                             , new STNodeSub(
                                                 new STNodeVar("dataContext")
-                                                , new STNodeVar("HP")
+                                                , "HP"
                                                 )
                                             , new STNodeConstant(1)
                                         )

@@ -10,10 +10,10 @@ namespace nf.protoscript.syntaxtree
         {
         }
 
-        public STNodeSub(ISyntaxTreeNode InLhs, ISyntaxTreeNode InRhs)
+        public STNodeSub(ISyntaxTreeNode InLhs, string InMemberID)
         {
             LHS = InLhs;
-            RHS = InRhs;
+            MemberID = InMemberID;
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace nf.protoscript.syntaxtree
         /// Right hand expression
         /// </summary>
         [Serialization.SerializableInfo]
-        public ISyntaxTreeNode RHS { get; private set; }
+        public string MemberID { get; private set; }
 
     }
 }

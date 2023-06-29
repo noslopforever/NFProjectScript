@@ -1,4 +1,5 @@
 ﻿using nf.protoscript.parser.token;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Linq;
 
@@ -35,11 +36,23 @@ namespace nf.protoscript.parser.syntax1.analysis
                 {
                     InTokenList.Consume();
 
-                    // All 'Ops' have rhs.
-                    var rhs = NextParser.Parse(InTokenList);
-
-                    var sub = new syntaxtree.STNodeSub(lhs, rhs);
-                    lhs = sub;
+                    // Try parse the next token as an 'ID' token.
+                    var curToken = InTokenList.CurrentToken;
+                    var nextTerm = NextParser.Parse(InTokenList);
+                    if (nextTerm is STNodeVar)
+                    {
+                        var sub = new syntaxtree.STNodeSub(lhs, (nextTerm as STNodeVar).IDName);
+                        lhs = sub;
+                    }
+                    else
+                    {
+                        throw new ParserException(
+                            ParserErrorType.AST_UnexpectedToken
+                            , curToken
+                            , ETokenType.ID
+                            );
+                        return null;
+                    }
                 }
                 // Handle CALL:  <Term> (EXPRs)
                 else if (InTokenList.CheckToken(ETokenType.OpenParen))

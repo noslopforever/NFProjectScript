@@ -107,11 +107,10 @@ namespace nf.protoscript.test
             {
                 // Exact Instructions of sub ST tree
                 var instLhs = _ExactInstructions(InFunction, stnSub.LHS);
-                var instRhs = _ExactInstructions(InFunction, stnSub.RHS);
                 var inst = new JsILInstruction_Sub(
                     InFunction
                     , instLhs
-                    , instRhs
+                    , stnSub.MemberID
                     );
 
                 return inst;
@@ -428,12 +427,12 @@ namespace nf.protoscript.test
     class JsILInstruction_Sub
     : JsInstruction
     {
-        public JsILInstruction_Sub(JsFunction InHostFunction, JsInstruction InLhs, JsInstruction InRhs)
+        public JsILInstruction_Sub(JsFunction InHostFunction, JsInstruction InLhs, string InMemberID)
             : base(InHostFunction)
         {
-            this.LhsInstruction = InLhs;
-            this.RhsInstruction = InRhs;
-            RefInstructions = new JsInstruction[] { InLhs, InRhs };
+            LhsInstruction = InLhs;
+            MemberID = InMemberID;
+            RefInstructions = new JsInstruction[] { InLhs };
         }
 
         /// <summary>
@@ -442,24 +441,20 @@ namespace nf.protoscript.test
         public JsInstruction LhsInstruction { get; }
 
         /// <summary>
-        /// The rhs instruction.
+        /// The member's name.
         /// </summary>
-        public JsInstruction RhsInstruction { get; }
+        public string MemberID { get; }
 
         internal protected override string GenCode(IList<String> InCodeList)
         {
             string lhs = LhsInstruction.GenCode(InCodeList);
-            string rhs = RhsInstruction.GenCode(InCodeList);
-            return $"({lhs}.{rhs})";
+            return $"({lhs}.{MemberID})";
         }
 
         protected internal override void MarkModified()
         {
             // Lhs's sub has been modified.
             LhsInstruction.MarkSubModified();
-
-            // Only the rhs has been modified.
-            RhsInstruction.MarkModified();
         }
 
         internal protected override void RequestRef()
