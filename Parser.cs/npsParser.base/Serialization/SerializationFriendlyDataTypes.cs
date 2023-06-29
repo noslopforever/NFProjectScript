@@ -116,19 +116,19 @@ namespace nf.protoscript.Serialization
 
         public bool IsType()
         {
-            return HasMember("Type");
+            return HasMember("__SFD_Type");
         }
 
         public Type AsType()
         {
-            Type type = this["Type"] as Type;
+            Type type = this["__SFD_Type"] as Type;
             return type;
         }
 
         public static SerializationFriendlyData NewTypeData(Type InDeclValueType)
         {
             var dynData = new SerializationFriendlyData();
-            dynData["Type"] = InDeclValueType;
+            dynData["__SFD_Type"] = InDeclValueType;
             return dynData;
         }
 
