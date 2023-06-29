@@ -10,7 +10,7 @@ namespace npsParser.test.ExpressionTranslator
 
 
     internal class ExprCodeGen_Log
-        : ExprCodeGenerator
+        : ExprCodeGeneratorAbstract
     {
         class NodeResultPlaceholder
             : ISTNodeResultPlaceholder

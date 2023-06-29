@@ -55,9 +55,9 @@ namespace nf.protoscript.translator.expression
     /// Expression code generator.
     /// Create new generator for each expr-generating transaction.
     /// </summary>
-    public abstract class ExprCodeGenerator
+    public abstract class ExprCodeGeneratorAbstract
     {
-        public ExprCodeGenerator()
+        public ExprCodeGeneratorAbstract()
         {
         }
 
@@ -191,60 +191,44 @@ namespace nf.protoscript.translator.expression
         /// <summary>
         /// Called before generating codes for a function.
         /// </summary>
-        protected virtual void BeginFunction(ISyntaxTreeNode InFunctionRoot)
-        {
-        }
+        protected abstract void BeginFunction(ISyntaxTreeNode InFunctionRoot);
 
         /// <summary>
         /// Called after generated codes for a function.
         /// </summary>
-        protected virtual void EndFunction(ISyntaxTreeNode InFunctionRoot)
-        {
-        }
+        protected abstract void EndFunction(ISyntaxTreeNode InFunctionRoot);
 
         /// <summary>
         /// Called before generating statement codes.
         /// </summary>
-        protected virtual void BeginStatement(ISyntaxTreeNode InStatementNode)
-        {
-        }
+        protected abstract void BeginStatement(ISyntaxTreeNode InStatementNode);
 
         /// <summary>
         /// Called after generated codes for a statement.
         /// </summary>
-        protected virtual void EndStatement(ISyntaxTreeNode InStatementNode)
-        {
-        }
+        protected abstract void EndStatement(ISyntaxTreeNode InStatementNode);
 
         /// <summary>
         /// Called before generating codes for a sub-block.
         /// </summary>
-        protected virtual void BeginSubBlock(STNodeSequence InBlockNodes)
-        {
-        }
+        protected abstract void BeginSubBlock(STNodeSequence InBlockNodes);
 
         /// <summary>
         /// Called after generated codes for a sub-block.
         /// </summary>
-        protected virtual void EndSubBlock(STNodeSequence InBlockNodes)
-        {
-        }
+        protected abstract void EndSubBlock(STNodeSequence InBlockNodes);
 
         /// <summary>
         /// Called before generating codes for a syntax node in a statement.
         /// </summary>
         /// <param name="InNode"></param>
-        protected virtual void BeginNode(ISyntaxTreeNode InNode)
-        {
-        }
+        protected abstract void BeginNode(ISyntaxTreeNode InNode);
 
         /// <summary>
         /// Called after generated codes for a syntax node in a statement.
         /// </summary>
         /// <param name="InNode"></param>
-        protected virtual void EndNode(ISyntaxTreeNode InNode)
-        {
-        }
+        protected abstract void EndNode(ISyntaxTreeNode InNode);
 
         /// <summary>
         /// Alloc placeholder for sub-nodes to retrieve their results in future.
@@ -256,28 +240,24 @@ namespace nf.protoscript.translator.expression
         /// Called before accessing placeholder of a sub-node.
         /// </summary>
         /// <param name="InPlaceholder"></param>
-        protected virtual void PreAccessPlaceholder(ISTNodeResultPlaceholder InPlaceholder)
-        {
-        }
+        protected abstract void PreAccessPlaceholder(ISTNodeResultPlaceholder InPlaceholder);
 
         /// <summary>
         /// Called after a sub-node's placeholder has been used.
         /// </summary>
         /// <param name="InPlaceholder"></param>
-        protected virtual void PostAccessPlaceholder(ISTNodeResultPlaceholder InPlaceholder)
-        {
-        }
+        protected abstract void PostAccessPlaceholder(ISTNodeResultPlaceholder InPlaceholder);
 
 
         class ValueNodeVisitor
         {
-            public ValueNodeVisitor(ExprCodeGenerator InHostGenerator, ISTNodeResultPlaceholder InTargetPlaceholder)
+            public ValueNodeVisitor(ExprCodeGeneratorAbstract InHostGenerator, ISTNodeResultPlaceholder InTargetPlaceholder)
             {
                 HostGenerator = InHostGenerator;
                 TargetPlaceholder = InTargetPlaceholder;
             }
 
-            public ExprCodeGenerator HostGenerator { get; }
+            public ExprCodeGeneratorAbstract HostGenerator { get; }
 
             /// <summary>
             /// Placeholder which retrieves result from the current visiting node.
@@ -371,7 +351,7 @@ namespace nf.protoscript.translator.expression
         class LHSNodeVisitor
             : ValueNodeVisitor
         {
-            public LHSNodeVisitor(ExprCodeGenerator InHostGenerator, ISTNodeResultPlaceholder InTargetPlaceholder)
+            public LHSNodeVisitor(ExprCodeGeneratorAbstract InHostGenerator, ISTNodeResultPlaceholder InTargetPlaceholder)
                 : base(InHostGenerator, InTargetPlaceholder)
             {
             }
@@ -394,12 +374,12 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         class StatementNodeVisitor
         {
-            public StatementNodeVisitor(ExprCodeGenerator InHostGenerator)
+            public StatementNodeVisitor(ExprCodeGeneratorAbstract InHostGenerator)
             {
                 HostGenerator = InHostGenerator;
             }
 
-            public ExprCodeGenerator HostGenerator { get; }
+            public ExprCodeGeneratorAbstract HostGenerator { get; }
 
             public void Visit(ISyntaxTreeNode InOtherSTNode)
             {
@@ -432,12 +412,12 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         class FunctionBodyVisitor
         {
-            public FunctionBodyVisitor(ExprCodeGenerator InHostGenerator)
+            public FunctionBodyVisitor(ExprCodeGeneratorAbstract InHostGenerator)
             {
                 HostGenerator = InHostGenerator;
             }
 
-            public ExprCodeGenerator HostGenerator { get; }
+            public ExprCodeGeneratorAbstract HostGenerator { get; }
 
             /// <summary>
             /// Visit a single syntax-tree as function-body.
