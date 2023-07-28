@@ -1,30 +1,10 @@
 using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace nf.protoscript.translator.expression
 {
-
-
-    /// <summary>
-    /// Retrieve results of a sub node.
-    /// </summary>
-    public interface ISTNodeResultPlaceholder
-    {
-        /// <summary>
-        /// Usage of the sub-node.
-        /// </summary>
-        EInstructionUsage Usage { get; }
-
-        /// <summary>
-        /// Present code that can be used as name or identity of sub node.
-        /// </summary>
-        string PresentCode { get; }
-
-    }
-
-
-
 
     /// <summary>
     /// Usage of an instruction, to determine if the instruction is used for loading/setting/calling.
@@ -51,6 +31,27 @@ namespace nf.protoscript.translator.expression
 
     }
 
+
+
+    /// <summary>
+    /// Retrieve results of a sub node.
+    /// </summary>
+    public interface ISTNodeResultPlaceholder
+    {
+        /// <summary>
+        /// Usage of the sub-node.
+        /// </summary>
+        EInstructionUsage Usage { get; }
+
+        /// <summary>
+        /// Present code that can be used as name or identity of sub node.
+        /// </summary>
+        string PresentCode { get; }
+
+    }
+
+
+
     /// <summary>
     /// Expression code generator.
     /// Create new generator for each expr-generating transaction.
@@ -60,6 +61,48 @@ namespace nf.protoscript.translator.expression
         public ExprCodeGeneratorAbstract()
         {
         }
+
+
+        /// <summary>
+        /// Type of a analysing stage.
+        /// </summary>
+        public enum EStageType
+        {
+            Function,
+            Block,
+            Statement,
+        }
+
+        /// <summary>
+        /// Which stage (function, block, statement) is being generated.
+        /// </summary>
+        public class Stage
+        {
+
+            public Stage(Stage InParentStage, EStageType InStageType, ISyntaxTreeNode InBoundSTNode)
+            {
+                ParentNodeState = InParentStage;
+                StageType = InStageType;
+                BoundSTNode = InBoundSTNode;
+            }
+
+            /// <summary>
+            /// Parent of this stage.
+            /// </summary>
+            public Stage ParentNodeState { get; }
+
+            /// <summary>
+            /// Type of the stage.
+            /// </summary>
+            public EStageType StageType { get; }
+
+            /// <summary>
+            /// STNode bound with the stage.
+            /// </summary>
+            public ISyntaxTreeNode BoundSTNode { get; }
+
+        }
+
 
         /// <summary>
         /// Scope (MethodInfo, TypeInfo) of the generating expression-codes.
@@ -188,47 +231,90 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         protected abstract void EmitNew(ISTNodeResultPlaceholder InTargetPlaceholder, Info InArchetype, ISTNodeResultPlaceholder[] InParamCodes);
 
-        /// <summary>
-        /// Called before generating codes for a function.
-        /// </summary>
-        protected abstract void BeginFunction(ISyntaxTreeNode InFunctionRoot);
+
+        //
+        // DomainBasedStage management
+        //
+
+        // The only 'Function' stage is also the root stage.
+        // constructed in 'BeginFunction'.
+        Stage _rootFunctionStage = null;
+
+        // current stage of the parsing expression.
+        Stage _currentStage = null;
+
 
         /// <summary>
-        /// Called after generated codes for a function.
+        /// DomainBasedStage factory.
         /// </summary>
-        protected abstract void EndFunction(ISyntaxTreeNode InFunctionRoot);
+        /// <param name="InParentStage"></param>
+        /// <param name="InStageType"></param>
+        /// <param name="InSTNode"></param>
+        /// <returns></returns>
+        protected virtual Stage AllocStage(Stage InParentStage, EStageType InStageType, ISyntaxTreeNode InSTNode)
+        {
+            return new Stage(InParentStage, InStageType, InSTNode);
+        }
 
         /// <summary>
-        /// Called before generating statement codes.
+        /// Called when beginning a generating stage.
         /// </summary>
-        protected abstract void BeginStatement(ISyntaxTreeNode InStatementNode);
+        /// <param name="InStageType"></param>
+        /// <param name="InSTNode"></param>
+        protected virtual void EnterStage(EStageType InStageType, ISyntaxTreeNode InSTNode)
+        {
+            _currentStage = new Stage(_currentStage, InStageType, InSTNode);
+            if (InStageType == EStageType.Function)
+            {
+                _rootFunctionStage = _currentStage;
+            }
+        }
 
         /// <summary>
-        /// Called after generated codes for a statement.
+        /// Called when leaving a generating stage.
         /// </summary>
-        protected abstract void EndStatement(ISyntaxTreeNode InStatementNode);
+        /// <param name="InStageType"></param>
+        /// <param name="InSTNode"></param>
+        protected virtual void LeaveStage(EStageType InStageType, ISyntaxTreeNode InSTNode)
+        {
+            Debug.Assert(_currentStage.StageType == InStageType);
+            Debug.Assert(_currentStage.BoundSTNode == InSTNode);
+
+            //// Generate codes for the domain.
+            //_CollectDomainBeginCodes(popDomain);
+
+            //_CollectDomainCode(popDomain);
+
+            //_CollectDomainEndCodes(popDomain);
+
+            if (_currentStage == _rootFunctionStage)
+            {
+                _rootFunctionStage = null;
+            }
+            _currentStage = _currentStage.ParentNodeState;
+        }
 
         /// <summary>
-        /// Called before generating codes for a sub-block.
-        /// </summary>
-        protected abstract void BeginSubBlock(STNodeSequence InBlockNodes);
-
-        /// <summary>
-        /// Called after generated codes for a sub-block.
-        /// </summary>
-        protected abstract void EndSubBlock(STNodeSequence InBlockNodes);
-
-        /// <summary>
-        /// Called before generating codes for a syntax node in a statement.
+        /// Called before generating codes for a single syntax node in a statement.
         /// </summary>
         /// <param name="InNode"></param>
-        protected abstract void BeginNode(ISyntaxTreeNode InNode);
+        protected virtual void EnterNode(ISyntaxTreeNode InNode)
+        {
+        }
 
         /// <summary>
-        /// Called after generated codes for a syntax node in a statement.
+        /// Called after generated codes for a single syntax node in a statement.
         /// </summary>
         /// <param name="InNode"></param>
-        protected abstract void EndNode(ISyntaxTreeNode InNode);
+        protected virtual void LeaveNode(ISyntaxTreeNode InNode)
+        {
+        }
+
+
+
+        //
+        // placeholders to hold the code result which has been generated for sub-STNodes.
+        //
 
         /// <summary>
         /// Alloc placeholder for sub-nodes to retrieve their results in future.
@@ -248,6 +334,11 @@ namespace nf.protoscript.translator.expression
         /// <param name="InPlaceholder"></param>
         protected abstract void PostAccessPlaceholder(ISTNodeResultPlaceholder InPlaceholder);
 
+
+
+        //
+        // Visitors
+        //
 
         class ValueNodeVisitor
         {
@@ -293,11 +384,18 @@ namespace nf.protoscript.translator.expression
 
             public virtual void Visit(STNodeMemberAccess InSubNode)
             {
-                throw new NotImplementedException();
+                var lPlaceholder = HostGenerator.AllocPlaceholderForSubNode(EInstructionUsage.Load);
+
+                ValueNodeVisitor subVisitor_L = new ValueNodeVisitor(HostGenerator, lPlaceholder);
+                VisitByReflectionHelper.FindAndCallVisit(InSubNode.LHS, subVisitor_L);
+
+                HostGenerator.PreAccessPlaceholder(lPlaceholder);
+                HostGenerator.EmitMemberRef(TargetPlaceholder, lPlaceholder, InSubNode.MemberID, EInstructionUsage.Load);
+                HostGenerator.PostAccessPlaceholder(lPlaceholder);
             }
             public virtual void Visit(STNodeAssign InAssignNode)
             {
-                HostGenerator.BeginNode(InAssignNode);
+                HostGenerator.EnterNode(InAssignNode);
 
                 var lhsPlaceholder = HostGenerator.AllocPlaceholderForSubNode(EInstructionUsage.Set);
                 var rhsPlaceholder = HostGenerator.AllocPlaceholderForSubNode(EInstructionUsage.Load);
@@ -314,7 +412,7 @@ namespace nf.protoscript.translator.expression
                 HostGenerator.PostAccessPlaceholder(lhsPlaceholder);
                 HostGenerator.PostAccessPlaceholder(rhsPlaceholder);
 
-                HostGenerator.EndNode(InAssignNode);
+                HostGenerator.LeaveNode(InAssignNode);
             }
             public virtual void Visit(STNodeBinaryOp InBinOpNode)
             {
@@ -363,7 +461,14 @@ namespace nf.protoscript.translator.expression
 
             public override void Visit(STNodeMemberAccess InSubNode)
             {
-                throw new NotImplementedException();
+                var lPlaceholder = HostGenerator.AllocPlaceholderForSubNode(EInstructionUsage.Load);
+
+                ValueNodeVisitor subVisitor_L = new ValueNodeVisitor(HostGenerator, lPlaceholder);
+                VisitByReflectionHelper.FindAndCallVisit(InSubNode.LHS, subVisitor_L);
+
+                HostGenerator.PreAccessPlaceholder(lPlaceholder);
+                HostGenerator.EmitMemberRef(TargetPlaceholder, lPlaceholder, InSubNode.MemberID, EInstructionUsage.Set);
+                HostGenerator.PostAccessPlaceholder(lPlaceholder);
             }
 
 
@@ -383,17 +488,17 @@ namespace nf.protoscript.translator.expression
 
             public void Visit(ISyntaxTreeNode InOtherSTNode)
             {
-                HostGenerator.BeginStatement(InOtherSTNode);
+                HostGenerator.EnterStage(EStageType.Statement, InOtherSTNode);
 
                 ValueNodeVisitor valueNodeVisitor = new ValueNodeVisitor(HostGenerator, null);
                 VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, valueNodeVisitor);
 
-                HostGenerator.EndStatement(InOtherSTNode);
+                HostGenerator.LeaveStage(EStageType.Statement, InOtherSTNode);
             }
 
             public void Visit(STNodeSequence InNodes)
             {
-                HostGenerator.BeginSubBlock(InNodes);
+                HostGenerator.EnterStage(EStageType.Block, InNodes);
 
                 //List<ISTNodeCodeSnippet> snippets = new List<ISTNodeCodeSnippet>();
                 foreach (var subNode in InNodes.NodeList)
@@ -403,7 +508,7 @@ namespace nf.protoscript.translator.expression
                     //snippets.Add(statementNodeVisitor.EmittedCode);
                 }
 
-                HostGenerator.EndSubBlock(InNodes);
+                HostGenerator.LeaveStage(EStageType.Block, InNodes);
             }
         }
 
@@ -425,13 +530,14 @@ namespace nf.protoscript.translator.expression
             /// <param name="InOtherSTNode"></param>
             public void Visit(ISyntaxTreeNode InOtherSTNode)
             {
-                HostGenerator.BeginFunction(InOtherSTNode);
+                HostGenerator.EnterStage(EStageType.Function, InOtherSTNode);
+
 
                 StatementNodeVisitor stmtVisitor = new StatementNodeVisitor(HostGenerator);
                 VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, stmtVisitor);
 
                 //HostGenerator.EndFunction(new ISTNodeCodeSnippet[] { stmtVisitor.EmittedCode });
-                HostGenerator.EndFunction(InOtherSTNode);
+                HostGenerator.LeaveStage(EStageType.Function, InOtherSTNode);
             }
 
         }

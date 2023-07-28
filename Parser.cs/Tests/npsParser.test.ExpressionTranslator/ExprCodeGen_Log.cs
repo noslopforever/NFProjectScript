@@ -1,4 +1,4 @@
-﻿using nf.protoscript;
+using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using nf.protoscript.translator.expression;
 using System;
@@ -40,37 +40,23 @@ namespace npsParser.test.ExpressionTranslator
         List<string> _Results = new List<string>();
 
 
-        protected override void BeginFunction(ISyntaxTreeNode InFunctionRoot)
+        protected override void EnterStage(EStageType InStageType, ISyntaxTreeNode InSTNode)
         {
-            _Results.Add("BeginFunction");
+            base.EnterStage(InStageType, InSTNode);
+            _Results.Add($"Enter Stage {InStageType}");
         }
-        protected override void EndFunction(ISyntaxTreeNode InFunctionRoot)
+        protected override void LeaveStage(EStageType InStageType, ISyntaxTreeNode InSTNode)
         {
-            _Results.Add("EndFunction");
+            _Results.Add($"Leave Stage {InStageType}");
+            base.LeaveStage(InStageType, InSTNode);
         }
-        protected override void BeginStatement(ISyntaxTreeNode InStatementNode)
+        protected override void EnterNode(ISyntaxTreeNode InNode)
         {
-            _Results.Add("BeginStatement");
+            _Results.Add("EnterNode");
         }
-        protected override void EndStatement(ISyntaxTreeNode InStatementNode)
+        protected override void LeaveNode(ISyntaxTreeNode InNode)
         {
-            _Results.Add("EndStatement");
-        }
-        protected override void BeginSubBlock(STNodeSequence InBlockNodes)
-        {
-            _Results.Add("BeginSubBlock");
-        }
-        protected override void EndSubBlock(STNodeSequence InBlockNodes)
-        {
-            _Results.Add("EndSubBlock");
-        }
-        protected override void BeginNode(ISyntaxTreeNode InNode)
-        {
-            _Results.Add("BeginNode");
-        }
-        protected override void EndNode(ISyntaxTreeNode InNode)
-        {
-            _Results.Add("EndNode");
+            _Results.Add("LeaveNode");
         }
         protected override ISTNodeResultPlaceholder AllocPlaceholderForSubNode(EInstructionUsage InUsage)
         {
