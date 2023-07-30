@@ -40,10 +40,11 @@ namespace npsParser.test.ExpressionTranslator
         List<string> _Results = new List<string>();
 
 
-        protected override void EnterStage(EStageType InStageType, ISyntaxTreeNode InSTNode)
+        protected override Stage EnterStage(EStageType InStageType, ISyntaxTreeNode InSTNode)
         {
-            base.EnterStage(InStageType, InSTNode);
+            var stage = base.EnterStage(InStageType, InSTNode);
             _Results.Add($"Enter Stage {InStageType}");
+            return stage;
         }
         protected override void LeaveStage(EStageType InStageType, ISyntaxTreeNode InSTNode)
         {
@@ -72,7 +73,7 @@ namespace npsParser.test.ExpressionTranslator
         }
 
 
-        protected override void EmitConstString(ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, string InTextString)
+        protected override void EmitConstString(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, string InTextString)
         {
             string code = $"\"{InTextString}\"";
             _Results.Add(code);
@@ -83,7 +84,7 @@ namespace npsParser.test.ExpressionTranslator
             }
         }
 
-        protected override void EmitConstValueCode(ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, string InConstValueString)
+        protected override void EmitConstValueCode(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, string InConstValueString)
         {
             _Results.Add(InConstValueString);
             if (InTargetPlaceholder != null)
@@ -92,12 +93,12 @@ namespace npsParser.test.ExpressionTranslator
             }
         }
 
-        protected override void EmitConstInfo(ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, Info InConstInfo)
+        protected override void EmitConstInfo(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, TypeInfo InValueType, Info InConstInfo)
         {
             throw new NotImplementedException();
         }
 
-        protected override void EmitVarRef(ISTNodeResultPlaceholder InTargetPlaceholder, Info InScope, string InVarID, EInstructionUsage InUsage)
+        protected override void EmitVarRef(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, Info InScope, string InVarID, EInstructionUsage InUsage)
         {
             switch (InUsage)
             {
@@ -121,7 +122,7 @@ namespace npsParser.test.ExpressionTranslator
             }
         }
 
-        protected override void EmitMemberRef(ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InHost, string InMemberID, EInstructionUsage InUsage)
+        protected override void EmitMemberRef(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InHost, string InMemberID, EInstructionUsage InUsage)
         {
             switch (InUsage)
             {
@@ -145,7 +146,7 @@ namespace npsParser.test.ExpressionTranslator
             }
         }
 
-        protected override void EmitAssign(ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InLhsCode, ISTNodeResultPlaceholder InRhsCode)
+        protected override void EmitAssign(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InLhsCode, ISTNodeResultPlaceholder InRhsCode)
         {
             string lhsCode = InLhsCode != null ? InLhsCode.PresentCode : "ERROR_LHS";
             string rhsCode = InRhsCode != null ? InRhsCode.PresentCode : "ERROR_RHS";
@@ -158,7 +159,7 @@ namespace npsParser.test.ExpressionTranslator
             }
         }
 
-        protected override void EmitBinOp(ISTNodeResultPlaceholder InTargetPlaceholder, string InOpCode, ISTNodeResultPlaceholder InLeftCode, ISTNodeResultPlaceholder InRightCode)
+        protected override void EmitBinOp(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, string InOpCode, ISTNodeResultPlaceholder InLeftCode, ISTNodeResultPlaceholder InRightCode)
         {
             string lhsCode = InLeftCode != null ? InLeftCode.PresentCode : "ERROR_LEFT";
             string rhsCode = InRightCode != null ? InRightCode.PresentCode : "ERROR_RIGHT";
@@ -171,17 +172,17 @@ namespace npsParser.test.ExpressionTranslator
             }
         }
 
-        protected override void EmitUnaryOp(ISTNodeResultPlaceholder InTargetPlaceholder, string InOpCode, ISTNodeResultPlaceholder InRhsCode)
+        protected override void EmitUnaryOp(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, string InOpCode, ISTNodeResultPlaceholder InRhsCode)
         {
             throw new NotImplementedException();
         }
 
-        protected override void EmitCall(ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InSourceCode, ISTNodeResultPlaceholder[] InParamCodes)
+        protected override void EmitCall(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, ISTNodeResultPlaceholder InSourceCode, ISTNodeResultPlaceholder[] InParamCodes)
         {
             throw new NotImplementedException();
         }
 
-        protected override void EmitNew(ISTNodeResultPlaceholder InTargetPlaceholder, Info InArchetype, ISTNodeResultPlaceholder[] InParamCodes)
+        protected override void EmitNew(Stage InStage, ISTNodeResultPlaceholder InTargetPlaceholder, Info InArchetype, ISTNodeResultPlaceholder[] InParamCodes)
         {
             throw new NotImplementedException();
         }
