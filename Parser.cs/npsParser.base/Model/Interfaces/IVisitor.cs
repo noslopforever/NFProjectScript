@@ -34,7 +34,7 @@ namespace nf.protoscript.syntaxtree
         /// <summary>
         /// Find the best Visit method which can match this visitable's type.
         /// </summary>
-        public static bool FindAndCallVisit(object InThis, object InVisitor)
+        public static object FindAndCallVisit(object InThis, object InVisitor)
         {
             Type thisType = InThis.GetType();
 
@@ -48,19 +48,28 @@ namespace nf.protoscript.syntaxtree
             if (bestVisit != null)
             {
                 // Invoke the Visit function.
-                bestVisit.Invoke(InVisitor, new object[] { InThis });
-                return true;
+                return bestVisit.Invoke(InVisitor, new object[] { InThis });
             }
 
             // Find the method with the parameter which implements IVisitable interface.
             MethodInfo bestVisitInterface = _FindTheFirstVisitInterface(visits, thisType);
             if (bestVisitInterface != null)
             {
-                bestVisitInterface.Invoke(InVisitor, new object[] { InThis });
-                return true;
+                return bestVisitInterface.Invoke(InVisitor, new object[] { InThis });
             }
 
-            return false;
+            // TODO log error: cannot find matching methods.
+
+            return null;
+        }
+
+        /// <summary>
+        /// Find the best Visit method which can match this visitable's type.
+        /// </summary>
+        public static T FindAndCallVisit<T>(object InThis, object InVisitor)
+        {
+            object result = FindAndCallVisit(InThis, InVisitor);
+            return (T)result;
         }
 
         /// <summary>

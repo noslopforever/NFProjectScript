@@ -177,13 +177,21 @@ namespace nf.protoscript.test
 
         /// <summary>
         /// Basic expression test:
-        /// 
         /// </summary>
         /// <returns></returns>
         public static TypeInfo BasicExpressions()
         {
             ProjectInfo testProj = new ProjectInfo("TestProj");
-            TypeInfo testType = new TypeInfo(testProj, "model", "Expressions");
+
+            {
+                ElementInfo global0 = new ElementInfo(testProj, "global"
+                    , "global0"
+                    , CommonTypeInfos.Integer
+                    , new STNodeConstant(1)
+                    );
+            }
+
+            TypeInfo testType = new TypeInfo(testProj, "model", "Variables");
             {
                 ElementInfo member0 = new ElementInfo(testType, "member"
                     , "member0"
@@ -196,9 +204,7 @@ namespace nf.protoscript.test
                     , CommonTypeInfos.Integer
                     , null
                     );
-            }
 
-            {
                 // member0 = 0
                 ElementInfo member_assign_by_const = new ElementInfo(testType, "method"
                     , "member_assign_by_const"
@@ -217,6 +223,39 @@ namespace nf.protoscript.test
                         new STNodeVar("member0")
                         , new STNodeVar("member0")
                         )
+                    );
+            }
+
+            return testType;
+        }
+        /// <summary>
+        /// BinOP expression test:
+        /// </summary>
+        /// <returns></returns>
+        public static TypeInfo BinOpExpressions()
+        {
+            ProjectInfo testProj = new ProjectInfo("TestProj");
+
+            {
+                ElementInfo global0 = new ElementInfo(testProj, "global"
+                    , "global0"
+                    , CommonTypeInfos.Integer
+                    , new STNodeConstant(1)
+                    );
+            }
+
+            TypeInfo testType = new TypeInfo(testProj, "model", "Variables");
+            {
+                ElementInfo member0 = new ElementInfo(testType, "member"
+                    , "member0"
+                    , CommonTypeInfos.Integer
+                    , new STNodeConstant(100)
+                    );
+
+                ElementInfo getset0 = new ElementInfo(testType, "setterproperty"
+                    , "getset0"
+                    , CommonTypeInfos.Integer
+                    , null
                     );
 
                 // member0 = member0 + 10
