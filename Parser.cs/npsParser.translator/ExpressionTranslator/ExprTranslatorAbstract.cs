@@ -1,19 +1,10 @@
 ﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace nf.protoscript.translator.expression
 {
-
-    /// <summary>
-    /// Runtime context created by info-translators to describe the environment of the translating expression.
-    /// </summary>
-    public interface IExprTranslateContext
-    {
-
-        //string HostName { get; }
-
-    }
 
 
     public abstract partial class ExprTranslatorAbstract

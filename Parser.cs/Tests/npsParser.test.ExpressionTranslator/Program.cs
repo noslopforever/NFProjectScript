@@ -60,7 +60,8 @@ namespace npsParser.test.ExpressionTranslator
                 {
                     Console.WriteLine($"Code emit sequences for {mtdInfo.Name}:");
 
-                    var codes = exprTrans.Translate(null, mtdInfo.InitSyntax);
+                    var context = new ExprTranslateContextDefault(mtdInfo, "self");
+                    var codes = exprTrans.Translate(context, mtdInfo.InitSyntax);
                     foreach (var code in codes)
                     {
                         Console.WriteLine("    " + code);
