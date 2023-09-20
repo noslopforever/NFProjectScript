@@ -34,7 +34,7 @@ namespace nf.protoscript.translator.expression
         // Constant access schemeInstances
         //
 
-        protected abstract ISTNodeTranslateScheme NewErrorScheme(STNodeBase InErrorNode);
+        protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
 
         protected abstract ISTNodeTranslateScheme QueryNullScheme(TypeInfo InConstType);
 

@@ -75,7 +75,7 @@ namespace nf.protoscript.translator.expression
                 }
                 else
                 {
-                    ResultSchemeInstance = HostTranslator.NewErrorScheme(InConst)
+                    ResultSchemeInstance = HostTranslator.ErrorScheme(InConst)
                         .CreateInstance(HostTranslator, ExprTranslateContext, InConst)
                         ;
                 }
@@ -88,7 +88,7 @@ namespace nf.protoscript.translator.expression
                 if (hostScopeVar == null)
                 {
                     PredictScope = null;
-                    ResultSchemeInstance = HostTranslator.NewErrorScheme(InVarNode).CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
+                    ResultSchemeInstance = HostTranslator.ErrorScheme(InVarNode).CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
                     return;
                 }
 
@@ -197,7 +197,7 @@ namespace nf.protoscript.translator.expression
                 if (hostScopeVar == null)
                 {
                     PredictScope = null;
-                    ResultSchemeInstance = HostTranslator.NewErrorScheme(InVarNode).CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
+                    ResultSchemeInstance = HostTranslator.ErrorScheme(InVarNode).CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
                     return;
                 }
 
@@ -255,7 +255,7 @@ namespace nf.protoscript.translator.expression
                 if (hostScopeVar == null)
                 {
                     PredictScope = null;
-                    ResultSchemeInstance = HostTranslator.NewErrorScheme(InVarNode).CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
+                    ResultSchemeInstance = HostTranslator.ErrorScheme(InVarNode).CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
                     return;
                 }
 

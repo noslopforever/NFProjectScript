@@ -11,7 +11,7 @@ namespace nf.protoscript.translator.expression
     {
 
 
-        protected override ISTNodeTranslateScheme NewErrorScheme(STNodeBase InErrorNode)
+        protected override ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode)
         {
             throw new System.NotImplementedException();
         }
