@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
@@ -16,7 +16,7 @@ namespace nf.protoscript.translator.expression
         public class Instance
             : ISTNodeTranslateSchemeInstance
         {
-            public Instance(ISTNodeTranslateScheme InScheme
+            public Instance(STNodeTranslateSchemeDefault InScheme
                 , ExprTranslatorAbstract InTranslator
                 , IExprTranslateContext InTranslateContext
                 , ISyntaxTreeNode InNodeToTranslate
@@ -29,16 +29,12 @@ namespace nf.protoscript.translator.expression
             }
 
 
+            // Begin ISTNodeTranslateSchemeInstance interfaces
+
             public ISTNodeTranslateScheme Scheme { get; }
-
             public ExprTranslatorAbstract Translator { get; }
-
             public IExprTranslateContext TranslateContext { get; }
-
             public ISyntaxTreeNode NodeToTranslate { get; }
-
-
-
 
             public IReadOnlyList<string> GetResult(string InStageName)
             {
@@ -83,9 +79,31 @@ namespace nf.protoscript.translator.expression
                 return _prerequisitesTable[InKey];
             }
 
+            public void SetEnvVariable(string InVariableName, object InEnvVarValue)
+            {
+                _envVars[InVariableName] = InEnvVarValue;
+            }
+
+            public object FindEnvVariable(string InVariableName)
+            {
+                if (_envVars.TryGetValue(InVariableName, out var varValue))
+                {
+                    return varValue;
+                }
+                return null;
+            }
+
+            // ~ End ISTNodeTranslateSchemeInstance interfaces
+
+
+            // Env-var table
+            Dictionary<string, object> _envVars = new Dictionary<string, object>();
+
             // Prerequisite scheme table and list.
             Dictionary<string, ISTNodeTranslateSchemeInstance> _prerequisitesTable = new Dictionary<string, ISTNodeTranslateSchemeInstance>();
             List<ISTNodeTranslateSchemeInstance> _prerequisitesList = new List<ISTNodeTranslateSchemeInstance>();
+
+            // Result caches
             public Dictionary<string, IReadOnlyList<string>> _stageResultCaches = new Dictionary<string, IReadOnlyList<string>>();
 
         }
@@ -124,7 +142,7 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         /// <param name="InStageName"></param>
         /// <param name="InSnippet"></param>
-        public void AddSnippet(string InStageName,  STNodeTranslateSnippet InSnippet)
+        public void AddSnippet(string InStageName, STNodeTranslateSnippet InSnippet)
         {
             _snippetTable[InStageName] = InSnippet;
         }

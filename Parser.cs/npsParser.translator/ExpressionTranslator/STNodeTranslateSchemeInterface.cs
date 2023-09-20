@@ -62,6 +62,20 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         ISTNodeTranslateSchemeInstance FindPrerequisite(string InKey);
 
+        /// <summary>
+        /// Set Environment Variable 
+        /// </summary>
+        /// <param name="InVariableName"></param>
+        /// <param name="InEnvVarValue"></param>
+        void SetEnvVariable(string InVariableName, object InEnvVarValue);
+
+        /// <summary>
+        /// Get Environment Variable Value
+        /// </summary>
+        /// <param name="InVariableName"></param>
+        /// <returns></returns>
+        object FindEnvVariable(string InVariableName);
+    
     }
 
     /// <summary>
