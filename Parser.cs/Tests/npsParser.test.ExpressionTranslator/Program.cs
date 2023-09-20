@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using nf.protoscript;
 using nf.protoscript.syntaxtree;
@@ -60,7 +60,14 @@ namespace npsParser.test.ExpressionTranslator
                 {
                     Console.WriteLine($"Code emit sequences for {mtdInfo.Name}:");
 
-                    var context = new ExprTranslateContextDefault(mtdInfo, "self");
+                    var context = new ExprTranslateContextDefault(mtdInfo
+                        , new ExprTranslateContextDefault.Scope[]
+                        {
+                            new ExprTranslateContextDefault.Scope(mtdInfo, "local", "")
+                            , new ExprTranslateContextDefault.Scope(testExprs, "this", "this->")
+                            , new ExprTranslateContextDefault.Scope(testExprs.ParentInfo, "global", "::")
+                        }
+                        );
                     var codes = exprTrans.Translate(context, mtdInfo.InitSyntax);
                     foreach (var code in codes)
                     {

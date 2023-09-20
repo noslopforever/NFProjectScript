@@ -38,9 +38,9 @@ namespace nf.protoscript.translator.expression
 
 
 
-        protected override ISTNodeTranslateScheme QueryVarGetScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
+        protected override ISTNodeTranslateScheme QueryMemberGetScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
         {
-            var elemInfo = InfoHelper.FindPropertyAlongScopeTree(InContextScope, InMemberID);
+            var elemInfo = InfoHelper.FindPropertyOfType(InContextScope, InMemberID);
             if (elemInfo == null)
             {
                 OutMemberType = CommonTypeInfos.Any;
@@ -56,9 +56,9 @@ namespace nf.protoscript.translator.expression
             return DefaultVarGetScheme;
         }
 
-        protected override ISTNodeTranslateScheme QueryVarRefScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
+        protected override ISTNodeTranslateScheme QueryMemberRefScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
         {
-            var elemInfo = InfoHelper.FindPropertyAlongScopeTree(InContextScope, InMemberID);
+            var elemInfo = InfoHelper.FindPropertyOfType(InContextScope, InMemberID);
             if (elemInfo == null)
             {
                 OutMemberType = CommonTypeInfos.Any;
@@ -71,9 +71,9 @@ namespace nf.protoscript.translator.expression
             return DefaultVarRefScheme;
         }
 
-        protected override ISTNodeTranslateScheme QueryVarSetScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
+        protected override ISTNodeTranslateScheme QueryMemberSetScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
         {
-            var elemInfo = InfoHelper.FindPropertyAlongScopeTree(InContextScope, InMemberID);
+            var elemInfo = InfoHelper.FindPropertyOfType(InContextScope, InMemberID);
             if (elemInfo == null)
             {
                 OutMemberType = CommonTypeInfos.Any;
