@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using nf.protoscript;
 using nf.protoscript.syntaxtree;
@@ -17,13 +17,19 @@ namespace npsParser.test.ExpressionTranslator
 
             Console.WriteLine("Which translator do you want to test?");
 
+
+            // Default host object scheme for methods
             var exprTrans = new ExprTranslatorDefault();
             {
+
+
                 exprTrans.DefaultVarGetScheme = new STNodeTranslateSchemeDefault()
                 {
                     //Present "%{VarName}%",
                     Present = new STNodeTranslateSnippet(
-                                new ElementVarName()
+                                new ElementReplaceSubNodeValue("HOST")
+                                , new ElementConstString(".")
+                                , new ElementVarName()
                             ),
                 }
                 ;
@@ -54,6 +60,7 @@ namespace npsParser.test.ExpressionTranslator
                 }
                 ;
             }
+
 
             TypeInfo testExprs = TestCases.BasicExpressions();
             testExprs.ForeachSubInfoByHeader<ElementInfo>("method", mtdInfo =>
