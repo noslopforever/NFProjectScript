@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
@@ -76,7 +76,11 @@ namespace nf.protoscript.translator.expression
 
             public ISTNodeTranslateSchemeInstance FindPrerequisite(string InKey)
             {
-                return _prerequisitesTable[InKey];
+                if (_prerequisitesTable.TryGetValue(InKey, out var result))
+                {
+                    return result;
+                }
+                return null;
             }
 
             public void SetEnvVariable(string InVariableName, object InEnvVarValue)
