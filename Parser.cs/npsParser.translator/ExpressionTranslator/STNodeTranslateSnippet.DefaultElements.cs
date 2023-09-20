@@ -102,28 +102,41 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
     public class ElementReplaceSubNodeValue
         : STNodeTranslateSnippet.IElement
     {
-        public ElementReplaceSubNodeValue(string InOtherNodeKey, string InStageName = "Present")
+        public ElementReplaceSubNodeValue(string InKey, string InStageName = "Present")
         {
-            OtherNodeKey = InOtherNodeKey;
+            Key = InKey;
         }
 
-        public string OtherNodeKey { get; }
+        public string Key { get; }
 
         public string StageName { get; } = "Present";
 
         public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            var schemeInst = InHolderSchemeInstance.FindPrerequisite(OtherNodeKey);
-
-            var result = schemeInst.GetResult(StageName);
-            if (result.Count > 1)
+            // Find env-variables
+            var envVar = InHolderSchemeInstance.FindEnvVariable(Key);
+            if (envVar != null)
             {
-                // TODO log error
-                throw new InvalidOperationException();
+                return envVar.ToString();
             }
-            return result[0];
+
+            // Find prerequisite
+            var schemeInst = InHolderSchemeInstance.FindPrerequisite(Key);
+            if (schemeInst != null)
+            {
+                var result = schemeInst.GetResult(StageName);
+                if (result.Count > 1)
+                {
+                    // TODO log error
+                    throw new InvalidOperationException();
+                }
+                return result[0];
+            }
+
+            return "<<INVALID_SUB_VALUE>>";
         }
     }
+
 
 
 
