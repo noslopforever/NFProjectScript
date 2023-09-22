@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
@@ -92,11 +92,16 @@ namespace nf.protoscript.translator.expression
             throw new System.NotImplementedException();
         }
 
+        protected override ISTNodeTranslateScheme QueryHostAccessScheme(STNodeMemberAccess InMemberAccessNode, TypeInfo InHostType)
+        {
+            return DefaultHostAccessScheme;
+        }
 
         public STNodeTranslateSchemeDefault DefaultVarGetScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultVarRefScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultVarSetScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultConstScheme { get; set; }
+        public STNodeTranslateSchemeDefault DefaultHostAccessScheme { get; set; }
     }
 
 

@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -115,12 +115,17 @@ namespace nf.protoscript.translator.expression
                 STNodeVisitor_GetNodeValue hostVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ExprTranslateContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InSubNode.LHS, hostVisitor);
 
-                // Use host to find the best scheme for the member.
+                // Use host to find the best scheme for GETTing the member.
                 TypeInfo varScope = null;
                 var memberGetScheme = HostTranslator.QueryMemberGetScheme(hostVisitor.PredictScope, InSubNode.MemberID, out varScope);
                 ResultSchemeInstance = memberGetScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
 
-                ResultSchemeInstance.AddPrerequisiteScheme("HOST", hostVisitor.ResultSchemeInstance);
+                // Use host-access wrapper for generating HOST codes for the member.
+                var hostAccessScheme = HostTranslator.QueryHostAccessScheme(InSubNode, hostVisitor.PredictScope);
+                var hostAccessSchemeInstance = hostAccessScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
+                hostAccessSchemeInstance.AddPrerequisiteScheme("HOSTOBJ", hostVisitor.ResultSchemeInstance);
+
+                ResultSchemeInstance.AddPrerequisiteScheme("HOST", hostAccessSchemeInstance);
 
                 PredictScope = varScope;
             }
@@ -229,7 +234,12 @@ namespace nf.protoscript.translator.expression
                 var memberSetScheme = HostTranslator.QueryMemberSetScheme(hostVisitor.PredictScope, InSubNode.MemberID, out memberType);
                 ResultSchemeInstance = memberSetScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
 
-                ResultSchemeInstance.AddPrerequisiteScheme("HOST", hostVisitor.ResultSchemeInstance);
+                // Use host-access wrapper for generating HOST codes for the member.
+                var hostAccessScheme = HostTranslator.QueryHostAccessScheme(InSubNode, hostVisitor.PredictScope);
+                var hostAccessSchemeInstance = hostAccessScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
+                hostAccessSchemeInstance.AddPrerequisiteScheme("HOSTOBJ", hostVisitor.ResultSchemeInstance);
+
+                ResultSchemeInstance.AddPrerequisiteScheme("HOST", hostAccessSchemeInstance);
 
                 PredictScope = memberType;
             }
@@ -287,7 +297,12 @@ namespace nf.protoscript.translator.expression
                 var memberSetScheme = HostTranslator.QueryMemberRefScheme(hostVisitor.PredictScope, InSubNode.MemberID, out memberType);
                 ResultSchemeInstance = memberSetScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
 
-                ResultSchemeInstance.AddPrerequisiteScheme("HOST", hostVisitor.ResultSchemeInstance);
+                // Use host-access wrapper for generating HOST codes for the member.
+                var hostAccessScheme = HostTranslator.QueryHostAccessScheme(InSubNode, hostVisitor.PredictScope);
+                var hostAccessSchemeInstance = hostAccessScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
+                hostAccessSchemeInstance.AddPrerequisiteScheme("HOSTOBJ", hostVisitor.ResultSchemeInstance);
+
+                ResultSchemeInstance.AddPrerequisiteScheme("HOST", hostAccessSchemeInstance);
 
                 PredictScope = memberType;
             }

@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
@@ -158,6 +158,16 @@ namespace nf.protoscript.translator.expression
             , out TypeInfo OutResultType
             );
 
+        /// <summary>
+        /// Query scheme to generate host-access codes like "Host.Member"
+        /// </summary>
+        /// <param name="InMemberAccessNode"></param>
+        /// <param name="InHostElement"></param>
+        /// <returns></returns>
+        protected abstract ISTNodeTranslateScheme QueryHostAccessScheme(
+            STNodeMemberAccess InMemberAccessNode
+            , TypeInfo InHostType
+            );
 
 
         private void _HandleSchemeInstances(

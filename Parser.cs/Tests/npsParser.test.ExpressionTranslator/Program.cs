@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using nf.protoscript;
 using nf.protoscript.syntaxtree;
@@ -21,14 +21,20 @@ namespace npsParser.test.ExpressionTranslator
             // Default host object scheme for methods
             var exprTrans = new ExprTranslatorDefault();
             {
-
+                exprTrans.DefaultHostAccessScheme = new STNodeTranslateSchemeDefault()
+                {
+                    Present = new STNodeTranslateSnippet(
+                        new ElementConstString("TToRef(")
+                        , new ElementReplaceSubNodeValue("HOSTOBJ")
+                        , new ElementConstString(").")
+                        ),
+                };
 
                 exprTrans.DefaultVarGetScheme = new STNodeTranslateSchemeDefault()
                 {
                     //Present "%{VarName}%",
                     Present = new STNodeTranslateSnippet(
                                 new ElementReplaceSubNodeValue("HOST")
-                                , new ElementConstString(".")
                                 , new ElementVarName()
                             ),
                 }
