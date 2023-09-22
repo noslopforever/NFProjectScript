@@ -12,19 +12,13 @@
         /// Info which hold this expression.
         /// 
         /// e.g.
-        ///     Method expressions:             The host MethodInfo.
-        ///     Ctor expressions:               The host TypeInfo.
-        ///     Lambda expressions:             The TypeInfo where this lambda is defined.
-        ///     Global function expressions:    null.
+        ///     Method expressions:                             The host MethodInfo.
+        ///     Member init expressions (ctor expressions):     The host TypeInfo.
+        ///     Lambda expressions:                             The host TypeInfo where the lambda is defined in.
+        ///     Global function expressions:                    The host ProjectInfo which holds the global varaible or function.
         /// 
         /// </summary>
         Info HostInfo { get; }
-
-        ///// <summary>
-        ///// Translated type of the host.
-        ///// </summary>
-        //ITranslatedType HostType { get; }
-        ///// ~ Saved by each scope
 
         /// <summary>
         /// Scope to find variables.
@@ -101,29 +95,6 @@
         /// <param name="InName"></param>
         /// <returns></returns>
         IVariable FindVariable(string InName);
-
-        ///// <summary>
-        ///// Scopes where elements should be found in.
-        ///// </summary>
-        //IEnumerable<Info> ScopeChain { get; }
-        ///// ~ Replaced by FindVariable call.
-
-
-        ///// <summary>
-        ///// The scheme instance to present the 'host' object (like this in C++/Javascript).
-        ///// 
-        ///// In some situition, we need to use this host when accessing members of method/constructor's host type.
-        ///// For example, in Js-constructors:
-        /////     class Person {
-        /////         constructor(name)
-        /////         {
-        /////             this.name = name; // Here we must have a 'this.'.
-        /////         }
-        /////     }
-        ///// 
-        ///// </summary>
-        //ISTNodeTranslateSchemeInstance HostSchemeInstance { get; }
-        ///// ~ Replaced by EnvVar
 
     }
 

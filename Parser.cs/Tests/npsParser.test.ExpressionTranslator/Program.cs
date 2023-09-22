@@ -86,39 +86,6 @@ namespace npsParser.test.ExpressionTranslator
                     {
                         Console.WriteLine("    " + code);
                     }
-                    //{
-                    //    var generator = new ExprCodeGen_Log();
-                    //    generator.GenFunctionCodes(mtdInfo.Name, mtdInfo, mtdInfo.InitSyntax);
-
-                    //    foreach (string codeLn in generator.Results)
-                    //    {
-                    //        Console.WriteLine("    " + codeLn);
-                    //    }
-                    //}
-
-                    //// domain based generator
-                    //{
-                    //    var generator = new ExprCodeGenerator_DomainBased();
-
-                    //    // Register domain code templates
-                    //    {
-                    //        // Default Domain Template:
-                    //        //      %PRE
-                    //        //      %PRESENT%
-                    //        //      %POST%
-                    //        DomainBasedCodeTemplate defaultTemplate = new DomainBasedCodeTemplate();
-                    //        defaultTemplate.AddSnippet(new SnippetDomain("Pre"));
-                    //        defaultTemplate.AddSnippet(new SnippetPresent());
-                    //        defaultTemplate.AddSnippet(new SnippetDomain("Post"));
-                    //        generator.SetDefaultCodeTemplate(defaultTemplate);
-
-                    //    }
-
-                    //    generator.GenFunctionCodes(mtdInfo.Name, mtdInfo, mtdInfo.InitSyntax);
-
-                    //}
-
-
                 });
 
         }
