@@ -116,7 +116,7 @@ namespace nf.protoscript.test
                     // delegate void func_V_IR_Type(int&)
                     DelegateTypeInfo func_V_IR_Type = new DelegateTypeInfo(testProj, "FuncType", "funcV_IR_Type");
                     {
-                        ElementInfo refParam0 = new ElementInfo(func_I_I_Type, "param", "RefParam"
+                        ElementInfo refParam0 = new ElementInfo(func_V_IR_Type, "param", "RefParam"
                             , CommonTypeInfos.Integer
                             , null
                             );

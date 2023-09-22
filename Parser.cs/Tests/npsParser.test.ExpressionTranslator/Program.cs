@@ -81,16 +81,19 @@ namespace npsParser.test.ExpressionTranslator
             }
 
 
+            //TestCases.BasicLanguage().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
+            //TestCases.BasicDataBinding().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
             _GenerateMethodsForType(exprTrans, TestCases.BasicExpressions());
             _GenerateMethodsForType(exprTrans, TestCases.BinOpExpressions());
 
         }
 
-        private static void _GenerateMethodsForType(ExprTranslatorDefault exprTrans, TypeInfo InTargetType)
+        private static void _GenerateMethodsForType(ExprTranslatorDefault InTranslator, TypeInfo InTargetType)
         {
+            Console.WriteLine($"Code emit sequences for Type: {InTargetType.Name}");
             // ctor
             {
-                Console.WriteLine($"Code emit sequences for Ctor:");
+                Console.WriteLine($"    Code emit sequences for Ctor:");
 
                 var context = new ExprTranslateContextDefault(InTargetType
                     , new ExprTranslateContextDefault.Scope[]
@@ -104,10 +107,11 @@ namespace npsParser.test.ExpressionTranslator
                 {
                     if (memberInfo.InitSyntax != null)
                     {
-                        var codes = exprTrans.Translate(context, memberInfo.InitSyntax);
+                        var codes = InTranslator.Translate(context, memberInfo.InitSyntax);
                         foreach (var code in codes)
                         {
-                            Console.WriteLine("    " + code);
+                            // TODO "this->member = %{RHS}%" should comes from MemberInitScheme
+                            Console.WriteLine($"        this->{memberInfo.Name} = " + code);
                         }
                     }
                 });
@@ -117,7 +121,7 @@ namespace npsParser.test.ExpressionTranslator
             // Methods
             InTargetType.ForeachSubInfoByHeader<ElementInfo>("method", mtdInfo =>
             {
-                Console.WriteLine($"Code emit sequences for {mtdInfo.Name}:");
+                Console.WriteLine($"    Code emit sequences for {mtdInfo.Name}:");
 
                 var context = new ExprTranslateContextDefault(mtdInfo
                     , new ExprTranslateContextDefault.Scope[]
@@ -127,10 +131,10 @@ namespace npsParser.test.ExpressionTranslator
                         , new ExprTranslateContextDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
                     );
-                var codes = exprTrans.Translate(context, mtdInfo.InitSyntax);
+                var codes = InTranslator.Translate(context, mtdInfo.InitSyntax);
                 foreach (var code in codes)
                 {
-                    Console.WriteLine("    " + code);
+                    Console.WriteLine("        " + code);
                 }
             });
         }
