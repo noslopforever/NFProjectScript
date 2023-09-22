@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
@@ -41,6 +41,20 @@ namespace nf.protoscript.translator.expression
 
             return codes;
         }
+
+        private void _HandleSchemeInstances(
+            List<string> OutCodes
+            , IEnumerable<ISTNodeTranslateSchemeInstance> InSchemeInstances
+            )
+        {
+            foreach (var schemeInst in InSchemeInstances)
+            {
+                var presentResult = schemeInst.GetResult("Present");
+                OutCodes.AddRange(presentResult);
+
+            }
+        }
+
 
         //
         // Constant access schemeInstances
@@ -136,19 +150,6 @@ namespace nf.protoscript.translator.expression
             STNodeMemberAccess InMemberAccessNode
             , TypeInfo InHostType
             );
-
-
-        private void _HandleSchemeInstances(
-            List<string> OutCodes
-            , IEnumerable<ISTNodeTranslateSchemeInstance> InSchemeInstances
-            )
-        {
-            foreach (var schemeInst in InSchemeInstances)
-            {
-                var presentResult = schemeInst.GetResult("Present");
-                OutCodes.AddRange(presentResult);
-            }
-        }
 
     }
 

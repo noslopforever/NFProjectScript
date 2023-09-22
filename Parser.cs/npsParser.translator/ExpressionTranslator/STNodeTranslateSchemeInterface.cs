@@ -46,7 +46,7 @@ namespace nf.protoscript.translator.expression
         /// <summary>
         /// Prerequisite schemes of this scheme.
         /// </summary>
-        IEnumerable<ISTNodeTranslateSchemeInstance> PrerequisiteSchemeInstance { get; }
+        IEnumerable<ISTNodeTranslateSchemeInstance> PrerequisiteSchemeInstances { get; }
 
         /// <summary>
         /// Add prerequisite scheme. Prerequisite schemes will be handled before this scheme.

@@ -46,15 +46,14 @@ namespace nf.protoscript.translator.expression
                 }
 
                 // Not found in cache, calculate the result.
-                // Get and cache prerequisites.
-                foreach (var prerequisite in _prerequisitesList)
-                {
-                    prerequisite.GetResult(InStageName);
-                }
 
-                // Get snippet of this stage, then apply it.
-                var presentSnippet = Scheme.GetTranslateSnippet(InStageName);
-                IReadOnlyList<string> schemeCodes = presentSnippet.Apply(this);
+                // Try get snippet of this stage, then apply it.
+                IReadOnlyList<string> schemeCodes = new string[0];
+                var targetSnippet = Scheme.GetTranslateSnippet(InStageName);
+                if (targetSnippet != null)
+                {
+                    schemeCodes = targetSnippet.Apply(this);
+                }
 
                 // Cache and return.
                 _stageResultCaches.Add(InStageName, schemeCodes);
@@ -63,7 +62,7 @@ namespace nf.protoscript.translator.expression
 
 
 
-            public IEnumerable<ISTNodeTranslateSchemeInstance> PrerequisiteSchemeInstance
+            public IEnumerable<ISTNodeTranslateSchemeInstance> PrerequisiteSchemeInstances
             {
                 get { return _prerequisitesList; }
             }
@@ -138,7 +137,11 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         public STNodeTranslateSnippet GetTranslateSnippet(string InStageName)
         {
-            return _snippetTable[InStageName];
+            if (_snippetTable.TryGetValue(InStageName, out STNodeTranslateSnippet value))
+            {
+                return value;
+            }
+            return null;
         }
 
         /// <summary>
