@@ -67,29 +67,72 @@ namespace npsParser.test.ExpressionTranslator
                             ),
                 }
                 ;
+                exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault()
+                {
+                    // Present: "%{LHS}% %{OpCode}% %{RHS}%"
+                    Present = new STNodeTranslateSnippet(
+                        new ElementReplaceSubNodeValue("LHS")
+                        , new ElementConstString(" ")
+                        , new ElementReplaceSubNodeValue("OpCode")
+                        , new ElementConstString(" ")
+                        , new ElementReplaceSubNodeValue("RHS")
+                    )
+                };
             }
 
 
-            TypeInfo testExprs = TestCases.BasicExpressions();
-            testExprs.ForeachSubInfoByHeader<ElementInfo>("method", mtdInfo =>
-                {
-                    Console.WriteLine($"Code emit sequences for {mtdInfo.Name}:");
+            _GenerateMethodsForType(exprTrans, TestCases.BasicExpressions());
+            _GenerateMethodsForType(exprTrans, TestCases.BinOpExpressions());
 
-                    var context = new ExprTranslateContextDefault(mtdInfo
-                        , new ExprTranslateContextDefault.Scope[]
-                        {
-                            new ExprTranslateContextDefault.Scope(mtdInfo, "local", "")
-                            , new ExprTranslateContextDefault.Scope(testExprs, "this", "this->")
-                            , new ExprTranslateContextDefault.Scope(testExprs.ParentInfo, "global", "::")
-                        }
-                        );
-                    var codes = exprTrans.Translate(context, mtdInfo.InitSyntax);
-                    foreach (var code in codes)
+        }
+
+        private static void _GenerateMethodsForType(ExprTranslatorDefault exprTrans, TypeInfo InTargetType)
+        {
+            // ctor
+            {
+                Console.WriteLine($"Code emit sequences for Ctor:");
+
+                var context = new ExprTranslateContextDefault(InTargetType
+                    , new ExprTranslateContextDefault.Scope[]
                     {
-                        Console.WriteLine("    " + code);
+                        new ExprTranslateContextDefault.Scope(InTargetType, "this", "this->")
+                        , new ExprTranslateContextDefault.Scope(InTargetType.ParentInfo, "global", "::")
+                    }
+                    );
+
+                InTargetType.ForeachSubInfoByHeader<ElementInfo>("property", memberInfo =>
+                {
+                    if (memberInfo.InitSyntax != null)
+                    {
+                        var codes = exprTrans.Translate(context, memberInfo.InitSyntax);
+                        foreach (var code in codes)
+                        {
+                            Console.WriteLine("    " + code);
+                        }
                     }
                 });
 
+            }
+
+            // Methods
+            InTargetType.ForeachSubInfoByHeader<ElementInfo>("method", mtdInfo =>
+            {
+                Console.WriteLine($"Code emit sequences for {mtdInfo.Name}:");
+
+                var context = new ExprTranslateContextDefault(mtdInfo
+                    , new ExprTranslateContextDefault.Scope[]
+                    {
+                        new ExprTranslateContextDefault.Scope(mtdInfo, "local", "")
+                        , new ExprTranslateContextDefault.Scope(InTargetType, "this", "this->")
+                        , new ExprTranslateContextDefault.Scope(InTargetType.ParentInfo, "global", "::")
+                    }
+                    );
+                var codes = exprTrans.Translate(context, mtdInfo.InitSyntax);
+                foreach (var code in codes)
+                {
+                    Console.WriteLine("    " + code);
+                }
+            });
         }
     }
 }

@@ -133,6 +133,18 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
                 return result[0];
             }
 
+            // Find node's properties
+            ISyntaxTreeNode nodeToTranslate = InHolderSchemeInstance.NodeToTranslate;
+            try
+            {
+                var propVal = nodeToTranslate.GetType().GetProperty(Key).GetValue(nodeToTranslate).ToString();
+                return propVal;
+            }
+            catch (Exception ex)
+            {
+                // TODO log error
+            }
+
             return "<<INVALID_SUB_VALUE>>";
         }
     }

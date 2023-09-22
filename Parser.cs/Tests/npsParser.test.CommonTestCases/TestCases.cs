@@ -193,13 +193,13 @@ namespace nf.protoscript.test
 
             TypeInfo testType = new TypeInfo(testProj, "model", "TestClass");
             {
-                ElementInfo member0 = new ElementInfo(testType, "member"
+                ElementInfo member0 = new ElementInfo(testType, "property"
                     , "member0"
                     , CommonTypeInfos.Integer
                     , new STNodeConstant(100)
                     );
 
-                ElementInfo getset0 = new ElementInfo(testType, "setterproperty"
+                ElementInfo getset0 = new ElementInfo(testType, "property"
                     , "getset0"
                     , CommonTypeInfos.Integer
                     , null

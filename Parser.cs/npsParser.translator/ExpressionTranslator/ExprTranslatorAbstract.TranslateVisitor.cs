@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -207,6 +207,7 @@ namespace nf.protoscript.translator.expression
             /// The RHS's Scope to set this STNode.
             /// </summary>
             public TypeInfo RHSScope { get; }
+            // TODO Setter scheme should be decided with the RHS's Type.
 
             public override void Visit(STNodeVar InVarNode)
             {

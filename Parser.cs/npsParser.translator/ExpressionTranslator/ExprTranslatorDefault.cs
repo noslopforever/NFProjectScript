@@ -109,7 +109,9 @@ namespace nf.protoscript.translator.expression
 
         protected override ISTNodeTranslateScheme QueryBinOpScheme(STNodeBinaryOp InBinOpNode, TypeInfo InLhsType, TypeInfo InRhsType, out TypeInfo OutResultType)
         {
-            throw new System.NotImplementedException();
+            // TODO decide OutResultType by InBinOpNode.OpCode
+            OutResultType = CommonTypeInfos.Any;
+            return DefaultBinOpScheme;
         }
 
         protected override ISTNodeTranslateScheme QueryHostAccessScheme(STNodeMemberAccess InMemberAccessNode, TypeInfo InHostType)
@@ -117,11 +119,13 @@ namespace nf.protoscript.translator.expression
             return DefaultHostAccessScheme;
         }
 
+        public STNodeTranslateSchemeDefault DefaultConstScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultVarGetScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultVarRefScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultVarSetScheme { get; set; }
-        public STNodeTranslateSchemeDefault DefaultConstScheme { get; set; }
+        public STNodeTranslateSchemeDefault DefaultBinOpScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultHostAccessScheme { get; set; }
+
     }
 
 
