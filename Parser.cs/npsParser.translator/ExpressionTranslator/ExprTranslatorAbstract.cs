@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
@@ -7,10 +7,22 @@ namespace nf.protoscript.translator.expression
 {
 
 
+    /// <summary>
+    /// Access type of the expression variable
+    /// </summary>
+    public enum EExprVarAccessType
+    {
+        Get,
+        Set,
+        Ref,
+    }
+
+
+    /// <summary>
+    /// Common calls of all Expression-Translators.
+    /// </summary>
     public abstract partial class ExprTranslatorAbstract
     {
-
- 
 
         /// <summary>
         /// Translate syntax tree into codes.
@@ -128,24 +140,15 @@ namespace nf.protoscript.translator.expression
         //    return foundInfo;
         //}
 
-        protected abstract ISTNodeTranslateScheme QueryMemberGetScheme(
-            TypeInfo InContextScope
-            , string InMemberID
-            , out TypeInfo OutMemberType
-            );
 
-        protected abstract ISTNodeTranslateScheme QueryMemberSetScheme(
-            TypeInfo InContextScope
-            , string InMemberID
-            , out TypeInfo OutMemberType
-            );
 
-        protected abstract ISTNodeTranslateScheme QueryMemberRefScheme(
-            TypeInfo InContextScope
+        protected abstract ISTNodeTranslateScheme QueryMemberAccessScheme(
+            EExprVarAccessType InAccessType
+            , TypeInfo InContextType
             , string InMemberID
             , out TypeInfo OutMemberType
             );
-        
+       
 
         //
         // Operation schemeInstances.

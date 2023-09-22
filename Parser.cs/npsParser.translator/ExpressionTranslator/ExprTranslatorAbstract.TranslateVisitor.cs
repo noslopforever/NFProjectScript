@@ -94,14 +94,23 @@ namespace nf.protoscript.translator.expression
 
                 // Find translate-scheme for MEMBER-GET call.
                 TypeInfo varType = hostScopeVar.VarType;
-                var scheme = hostScopeVar.OverrideVarGetScheme;
-                if (scheme == null && hostScopeVar.HostScope.ScopeInfo is TypeInfo)
+                var hostGetVarScheme = hostScopeVar.OverrideVarGetScheme;
+                if (hostGetVarScheme == null)
                 {
-                    scheme = HostTranslator.QueryMemberGetScheme(hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
+                    if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
+                    {
+                        hostGetVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Get, hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
+                    }
+                    else
+                    {
+                        // TODO precise scope type like inline-archetype's member/ method-parameter/ global-variable... ?
+                        //hostGetVarScheme = HostTranslator.QueryVarGetScheme(hostScopeVar.HostScope.ScopeInfo, hostScopeVar.Name);
+                    }
+
                 }
 
                 // Create scheme instance
-                ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
+                ResultSchemeInstance = hostGetVarScheme.CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
 
                 // Set the host's present code to the '%{Host}%' variable.
                 ResultSchemeInstance.SetEnvVariable("HOST", hostScopeVar.HostScope.ScopePresentCode);
@@ -117,7 +126,7 @@ namespace nf.protoscript.translator.expression
 
                 // Use host to find the best scheme for GETTing the member.
                 TypeInfo varScope = null;
-                var memberGetScheme = HostTranslator.QueryMemberGetScheme(hostVisitor.PredictScope, InSubNode.MemberID, out varScope);
+                var memberGetScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Get, hostVisitor.PredictScope, InSubNode.MemberID, out varScope);
                 ResultSchemeInstance = memberGetScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
 
                 // Use host-access wrapper for generating HOST codes for the member.
@@ -135,7 +144,7 @@ namespace nf.protoscript.translator.expression
                 STNodeVisitor_GetNodeValue rhsVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ExprTranslateContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InAssignNode.RHS, rhsVisitor);
 
-                // Handle LHS hands.
+                // Handle LHS hands. Visit it by 'set' visitor.
                 STNodeVisitor_GatherSetScheme lhsVisitor = new STNodeVisitor_GatherSetScheme(HostTranslator, ExprTranslateContext, rhsVisitor.PredictScope);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InAssignNode.LHS, lhsVisitor);
 
@@ -208,14 +217,22 @@ namespace nf.protoscript.translator.expression
 
                 // Find translate-scheme for MEMBER-SET call.
                 TypeInfo varType = hostScopeVar.VarType;
-                var scheme = hostScopeVar.OverrideVarSetScheme;
-                if (scheme == null && hostScopeVar.HostScope.ScopeInfo is TypeInfo)
+                var hostSetVarScheme = hostScopeVar.OverrideVarSetScheme;
+                if (hostSetVarScheme == null)
                 {
-                    scheme = HostTranslator.QueryMemberSetScheme(hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
+                    if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
+                    {
+                        hostSetVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Set, hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
+                    }
+                    else
+                    {
+                        // TODO precise scope type like inline-archetype's member/ method-parameter/ global-variable... ?
+                        //hostSetVarScheme = HostTranslator.QueryVarSetScheme(hostScopeVar.HostScope.ScopeInfo, hostScopeVar.Name);
+                    }
                 }
 
                 // Create scheme instance
-                ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
+                ResultSchemeInstance = hostSetVarScheme.CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
 
                 // Set the host's present code to the '%{Host}%' variable.
                 ResultSchemeInstance.SetEnvVariable("HOST", hostScopeVar.HostScope.ScopePresentCode);
@@ -225,13 +242,13 @@ namespace nf.protoscript.translator.expression
 
             public override void Visit(STNodeMemberAccess InSubNode)
             {
-                // Visit host node first.
+                // Visit host node by 'ref' visitor first.
                 STNodeVisitor_GatherRefScheme hostVisitor = new STNodeVisitor_GatherRefScheme(HostTranslator, ExprTranslateContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InSubNode.LHS, hostVisitor);
 
                 // Use host to find the best scheme for the member.
                 TypeInfo memberType = null;
-                var memberSetScheme = HostTranslator.QueryMemberSetScheme(hostVisitor.PredictScope, InSubNode.MemberID, out memberType);
+                var memberSetScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Set, hostVisitor.PredictScope, InSubNode.MemberID, out memberType);
                 ResultSchemeInstance = memberSetScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
 
                 // Use host-access wrapper for generating HOST codes for the member.
@@ -271,14 +288,23 @@ namespace nf.protoscript.translator.expression
 
                 // Find translate-scheme for MEMBER-REF call.
                 TypeInfo varType = hostScopeVar.VarType;
-                var scheme = hostScopeVar.OverrideVarRefScheme;
-                if (scheme == null && hostScopeVar.HostScope.ScopeInfo is TypeInfo)
+                var hostRefVarScheme = hostScopeVar.OverrideVarRefScheme;
+                if (hostRefVarScheme == null)
                 {
-                    scheme = HostTranslator.QueryMemberRefScheme(hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
+                    if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
+                    {
+                        hostRefVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Ref, hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
+                    }
+                    else
+                    {
+                        // TODO precise scope type like inline-archetype's member/ method-parameter/ global-variable... ?
+                        //hostRefVarScheme = HostTranslator.QueryVarRefScheme(hostScopeVar.HostScope.ScopeInfo, hostScopeVar.Name);
+                    }
+
                 }
 
                 // Create scheme instance
-                ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
+                ResultSchemeInstance = hostRefVarScheme.CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
 
                 // Set the host's present code to the '%{Host}%' variable.
                 ResultSchemeInstance.SetEnvVariable("HOST", hostScopeVar.HostScope.ScopePresentCode);
@@ -288,13 +314,13 @@ namespace nf.protoscript.translator.expression
 
             public override void Visit(STNodeMemberAccess InSubNode)
             {
-                // Visit host node first.
+                // Visit host node by 'ref' visitor first.
                 STNodeVisitor_GatherRefScheme hostVisitor = new STNodeVisitor_GatherRefScheme(HostTranslator, ExprTranslateContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InSubNode.LHS, hostVisitor);
 
                 // Use host to find the best scheme for the member.
                 TypeInfo memberType = null;
-                var memberSetScheme = HostTranslator.QueryMemberRefScheme(hostVisitor.PredictScope, InSubNode.MemberID, out memberType);
+                var memberSetScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Ref, hostVisitor.PredictScope, InSubNode.MemberID, out memberType);
                 ResultSchemeInstance = memberSetScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
 
                 // Use host-access wrapper for generating HOST codes for the member.

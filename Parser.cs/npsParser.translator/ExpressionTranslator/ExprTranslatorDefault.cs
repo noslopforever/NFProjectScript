@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
@@ -36,11 +36,9 @@ namespace nf.protoscript.translator.expression
             return DefaultConstScheme;
         }
 
-
-
-        protected override ISTNodeTranslateScheme QueryMemberGetScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
+        protected override ISTNodeTranslateScheme QueryMemberAccessScheme(EExprVarAccessType InAccessType, TypeInfo InContextType, string InMemberID, out TypeInfo OutMemberType)
         {
-            var elemInfo = InfoHelper.FindPropertyOfType(InContextScope, InMemberID);
+            var elemInfo = InfoHelper.FindPropertyOfType(InContextType, InMemberID);
             if (elemInfo == null)
             {
                 OutMemberType = CommonTypeInfos.Any;
@@ -49,43 +47,21 @@ namespace nf.protoscript.translator.expression
             {
                 OutMemberType = elemInfo.ElementType;
 
-                // TODO find Member specific getters
+                // TODO find Member specific accessors
 
             }
 
-            return DefaultVarGetScheme;
+            switch (InAccessType)
+            {
+                case EExprVarAccessType.Get:
+                    return DefaultVarGetScheme;
+                case EExprVarAccessType.Set:
+                    return DefaultVarSetScheme;
+                case EExprVarAccessType.Ref:
+                    return DefaultVarRefScheme;
+            }
+            return null;
         }
-
-        protected override ISTNodeTranslateScheme QueryMemberRefScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
-        {
-            var elemInfo = InfoHelper.FindPropertyOfType(InContextScope, InMemberID);
-            if (elemInfo == null)
-            {
-                OutMemberType = CommonTypeInfos.Any;
-            }
-            else
-            {
-                OutMemberType = elemInfo.ElementType;
-
-            }
-            return DefaultVarRefScheme;
-        }
-
-        protected override ISTNodeTranslateScheme QueryMemberSetScheme(TypeInfo InContextScope, string InMemberID, out TypeInfo OutMemberType)
-        {
-            var elemInfo = InfoHelper.FindPropertyOfType(InContextScope, InMemberID);
-            if (elemInfo == null)
-            {
-                OutMemberType = CommonTypeInfos.Any;
-            }
-            else
-            {
-                OutMemberType = elemInfo.ElementType;
-
-            }
-            return DefaultVarSetScheme;
-        }
-
 
         protected override ISTNodeTranslateScheme QueryBinOpScheme(STNodeBinaryOp InBinOpNode, TypeInfo InLhsType, TypeInfo InRhsType, out TypeInfo OutResultType)
         {
