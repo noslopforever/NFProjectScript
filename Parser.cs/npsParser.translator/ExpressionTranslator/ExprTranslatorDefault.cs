@@ -36,7 +36,12 @@ namespace nf.protoscript.translator.expression
             return DefaultConstScheme;
         }
 
-        protected override ISTNodeTranslateScheme QueryMemberAccessScheme(EExprVarAccessType InAccessType, TypeInfo InContextType, string InMemberID, out TypeInfo OutMemberType)
+        protected override ISTNodeTranslateScheme QueryMemberAccessScheme(
+            EExprVarAccessType InAccessType
+            , TypeInfo InContextType
+            , string InMemberID
+            , out TypeInfo OutMemberType
+            )
         {
             var elemInfo = InfoHelper.FindPropertyOfType(InContextType, InMemberID);
             if (elemInfo == null)
@@ -62,6 +67,45 @@ namespace nf.protoscript.translator.expression
             }
             return null;
         }
+
+        protected override ISTNodeTranslateScheme QueryGlobalVarAccessScheme(
+            EExprVarAccessType InAccessType
+            , Info InGlobalInfo
+            , string InVarName
+            )
+        {
+            switch (InAccessType)
+            {
+                case EExprVarAccessType.Get:
+                    return DefaultVarGetScheme;
+                case EExprVarAccessType.Set:
+                    return DefaultVarSetScheme;
+                case EExprVarAccessType.Ref:
+                    return DefaultVarRefScheme;
+            }
+            return null;
+        }
+
+        protected override ISTNodeTranslateScheme QueryMethodVarAccessScheme(
+            EExprVarAccessType InAccessType
+            , IExprTranslateContext InTranslatingContext
+            , ElementInfo InMethodInfo
+            , string InVarName
+            )
+        {
+            switch (InAccessType)
+            {
+                case EExprVarAccessType.Get:
+                    return DefaultVarGetScheme;
+                case EExprVarAccessType.Set:
+                    return DefaultVarSetScheme;
+                case EExprVarAccessType.Ref:
+                    return DefaultVarRefScheme;
+            }
+            return null;
+        }
+
+
 
         protected override ISTNodeTranslateScheme QueryBinOpScheme(STNodeBinaryOp InBinOpNode, TypeInfo InLhsType, TypeInfo InRhsType, out TypeInfo OutResultType)
         {

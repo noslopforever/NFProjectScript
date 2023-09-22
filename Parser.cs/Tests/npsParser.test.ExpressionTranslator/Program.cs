@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using nf.protoscript;
 using nf.protoscript.syntaxtree;
@@ -43,7 +43,8 @@ namespace npsParser.test.ExpressionTranslator
                 {
                     //Present "%{VarName}%",
                     Present = new STNodeTranslateSnippet(
-                                new ElementVarName()
+                                new ElementReplaceSubNodeValue("HOST")
+                                , new ElementVarName()
                             ),
                 }
                 ;
@@ -51,7 +52,8 @@ namespace npsParser.test.ExpressionTranslator
                 {
                     //Present: "%{VarName}%",
                     Present = new STNodeTranslateSnippet(
-                                new ElementVarName()
+                                new ElementReplaceSubNodeValue("HOST")
+                                , new ElementVarName()
                                 , new ElementConstString(" = ")
                                 , new ElementReplaceSubNodeValue("RHS")
                             ),

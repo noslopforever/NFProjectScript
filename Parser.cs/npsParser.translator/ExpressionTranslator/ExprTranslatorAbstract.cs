@@ -70,13 +70,50 @@ namespace nf.protoscript.translator.expression
         // var access schemeInstances
         //
 
+        /// <summary>
+        /// Find Scheme for translating member-accesses.
+        /// </summary>
+        /// <param name="InAccessType"></param>
+        /// <param name="InContextType"></param>
+        /// <param name="InMemberID"></param>
+        /// <param name="OutMemberType"></param>
+        /// <returns></returns>
         protected abstract ISTNodeTranslateScheme QueryMemberAccessScheme(
             EExprVarAccessType InAccessType
             , TypeInfo InContextType
             , string InMemberID
             , out TypeInfo OutMemberType
             );
-       
+
+        /// <summary>
+        /// Find Scheme for translating global-var accesses.
+        /// </summary>
+        /// <param name="InAccessType"></param>
+        /// <param name="InGlobalInfo"></param>
+        /// <param name="InVarName"></param>
+        /// <param name="OutVarType"></param>
+        /// <returns></returns>
+        protected abstract ISTNodeTranslateScheme QueryGlobalVarAccessScheme(
+            EExprVarAccessType InAccessType
+            , Info InGlobalInfo
+            , string InVarName
+            );
+
+        /// <summary>
+        /// Find Scheme for translating method-scope vars (parameters and locals).
+        /// </summary>
+        /// <param name="InAccessType"></param>
+        /// <param name="InTranslatingContext"></param>
+        /// <param name="InMethodInfo"></param>
+        /// <param name="InVarName"></param>
+        /// <param name="OutVarType"></param>
+        /// <returns></returns>
+        protected abstract ISTNodeTranslateScheme QueryMethodVarAccessScheme(
+            EExprVarAccessType InAccessType
+            , IExprTranslateContext InTranslatingContext
+            , ElementInfo InMethodInfo
+            , string InVarName
+            );
 
         //
         // Operation schemeInstances.

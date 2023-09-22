@@ -5,6 +5,34 @@
     /// <summary>
     /// Runtime context created by info-translators to describe the environment of the translating expression.
     /// </summary>
+    /// <example>
+    /// Member init-expression:
+    /// model Person
+    ///     age = 32
+    /// 
+    /// The translate context should be:
+    ///     HostInfo: Person (a TypeInfo)
+    ///     ScopeChain:
+    ///             ScopeInfo       | ScopeName | ScopePresent
+    ///         --------------------|-----------|--------------
+    ///         Project             | global    | "::"
+    ///         Person(TypeInfo)    | this      | "this->"
+    /// </example>
+    /// <example>
+    /// Method expressions:
+    /// model Person
+    ///     + talk(Other)
+    ///         > var = 32
+    /// 
+    /// The translate context should be:
+    ///     HostInfo: Person.talk (a MethodInfo)
+    ///     ScopeChain:
+    ///             ScopeInfo       | ScopeName | ScopePresent
+    ///         --------------------|-----------|--------------
+    ///         Project             | global    | "::"
+    ///         Person(TypeInfo)    | this      | "this->"
+    ///         talk (MethodInfo)   | method    | ""
+    /// </example>
     public interface IExprTranslateContext
     {
 
@@ -71,21 +99,6 @@
             /// The scope which hold this variable.
             /// </summary>
             IScope HostScope { get; }
-
-            /// <summary>
-            /// Scheme to Get the variable.
-            /// </summary>
-            ISTNodeTranslateScheme OverrideVarGetScheme { get; }
-
-            /// <summary>
-            /// Scheme to Set the variable.
-            /// </summary>
-            ISTNodeTranslateScheme OverrideVarSetScheme { get; }
-
-            /// <summary>
-            /// Scheme to Ref the variable.
-            /// </summary>
-            ISTNodeTranslateScheme OverrideVarRefScheme { get; }
 
         }
 

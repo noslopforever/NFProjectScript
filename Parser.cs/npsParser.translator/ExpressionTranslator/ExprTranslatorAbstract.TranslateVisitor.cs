@@ -1,6 +1,7 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using static nf.protoscript.translator.expression.ExprCodeGeneratorAbstract;
 
@@ -94,19 +95,22 @@ namespace nf.protoscript.translator.expression
 
                 // Find translate-scheme for MEMBER-GET call.
                 TypeInfo varType = hostScopeVar.VarType;
-                var hostGetVarScheme = hostScopeVar.OverrideVarGetScheme;
-                if (hostGetVarScheme == null)
+                ISTNodeTranslateScheme hostGetVarScheme = null;
+                if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
                 {
-                    if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
-                    {
-                        hostGetVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Get, hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
-                    }
-                    else
-                    {
-                        // TODO precise scope type like inline-archetype's member/ method-parameter/ global-variable... ?
-                        //hostGetVarScheme = HostTranslator.QueryVarGetScheme(hostScopeVar.HostScope.ScopeInfo, hostScopeVar.Name);
-                    }
-
+                    TypeInfo memberVarType = null;
+                    hostGetVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Get, hostScopeVar.HostScope.ScopeInfo as TypeInfo, hostScopeVar.Name, out memberVarType);
+                    Debug.Assert(memberVarType == varType);
+                }
+                else if (hostScopeVar.HostScope.ScopeInfo is ProjectInfo)
+                {
+                    hostGetVarScheme = HostTranslator.QueryGlobalVarAccessScheme(EExprVarAccessType.Get, hostScopeVar.HostScope.ScopeInfo as ProjectInfo, hostScopeVar.Name);
+                }
+                else if (hostScopeVar.HostScope.ScopeInfo is ElementInfo)
+                {
+                    // TODO Make sure the scope is the method scope.
+                    hostGetVarScheme = HostTranslator.QueryMethodVarAccessScheme(EExprVarAccessType.Get, ExprTranslateContext, hostScopeVar.HostScope.ScopeInfo as ElementInfo, hostScopeVar.Name);
+                    // TODO handle member archetypes.
                 }
 
                 // Create scheme instance
@@ -125,8 +129,8 @@ namespace nf.protoscript.translator.expression
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InSubNode.LHS, hostVisitor);
 
                 // Use host to find the best scheme for GETTing the member.
-                TypeInfo varScope = null;
-                var memberGetScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Get, hostVisitor.PredictScope, InSubNode.MemberID, out varScope);
+                TypeInfo varType = null;
+                var memberGetScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Get, hostVisitor.PredictScope, InSubNode.MemberID, out varType);
                 ResultSchemeInstance = memberGetScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
 
                 // Use host-access wrapper for generating HOST codes for the member.
@@ -136,7 +140,7 @@ namespace nf.protoscript.translator.expression
 
                 ResultSchemeInstance.AddPrerequisiteScheme("HOST", hostAccessSchemeInstance);
 
-                PredictScope = varScope;
+                PredictScope = varType;
             }
             public virtual void Visit(STNodeAssign InAssignNode)
             {
@@ -217,18 +221,22 @@ namespace nf.protoscript.translator.expression
 
                 // Find translate-scheme for MEMBER-SET call.
                 TypeInfo varType = hostScopeVar.VarType;
-                var hostSetVarScheme = hostScopeVar.OverrideVarSetScheme;
-                if (hostSetVarScheme == null)
+                ISTNodeTranslateScheme hostSetVarScheme = null;
+                if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
                 {
-                    if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
-                    {
-                        hostSetVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Set, hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
-                    }
-                    else
-                    {
-                        // TODO precise scope type like inline-archetype's member/ method-parameter/ global-variable... ?
-                        //hostSetVarScheme = HostTranslator.QueryVarSetScheme(hostScopeVar.HostScope.ScopeInfo, hostScopeVar.Name);
-                    }
+                    TypeInfo memberVarType = null;
+                    hostSetVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Set, hostScopeVar.HostScope.ScopeInfo as TypeInfo, hostScopeVar.Name, out memberVarType);
+                    Debug.Assert(memberVarType == varType);
+                }
+                else if (hostScopeVar.HostScope.ScopeInfo is ProjectInfo)
+                {
+                    hostSetVarScheme = HostTranslator.QueryGlobalVarAccessScheme(EExprVarAccessType.Set, hostScopeVar.HostScope.ScopeInfo as ProjectInfo, hostScopeVar.Name);
+                }
+                else if (hostScopeVar.HostScope.ScopeInfo is ElementInfo)
+                {
+                    // TODO Make sure the scope is the method scope.
+                    hostSetVarScheme = HostTranslator.QueryMethodVarAccessScheme(EExprVarAccessType.Set, ExprTranslateContext, hostScopeVar.HostScope.ScopeInfo as ElementInfo, hostScopeVar.Name);
+                    // TODO handle member archetypes.
                 }
 
                 // Create scheme instance
@@ -288,19 +296,22 @@ namespace nf.protoscript.translator.expression
 
                 // Find translate-scheme for MEMBER-REF call.
                 TypeInfo varType = hostScopeVar.VarType;
-                var hostRefVarScheme = hostScopeVar.OverrideVarRefScheme;
-                if (hostRefVarScheme == null)
+                ISTNodeTranslateScheme hostRefVarScheme = null;
+                if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
                 {
-                    if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
-                    {
-                        hostRefVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Ref, hostScopeVar.HostScope.ScopeInfo as TypeInfo, InVarNode.IDName, out varType);
-                    }
-                    else
-                    {
-                        // TODO precise scope type like inline-archetype's member/ method-parameter/ global-variable... ?
-                        //hostRefVarScheme = HostTranslator.QueryVarRefScheme(hostScopeVar.HostScope.ScopeInfo, hostScopeVar.Name);
-                    }
-
+                    TypeInfo memberVarType = null;
+                    hostRefVarScheme = HostTranslator.QueryMemberAccessScheme(EExprVarAccessType.Ref, hostScopeVar.HostScope.ScopeInfo as TypeInfo, hostScopeVar.Name, out memberVarType);
+                    Debug.Assert(memberVarType == varType);
+                }
+                else if (hostScopeVar.HostScope.ScopeInfo is ProjectInfo)
+                {
+                    hostRefVarScheme = HostTranslator.QueryGlobalVarAccessScheme(EExprVarAccessType.Ref, hostScopeVar.HostScope.ScopeInfo as ProjectInfo, hostScopeVar.Name);
+                }
+                else if (hostScopeVar.HostScope.ScopeInfo is ElementInfo)
+                {
+                    // TODO Make sure the scope is the method scope.
+                    hostRefVarScheme = HostTranslator.QueryMethodVarAccessScheme(EExprVarAccessType.Ref, ExprTranslateContext, hostScopeVar.HostScope.ScopeInfo as ElementInfo, hostScopeVar.Name);
+                    // TODO handle member archetypes.
                 }
 
                 // Create scheme instance
