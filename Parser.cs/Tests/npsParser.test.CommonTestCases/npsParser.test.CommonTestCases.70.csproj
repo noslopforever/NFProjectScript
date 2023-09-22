@@ -5,11 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\npsParser.base\npsParser.base.70.csproj" />
+    <Compile Remove="resx31\**" />
+    <EmbeddedResource Remove="resx31\**" />
+    <None Remove="resx31\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="TestNpsScripts.Designer.cs">
+    <ProjectReference Include="..\..\npsParser.base\npsParser.base.70.csproj" />
+    <ProjectReference Include="..\..\npsParser.parser\npsParser.parser.70.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="resx70\TestNpsScripts.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TestNpsScripts.resx</DependentUpon>
@@ -17,14 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="TestNpsScripts.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+    <EmbeddedResource Update="resx70\TestNpsScripts.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>TestNpsScripts.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>nf.protoscript.test</CustomToolNamespace>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
 
 </Project>

@@ -338,6 +338,24 @@ namespace nf.protoscript.test
         }
 
         /// <summary>
+        /// Adv exprs like auto set-back, data-changed notification, mass-unit, etc.
+        /// </summary>
+        /// <returns></returns>
+        public static ProjectInfo AdvancedExpressions()
+        {
+            parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
+
+            ProjectInfo testProj = new ProjectInfo("TestProject");
+            parser.ICodeContentReader reader = parser.StringCodeContentReader.LoadFromString(
+                "AdvExprs"
+                , TestNpsScripts.AdvExprs
+                );
+
+            testParser.Parse(testProj, reader);
+            return testProj;
+        }
+
+        /// <summary>
         /// Basic data-binding test:
         /// 
         /// model testCharacterTemplate

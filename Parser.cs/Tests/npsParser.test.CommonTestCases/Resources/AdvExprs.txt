@@ -1,0 +1,11 @@
+value IntColor
+	-R = 0
+	-G = 0
+	-B = 0
+
+model TestObj
+	-IntColor Color @setter
+
+model Test
+	+TestMethod(InParam0:TestObj)
+		> InParam0.Color.R = 100

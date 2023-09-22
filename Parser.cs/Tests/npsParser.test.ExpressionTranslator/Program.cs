@@ -85,7 +85,7 @@ namespace npsParser.test.ExpressionTranslator
             //TestCases.BasicDataBinding().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
             _GenerateMethodsForType(exprTrans, TestCases.BasicExpressions());
             _GenerateMethodsForType(exprTrans, TestCases.BinOpExpressions());
-
+            TestCases.AdvancedExpressions().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
         }
 
         private static void _GenerateMethodsForType(ExprTranslatorDefault InTranslator, TypeInfo InTargetType)
