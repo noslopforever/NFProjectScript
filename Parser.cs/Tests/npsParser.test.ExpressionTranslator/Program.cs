@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using nf.protoscript.test;
@@ -49,26 +50,33 @@ namespace npsParser.test.ExpressionTranslator
                 });
                 exprTrans.DefaultVarRefScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 {
-                    //Present "%{VarName}%",
-                    ["Present"] = new STNodeTranslateSnippet(
-                        new ElementReplaceSubNodeValue("HOST")
-                        , new ElementVarName()
-                        )
-                    ,
-
+                    ////Present "%{VarName}%",
                     //["Present"] = new STNodeTranslateSnippet(
-                    //    new ElementTempVar("Var",
-                    //        new STNodeTranslateSnippet(
-                    //            new ElementReplaceSubNodeValue("HOST")
-                    //            , new ElementVarName()
-                    //            )
-                    //        )
-                    //    )
-                    //    ,
-                    //["PostStatement"] = new STNodeTranslateSnippet(
-                    //    new ElementConstString("PostStatement for REF ")
+                    //    new ElementReplaceSubNodeValue("HOST")
                     //    , new ElementVarName()
                     //    )
+                    //,
+
+                    ["Present"] = new STNodeTranslateSnippet(
+                        new ElementTempVar("Var",
+                            new ElementReplaceSubNodeValue("HOST")
+                            , new ElementConstString("get")
+                            , new ElementVarName()
+                            , new ElementConstString("()")
+                            )
+                        )
+                        ,
+                    ["PostStatement"] = new STNodeTranslateSnippet(
+                        new ElementConstString("// PostStatement for REF ")
+                        , new ElementVarName()
+                        , new ElementNewLine()
+                        , new ElementReplaceSubNodeValue("HOST")
+                        , new ElementConstString("set")
+                        , new ElementVarName()
+                        , new ElementConstString("(")
+                        , new ElementTempVar("Var")
+                        , new ElementConstString(")")
+                        )
                 });
                 exprTrans.DefaultVarSetScheme = new STNodeTranslateSchemeDefault()
                 {
@@ -103,11 +111,11 @@ namespace npsParser.test.ExpressionTranslator
                 exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 {
                     ["Present"] = new STNodeTranslateSnippet(
-                            new ElementTempVar("LHS")
+                            new ElementTempVar("LHS", new ElementReplaceSubNodeValue("LHS"))
                             , new ElementConstString(" ")
                             , new ElementReplaceSubNodeValue("OpCode")
                             , new ElementConstString(" ")
-                            , new ElementTempVar("RHS")
+                            , new ElementTempVar("RHS", new ElementReplaceSubNodeValue("RHS"))
                             )
                         //,
                         //["PreStatement"] = new STNodeTranslateSnippet(

@@ -89,7 +89,7 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         /// <param name="InKey"></param>
         /// <returns></returns>
-        IExprTranslateContext.IVariable EnsureTempVar(string InKey, ISyntaxTreeNode InTranslatingNode);
+        IExprTranslateContext.IVariable EnsureTempVar(string InKey, ISyntaxTreeNode InTranslatingNode, STNodeTranslateSnippet InInitSnippet);
     }
 
     /// <summary>

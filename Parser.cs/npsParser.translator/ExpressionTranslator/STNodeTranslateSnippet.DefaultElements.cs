@@ -124,16 +124,34 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
     public class ElementTempVar
         : STNodeTranslateSnippet.IElement
     {
-        public ElementTempVar(string InKey)
+        //public ElementTempVar(string InKey)
+        //{
+        //    Key = InKey;
+        //}
+        public ElementTempVar(string InKey, STNodeTranslateSnippet InInitSnippet)
         {
             Key = InKey;
+            InitSnippet = InInitSnippet;
+        }
+        public ElementTempVar(string InKey, params STNodeTranslateSnippet.IElement[] InInitElements)
+        {
+            Key = InKey;
+            InitSnippet = new STNodeTranslateSnippet(InInitElements);
         }
 
+        /// <summary>
+        /// Key name of the temp-var
+        /// </summary>
         public string Key { get; }
+
+        /// <summary>
+        /// Init snippet for the temp-var
+        /// </summary>
+        public STNodeTranslateSnippet InitSnippet { get; }
 
         public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            IExprTranslateContext.IVariable var = InHolderSchemeInstance.EnsureTempVar(Key, InHolderSchemeInstance.NodeToTranslate);
+            IExprTranslateContext.IVariable var = InHolderSchemeInstance.EnsureTempVar(Key, InHolderSchemeInstance.NodeToTranslate, InitSnippet);
             return var.Name;
         }
     }
