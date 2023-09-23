@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using nf.protoscript;
@@ -39,33 +39,46 @@ namespace npsParser.test.ExpressionTranslator
                         ),
                 };
 
-                exprTrans.DefaultVarGetScheme = new STNodeTranslateSchemeDefault()
+                exprTrans.DefaultVarGetScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 {
                     //Present "%{VarName}%",
-                    Present = new STNodeTranslateSnippet(
-                                new ElementReplaceSubNodeValue("HOST")
-                                , new ElementVarName()
-                            ),
-                }
-                ;
-                exprTrans.DefaultVarRefScheme = new STNodeTranslateSchemeDefault()
+                    ["Present"] = new STNodeTranslateSnippet(
+                        new ElementReplaceSubNodeValue("HOST")
+                        , new ElementVarName()
+                        )
+                });
+                exprTrans.DefaultVarRefScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 {
                     //Present "%{VarName}%",
-                    Present = new STNodeTranslateSnippet(
-                                new ElementReplaceSubNodeValue("HOST")
-                                , new ElementVarName()
-                            ),
-                }
-                ;
+                    ["Present"] = new STNodeTranslateSnippet(
+                        new ElementReplaceSubNodeValue("HOST")
+                        , new ElementVarName()
+                        )
+                    ,
+
+                    //["Present"] = new STNodeTranslateSnippet(
+                    //    new ElementTempVar("Var",
+                    //        new STNodeTranslateSnippet(
+                    //            new ElementReplaceSubNodeValue("HOST")
+                    //            , new ElementVarName()
+                    //            )
+                    //        )
+                    //    )
+                    //    ,
+                    //["PostStatement"] = new STNodeTranslateSnippet(
+                    //    new ElementConstString("PostStatement for REF ")
+                    //    , new ElementVarName()
+                    //    )
+                });
                 exprTrans.DefaultVarSetScheme = new STNodeTranslateSchemeDefault()
                 {
                     //Present: "%{VarName}%",
                     Present = new STNodeTranslateSnippet(
-                                new ElementReplaceSubNodeValue("HOST")
-                                , new ElementVarName()
-                                , new ElementConstString(" = ")
-                                , new ElementReplaceSubNodeValue("RHS")
-                            ),
+                        new ElementReplaceSubNodeValue("HOST")
+                        , new ElementVarName()
+                        , new ElementConstString(" = ")
+                        , new ElementReplaceSubNodeValue("RHS")
+                        ),
                 }
                 ;
                 exprTrans.DefaultConstScheme = new STNodeTranslateSchemeDefault()
@@ -87,23 +100,26 @@ namespace npsParser.test.ExpressionTranslator
                 //        , new ElementReplaceSubNodeValue("RHS")
                 //    )
                 //};
-                exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(
-                    // Present: "%{LHS}% %{OpCode}% %{RHS}%"
-                    new STNodeTranslateSnippet(
-                        new ElementTempVar("LHS")
-                        , new ElementConstString(" ")
-                        , new ElementReplaceSubNodeValue("OpCode")
-                        , new ElementConstString(" ")
-                        , new ElementTempVar("RHS")
-                    )
-                    //, new Dictionary<string, STNodeTranslateSnippet>()
-                    //{
-                    //    ["PreStatement"] = new STNodeTranslateSnippet(
-                    //        new ElementNewTempVar("LHS")
-                    //        , new ElementNewTempVar("RHS")
-                    //        )
-                    //}
-                );
+                exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
+                {
+                    ["Present"] = new STNodeTranslateSnippet(
+                            new ElementTempVar("LHS")
+                            , new ElementConstString(" ")
+                            , new ElementReplaceSubNodeValue("OpCode")
+                            , new ElementConstString(" ")
+                            , new ElementTempVar("RHS")
+                            )
+                        //,
+                        //["PreStatement"] = new STNodeTranslateSnippet(
+                        //    new ElementTempVar("LHS")
+                        //    , new ElementTempVar("RHS")
+                        //    )
+                        ,
+                    //["PostStatementRev"] = new STNodeTranslateSnippet(
+                    //    new ElementConstString("Post statement REV of ")
+                    //    , new ElementNodeUniqueName()
+                    //    )
+                });
             }
 
 

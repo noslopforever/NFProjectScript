@@ -191,9 +191,8 @@ namespace nf.protoscript.translator.expression
             Present = InPresent;
         }
 
-        public STNodeTranslateSchemeDefault(STNodeTranslateSnippet InPresent, Dictionary<string, STNodeTranslateSnippet> InSnippetTable)
+        public STNodeTranslateSchemeDefault(Dictionary<string, STNodeTranslateSnippet> InSnippetTable)
         {
-            Present = InPresent;
             _snippetTable = InSnippetTable;
         }
 
