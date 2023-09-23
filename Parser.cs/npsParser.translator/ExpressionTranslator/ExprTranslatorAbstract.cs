@@ -71,7 +71,7 @@ namespace nf.protoscript.translator.expression
             codes.AddRange(presentResult);
 
             // Gather all Post-statement(Rev) codes from sub-SIs
-            foreach (var si in revSubSIs)
+            foreach (var si in allSubSIs)
             {
                 codes.AddRange(si.GetResult("PostStatement"));
             }
