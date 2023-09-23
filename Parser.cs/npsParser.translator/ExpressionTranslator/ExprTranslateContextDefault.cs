@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+using nf.protoscript.syntaxtree;
+using System;
+using System.Collections.Generic;
 
 
 namespace nf.protoscript.translator.expression
@@ -70,9 +72,6 @@ namespace nf.protoscript.translator.expression
             public string Name { get { return VarElement.Name; } }
             public TypeInfo VarType { get { return VarElement.ElementType; } }
             public IExprTranslateContext.IScope HostScope { get; }
-            public ISTNodeTranslateScheme OverrideVarGetScheme { get; }
-            public ISTNodeTranslateScheme OverrideVarSetScheme { get; }
-            public ISTNodeTranslateScheme OverrideVarRefScheme { get; }
             // ~ End IVariable interfaces.
         }
 
@@ -81,6 +80,13 @@ namespace nf.protoscript.translator.expression
 
         public IExprTranslateContext.IVariable FindVariable(string InName)
         {
+            // Find local and temp vars first
+            if (_localScope.TempVarTable.TryGetValue(InName, out var tempVar))
+            {
+                return tempVar;
+            }
+
+            // Find in scope chain.
             foreach (Scope scope in ScopeChain)
             {
                 if (scope.ScopeInfo is TypeInfo)
@@ -91,8 +97,6 @@ namespace nf.protoscript.translator.expression
                         return new ElementInfoVar(propertyInfo, scope);
                     }
                 }
-
-                // TODO find local and temp first.
 
                 // Try find archetype and global variables.
                 if (scope.ScopeInfo is ElementInfo)
@@ -115,6 +119,79 @@ namespace nf.protoscript.translator.expression
             }
 
             return null;
+        }
+
+        public IExprTranslateContext.IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InTempVarKey, string InTempVarInitCodes)
+        {
+            string nodeTypeName = InNodeToTranslate.GetType().Name;
+            int uniqueID = _localScope.TempVarTable.Count;
+            string uniqueTempVarKey = $"TMP_{nodeTypeName}_{InTempVarKey}_{uniqueID}";
+
+            var tempVar = new TempVar(_localScope, uniqueTempVarKey, InTempVarInitCodes);
+            _localScope.AddTempVar(uniqueTempVarKey, tempVar);
+            return tempVar;
+        }
+
+        /// <summary>
+        /// The Special 'Local' Scope of the context to save local and temp variables.
+        /// It should always be the first scope when finding variables.
+        /// </summary>
+        internal class LocalScope
+            : IExprTranslateContext.IScope
+        {
+
+            internal LocalScope()
+            {}
+
+            // Begin IExprTranslateContext.IScope interfaces
+            public Info ScopeInfo { get { return null; } }
+            public string ScopeName { get { return "ContextLocal"; } }
+            public string ScopePresentCode { get { return ""; } }
+            // ~ End IExprTranslateContext.IScope interfaces
+
+            /// <summary>
+            /// Temp var table
+            /// </summary>
+            public IReadOnlyDictionary<string, TempVar> TempVarTable { get { return _tempVarTable; } }
+
+            /// <summary>
+            /// Register one temp var to the table.
+            /// </summary>
+            /// <param name="InKey"></param>
+            /// <param name="InTempVar"></param>
+            internal void AddTempVar(string InKey, TempVar InTempVar)
+            {
+                _tempVarTable.Add(InKey, InTempVar);
+            }
+
+            // Temporary variables table.
+            Dictionary<string, TempVar> _tempVarTable = new Dictionary<string, TempVar>();
+
+        }
+
+        // the local scope bound with this context
+        LocalScope _localScope = new LocalScope();
+
+        /// <summary>
+        /// Temporary variable registered in this context.
+        /// </summary>
+        public class TempVar
+            : IExprTranslateContext.IVariable
+        {
+            internal TempVar(LocalScope InLocalScope, string InVarName, string InInitCode)
+            {
+                HostScope = InLocalScope;
+                Name = InVarName;
+                VarType = CommonTypeInfos.Any;
+                InitCode = InInitCode;
+            }
+
+            // Begin IVariable interfaces
+            public string Name { get; }
+            public TypeInfo VarType { get; }
+            public IExprTranslateContext.IScope HostScope { get; }
+            // ~ End IVariable interfaces.
+            public string InitCode { get; }
         }
 
     }

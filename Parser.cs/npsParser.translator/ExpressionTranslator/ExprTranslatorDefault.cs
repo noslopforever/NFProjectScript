@@ -13,12 +13,17 @@ namespace nf.protoscript.translator.expression
 
         protected override ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+        public override ISTNodeTranslateScheme QueryInitTempVarScheme(ISyntaxTreeNode InTranslatingNode, string InName, string InTempVarInitValue)
+        {
+            return DefaultInitTempVarScheme;
         }
 
         protected override ISTNodeTranslateScheme QueryNullScheme(TypeInfo InConstType)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         protected override ISTNodeTranslateScheme QueryConstGetScheme(TypeInfo InConstType, string InValueString)
@@ -119,6 +124,7 @@ namespace nf.protoscript.translator.expression
             return DefaultHostAccessScheme;
         }
 
+        public STNodeTranslateSchemeDefault DefaultInitTempVarScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultConstScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultVarGetScheme { get; set; }
         public STNodeTranslateSchemeDefault DefaultVarRefScheme { get; set; }

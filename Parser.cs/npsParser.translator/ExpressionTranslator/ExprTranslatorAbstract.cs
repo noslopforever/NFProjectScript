@@ -52,15 +52,14 @@ namespace nf.protoscript.translator.expression
                 var presentResult = schemeInst.GetResult("Present");
                 OutCodes.AddRange(presentResult);
 
-            }
-        }
 
+        protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
+
+        public abstract ISTNodeTranslateScheme QueryInitTempVarScheme(ISyntaxTreeNode InTranslatingNode, string InName, string InTempVarInitValue);
 
         //
         // Constant access schemeInstances
         //
-
-        protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
 
         protected abstract ISTNodeTranslateScheme QueryNullScheme(TypeInfo InConstType);
 

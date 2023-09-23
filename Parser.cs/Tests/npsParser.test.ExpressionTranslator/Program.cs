@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using nf.protoscript;
 using nf.protoscript.syntaxtree;
@@ -21,6 +22,14 @@ namespace npsParser.test.ExpressionTranslator
             // Default host object scheme for methods
             var exprTrans = new ExprTranslatorDefault();
             {
+                exprTrans.DefaultInitTempVarScheme = new STNodeTranslateSchemeDefault(
+                    new STNodeTranslateSnippet(
+                        new ElementConstString("auto ")
+                        , new ElementReplaceSubNodeValue("TEMPVARNAME")
+                        , new ElementConstString(" = ")
+                        , new ElementReplaceSubNodeValue("TEMPVARVALUE")
+                        )
+                    );
                 exprTrans.DefaultHostAccessScheme = new STNodeTranslateSchemeDefault()
                 {
                     Present = new STNodeTranslateSnippet(
@@ -67,17 +76,34 @@ namespace npsParser.test.ExpressionTranslator
                             ),
                 }
                 ;
-                exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault()
-                {
+                //exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault()
+                //{
+                //    // Present: "%{LHS}% %{OpCode}% %{RHS}%"
+                //    Present = new STNodeTranslateSnippet(
+                //        new ElementReplaceSubNodeValue("LHS")
+                //        , new ElementConstString(" ")
+                //        , new ElementReplaceSubNodeValue("OpCode")
+                //        , new ElementConstString(" ")
+                //        , new ElementReplaceSubNodeValue("RHS")
+                //    )
+                //};
+                exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(
                     // Present: "%{LHS}% %{OpCode}% %{RHS}%"
-                    Present = new STNodeTranslateSnippet(
-                        new ElementReplaceSubNodeValue("LHS")
+                    new STNodeTranslateSnippet(
+                        new ElementTempVar("LHS")
                         , new ElementConstString(" ")
                         , new ElementReplaceSubNodeValue("OpCode")
                         , new ElementConstString(" ")
-                        , new ElementReplaceSubNodeValue("RHS")
+                        , new ElementTempVar("RHS")
                     )
-                };
+                    //, new Dictionary<string, STNodeTranslateSnippet>()
+                    //{
+                    //    ["PreStatement"] = new STNodeTranslateSnippet(
+                    //        new ElementNewTempVar("LHS")
+                    //        , new ElementNewTempVar("RHS")
+                    //        )
+                    //}
+                );
             }
 
 
@@ -139,4 +165,50 @@ namespace npsParser.test.ExpressionTranslator
             });
         }
     }
+
+
+
+    static class TestSetBackErrors
+    {
+        static void foo(ref int P0, ref int P1)
+        {
+            P0++;
+            P1++;
+        }
+
+        class A
+        {
+            public int _p;
+            public int p { get { return _p; } set { _p = value; } }
+            public ref int refp { get { return ref _p; } }
+        }
+
+        static void main()
+        {
+            int procID = Process.GetCurrentProcess().Id;
+
+            {
+                A a = new A();
+                foo(ref a.refp, ref a.refp);
+                Console.WriteLine(a.p); // 2, success
+            }
+            {
+                //A a = new A();
+                //foo(ref a.p, ref a.p);
+                //Console.WriteLine(a.p);
+            }
+            {
+                A a = new A();
+                int t0 = a.p;
+                int t1 = a.p;
+                foo(ref t0, ref t1);
+                a.p = t0;
+                a.p = t1;
+                Console.WriteLine($"ap {a.p}, t0 {t0}, t1 {t1}"); // 1 1 1, fail (of course)
+            }
+
+        }
+
+    }
+
 }

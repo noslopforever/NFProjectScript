@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
@@ -118,6 +118,25 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
     }
 
 
+    /// <summary>
+    /// Add Temporary variable in current Context.
+    /// </summary>
+    public class ElementTempVar
+        : STNodeTranslateSnippet.IElement
+    {
+        public ElementTempVar(string InKey)
+        {
+            Key = InKey;
+        }
+
+        public string Key { get; }
+
+        public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            IExprTranslateContext.IVariable var = InHolderSchemeInstance.EnsureTempVar(Key, InHolderSchemeInstance.NodeToTranslate);
+            return var.Name;
+        }
+    }
 
 
 

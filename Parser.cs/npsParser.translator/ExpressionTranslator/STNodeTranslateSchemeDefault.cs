@@ -1,4 +1,5 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.translator.expression.DefaultSnippetElements;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
@@ -133,6 +134,43 @@ namespace nf.protoscript.translator.expression
                 return "<<INVALID_SUB_VALUE>>";
             }
 
+            public IExprTranslateContext.IVariable EnsureTempVar(string InVariableName, ISyntaxTreeNode InTranslatingNode)
+            {
+                if (_tempVarCaches.TryGetValue(InVariableName, out var result))
+                {
+                    return result;
+                }
+
+                // Add TempVar and cache it in this SI.
+                var tempVarInitValue = this.GetVarValue(InVariableName, "Present");
+                IExprTranslateContext.IVariable var = this.TranslateContext.AddTempVar(
+                    this.NodeToTranslate
+                    , InVariableName
+                    , tempVarInitValue
+                    );
+                _tempVarCaches[InVariableName] = var;
+
+                // Generate temp var init code.
+                var scheme = Translator.QueryInitTempVarScheme(
+                    InTranslatingNode
+                    , InVariableName
+                    , tempVarInitValue
+                    );
+                var schemeInstance = scheme.CreateInstance(this.Translator, this.TranslateContext, InTranslatingNode);
+                schemeInstance.SetEnvVariable("TEMPVARNAME", var.Name);
+                schemeInstance.SetEnvVariable("TEMPVARVALUE", tempVarInitValue);
+                var tempVarInitCodes = schemeInstance.GetResult("Present");
+
+                // TODO: Write it to result code pool saves in the context.
+                foreach (var tempVarCode in tempVarInitCodes)
+                {
+                    Console.WriteLine(tempVarCode);
+                    //TranslateContext.CodeWriter.WriteLine(tempVarCode);
+                }
+
+                return var;
+            }
+
             // ~ End ISTNodeTranslateSchemeInstance interfaces
 
 
@@ -144,8 +182,10 @@ namespace nf.protoscript.translator.expression
             List<ISTNodeTranslateSchemeInstance> _prerequisitesList = new List<ISTNodeTranslateSchemeInstance>();
 
             // Result caches
-            public Dictionary<string, IReadOnlyList<string>> _stageResultCaches = new Dictionary<string, IReadOnlyList<string>>();
+            Dictionary<string, IReadOnlyList<string>> _stageResultCaches = new Dictionary<string, IReadOnlyList<string>>();
 
+            // TempVar caches
+            Dictionary<string, IExprTranslateContext.IVariable> _tempVarCaches = new Dictionary<string, IExprTranslateContext.IVariable>();
         }
 
         public STNodeTranslateSchemeDefault() { }

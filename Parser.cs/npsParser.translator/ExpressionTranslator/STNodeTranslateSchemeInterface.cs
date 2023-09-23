@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System.Collections.Generic;
 
 namespace nf.protoscript.translator.expression
@@ -84,6 +84,12 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         string GetVarValue(string InKey, string InStageName);
 
+        /// <summary>
+        /// Save/Get TempVar bound with this SI.
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <returns></returns>
+        IExprTranslateContext.IVariable EnsureTempVar(string InKey, ISyntaxTreeNode InTranslatingNode);
     }
 
     /// <summary>

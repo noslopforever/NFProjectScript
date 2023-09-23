@@ -1,4 +1,8 @@
-﻿namespace nf.protoscript.translator.expression
+using nf.protoscript.syntaxtree;
+using System.Collections;
+using System.IO;
+
+namespace nf.protoscript.translator.expression
 {
 
 
@@ -108,6 +112,16 @@
         /// <param name="InName"></param>
         /// <returns></returns>
         IVariable FindVariable(string InName);
+
+
+        /// <summary>
+        /// Add Temporary variable to this context.
+        /// </summary>
+        /// <param name="InNodeToTranslate"></param>
+        /// <param name="InTempVarKey"></param>
+        /// <param name="InTempVarInitCodes"></param>
+        /// <returns></returns>
+        IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InTempVarKey, string InTempVarInitCodes);
 
     }
 
