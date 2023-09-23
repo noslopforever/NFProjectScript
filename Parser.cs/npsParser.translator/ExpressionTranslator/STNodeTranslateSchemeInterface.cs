@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System.Collections.Generic;
 
 namespace nf.protoscript.translator.expression
@@ -75,7 +75,15 @@ namespace nf.protoscript.translator.expression
         /// <param name="InVariableName"></param>
         /// <returns></returns>
         object FindEnvVariable(string InVariableName);
-    
+
+        /// <summary>
+        /// Get Var value, the var may comes from EnvVariable, NodeValue, or Referenced-SchemeInstances.
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="InStageName"></param>
+        /// <returns></returns>
+        string GetVarValue(string InKey, string InStageName);
+
     }
 
     /// <summary>

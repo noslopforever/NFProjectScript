@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
@@ -108,46 +108,16 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
         }
 
         public string Key { get; }
-
+         
         public string StageName { get; } = "Present";
 
         public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            // Find env-variables
-            var envVar = InHolderSchemeInstance.FindEnvVariable(Key);
-            if (envVar != null)
-            {
-                return envVar.ToString();
-            }
-
-            // Find prerequisite
-            var schemeInst = InHolderSchemeInstance.FindPrerequisite(Key);
-            if (schemeInst != null)
-            {
-                var result = schemeInst.GetResult(StageName);
-                if (result.Count > 1)
-                {
-                    // TODO log error
-                    throw new InvalidOperationException();
-                }
-                return result[0];
-            }
-
-            // Find node's properties
-            ISyntaxTreeNode nodeToTranslate = InHolderSchemeInstance.NodeToTranslate;
-            try
-            {
-                var propVal = nodeToTranslate.GetType().GetProperty(Key).GetValue(nodeToTranslate).ToString();
-                return propVal;
-            }
-            catch (Exception ex)
-            {
-                // TODO log error
-            }
-
-            return "<<INVALID_SUB_VALUE>>";
+            return InHolderSchemeInstance.GetVarValue(Key, StageName);
         }
     }
+
+
 
 
 

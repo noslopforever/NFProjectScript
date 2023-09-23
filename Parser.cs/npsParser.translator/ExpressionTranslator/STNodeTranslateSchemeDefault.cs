@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
@@ -94,6 +94,43 @@ namespace nf.protoscript.translator.expression
                     return varValue;
                 }
                 return null;
+            }
+
+            public string GetVarValue(string InKey, string InStageName)
+            {
+                // Find env-variables
+                var envVar = this.FindEnvVariable(InKey);
+                if (envVar != null)
+                {
+                    return envVar.ToString();
+                }
+
+                // Find prerequisite
+                var schemeInst = this.FindPrerequisite(InKey);
+                if (schemeInst != null)
+                {
+                    var result = schemeInst.GetResult(InStageName);
+                    if (result.Count > 1)
+                    {
+                        // TODO log error
+                        throw new InvalidOperationException();
+                    }
+                    return result[0];
+                }
+
+                // Find node's properties
+                ISyntaxTreeNode nodeToTranslate = this.NodeToTranslate;
+                try
+                {
+                    var propVal = nodeToTranslate.GetType().GetProperty(InKey).GetValue(nodeToTranslate).ToString();
+                    return propVal;
+                }
+                catch (Exception ex)
+                {
+                    // TODO log error
+                }
+
+                return "<<INVALID_SUB_VALUE>>";
             }
 
             // ~ End ISTNodeTranslateSchemeInstance interfaces
