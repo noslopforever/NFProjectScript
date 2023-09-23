@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using nf.protoscript.translator.expression.DefaultSnippetElements;
 using System;
 using System.Collections.Generic;
@@ -141,25 +141,21 @@ namespace nf.protoscript.translator.expression
                     return result;
                 }
 
+                // Generate TempVar init statement.
+                //var tempVarInitValue = this.GetVarValue(InVariableName, "Present");
+                var tempVarInitValueSI = FindPrerequisite(InVariableName);
+
                 // Add TempVar and cache it in this SI.
-                var tempVarInitValue = this.GetVarValue(InVariableName, "Present");
-                IExprTranslateContext.IVariable var = this.TranslateContext.AddTempVar(
-                    this.NodeToTranslate
-                    , InVariableName
-                    , tempVarInitValue
-                    );
+                IExprTranslateContext.IVariable var = this.TranslateContext.AddTempVar(this.NodeToTranslate, InVariableName, tempVarInitValueSI);
                 _tempVarCaches[InVariableName] = var;
 
                 // Generate temp var init code.
-                var scheme = Translator.QueryInitTempVarScheme(
-                    InTranslatingNode
-                    , InVariableName
-                    , tempVarInitValue
-                    );
-                var schemeInstance = scheme.CreateInstance(this.Translator, this.TranslateContext, InTranslatingNode);
-                schemeInstance.SetEnvVariable("TEMPVARNAME", var.Name);
-                schemeInstance.SetEnvVariable("TEMPVARVALUE", tempVarInitValue);
-                var tempVarInitCodes = schemeInstance.GetResult("Present");
+                var tempVarInitScheme = Translator.QueryInitTempVarScheme(InTranslatingNode, InVariableName, tempVarInitValueSI);
+                var tempVarInitSI = tempVarInitScheme.CreateInstance(this.Translator, this.TranslateContext, InTranslatingNode);
+                tempVarInitSI.SetEnvVariable("TEMPVARNAME", var.Name);
+                tempVarInitSI.AddPrerequisiteScheme("TEMPVARVALUE", tempVarInitValueSI);
+                var tempVarInitCodes = tempVarInitSI.GetResult("Present");
+                //var tempVarInitCodes = Translator.TranslateOneStatement(tempVarInitSI);
 
                 // TODO: Write it to result code pool saves in the context.
                 foreach (var tempVarCode in tempVarInitCodes)

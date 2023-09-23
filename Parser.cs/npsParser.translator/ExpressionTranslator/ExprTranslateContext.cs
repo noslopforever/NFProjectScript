@@ -121,7 +121,7 @@ namespace nf.protoscript.translator.expression
         /// <param name="InTempVarKey"></param>
         /// <param name="InTempVarInitCodes"></param>
         /// <returns></returns>
-        IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InTempVarKey, string InTempVarInitCodes);
+        IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InTempVarKey, ISTNodeTranslateSchemeInstance InTempVarInitSI);
 
     }
 

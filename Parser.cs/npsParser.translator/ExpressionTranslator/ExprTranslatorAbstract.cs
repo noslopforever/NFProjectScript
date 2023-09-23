@@ -55,12 +55,33 @@ namespace nf.protoscript.translator.expression
             }
         }
 
-        protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
-
-        public abstract ISTNodeTranslateScheme QueryInitTempVarScheme(ISyntaxTreeNode InTranslatingNode, string InName, string InTempVarInitValue);
 
         //
-        // Constant access schemeInstances
+        // System Schemes
+        // 
+
+        /// <summary>
+        /// Return the scheme when error occurs in translating.
+        /// </summary>
+        /// <param name="InErrorNode"></param>
+        /// <returns></returns>
+        protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
+
+        /// <summary>
+        /// Return the scheme to init TempVars.
+        /// </summary>
+        /// <param name="InTranslatingNode"></param>
+        /// <param name="InName"></param>
+        /// <param name="InTempVarInitValue"></param>
+        /// <returns></returns>
+        public abstract ISTNodeTranslateScheme QueryInitTempVarScheme(
+            ISyntaxTreeNode InTranslatingNode
+            , string InName
+            , ISTNodeTranslateSchemeInstance InTempVarInitValue
+            );
+
+        //
+        // Constant access Schemes
         //
 
         protected abstract ISTNodeTranslateScheme QueryNullScheme(TypeInfo InConstType);
@@ -82,7 +103,7 @@ namespace nf.protoscript.translator.expression
 
 
         //
-        // var access schemeInstances
+        // var access Schemes
         //
 
         /// <summary>
@@ -131,9 +152,17 @@ namespace nf.protoscript.translator.expression
             );
 
         //
-        // Operation schemeInstances.
+        // Operation Schemes.
         //
 
+        /// <summary>
+        /// Query scheme to generate Bin-Op codes.
+        /// </summary>
+        /// <param name="InBinOpNode"></param>
+        /// <param name="InLhsType"></param>
+        /// <param name="InRhsType"></param>
+        /// <param name="OutResultType"></param>
+        /// <returns></returns>
         protected abstract ISTNodeTranslateScheme QueryBinOpScheme(
             STNodeBinaryOp InBinOpNode
             , TypeInfo InLhsType

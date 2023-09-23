@@ -16,7 +16,11 @@ namespace nf.protoscript.translator.expression
             throw new NotImplementedException();
         }
 
-        public override ISTNodeTranslateScheme QueryInitTempVarScheme(ISyntaxTreeNode InTranslatingNode, string InName, string InTempVarInitValue)
+        public override ISTNodeTranslateScheme QueryInitTempVarScheme(
+            ISyntaxTreeNode InTranslatingNode
+            , string InName
+            , ISTNodeTranslateSchemeInstance InTempVarInitValue
+            )
         {
             return DefaultInitTempVarScheme;
         }
