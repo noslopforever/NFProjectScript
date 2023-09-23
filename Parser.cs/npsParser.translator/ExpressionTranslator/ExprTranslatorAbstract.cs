@@ -52,6 +52,8 @@ namespace nf.protoscript.translator.expression
                 var presentResult = schemeInst.GetResult("Present");
                 OutCodes.AddRange(presentResult);
 
+            }
+        }
 
         protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
 
