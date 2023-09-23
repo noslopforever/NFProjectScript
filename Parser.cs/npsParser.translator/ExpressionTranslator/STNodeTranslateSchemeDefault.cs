@@ -150,6 +150,16 @@ namespace nf.protoscript.translator.expression
 
         public STNodeTranslateSchemeDefault() { }
 
+        public STNodeTranslateSchemeDefault(STNodeTranslateSnippet InPresent)
+        {
+            Present = InPresent;
+        }
+
+        public STNodeTranslateSchemeDefault(STNodeTranslateSnippet InPresent, Dictionary<string, STNodeTranslateSnippet> InSnippetTable)
+        {
+            Present = InPresent;
+            _snippetTable = InSnippetTable;
+        }
 
         /// <summary>
         /// Snippet for the 'Present' stage.
@@ -202,7 +212,6 @@ namespace nf.protoscript.translator.expression
         {
             return new Instance(this, InTranslator, InExprContext, InSTNode);
         }
-
 
         // Snippet table.
         Dictionary<string, STNodeTranslateSnippet> _snippetTable = new Dictionary<string, STNodeTranslateSnippet>();
