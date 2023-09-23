@@ -34,24 +34,66 @@ namespace nf.protoscript.translator.expression
             STNodeVisitor_FunctionBody visitor = new STNodeVisitor_FunctionBody(this, InContext);
             VisitByReflectionHelper.FindAndCallVisit(InSyntaxTree, visitor);
 
-            // Create runtime context and do apply schemeInstances.
-            var schemeInstances = visitor.TranslateSchemeInstances;
+            // Take each scheme-instance as a statement and try to translate it.
             List<string> codes = new List<string>();
-            _HandleSchemeInstances(codes, schemeInstances);
+            foreach (var schemeInst in visitor.TranslateSchemeInstances)
+            {
+                var stmtCodes = TranslateOneStatement(schemeInst);
+                codes.AddRange(stmtCodes);
+            }
 
             return codes;
         }
 
-        private void _HandleSchemeInstances(
-            List<string> OutCodes
-            , IEnumerable<ISTNodeTranslateSchemeInstance> InSchemeInstances
-            )
+        /// <summary>
+        /// Translate only one statement
+        /// </summary>
+        /// <param name="InSchemeInstanceOfStatement"></param>
+        /// <returns></returns>
+        public virtual IReadOnlyList<string> TranslateOneStatement(ISTNodeTranslateSchemeInstance InSchemeInstanceOfStatement)
         {
-            foreach (var schemeInst in InSchemeInstances)
-            {
-                var presentResult = schemeInst.GetResult("Present");
-                OutCodes.AddRange(presentResult);
+            // Gather all SIs
+            List<ISTNodeTranslateSchemeInstance> allSubSIs = new List<ISTNodeTranslateSchemeInstance>();
+            _RecursivePrerequisite(InSchemeInstanceOfStatement, si => allSubSIs.Add(si));
 
+            // Construct reverse Sub SIs
+            var revSubSIs = new List<ISTNodeTranslateSchemeInstance>(allSubSIs);
+            revSubSIs.Reverse();
+
+            // Gather all Pre-statement codes from sub-SIs
+            List<string> codes = new List<string>();
+            foreach (var si in allSubSIs)
+            {
+                codes.AddRange(si.GetResult("PreStatement"));
+            }
+
+            var presentResult = InSchemeInstanceOfStatement.GetResult("Present");
+            codes.AddRange(presentResult);
+
+            // Gather all Post-statement(Rev) codes from sub-SIs
+            foreach (var si in revSubSIs)
+            {
+                codes.AddRange(si.GetResult("PostStatement"));
+            }
+            foreach (var si in revSubSIs)
+            {
+                codes.AddRange(si.GetResult("PostStatementRev"));
+            }
+
+            return codes;
+        }
+
+        /// <summary>
+        /// Iterate prerequisites recursively of InCurrentSI
+        /// </summary>
+        /// <param name="InCurrentSI"></param>
+        /// <param name="InFunc"></param>
+        private void _RecursivePrerequisite(ISTNodeTranslateSchemeInstance InCurrentSI, Action<ISTNodeTranslateSchemeInstance> InFunc)
+        {
+            foreach (var preSI in InCurrentSI.PrerequisiteSchemeInstances)
+            {
+                InFunc(preSI);
+                _RecursivePrerequisite(preSI, InFunc);
             }
         }
 

@@ -154,8 +154,8 @@ namespace nf.protoscript.translator.expression
                 var tempVarInitSI = tempVarInitScheme.CreateInstance(this.Translator, this.TranslateContext, InTranslatingNode);
                 tempVarInitSI.SetEnvVariable("TEMPVARNAME", var.Name);
                 tempVarInitSI.AddPrerequisiteScheme("TEMPVARVALUE", tempVarInitValueSI);
-                var tempVarInitCodes = tempVarInitSI.GetResult("Present");
-                //var tempVarInitCodes = Translator.TranslateOneStatement(tempVarInitSI);
+                //var tempVarInitCodes = tempVarInitSI.GetResult("Present");
+                var tempVarInitCodes = Translator.TranslateOneStatement(tempVarInitSI);
 
                 // TODO: Write it to result code pool saves in the context.
                 foreach (var tempVarCode in tempVarInitCodes)
