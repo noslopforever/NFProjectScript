@@ -92,8 +92,8 @@ namespace nf.protoscript.translator.expression
         {
             foreach (var preSI in InCurrentSI.PrerequisiteSchemeInstances)
             {
-                InFunc(preSI);
                 _RecursivePrerequisite(preSI, InFunc);
+                InFunc(preSI);
             }
         }
 

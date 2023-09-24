@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -65,8 +65,7 @@ namespace npsParser.test.ExpressionTranslator
                             , new ElementConstString("()")
                             )
                         )
-                        ,
-                    ["PostStatement"] = new STNodeTranslateSnippet(
+                    ["PostStatementRev"] = new STNodeTranslateSnippet(
                         new ElementConstString("// PostStatement for REF ")
                         , new ElementVarName()
                         , new ElementNewLine()
