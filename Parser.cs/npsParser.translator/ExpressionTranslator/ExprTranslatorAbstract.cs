@@ -52,6 +52,18 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         public virtual IReadOnlyList<string> TranslateOneStatement(ISTNodeTranslateSchemeInstance InSchemeInstanceOfStatement)
         {
+            List<string> codes = new List<string>();
+            TranslateOneStatement(codes, InSchemeInstanceOfStatement);
+            return codes;
+        }
+
+        /// <summary>
+        /// Translate only one statement, Get result by a ref-list parameter.
+        /// </summary>
+        /// <param name="RefResultCodes"></param>
+        /// <param name="InSchemeInstanceOfStatement"></param>
+        public void TranslateOneStatement(List<string> RefResultCodes, ISTNodeTranslateSchemeInstance InSchemeInstanceOfStatement)
+        {
             // Gather all SIs
             List<ISTNodeTranslateSchemeInstance> allSubSIs = new List<ISTNodeTranslateSchemeInstance>();
             _RecursivePrerequisite(InSchemeInstanceOfStatement, si => allSubSIs.Add(si));
@@ -61,26 +73,23 @@ namespace nf.protoscript.translator.expression
             revSubSIs.Reverse();
 
             // Gather all Pre-statement codes from sub-SIs
-            List<string> codes = new List<string>();
             foreach (var si in allSubSIs)
             {
-                codes.AddRange(si.GetResult("PreStatement"));
+                RefResultCodes.AddRange(si.GetResult("PreStatement"));
             }
 
             var presentResult = InSchemeInstanceOfStatement.GetResult("Present");
-            codes.AddRange(presentResult);
+            RefResultCodes.AddRange(presentResult);
 
             // Gather all Post-statement(Rev) codes from sub-SIs
             foreach (var si in allSubSIs)
             {
-                codes.AddRange(si.GetResult("PostStatement"));
+                RefResultCodes.AddRange(si.GetResult("PostStatement"));
             }
             foreach (var si in revSubSIs)
             {
-                codes.AddRange(si.GetResult("PostStatementRev"));
+                RefResultCodes.AddRange(si.GetResult("PostStatementRev"));
             }
-
-            return codes;
         }
 
         /// <summary>

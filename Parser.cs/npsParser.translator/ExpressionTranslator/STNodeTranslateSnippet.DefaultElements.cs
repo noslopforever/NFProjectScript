@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +11,7 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
     public sealed class ElementNewLine
         : STNodeTranslateSnippet.IElement
     {
-        public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
             throw new InvalidOperationException();
         }
@@ -33,9 +33,9 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
             return Value;
         }
 
-        public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            return Value;
+            return new string[] { Value };
         }
     }
 
@@ -55,21 +55,21 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
             return $"%{{VarName}}%";
         }
 
-        public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
             ISyntaxTreeNode nodeToTranslate = InHolderSchemeInstance.NodeToTranslate;
             if (nodeToTranslate is STNodeVar)
             {
-                return (nodeToTranslate as STNodeVar).IDName;
+                return new string[] { (nodeToTranslate as STNodeVar).IDName };
             }
             else if (nodeToTranslate is STNodeMemberAccess)
             {
-                return (nodeToTranslate as STNodeMemberAccess).MemberID;
+                return new string[] { (nodeToTranslate as STNodeMemberAccess).MemberID };
             }
 
             // TODO log error
             throw new InvalidCastException();
-            return "<<ERROR NODE TYPE>>";
+            return new string[] { "<<ERROR NODE TYPE>>" };
         }
     }
 
@@ -85,17 +85,17 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
             return $"%{{ValueString}}%";
         }
 
-        public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
             ISyntaxTreeNode nodeToTranslate = InHolderSchemeInstance.NodeToTranslate;
             if (nodeToTranslate is STNodeConstant)
             {
-                return (nodeToTranslate as STNodeConstant).Value.ToString();
+                return new string[] { (nodeToTranslate as STNodeConstant).Value.ToString() };
             }
 
             // TODO log error
             throw new InvalidCastException();
-            return "<<ERROR NODE TYPE>>";
+            return new string[] { "<<ERROR NODE TYPE>>" };
         }
     }
 
@@ -111,9 +111,9 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
          
         public string StageName { get; } = "Present";
 
-        public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            return InHolderSchemeInstance.GetVarValue(Key, StageName);
+            return new string[] { InHolderSchemeInstance.GetVarValue(Key, StageName) };
         }
     }
 
@@ -149,12 +149,18 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
         /// </summary>
         public STNodeTranslateSnippet InitSnippet { get; }
 
-        public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
             IExprTranslateContext.IVariable var = InHolderSchemeInstance.EnsureTempVar(Key, InHolderSchemeInstance.NodeToTranslate, InitSnippet);
-            return var.Name;
+            if (var != null)
+            {
+                return new string[] { var.Name };
+            }
+            return new string[] { $"<<INVALID_TEMP_VAR_{Key}>>" };
         }
+
     }
+
 
 
 

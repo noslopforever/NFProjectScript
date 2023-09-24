@@ -65,6 +65,7 @@ namespace npsParser.test.ExpressionTranslator
                             , new ElementConstString("()")
                             )
                         )
+                    ,
                     ["PostStatementRev"] = new STNodeTranslateSnippet(
                         new ElementConstString("// PostStatement for REF ")
                         , new ElementVarName()

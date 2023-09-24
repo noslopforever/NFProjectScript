@@ -1,6 +1,7 @@
 ﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace nf.protoscript.translator.expression
 {
@@ -21,7 +22,7 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public interface IElement
         {
-            public string Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance);
+            public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance);
         }
 
         /// <summary>
@@ -50,7 +51,15 @@ namespace nf.protoscript.translator.expression
                     continue;
                 }
 
-                codeLines[writingLineIndex] += snippetElem.Apply(InHolderSchemeInstance);
+                // The first line of the snippet will be applied to the current writing-line.
+                // Other lines will be pushed to new lines.
+                var elemCodeLns = snippetElem.Apply(InHolderSchemeInstance).ToArray();
+                codeLines[writingLineIndex] += elemCodeLns[0];
+                for (int elemLnIndex = 1; elemLnIndex < elemCodeLns.Length; elemLnIndex++)
+                {
+                    codeLines.Add($"{elemCodeLns[elemLnIndex]}");
+                    writingLineIndex++;
+                }
             }
 
             return codeLines;
