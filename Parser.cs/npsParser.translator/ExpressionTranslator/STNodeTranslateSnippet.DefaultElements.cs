@@ -118,6 +118,46 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
     }
 
 
+
+    /// <summary>
+    /// Element which act as a new scheme with another snippet
+    /// </summary>
+    public abstract class ElementProxyAbstract
+        : STNodeTranslateSnippet.IElement
+    {
+        public ElementProxyAbstract(STNodeTranslateSnippet InSnippet)
+        {
+            ProxySnippet = InSnippet;
+        }
+
+        /// <summary>
+        /// Referenced snippet
+        /// </summary>
+        public STNodeTranslateSnippet ProxySnippet { get; }
+
+        public virtual IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            // Get or create a scheme with only Present snippets.
+            if (_cachedScheme == null)
+            {
+                _cachedScheme = new STNodeTranslateSchemeDefault(ProxySnippet);
+            }
+
+            // Create inner proxy SI for applying
+            if (_cachedSchemeInstance == null)
+            {
+                _cachedSchemeInstance = _cachedScheme.CreateProxyInstance(InHolderSchemeInstance);
+            }
+
+            return _cachedSchemeInstance.GetResult("Present");
+        }
+
+        ISTNodeTranslateScheme _cachedScheme;
+        ISTNodeTranslateSchemeInstance _cachedSchemeInstance;
+
+    }
+
+
     /// <summary>
     /// Add Temporary variable in current Context.
     /// </summary>

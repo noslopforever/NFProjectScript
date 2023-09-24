@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System.Collections.Generic;
 
 namespace nf.protoscript.translator.expression
@@ -111,6 +111,13 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         /// <returns></returns>
         ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, IExprTranslateContext InExprContext, ISyntaxTreeNode InSTNode);
+
+        /// <summary>
+        /// Create a instance and set it as the 'proxy' of another instance.
+        /// </summary>
+        /// <param name="InSchemeInstanceToBeProxied"></param>
+        /// <returns></returns>
+        ISTNodeTranslateSchemeInstance CreateProxyInstance(ISTNodeTranslateSchemeInstance InSchemeInstanceToBeProxied);
 
     }
 

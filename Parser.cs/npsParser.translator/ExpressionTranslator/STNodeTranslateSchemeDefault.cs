@@ -29,6 +29,19 @@ namespace nf.protoscript.translator.expression
                 NodeToTranslate = InNodeToTranslate;
             }
 
+            public static ISTNodeTranslateSchemeInstance CreateProxyInstance(STNodeTranslateSchemeDefault InScheme, ISTNodeTranslateSchemeInstance InProxySI)
+            {
+                Instance inst = new Instance(InScheme, InProxySI.Translator, InProxySI.TranslateContext, InProxySI.NodeToTranslate)
+                {
+                    ProxyInstance = InProxySI
+                };
+                return inst;
+            }
+
+            /// <summary>
+            /// The Proxy SI if this instance is a proxy instance.
+            /// </summary>
+            public ISTNodeTranslateSchemeInstance ProxyInstance { get; private set; }
 
             // Begin ISTNodeTranslateSchemeInstance interfaces
 
@@ -80,6 +93,12 @@ namespace nf.protoscript.translator.expression
                 {
                     return result;
                 }
+
+                // If proxy, find in proxy's prerequisites
+                if (ProxyInstance != null)
+                {
+                    return ProxyInstance.FindPrerequisite(InKey);
+                }
                 return null;
             }
 
@@ -93,6 +112,12 @@ namespace nf.protoscript.translator.expression
                 if (_envVars.TryGetValue(InVariableName, out var varValue))
                 {
                     return varValue;
+                }
+
+                // If proxy, find in proxy's EnvVars.
+                if (ProxyInstance != null)
+                {
+                    return ProxyInstance.FindEnvVariable(InVariableName);
                 }
                 return null;
             }
@@ -188,6 +213,7 @@ namespace nf.protoscript.translator.expression
 
             // TempVar caches
             Dictionary<string, IExprTranslateContext.IVariable> _tempVarCaches = new Dictionary<string, IExprTranslateContext.IVariable>();
+
         }
 
         public STNodeTranslateSchemeDefault() { }
@@ -242,17 +268,19 @@ namespace nf.protoscript.translator.expression
             _snippetTable[InStageName] = InSnippet;
         }
 
-        /// <summary>
-        /// Create a instance of this scheme.
-        /// </summary>
-        /// <param name="InTranslator"></param>
-        /// <param name="InExprContext"></param>
-        /// <param name="InSTNode"></param>
-        /// <returns></returns>
+        // Begin ISTNodeTranslateScheme interfaces
+
         public ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, IExprTranslateContext InExprContext, ISyntaxTreeNode InSTNode)
         {
             return new Instance(this, InTranslator, InExprContext, InSTNode);
         }
+
+        public ISTNodeTranslateSchemeInstance CreateProxyInstance(ISTNodeTranslateSchemeInstance InSchemeInstanceToBeProxied)
+        {
+            return Instance.CreateProxyInstance(this, InSchemeInstanceToBeProxied);
+        }
+
+        // ~ End ISTNodeTranslateScheme interfaces
 
         // Snippet table.
         Dictionary<string, STNodeTranslateSnippet> _snippetTable = new Dictionary<string, STNodeTranslateSnippet>();
