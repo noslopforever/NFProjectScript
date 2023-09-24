@@ -2,8 +2,6 @@ using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using static nf.protoscript.translator.expression.ExprCodeGeneratorAbstract;
 
 namespace nf.protoscript.translator.expression
 {
