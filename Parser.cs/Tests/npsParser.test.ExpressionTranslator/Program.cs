@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -56,14 +56,17 @@ namespace npsParser.test.ExpressionTranslator
                     //    , new ElementVarName()
                     //    )
                     //,
-
-                    ["Present"] = new STNodeTranslateSnippet(
-                        new ElementTempVar("Var",
+                    ["PreStatement"] = new STNodeTranslateSnippet(
+                        new ElementAddTempVar("Var",
                             new ElementReplaceSubNodeValue("HOST")
                             , new ElementConstString("get")
                             , new ElementVarName()
                             , new ElementConstString("()")
                             )
+                        )
+                    ,
+                    ["Present"] = new STNodeTranslateSnippet(
+                        new ElementTempVar("Var")
                         )
                     ,
                     ["PostStatementRev"] = new STNodeTranslateSnippet(
@@ -110,23 +113,30 @@ namespace npsParser.test.ExpressionTranslator
                 //};
                 exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 {
-                    ["Present"] = new STNodeTranslateSnippet(
-                            new ElementTempVar("LHS", new ElementReplaceSubNodeValue("LHS"))
-                            , new ElementConstString(" ")
-                            , new ElementReplaceSubNodeValue("OpCode")
-                            , new ElementConstString(" ")
-                            , new ElementTempVar("RHS", new ElementReplaceSubNodeValue("RHS"))
+                    ["PreStatement"] = new STNodeTranslateSnippet(
+                        new ElementAddTempVar("LHS"
+                            , new ElementReplaceSubNodeValue("LHS")
                             )
-                        //,
-                        //["PreStatement"] = new STNodeTranslateSnippet(
-                        //    new ElementTempVar("LHS")
-                        //    , new ElementTempVar("RHS")
-                        //    )
+                        , new ElementNewLine()
+                        , new ElementAddTempVar("RHS"
+                            , new ElementReplaceSubNodeValue("RHS")
+                            )
+                        )
                         ,
-                    //["PostStatementRev"] = new STNodeTranslateSnippet(
-                    //    new ElementConstString("Post statement REV of ")
-                    //    , new ElementNodeUniqueName()
-                    //    )
+                    ["Present"] = new STNodeTranslateSnippet(
+                        new ElementTempVar("LHS")
+                        , new ElementConstString(" ")
+                        , new ElementReplaceSubNodeValue("OpCode")
+                        , new ElementConstString(" ")
+                        , new ElementTempVar("RHS")
+                        )
+                        ,
+                    ["PostStatementRev"] = new STNodeTranslateSnippet(
+                        new ElementConstString("// Post statement REV of ")
+                        , new ElementTempVar("LHS")
+                        , new ElementConstString(" and ")
+                        , new ElementTempVar("RHS")
+                        )
                 });
             }
 

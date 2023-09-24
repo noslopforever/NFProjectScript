@@ -159,43 +159,18 @@ namespace nf.protoscript.translator.expression
                 return "<<INVALID_SUB_VALUE>>";
             }
 
-            public IExprTranslateContext.IVariable EnsureTempVar(string InKey, ISyntaxTreeNode InTranslatingNode, STNodeTranslateSnippet InInitSnippet)
+            public IExprTranslateContext.IVariable GetTempVar(string InKey)
             {
                 if (_tempVarCaches.TryGetValue(InKey, out var result))
                 {
                     return result;
                 }
+                return null;
+            }
 
-                // Acquire TempVar init value SI.
-                //var tempVarInitValue = this.GetVarValue(InKey, "Present");
-                //var tempVarInitValueSI = FindPrerequisite(InKey);
-                var tempVarInitValueScheme = new STNodeTranslateSchemeDefault(InInitSnippet);
-                var tempVarInitValueSI = tempVarInitValueScheme.CreateInstance(this.Translator, this.TranslateContext, InTranslatingNode);
-                // Transfer env-vars and prerequisites to the inner SI
-                (tempVarInitValueSI as Instance)._envVars = new Dictionary<string, object>(this._envVars);
-                (tempVarInitValueSI as Instance)._prerequisitesTable = new Dictionary<string, ISTNodeTranslateSchemeInstance>(this._prerequisitesTable);
-                (tempVarInitValueSI as Instance)._prerequisitesList = new List<ISTNodeTranslateSchemeInstance>(this._prerequisitesList);
-
-                // Add TempVar and cache it in this SI.
-                IExprTranslateContext.IVariable var = this.TranslateContext.AddTempVar(this.NodeToTranslate, InKey, tempVarInitValueSI);
-                _tempVarCaches[InKey] = var;
-
-                // Generate temp var init code.
-                var tempVarInitScheme = Translator.QueryInitTempVarScheme(InTranslatingNode, InKey, tempVarInitValueSI);
-                var tempVarInitSI = tempVarInitScheme.CreateInstance(this.Translator, this.TranslateContext, InTranslatingNode);
-                tempVarInitSI.SetEnvVariable("TEMPVARNAME", var.Name);
-                tempVarInitSI.AddPrerequisiteScheme("TEMPVARVALUE", tempVarInitValueSI);
-                //var tempVarInitCodes = tempVarInitSI.GetResult("Present");
-                var tempVarInitCodes = Translator.TranslateOneStatement(tempVarInitSI);
-
-                // TODO: Write it to result code pool saves in the context.
-                foreach (var tempVarCode in tempVarInitCodes)
-                {
-                    Console.WriteLine(tempVarCode);
-                    //TranslateContext.CodeWriter.WriteLine(tempVarCode);
-                }
-
-                return var;
+            public void AddTempVar(string InKey, IExprTranslateContext.IVariable InTempVar)
+            {
+                _tempVarCaches[InKey] = InTempVar;
             }
 
             // ~ End ISTNodeTranslateSchemeInstance interfaces

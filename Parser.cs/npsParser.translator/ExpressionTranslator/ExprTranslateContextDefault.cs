@@ -121,13 +121,13 @@ namespace nf.protoscript.translator.expression
             return null;
         }
 
-        public IExprTranslateContext.IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InTempVarKey, ISTNodeTranslateSchemeInstance InTempVarInitSI)
+        public IExprTranslateContext.IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InTempVarKey)
         {
             string nodeTypeName = InNodeToTranslate.GetType().Name;
             int uniqueID = _localScope.TempVarTable.Count;
             string uniqueTempVarKey = $"TMP_{nodeTypeName}_{InTempVarKey}_{uniqueID}";
 
-            var tempVar = new TempVar(_localScope, uniqueTempVarKey, InTempVarInitSI);
+            var tempVar = new TempVar(_localScope, uniqueTempVarKey);
             _localScope.AddTempVar(uniqueTempVarKey, tempVar);
             return tempVar;
         }
@@ -178,12 +178,11 @@ namespace nf.protoscript.translator.expression
         public class TempVar
             : IExprTranslateContext.IVariable
         {
-            internal TempVar(LocalScope InLocalScope, string InVarName, ISTNodeTranslateSchemeInstance InitValueSI)
+            internal TempVar(LocalScope InLocalScope, string InVarName)
             {
                 HostScope = InLocalScope;
                 Name = InVarName;
                 VarType = CommonTypeInfos.Any;
-                this.InitValueSI = InitValueSI;
             }
 
             // Begin IVariable interfaces
@@ -191,7 +190,7 @@ namespace nf.protoscript.translator.expression
             public TypeInfo VarType { get; }
             public IExprTranslateContext.IScope HostScope { get; }
             // ~ End IVariable interfaces.
-            public ISTNodeTranslateSchemeInstance InitValueSI { get; }
+
         }
 
     }
