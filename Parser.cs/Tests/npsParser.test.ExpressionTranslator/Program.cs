@@ -21,10 +21,41 @@ namespace npsParser.test.ExpressionTranslator
             Console.WriteLine("Which translator do you want to test?");
 
 
+            var exprTrans = new ExprTranslatorDefault();
+
+            // Shared and generic schemes.
+            {
+                exprTrans.AddScheme("Getter"
+                    , new STNodeTranslateSnippet(
+                        new ElementConstString("get")
+                        , new ElementVarName()
+                        , new ElementConstString("()")
+                        )
+                    );
+
+                exprTrans.AddScheme("Setter"
+                    , new STNodeTranslateSnippet(
+                        new ElementConstString("set")
+                        , new ElementVarName()
+                        , new ElementConstString("(")
+                        , new ElementReplaceSubNodeValue("RHS")
+                        , new ElementConstString(")")
+                        )
+                    );
+
+                exprTrans.AddScheme("InitTempVar"
+                    , new STNodeTranslateSnippet(
+                        new ElementConstString("auto ")
+                        , new ElementReplaceSubNodeValue("VARNAME")
+                        , new ElementConstString(" = ")
+                        , new ElementReplaceSubNodeValue("INITVAL")
+                        )
+                    );
+            }
+
             // Default host object scheme for methods
             #region Default Schemes
 
-            var exprTrans = new ExprTranslatorDefault();
             {
                 exprTrans.DefaultHostAccessScheme = new STNodeTranslateSchemeDefault()
                 {
@@ -117,6 +148,7 @@ namespace npsParser.test.ExpressionTranslator
 
             {
                 #region Special Member Access for SetterProperty
+
                 // Special Member Access for SetterProperty 
                 {
                     Func<TypeInfo, string, ElementInfo, bool> condSetterProperty = (InTypeInfo, InPropName, InElementInfo) =>
@@ -138,11 +170,7 @@ namespace npsParser.test.ExpressionTranslator
                             {
                                 ["Present"] = new STNodeTranslateSnippet(
                                     new ElementReplaceSubNodeValue("HOST")
-                                    , new ElementConstString("set")
-                                    , new ElementVarName()
-                                    , new ElementConstString("(")
-                                    , new ElementReplaceSubNodeValue("RHS")
-                                    , new ElementConstString(")")
+                                    , new ElementCallOther("Setter")
                                     )
                             }
                             )
@@ -160,13 +188,18 @@ namespace npsParser.test.ExpressionTranslator
                                     new ElementConstString("// PreStatement for SetterProperty_Ref ")
                                     , new ElementVarName()
                                     , new ElementNewLine()
-                                    , new ElementConstString("auto ")
-                                    , new ElementTempVar("Var")
-                                    , new ElementConstString("= ")
-                                    , new ElementReplaceSubNodeValue("HOST")
-                                    , new ElementConstString("get")
-                                    , new ElementVarName()
-                                    , new ElementConstString("()")
+                                    , new ElementCallOther("InitTempVar"
+                                        , new Dictionary<string, STNodeTranslateSnippet>()
+                                        {
+                                            ["VARNAME"] = new STNodeTranslateSnippet(
+                                                new ElementTempVar("Var")
+                                                )
+                                            ,
+                                            ["INITVAL"] = new STNodeTranslateSnippet(
+                                                new ElementCallOther("Getter")
+                                                )
+                                        }
+                                        )
                                     )
                                 ,
                                 ["Present"] = new STNodeTranslateSnippet(
@@ -178,11 +211,14 @@ namespace npsParser.test.ExpressionTranslator
                                     , new ElementVarName()
                                     , new ElementNewLine()
                                     , new ElementReplaceSubNodeValue("HOST")
-                                    , new ElementConstString("set")
-                                    , new ElementVarName()
-                                    , new ElementConstString("(")
-                                    , new ElementTempVar("Var")
-                                    , new ElementConstString(")")
+                                    , new ElementCallOther("Setter"
+                                        , new Dictionary<string, STNodeTranslateSnippet>()
+                                        {
+                                            ["RHS"] = new STNodeTranslateSnippet(
+                                                new ElementTempVar("Var")
+                                                )
+                                        }
+                                        )
                                     )
                             }
                             )

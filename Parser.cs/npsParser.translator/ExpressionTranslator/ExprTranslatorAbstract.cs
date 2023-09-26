@@ -118,6 +118,13 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
 
+        /// <summary>
+        /// Find scheme by name
+        /// </summary>
+        /// <param name="schemeName"></param>
+        /// <returns></returns>
+        public abstract ISTNodeTranslateScheme FindSchemeByName(string InSchemeName);
+
         //
         // Constant access Schemes
         //

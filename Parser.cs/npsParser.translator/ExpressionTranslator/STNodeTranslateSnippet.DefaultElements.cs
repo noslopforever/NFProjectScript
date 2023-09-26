@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
@@ -183,6 +183,100 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
     }
 
+
+    /// <summary>
+    /// Element which calls another Scheme to provide the result.
+    /// </summary>
+    public class ElementCallOther
+        : STNodeTranslateSnippet.IElement
+    {
+        public ElementCallOther(string InSchemeName)
+        {
+            SchemeName = InSchemeName;
+            _varInitCodes = new List<VarInitCodeCache>();
+        }
+
+        public ElementCallOther(string InSchemeName, Dictionary<string, STNodeTranslateSnippet> InVarInitCodes)
+        {
+            SchemeName = InSchemeName;
+            foreach (var kvp in InVarInitCodes)
+            {
+                _varInitCodes.Add(new VarInitCodeCache(kvp.Key, kvp.Value));
+            }
+        }
+
+        /// <summary>
+        /// Referenced scheme name.
+        /// </summary>
+        public string SchemeName { get; }
+
+        public virtual IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            // Get or create a scheme with only Present snippets.
+            if (_cachedScheme == null)
+            {
+                _cachedScheme = InHolderSchemeInstance.Translator.FindSchemeByName(SchemeName);
+            }
+            // Create inner proxy SI for applying
+            if (_cachedSchemeInstance == null)
+            {
+                _cachedSchemeInstance = _cachedScheme.CreateProxyInstance(InHolderSchemeInstance);
+
+                // Ensure and bind 'Parameter' SIs.
+                foreach (var varInitCode in _varInitCodes)
+                {
+                    var paramSchemeInst = varInitCode.EnsureSchemeInstance(InHolderSchemeInstance);
+                    _cachedSchemeInstance.AddPrerequisiteScheme(varInitCode.Key, paramSchemeInst);
+                }
+            }
+
+            return _cachedSchemeInstance.GetResult("Present");
+        }
+
+        // The cache of the referenced scheme.
+        ISTNodeTranslateScheme _cachedScheme;
+        // The cache of the instance created by the referenced scheme.
+        ISTNodeTranslateSchemeInstance _cachedSchemeInstance;
+
+        /// <summary>
+        /// Helper class to cache var-init codes.
+        /// </summary>
+        class VarInitCodeCache
+        {
+            public VarInitCodeCache(string InKey, STNodeTranslateSnippet InSnippet)
+            {
+                Key = InKey;
+                _varSnippet = InSnippet;
+            }
+
+            /// <summary>
+            /// Ensure and return the scheme instance bound with the Key
+            /// </summary>
+            /// <param name="InHolderSchemeInstance"></param>
+            /// <returns></returns>
+            public ISTNodeTranslateSchemeInstance EnsureSchemeInstance(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
+            {
+                if (_cachedScheme == null)
+                {
+                    _cachedScheme = new STNodeTranslateSchemeDefault(_varSnippet);
+                }
+                if (_cachedSchemeInstance == null)
+                {
+                    _cachedSchemeInstance = _cachedScheme.CreateProxyInstance(InHolderSchemeInstance);
+                }
+                return _cachedSchemeInstance;
+            }
+
+            public string Key { get; }
+            STNodeTranslateSnippet _varSnippet;
+            ISTNodeTranslateScheme _cachedScheme;
+            ISTNodeTranslateSchemeInstance _cachedSchemeInstance;
+
+        }
+        List<VarInitCodeCache> _varInitCodes = new List<VarInitCodeCache>();
+
+
+    }
 
 
 

@@ -17,6 +17,15 @@ namespace nf.protoscript.translator.expression
             throw new NotImplementedException();
         }
 
+        public override ISTNodeTranslateScheme FindSchemeByName(string InSchemeName)
+        {
+            if (_genericSchemes.TryGetValue(InSchemeName, out var scheme))
+            {
+                return scheme;
+            }
+            return null;
+        }
+
         protected override ISTNodeTranslateScheme QueryNullScheme(TypeInfo InConstType)
         {
             throw new NotImplementedException();
@@ -140,6 +149,16 @@ namespace nf.protoscript.translator.expression
             _memberAccessSelectors.Add(InSelector.Priority, InSelector);
         }
 
+        /// <summary>
+        /// Add generic schemes
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="InSnippet"></param>
+        public void AddScheme(string InKey, STNodeTranslateSnippet InSnippet)
+        {
+            _genericSchemes[InKey] = new STNodeTranslateSchemeDefault(InSnippet);
+        }
+
         //
         // Default schemes
         //
@@ -158,7 +177,9 @@ namespace nf.protoscript.translator.expression
         SortedList<int, IMemberAccessSchemeSelector> _memberAccessSelectors 
             = new SortedList<int, IMemberAccessSchemeSelector>(new DuplicateKeyComparer<int>());
 
-
+        // Generic schemes
+        Dictionary<string, ISTNodeTranslateScheme> _genericSchemes
+            = new Dictionary<string, ISTNodeTranslateScheme>();
 
         // TODO Move it into the 'Base' project.
         class DuplicateKeyComparer<TKey>
