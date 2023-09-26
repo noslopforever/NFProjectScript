@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 
@@ -108,7 +108,7 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
         }
 
         public string Key { get; }
-         
+
         public string StageName { get; } = "Present";
 
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
@@ -176,16 +176,8 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            IExprTranslateContext.IVariable var = InHolderSchemeInstance.GetTempVar(Key);
-            if (var == null)
-            {
-                // Add TempVar and cache it in SI.
-                var = InHolderSchemeInstance.TranslateContext.AddTempVar(
-                    InHolderSchemeInstance.NodeToTranslate
-                    , Key
-                    );
-                InHolderSchemeInstance.AddTempVar(Key, var);
-            }
+            var context = InHolderSchemeInstance.TranslateContext;
+            IExprTranslateContext.IVariable var = context.EnsureTempVar(InHolderSchemeInstance.NodeToTranslate, Key);
             return new string[] { var.Name };
         }
 

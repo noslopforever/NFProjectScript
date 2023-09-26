@@ -159,20 +159,6 @@ namespace nf.protoscript.translator.expression
                 return "<<INVALID_SUB_VALUE>>";
             }
 
-            public IExprTranslateContext.IVariable GetTempVar(string InKey)
-            {
-                if (_tempVarCaches.TryGetValue(InKey, out var result))
-                {
-                    return result;
-                }
-                return null;
-            }
-
-            public void AddTempVar(string InKey, IExprTranslateContext.IVariable InTempVar)
-            {
-                _tempVarCaches[InKey] = InTempVar;
-            }
-
             // ~ End ISTNodeTranslateSchemeInstance interfaces
 
 
@@ -185,9 +171,6 @@ namespace nf.protoscript.translator.expression
 
             // Result caches
             Dictionary<string, IReadOnlyList<string>> _stageResultCaches = new Dictionary<string, IReadOnlyList<string>>();
-
-            // TempVar caches
-            Dictionary<string, IExprTranslateContext.IVariable> _tempVarCaches = new Dictionary<string, IExprTranslateContext.IVariable>();
 
         }
 

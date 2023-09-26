@@ -84,20 +84,6 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         string GetVarValue(string InKey, string InStageName);
 
-        /// <summary>
-        /// Get TempVar bound with this SI.
-        /// </summary>
-        /// <param name="InKey"></param>
-        /// <returns></returns>
-        IExprTranslateContext.IVariable GetTempVar(string InKey);
-
-        /// <summary>
-        /// Bind TempVar with this SI
-        /// </summary>
-        /// <param name="InKey"></param>
-        /// <param name="InVar"></param>
-        void AddTempVar(string InKey, IExprTranslateContext.IVariable InVar);
-
     }
 
     /// <summary>

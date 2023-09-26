@@ -1,6 +1,7 @@
 using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 
 namespace nf.protoscript.translator.expression
@@ -80,11 +81,7 @@ namespace nf.protoscript.translator.expression
 
         public IExprTranslateContext.IVariable FindVariable(string InName)
         {
-            // Find local and temp vars first
-            if (_localScope.TempVarTable.TryGetValue(InName, out var tempVar))
-            {
-                return tempVar;
-            }
+            // TODO Find local vars first
 
             // Find in scope chain.
             foreach (Scope scope in ScopeChain)
@@ -121,16 +118,27 @@ namespace nf.protoscript.translator.expression
             return null;
         }
 
-        public IExprTranslateContext.IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InTempVarKey)
+        public IExprTranslateContext.IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey)
         {
             string nodeTypeName = InNodeToTranslate.GetType().Name;
             int uniqueID = _localScope.TempVarTable.Count;
-            string uniqueTempVarKey = $"TMP_{nodeTypeName}_{InTempVarKey}_{uniqueID}";
 
-            var tempVar = new TempVar(_localScope, uniqueTempVarKey);
-            _localScope.AddTempVar(uniqueTempVarKey, tempVar);
+            string uniqueTempVarName = $"TMP_{nodeTypeName}_{InKey}_{uniqueID}";
+            var tempVar = new TempVar(_localScope, uniqueTempVarName, InNodeToTranslate, InKey);
+
+            _localScope.AddTempVar(InNodeToTranslate, InKey, tempVar);
             return tempVar;
         }
+
+        public IExprTranslateContext.IVariable EnsureTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey)
+        {
+            if (_localScope.TryGetTempVar(InNodeToTranslate, InKey, out var tempVar))
+            {
+                return tempVar;
+            }
+            return AddTempVar(InNodeToTranslate, InKey);
+        }
+
 
         /// <summary>
         /// The Special 'Local' Scope of the context to save local and temp variables.
@@ -139,7 +147,6 @@ namespace nf.protoscript.translator.expression
         internal class LocalScope
             : IExprTranslateContext.IScope
         {
-
             internal LocalScope()
             {}
 
@@ -150,22 +157,44 @@ namespace nf.protoscript.translator.expression
             // ~ End IExprTranslateContext.IScope interfaces
 
             /// <summary>
+            /// Key to find a temp var.
+            /// </summary>
+            public struct TempVarKey
+            {
+                public ISyntaxTreeNode Node;
+                public string Key;
+            }
+
+            /// <summary>
             /// Temp var table
             /// </summary>
-            public IReadOnlyDictionary<string, TempVar> TempVarTable { get { return _tempVarTable; } }
+            public IReadOnlyDictionary<TempVarKey, TempVar> TempVarTable { get { return _tempVarTable; } }
 
             /// <summary>
             /// Register one temp var to the table.
             /// </summary>
             /// <param name="InKey"></param>
             /// <param name="InTempVar"></param>
-            internal void AddTempVar(string InKey, TempVar InTempVar)
+            internal void AddTempVar(ISyntaxTreeNode InNode, string InKey, TempVar InTempVar)
             {
-                _tempVarTable.Add(InKey, InTempVar);
+                _tempVarTable.Add(new TempVarKey() { Node = InNode, Key = InKey }, InTempVar);
+            }
+
+            /// <summary>
+            /// Try get one temp var from the table.
+            /// </summary>
+            /// <param name="InNodeToTranslate"></param>
+            /// <param name="InKey"></param>
+            /// <param name="OutTempVar"></param>
+            /// <returns></returns>
+            /// <exception cref="NotImplementedException"></exception>
+            internal bool TryGetTempVar(ISyntaxTreeNode InNode, string InKey, out TempVar OutTempVar)
+            {
+                return _tempVarTable.TryGetValue(new TempVarKey() { Node = InNode, Key = InKey }, out OutTempVar);
             }
 
             // Temporary variables table.
-            Dictionary<string, TempVar> _tempVarTable = new Dictionary<string, TempVar>();
+            Dictionary<TempVarKey, TempVar> _tempVarTable = new Dictionary<TempVarKey, TempVar>();
 
         }
 
@@ -178,11 +207,18 @@ namespace nf.protoscript.translator.expression
         public class TempVar
             : IExprTranslateContext.IVariable
         {
-            internal TempVar(LocalScope InLocalScope, string InVarName)
+            internal TempVar(
+                LocalScope InLocalScope
+                , string InVarName
+                , ISyntaxTreeNode InBoundNode
+                , string InBoundNodeKey
+                )
             {
                 HostScope = InLocalScope;
                 Name = InVarName;
                 VarType = CommonTypeInfos.Any;
+                BoundNode = InBoundNode;
+                BoundNodeKey = InBoundNodeKey;
             }
 
             // Begin IVariable interfaces
@@ -190,6 +226,16 @@ namespace nf.protoscript.translator.expression
             public TypeInfo VarType { get; }
             public IExprTranslateContext.IScope HostScope { get; }
             // ~ End IVariable interfaces.
+
+            /// <summary>
+            /// Node bound with the temp-var
+            /// </summary>
+            public ISyntaxTreeNode BoundNode { get; }
+
+            /// <summary>
+            /// Key bound with the temp-var
+            /// </summary>
+            public string BoundNodeKey { get; }
 
         }
 
