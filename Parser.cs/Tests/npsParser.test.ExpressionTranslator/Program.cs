@@ -7,6 +7,7 @@ using nf.protoscript.syntaxtree;
 using nf.protoscript.test;
 using nf.protoscript.translator.expression;
 using nf.protoscript.translator.expression.DefaultSnippetElements;
+using nf.protoscript.translator.expression.schemeSelectors;
 
 namespace npsParser.test.ExpressionTranslator
 {
@@ -21,6 +22,8 @@ namespace npsParser.test.ExpressionTranslator
 
 
             // Default host object scheme for methods
+            #region Default Schemes
+
             var exprTrans = new ExprTranslatorDefault();
             {
                 exprTrans.DefaultInitTempVarScheme = new STNodeTranslateSchemeDefault(
@@ -50,36 +53,12 @@ namespace npsParser.test.ExpressionTranslator
                 });
                 exprTrans.DefaultVarRefScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 {
-                    ////Present "%{VarName}%",
-                    //["Present"] = new STNodeTranslateSnippet(
-                    //    new ElementReplaceSubNodeValue("HOST")
-                    //    , new ElementVarName()
-                    //    )
-                    //,
-                    ["PreStatement"] = new STNodeTranslateSnippet(
-                        new ElementAddTempVar("Var",
-                            new ElementReplaceSubNodeValue("HOST")
-                            , new ElementConstString("get")
-                            , new ElementVarName()
-                            , new ElementConstString("()")
-                            )
-                        )
-                    ,
+                    //Present "%{VarName}%",
                     ["Present"] = new STNodeTranslateSnippet(
-                        new ElementTempVar("Var")
+                        new ElementReplaceSubNodeValue("HOST")
+                        , new ElementVarName()
                         )
                     ,
-                    ["PostStatementRev"] = new STNodeTranslateSnippet(
-                        new ElementConstString("// PostStatement for REF ")
-                        , new ElementVarName()
-                        , new ElementNewLine()
-                        , new ElementReplaceSubNodeValue("HOST")
-                        , new ElementConstString("set")
-                        , new ElementVarName()
-                        , new ElementConstString("(")
-                        , new ElementTempVar("Var")
-                        , new ElementConstString(")")
-                        )
                 });
                 exprTrans.DefaultVarSetScheme = new STNodeTranslateSchemeDefault()
                 {
@@ -140,6 +119,92 @@ namespace npsParser.test.ExpressionTranslator
                 });
             }
 
+            #endregion
+            // ~ Default Schemes
+
+
+            // Scheme Selectors
+            #region Special Scheme Selectors
+
+            {
+                #region Special Member Access for SetterProperty
+                // Special Member Access for SetterProperty 
+                {
+                    Func<TypeInfo, string, ElementInfo, bool> condSetterProperty = (InTypeInfo, InPropName, InElementInfo) =>
+                    {
+                        var setterAttr = InElementInfo.FindTheFirstSubInfoWithName<AttributeInfo>("setter");
+                        if (null != setterAttr)
+                        {
+                            return true;
+                        }
+                        return false;
+                    };
+                    exprTrans.AddMemberAccessSchemeSelector(
+                        new MemberAccessSchemeSelector_Lambda(
+                            "SetterProperty_Set"
+                            , 0
+                            , EExprVarAccessType.Set
+                            , condSetterProperty
+                            , new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
+                            {
+                                ["Present"] = new STNodeTranslateSnippet(
+                                    new ElementReplaceSubNodeValue("HOST")
+                                    , new ElementConstString("set")
+                                    , new ElementVarName()
+                                    , new ElementConstString("(")
+                                    , new ElementReplaceSubNodeValue("RHS")
+                                    , new ElementConstString(")")
+                                    )
+                            }
+                            )
+                        )
+                    );
+                    exprTrans.AddMemberAccessSchemeSelector(
+                        new MemberAccessSchemeSelector_Lambda(
+                            "SetterProperty_Ref"
+                            , 0
+                            , EExprVarAccessType.Ref
+                            , condSetterProperty
+                            , new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
+                            {
+                                ["PreStatement"] = new STNodeTranslateSnippet(
+                                    new ElementConstString("// PreStatement for SetterProperty_Ref ")
+                                    , new ElementVarName()
+                                    , new ElementNewLine()
+                                    , new ElementAddTempVar("Var",
+                                        new ElementReplaceSubNodeValue("HOST")
+                                        , new ElementConstString("get")
+                                        , new ElementVarName()
+                                        , new ElementConstString("()")
+                                        )
+                                    )
+                                ,
+                                ["Present"] = new STNodeTranslateSnippet(
+                                    new ElementTempVar("Var")
+                                    )
+                                ,
+                                ["PostStatementRev"] = new STNodeTranslateSnippet(
+                                    new ElementConstString("// PostStatement for SetterProperty_Ref ")
+                                    , new ElementVarName()
+                                    , new ElementNewLine()
+                                    , new ElementReplaceSubNodeValue("HOST")
+                                    , new ElementConstString("set")
+                                    , new ElementVarName()
+                                    , new ElementConstString("(")
+                                    , new ElementTempVar("Var")
+                                    , new ElementConstString(")")
+                                    )
+                            }
+                            )
+                        )
+                    );
+                }
+                // ~ Special Member Access for SetterProperty
+                #endregion
+            }
+
+            #endregion
+            // ~ Scheme Selectors
 
             //TestCases.BasicLanguage().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
             //TestCases.BasicDataBinding().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));

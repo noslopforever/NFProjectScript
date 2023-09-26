@@ -10,6 +10,7 @@ namespace nf.protoscript.translator.expression
         : ExprTranslatorAbstract
     {
 
+        // Begin ExprTranslatorAbstract interfaces
 
         protected override ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode)
         {
@@ -56,15 +57,23 @@ namespace nf.protoscript.translator.expression
             if (elemInfo == null)
             {
                 OutMemberType = CommonTypeInfos.Any;
+                // TODO log warning: cannot find the property in type.
             }
             else
             {
                 OutMemberType = elemInfo.ElementType;
-
-                // TODO find Member specific accessors
-
             }
 
+            // Find special MemberAccess schemes by (HostType, PropertyName)
+            foreach (var selectorKvp in _memberAccessSelectors)
+            {
+                if (selectorKvp.Value.IsMatch(InAccessType, InContextType, InMemberID, elemInfo))
+                {
+                    return selectorKvp.Value.Scheme;
+                }
+            }
+
+            // Return default InScheme.
             switch (InAccessType)
             {
                 case EExprVarAccessType.Get:
@@ -128,13 +137,57 @@ namespace nf.protoscript.translator.expression
             return DefaultHostAccessScheme;
         }
 
-        public STNodeTranslateSchemeDefault DefaultInitTempVarScheme { get; set; }
-        public STNodeTranslateSchemeDefault DefaultConstScheme { get; set; }
-        public STNodeTranslateSchemeDefault DefaultVarGetScheme { get; set; }
-        public STNodeTranslateSchemeDefault DefaultVarRefScheme { get; set; }
-        public STNodeTranslateSchemeDefault DefaultVarSetScheme { get; set; }
-        public STNodeTranslateSchemeDefault DefaultBinOpScheme { get; set; }
-        public STNodeTranslateSchemeDefault DefaultHostAccessScheme { get; set; }
+        // ~ End ExprTranslatorAbstract interfaces
+
+
+        /// <summary>
+        /// Register a MemberAccess SchemeSelector.
+        /// </summary>
+        /// <param name="InSelector"></param>
+        public void AddMemberAccessSchemeSelector(IMemberAccessSchemeSelector InSelector)
+        {
+            _memberAccessSelectors.Add(InSelector.Priority, InSelector);
+        }
+
+        //
+        // Default schemes
+        //
+
+        public ISTNodeTranslateScheme DefaultInitTempVarScheme { get; set; }
+        public ISTNodeTranslateScheme DefaultConstScheme { get; set; }
+        public ISTNodeTranslateScheme DefaultVarGetScheme { get; set; }
+        public ISTNodeTranslateScheme DefaultVarRefScheme { get; set; }
+        public ISTNodeTranslateScheme DefaultVarSetScheme { get; set; }
+        public ISTNodeTranslateScheme DefaultBinOpScheme { get; set; }
+        public ISTNodeTranslateScheme DefaultHostAccessScheme { get; set; }
+
+        //
+        // Scheme Selectors
+        //
+
+        SortedList<int, IMemberAccessSchemeSelector> _memberAccessSelectors 
+            = new SortedList<int, IMemberAccessSchemeSelector>(new DuplicateKeyComparer<int>());
+
+
+
+        // TODO Move it into the 'Base' project.
+        class DuplicateKeyComparer<TKey>
+            : IComparer<TKey> where TKey : IComparable
+        {
+            #region IComparer<TKey> Members
+
+            public int Compare(TKey x, TKey y)
+            {
+                int result = x.CompareTo(y);
+
+                if (result == 0)
+                    return 1; // Handle equality as being greater. Note: this will break Remove(key) or
+                else          // IndexOfKey(key) since the comparer never returns 0 to signal key equality
+                    return result;
+            }
+
+            #endregion
+        }
 
     }
 

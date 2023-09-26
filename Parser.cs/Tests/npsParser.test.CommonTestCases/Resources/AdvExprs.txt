@@ -5,6 +5,8 @@ value IntColor
 
 model TestObj
 	-IntColor Color @setter
+	+TestSetterProp(InParam:IntColor)
+		> Color = InParam
 
 model Test
 	+TestMethod(InParam0:TestObj)
