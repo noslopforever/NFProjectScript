@@ -17,15 +17,6 @@ namespace nf.protoscript.translator.expression
             throw new NotImplementedException();
         }
 
-        public override ISTNodeTranslateScheme QueryInitTempVarScheme(
-            ISyntaxTreeNode InTranslatingNode
-            , string InName
-            , ISTNodeTranslateSchemeInstance InTempVarInitValue
-            )
-        {
-            return DefaultInitTempVarScheme;
-        }
-
         protected override ISTNodeTranslateScheme QueryNullScheme(TypeInfo InConstType)
         {
             throw new NotImplementedException();
@@ -153,7 +144,6 @@ namespace nf.protoscript.translator.expression
         // Default schemes
         //
 
-        public ISTNodeTranslateScheme DefaultInitTempVarScheme { get; set; }
         public ISTNodeTranslateScheme DefaultConstScheme { get; set; }
         public ISTNodeTranslateScheme DefaultVarGetScheme { get; set; }
         public ISTNodeTranslateScheme DefaultVarRefScheme { get; set; }

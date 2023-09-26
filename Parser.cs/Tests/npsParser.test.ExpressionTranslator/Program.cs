@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -26,14 +26,6 @@ namespace npsParser.test.ExpressionTranslator
 
             var exprTrans = new ExprTranslatorDefault();
             {
-                exprTrans.DefaultInitTempVarScheme = new STNodeTranslateSchemeDefault(
-                    new STNodeTranslateSnippet(
-                        new ElementConstString("auto ")
-                        , new ElementReplaceSubNodeValue("TEMPVARNAME")
-                        , new ElementConstString(" = ")
-                        , new ElementReplaceSubNodeValue("TEMPVARVALUE")
-                        )
-                    );
                 exprTrans.DefaultHostAccessScheme = new STNodeTranslateSchemeDefault()
                 {
                     Present = new STNodeTranslateSnippet(
@@ -79,27 +71,30 @@ namespace npsParser.test.ExpressionTranslator
                             ),
                 }
                 ;
-                //exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault()
+                //exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 //{
                 //    // Present: "%{LHS}% %{OpCode}% %{RHS}%"
-                //    Present = new STNodeTranslateSnippet(
+                //    ["Present"] = new STNodeTranslateSnippet(
                 //        new ElementReplaceSubNodeValue("LHS")
                 //        , new ElementConstString(" ")
                 //        , new ElementReplaceSubNodeValue("OpCode")
                 //        , new ElementConstString(" ")
                 //        , new ElementReplaceSubNodeValue("RHS")
                 //    )
-                //};
+                //})
+                //;
                 exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 {
                     ["PreStatement"] = new STNodeTranslateSnippet(
-                        new ElementAddTempVar("LHS"
-                            , new ElementReplaceSubNodeValue("LHS")
-                            )
+                        new ElementConstString("auto ")
+                        , new ElementTempVar("LHS")
+                        , new ElementConstString(" = ")
+                        , new ElementReplaceSubNodeValue("LHS")
                         , new ElementNewLine()
-                        , new ElementAddTempVar("RHS"
-                            , new ElementReplaceSubNodeValue("RHS")
-                            )
+                        , new ElementConstString("auto ")
+                        , new ElementTempVar("RHS")
+                        , new ElementConstString(" = ")
+                        , new ElementReplaceSubNodeValue("RHS")
                         )
                         ,
                     ["Present"] = new STNodeTranslateSnippet(
@@ -109,13 +104,7 @@ namespace npsParser.test.ExpressionTranslator
                         , new ElementConstString(" ")
                         , new ElementTempVar("RHS")
                         )
-                        ,
-                    ["PostStatementRev"] = new STNodeTranslateSnippet(
-                        new ElementConstString("// Post statement REV of ")
-                        , new ElementTempVar("LHS")
-                        , new ElementConstString(" and ")
-                        , new ElementTempVar("RHS")
-                        )
+
                 });
             }
 
@@ -171,12 +160,13 @@ namespace npsParser.test.ExpressionTranslator
                                     new ElementConstString("// PreStatement for SetterProperty_Ref ")
                                     , new ElementVarName()
                                     , new ElementNewLine()
-                                    , new ElementAddTempVar("Var",
-                                        new ElementReplaceSubNodeValue("HOST")
-                                        , new ElementConstString("get")
-                                        , new ElementVarName()
-                                        , new ElementConstString("()")
-                                        )
+                                    , new ElementConstString("auto ")
+                                    , new ElementTempVar("Var")
+                                    , new ElementConstString("= ")
+                                    , new ElementReplaceSubNodeValue("HOST")
+                                    , new ElementConstString("get")
+                                    , new ElementVarName()
+                                    , new ElementConstString("()")
                                     )
                                 ,
                                 ["Present"] = new STNodeTranslateSnippet(

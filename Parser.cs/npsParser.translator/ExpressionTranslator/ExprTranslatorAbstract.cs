@@ -118,19 +118,6 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
 
-        /// <summary>
-        /// Return the scheme to init TempVars.
-        /// </summary>
-        /// <param name="InTranslatingNode"></param>
-        /// <param name="InName"></param>
-        /// <param name="InTempVarInitValue"></param>
-        /// <returns></returns>
-        public abstract ISTNodeTranslateScheme QueryInitTempVarScheme(
-            ISyntaxTreeNode InTranslatingNode
-            , string InName
-            , ISTNodeTranslateSchemeInstance InTempVarInitValue
-            );
-
         //
         // Constant access Schemes
         //

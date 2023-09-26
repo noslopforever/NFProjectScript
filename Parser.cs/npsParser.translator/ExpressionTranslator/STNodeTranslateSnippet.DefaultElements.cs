@@ -159,77 +159,6 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
 
     /// <summary>
-    /// Add Temporary variable in current Context.
-    /// </summary>
-    public class ElementAddTempVar
-        : ElementProxyAbstract
-    {
-        //public ElementTempVar(string InKey)
-        //{
-        //    Key = InKey;
-        //}
-        public ElementAddTempVar(string InKey, STNodeTranslateSnippet InInitSnippet)
-            : base(InInitSnippet)
-        {
-            Key = InKey;
-        }
-        public ElementAddTempVar(string InKey, params STNodeTranslateSnippet.IElement[] InInitElements)
-            : base(new STNodeTranslateSnippet(InInitElements))
-        {
-            Key = InKey;
-        }
-
-        /// <summary>
-        /// Key name of the temp-var
-        /// </summary>
-        public string Key { get; }
-
-        public override IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
-        {
-            //IExprTranslateContext.IVariable var = InHolderSchemeInstance.EnsureTempVar(Key, InHolderSchemeInstance.NodeToTranslate, InitSnippet);
-            IExprTranslateContext.IVariable var = InHolderSchemeInstance.GetTempVar(Key);
-            if (var == null)
-            {
-                // Acquire TempVar init value SI.
-                var tempVarInitValueScheme = new STNodeTranslateSchemeDefault(ProxySnippet);
-                var tempVarInitValueSI = tempVarInitValueScheme.CreateProxyInstance(InHolderSchemeInstance);
-
-                // Add TempVar and cache it in SI.
-                var = InHolderSchemeInstance.TranslateContext.AddTempVar(
-                    InHolderSchemeInstance.NodeToTranslate
-                    , Key
-                    );
-                InHolderSchemeInstance.AddTempVar(Key, var);
-
-                // Generate temp var init code.
-                var tempVarInitScheme = InHolderSchemeInstance.Translator.QueryInitTempVarScheme(
-                    InHolderSchemeInstance.NodeToTranslate
-                    , Key
-                    , tempVarInitValueSI
-                    );
-                var tempVarInitSI = tempVarInitScheme.CreateInstance(
-                    InHolderSchemeInstance.Translator
-                    , InHolderSchemeInstance.TranslateContext
-                    , InHolderSchemeInstance.NodeToTranslate
-                    );
-                tempVarInitSI.SetEnvVariable("TEMPVARNAME", var.Name);
-                tempVarInitSI.AddPrerequisiteScheme("TEMPVARVALUE", tempVarInitValueSI);
-
-                var tempVarInitCodes = new List<string>();
-                InHolderSchemeInstance.Translator.TranslateOneStatement(tempVarInitCodes, tempVarInitSI);
-
-                //// Add new line at last
-                //tempVarInitCodes.Add("");
-
-                return tempVarInitCodes;
-            }
-
-            // Only once.
-            return new string[] { "" };
-        }
-    }
-
-    /// <summary>
     /// Reference A temporary variable in current Context.
     /// </summary>
     public class ElementTempVar
@@ -248,11 +177,16 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
             IExprTranslateContext.IVariable var = InHolderSchemeInstance.GetTempVar(Key);
-            if (var != null)
+            if (var == null)
             {
-                return new string[] { var.Name };
+                // Add TempVar and cache it in SI.
+                var = InHolderSchemeInstance.TranslateContext.AddTempVar(
+                    InHolderSchemeInstance.NodeToTranslate
+                    , Key
+                    );
+                InHolderSchemeInstance.AddTempVar(Key, var);
             }
-            return new string[] { $"<<INVALID_TEMP_VAR_{Key}>>" };
+            return new string[] { var.Name };
         }
 
     }
