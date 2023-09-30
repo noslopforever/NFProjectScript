@@ -99,21 +99,6 @@ namespace nf.protoscript.translator.expression
                 return null;
             }
 
-            public IReadOnlyList<string> GetVarValue(string InKey, string InStageName)
-            {
-                // Find prerequisite
-                var schemeInst = this.FindPrerequisite(InKey);
-                if (schemeInst != null)
-                {
-                    var result = schemeInst.GetResult(InStageName);
-                    return result;
-                }
-
-                // Find data in context
-                var ctxValStr = TranslatingContext.GetContextValueString(InKey);
-                return new string[] { ctxValStr };
-            }
-
             // ~ End ISTNodeTranslateSchemeInstance interfaces
 
 

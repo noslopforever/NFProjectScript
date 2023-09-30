@@ -53,14 +53,6 @@ namespace nf.protoscript.translator.expression
         /// <returns></returns>
         ISTNodeTranslateSchemeInstance FindPrerequisite(string InKey);
 
-        /// <summary>
-        /// Get Var value, the var may comes from EnvVariable, NodeValue, or Referenced-SchemeInstances.
-        /// </summary>
-        /// <param name="InKey"></param>
-        /// <param name="InStageName"></param>
-        /// <returns></returns>
-        IReadOnlyList<string> GetVarValue(string InKey, string InStageName);
-
     }
 
     /// <summary>
