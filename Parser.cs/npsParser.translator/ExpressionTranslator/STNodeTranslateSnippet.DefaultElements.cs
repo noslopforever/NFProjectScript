@@ -112,7 +112,7 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            return new string[] { InHolderSchemeInstance.GetVarValue(Key, StageName) };
+            return InHolderSchemeInstance.GetVarValue(Key, StageName);
         }
     }
 

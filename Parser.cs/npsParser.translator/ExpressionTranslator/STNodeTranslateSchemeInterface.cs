@@ -59,7 +59,7 @@ namespace nf.protoscript.translator.expression
         /// <param name="InKey"></param>
         /// <param name="InStageName"></param>
         /// <returns></returns>
-        string GetVarValue(string InKey, string InStageName);
+        IReadOnlyList<string> GetVarValue(string InKey, string InStageName);
 
     }
 
