@@ -7,14 +7,14 @@ namespace nf.protoscript.translator.expression
 
 
     /// <summary>
-    /// Runtime context created by info-translators to describe the environment of the translating expression.
+    /// Runtime environment created by info-translators to describe the environment of the translating expression.
     /// </summary>
     /// <example>
     /// Member init-expression:
     /// model Person
     ///     age = 32
     /// 
-    /// The translate context should be:
+    /// The translate environment should be:
     ///     HostInfo: Person (a TypeInfo)
     ///     ScopeChain:
     ///             ScopeInfo       | ScopeName | ScopePresent
@@ -28,7 +28,7 @@ namespace nf.protoscript.translator.expression
     ///     + talk(Other)
     ///         > var = 32
     /// 
-    /// The translate context should be:
+    /// The translate environment should be:
     ///     HostInfo: Person.talk (a MethodInfo)
     ///     ScopeChain:
     ///             ScopeInfo       | ScopeName | ScopePresent
@@ -37,7 +37,7 @@ namespace nf.protoscript.translator.expression
     ///         Person(TypeInfo)    | this      | "this->"
     ///         talk (MethodInfo)   | method    | ""
     /// </example>
-    public interface IExprTranslateContext
+    public interface IExprTranslateEnvironment
     {
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace nf.protoscript.translator.expression
         public interface IScope
         {
             /// <summary>
-            /// Context info bound with the scope.
+            /// Info bound with the scope.
             /// </summary>
             Info ScopeInfo { get; }
 
@@ -77,7 +77,7 @@ namespace nf.protoscript.translator.expression
         }
 
         /// <summary>
-        /// Variable found by this context.
+        /// Variable found by this environment.
         /// 
         /// The variable may be a Temporary variable which had not been bound with an ElementInfo.
         /// 
@@ -104,6 +104,11 @@ namespace nf.protoscript.translator.expression
             /// </summary>
             IScope HostScope { get; }
 
+            /// <summary>
+            /// Element Info of this variable. Null if the variable is a temporary variable.
+            /// </summary>
+            ElementInfo ElementInfo { get; }
+
         }
 
         /// <summary>
@@ -115,7 +120,7 @@ namespace nf.protoscript.translator.expression
 
 
         /// <summary>
-        /// Add Temporary variable to this context.
+        /// Add Temporary variable to this environment.
         /// </summary>
         /// <param name="InNodeToTranslate"></param>
         /// <param name="InTempVarKey"></param>
@@ -124,10 +129,10 @@ namespace nf.protoscript.translator.expression
         IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey);
 
         /// <summary>
-        /// Find a temp var in this context, if not have, add it.
+        /// Find a temp var in this environment, if not have, add it.
         /// </summary>
-        /// <param name="inHolderSchemeInstance"></param>
-        /// <param name="key"></param>
+        /// <param name="InNodeToTranslate">Current translating node, nullable.</param>
+        /// <param name="InKey"></param>
         /// <returns></returns>
         IVariable EnsureTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey);
 

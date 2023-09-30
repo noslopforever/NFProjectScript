@@ -1,7 +1,10 @@
+using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using static nf.protoscript.translator.expression.ExprTranslatorAbstract;
+using System.Runtime.CompilerServices;
 
 namespace nf.protoscript.translator.expression
 {
@@ -15,10 +18,10 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public class STNodeVisitor_GetNodeValue
         {
-            public STNodeVisitor_GetNodeValue(ExprTranslatorAbstract InHostTranslator, IExprTranslateContext InContext)
+            public STNodeVisitor_GetNodeValue(ExprTranslatorAbstract InHostTranslator, ITranslatingContext InParentContext)
             {
                 HostTranslator = InHostTranslator;
-                ExprTranslateContext = InContext;
+                ParentContext = InParentContext;
             }
 
             /// <summary>
@@ -27,9 +30,9 @@ namespace nf.protoscript.translator.expression
             public ExprTranslatorAbstract HostTranslator { get; }
 
             /// <summary>
-            /// Expr translate context.
+            /// Translating Context.
             /// </summary>
-            public IExprTranslateContext ExprTranslateContext { get; }
+            public ITranslatingContext ParentContext { get; }
 
             /// <summary>
             /// The scheme to translate the visiting STNode, found by this visitor after Visit .
@@ -46,43 +49,45 @@ namespace nf.protoscript.translator.expression
             /// </summary>
             public virtual void Visit(STNodeConstant InConst)
             {
+                ITranslatingContext ctx = null;
+                ISTNodeTranslateScheme scheme = null;
                 if (InConst.Value == null)
                 {
+                    ctx = ConstNodeContext.Null(ParentContext, InConst);
+                    scheme = HostTranslator.FindBestScheme(ctx, SystemScheme_Const);
                     PredictScope = InConst.Type;
-                    var scheme = HostTranslator.QueryNullScheme(InConst.Type);
-                    ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ExprTranslateContext, InConst);
                 }
                 else if (InConst.Value.GetType().IsValueType)
                 {
                     Type valueType = InConst.Value.GetType();
-
+                    ctx = ConstNodeContext.Const(ParentContext, InConst, InConst.Value.ToString());
+                    scheme = HostTranslator.FindBestScheme(ctx, SystemScheme_Const);
                     PredictScope = InConst.Type;
-                    var scheme = HostTranslator.QueryConstGetScheme(InConst.Type, InConst.Value.ToString());
-                    ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ExprTranslateContext, InConst);
                 }
                 else if (InConst.Value is string)
                 {
+                    ctx = ConstNodeContext.Const(ParentContext, InConst, InConst.Value as string);
+                    scheme = HostTranslator.FindBestScheme(ctx, SystemScheme_Const);
                     PredictScope = InConst.Type;
-                    var scheme = HostTranslator.QueryConstGetStringScheme(InConst.Type, InConst.Value as string);
-                    ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ExprTranslateContext, InConst);
                 }
                 else if (InConst.Value is Info)
                 {
+                    ctx = ConstNodeContext.Const(ParentContext, InConst, InConst.Value as Info);
+                    scheme = HostTranslator.FindBestScheme(ctx, SystemScheme_Const);
                     PredictScope = InConst.Type;
-                    var scheme = HostTranslator.QueryConstGetInfoScheme(InConst.Type, InConst.Value as Info);
-                    ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ExprTranslateContext, InConst);
                 }
                 else
                 {
-                    ResultSchemeInstance = HostTranslator.ErrorScheme(InConst)
-                        .CreateInstance(HostTranslator, ExprTranslateContext, InConst)
-                        ;
+                    ctx = new OnlyNodeContext(ParentContext, InConst);
+                    scheme = HostTranslator.FindBestScheme(ctx, SystemScheme_Error);
+                    PredictScope = null;
                 }
+                ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ctx);
             }
 
             public virtual void Visit(STNodeVar InVarNode)
             {
-                _Handle_VarAccessScheme(InVarNode, EExprVarAccessType.Get, out var outSI, out var outPredType);
+                LoadVarAccessSI(InVarNode, EExprVarAccessType.Get, out var outSI, out var outPredType);
                 ResultSchemeInstance = outSI;
                 PredictScope = outPredType;
             }
@@ -90,11 +95,13 @@ namespace nf.protoscript.translator.expression
             public virtual void Visit(STNodeMemberAccess InSubNode)
             {
                 // Visit host node first.
-                STNodeVisitor_GetNodeValue hostVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ExprTranslateContext);
+                STNodeVisitor_GetNodeValue hostVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ParentContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InSubNode.LHS, hostVisitor);
 
-                // Use host to find the best scheme for GETTing the member.
-                _Handle_MemberAccess(hostVisitor.ResultSchemeInstance, hostVisitor.PredictScope, InSubNode, EExprVarAccessType.Get, out var outVarType, out var outSI);
+                // Use host to find the best scheme for Accessing the member.
+                LoadMemberAccessSI(hostVisitor.PredictScope, InSubNode, EExprVarAccessType.Get, out var outVarType, out var outSI);
+                outSI.AddPrerequisiteScheme("HOST", hostVisitor.ResultSchemeInstance);
+
                 ResultSchemeInstance = outSI;
                 PredictScope = outVarType;
             }
@@ -102,11 +109,11 @@ namespace nf.protoscript.translator.expression
             public virtual void Visit(STNodeAssign InAssignNode)
             {
                 // Order: Right > Left, Handle RHS first.
-                STNodeVisitor_GetNodeValue rhsVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ExprTranslateContext);
+                STNodeVisitor_GetNodeValue rhsVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ParentContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InAssignNode.RHS, rhsVisitor);
 
                 // Handle LHS hands. Visit it by 'set' visitor.
-                STNodeVisitor_GatherSetScheme lhsVisitor = new STNodeVisitor_GatherSetScheme(HostTranslator, ExprTranslateContext, rhsVisitor.PredictScope);
+                STNodeVisitor_GatherSetScheme lhsVisitor = new STNodeVisitor_GatherSetScheme(HostTranslator, ParentContext, rhsVisitor.PredictScope);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InAssignNode.LHS, lhsVisitor);
 
                 // Add RHS scheme to the LHS's prerequistites.
@@ -117,21 +124,23 @@ namespace nf.protoscript.translator.expression
             }
             public virtual void Visit(STNodeBinaryOp InBinOpNode)
             {
-                STNodeVisitor_GetNodeValue lhsVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ExprTranslateContext);
+                STNodeVisitor_GetNodeValue lhsVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ParentContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InBinOpNode.LHS, lhsVisitor);
 
-                STNodeVisitor_GetNodeValue rhsVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ExprTranslateContext);
+                STNodeVisitor_GetNodeValue rhsVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ParentContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InBinOpNode.RHS, rhsVisitor);
 
                 // Construct op scheme and return.
-                TypeInfo opResultType = null;
-                var opScheme = HostTranslator.QueryBinOpScheme(InBinOpNode, lhsVisitor.PredictScope, rhsVisitor.PredictScope, out opResultType);
-                ResultSchemeInstance = opScheme.CreateInstance(HostTranslator, ExprTranslateContext, InBinOpNode);
+                var ctx = new OnlyNodeContext(ParentContext, InBinOpNode);
+                var opScheme = HostTranslator.FindBestScheme(ctx, SystemScheme_BinOp);
+                ResultSchemeInstance = opScheme.CreateInstance(HostTranslator, ctx);
 
                 ResultSchemeInstance.AddPrerequisiteScheme("LHS", lhsVisitor.ResultSchemeInstance);
                 ResultSchemeInstance.AddPrerequisiteScheme("RHS", rhsVisitor.ResultSchemeInstance);
 
-                PredictScope = opResultType;
+                // TODO Let Parser decide the result type of a bin-op.
+                //throw new NotImplementedException();
+                PredictScope = CommonTypeInfos.Any;
             }
             public virtual void Visit(STNodeCall InCallNode)
             {
@@ -146,67 +155,56 @@ namespace nf.protoscript.translator.expression
                 throw new NotImplementedException();
             }
 
-            protected void _Handle_VarAccessScheme(STNodeVar InVarNode, EExprVarAccessType InAccessType, out ISTNodeTranslateSchemeInstance OutSchemeInstance, out TypeInfo OutPredictType)
+            protected void LoadVarAccessSI(STNodeVar InVarNode, EExprVarAccessType InAccessType, out ISTNodeTranslateSchemeInstance OutSchemeInstance, out TypeInfo OutPredictType)
             {
-                // Try find the variable in the host-scope.
-                var hostScopeVar = ExprTranslateContext.FindVariable(InVarNode.IDName);
+
+                // Try find the variable in the environment's scope-chain.
+                var hostScopeVar = ParentContext.RootEnvironment.FindVariable(InVarNode.IDName);
                 if (hostScopeVar == null)
                 {
                     OutPredictType = null;
-                    OutSchemeInstance = HostTranslator.ErrorScheme(InVarNode).CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
+                    var errorCtx = new OnlyNodeContext(ParentContext, InVarNode);
+                    var scheme = HostTranslator.FindBestScheme(errorCtx, SystemScheme_Error);
+                    OutSchemeInstance = scheme.CreateInstance(HostTranslator, errorCtx);
                     return;
                 }
 
-                // Find translate-scheme for MEMBER-ACCESS call.
                 TypeInfo varType = hostScopeVar.VarType;
-                ISTNodeTranslateScheme hostAccVarScheme = null;
-                if (hostScopeVar.HostScope.ScopeInfo is TypeInfo)
-                {
-                    TypeInfo memberVarType = null;
-                    hostAccVarScheme = HostTranslator.QueryMemberAccessScheme(InAccessType, hostScopeVar.HostScope.ScopeInfo as TypeInfo, hostScopeVar.Name, out memberVarType);
-                    Debug.Assert(memberVarType == varType);
-                }
-                else if (hostScopeVar.HostScope.ScopeInfo is ProjectInfo)
-                {
-                    hostAccVarScheme = HostTranslator.QueryGlobalVarAccessScheme(InAccessType, hostScopeVar.HostScope.ScopeInfo as ProjectInfo, hostScopeVar.Name);
-                }
-                else if (hostScopeVar.HostScope.ScopeInfo is ElementInfo)
-                {
-                    // TODO Make sure the scope is the method scope.
-                    hostAccVarScheme = HostTranslator.QueryMethodVarAccessScheme(InAccessType, ExprTranslateContext, hostScopeVar.HostScope.ScopeInfo as ElementInfo, hostScopeVar.Name);
-                    // TODO handle member archetypes.
-                }
+                var ctx = new VarContext(ParentContext, InVarNode, hostScopeVar);
+                ISTNodeTranslateScheme varAccessScheme = HostTranslator.FindBestScheme(ctx, SystemScheme_VarAccess(InAccessType));
 
                 // Create scheme instance
-                OutSchemeInstance = hostAccVarScheme.CreateInstance(HostTranslator, ExprTranslateContext, InVarNode);
+                OutSchemeInstance = varAccessScheme.CreateInstance(HostTranslator, ctx);
 
-                // Set the host's present code to the '%{Host}%' variable.
-                OutSchemeInstance.SetEnvVariable("HOST", hostScopeVar.HostScope.ScopePresentCode);
+                // -- Host will be set by the contexts and environments
+                //// Set the host's present code to the '%{Host}%' variable.
+                //OutSchemeInstance.SetEnvVariable("HOST", hostScopeVar.HostScope.ScopePresentCode);
 
                 OutPredictType = varType;
             }
 
-            protected void _Handle_MemberAccess(
-                ISTNodeTranslateSchemeInstance InHostSI
-                , TypeInfo InHostPredictType
-                , STNodeMemberAccess InSubNode
+            protected void LoadMemberAccessSI(
+                TypeInfo InHostPredictType
+                , STNodeMemberAccess InMemberAccess
                 , EExprVarAccessType InAccessType
                 , out TypeInfo OutMemberType
                 , out ISTNodeTranslateSchemeInstance OutSI
                 )
             {
-                TypeInfo varType = null;
-                var memberAccScheme = HostTranslator.QueryMemberAccessScheme(InAccessType, InHostPredictType, InSubNode.MemberID, out varType);
-                OutSI = memberAccScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
+                var elemInfo = InfoHelper.FindPropertyOfType(InHostPredictType, InMemberAccess.MemberID);
+                if (elemInfo == null)
+                {
+                    // TODO log warning: cannot find the property in type.
+                    OutMemberType = CommonTypeInfos.Any;
+                }
+                else
+                {
+                    OutMemberType = elemInfo.ElementType;
+                }
 
-                // Use host-access wrapper for generating HOST codes for the member.
-                var hostAccessScheme = HostTranslator.QueryHostAccessScheme(InSubNode, InHostPredictType);
-                var hostAccessSchemeInstance = hostAccessScheme.CreateInstance(HostTranslator, ExprTranslateContext, InSubNode);
-                hostAccessSchemeInstance.AddPrerequisiteScheme("HOSTOBJ", InHostSI);
-
-                OutSI.AddPrerequisiteScheme("HOST", hostAccessSchemeInstance);
-
-                OutMemberType = varType;
+                var ctx = new MemberContext(ParentContext, InMemberAccess, elemInfo);
+                var scheme = HostTranslator.FindBestScheme(ctx, SystemScheme_VarAccess(InAccessType));
+                OutSI = scheme.CreateInstance(HostTranslator, ctx);
             }
 
 
@@ -218,7 +216,7 @@ namespace nf.protoscript.translator.expression
         public class STNodeVisitor_GatherSetScheme
             : STNodeVisitor_GetNodeValue
         {
-            public STNodeVisitor_GatherSetScheme(ExprTranslatorAbstract InHostTranslator, IExprTranslateContext InContext, TypeInfo InRHSScope)
+            public STNodeVisitor_GatherSetScheme(ExprTranslatorAbstract InHostTranslator, ITranslatingContext InContext, TypeInfo InRHSScope)
                 : base(InHostTranslator, InContext)
             {
                 RHSScope = InRHSScope;
@@ -232,7 +230,7 @@ namespace nf.protoscript.translator.expression
 
             public override void Visit(STNodeVar InVarNode)
             {
-                _Handle_VarAccessScheme(InVarNode, EExprVarAccessType.Set, out var outSI, out var outPredType);
+                LoadVarAccessSI(InVarNode, EExprVarAccessType.Set, out var outSI, out var outPredType);
                 ResultSchemeInstance = outSI;
                 PredictScope = outPredType;
             }
@@ -240,11 +238,13 @@ namespace nf.protoscript.translator.expression
             public override void Visit(STNodeMemberAccess InSubNode)
             {
                 // Visit host node first.
-                STNodeVisitor_GatherRefScheme hostVisitor = new STNodeVisitor_GatherRefScheme(HostTranslator, ExprTranslateContext);
+                STNodeVisitor_GatherRefScheme hostVisitor = new STNodeVisitor_GatherRefScheme(HostTranslator, ParentContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InSubNode.LHS, hostVisitor);
 
-                // Use host to find the best scheme for GETTing the member.
-                _Handle_MemberAccess(hostVisitor.ResultSchemeInstance, hostVisitor.PredictScope, InSubNode, EExprVarAccessType.Set, out var outVarType, out var outSI);
+                // Use host to find the best scheme for Setting the member.
+                LoadMemberAccessSI(hostVisitor.PredictScope, InSubNode, EExprVarAccessType.Set, out var outVarType, out var outSI);
+                outSI.AddPrerequisiteScheme("HOST", hostVisitor.ResultSchemeInstance);
+
                 ResultSchemeInstance = outSI;
                 PredictScope = outVarType;
             }
@@ -258,14 +258,14 @@ namespace nf.protoscript.translator.expression
         public class STNodeVisitor_GatherRefScheme
             : STNodeVisitor_GetNodeValue
         {
-            public STNodeVisitor_GatherRefScheme(ExprTranslatorAbstract InHostTranslator, IExprTranslateContext InContext)
+            public STNodeVisitor_GatherRefScheme(ExprTranslatorAbstract InHostTranslator, ITranslatingContext InContext)
                 : base(InHostTranslator, InContext)
             {
             }
 
             public override void Visit(STNodeVar InVarNode)
             {
-                _Handle_VarAccessScheme(InVarNode, EExprVarAccessType.Ref, out var outSI, out var outPredType);
+                LoadVarAccessSI(InVarNode, EExprVarAccessType.Ref, out var outSI, out var outPredType);
                 ResultSchemeInstance = outSI;
                 PredictScope = outPredType;
             }
@@ -273,11 +273,13 @@ namespace nf.protoscript.translator.expression
             public override void Visit(STNodeMemberAccess InSubNode)
             {
                 // Visit host node first.
-                STNodeVisitor_GatherRefScheme hostVisitor = new STNodeVisitor_GatherRefScheme(HostTranslator, ExprTranslateContext);
+                STNodeVisitor_GatherRefScheme hostVisitor = new STNodeVisitor_GatherRefScheme(HostTranslator, ParentContext);
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InSubNode.LHS, hostVisitor);
 
-                // Use host to find the best scheme for GETTing the member.
-                _Handle_MemberAccess(hostVisitor.ResultSchemeInstance, hostVisitor.PredictScope, InSubNode, EExprVarAccessType.Ref, out var outVarType, out var outSI);
+                // Use host to find the best scheme for Referring the member.
+                LoadMemberAccessSI(hostVisitor.PredictScope, InSubNode, EExprVarAccessType.Ref, out var outVarType, out var outSI);
+                outSI.AddPrerequisiteScheme("HOST", hostVisitor.ResultSchemeInstance);
+
                 ResultSchemeInstance = outSI;
                 PredictScope = outVarType;
             }
@@ -292,31 +294,36 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public class STNodeVisitor_Statement
         {
-            public STNodeVisitor_Statement(ExprTranslatorAbstract InHostTranslator, IExprTranslateContext InContext)
+            public STNodeVisitor_Statement(ExprTranslatorAbstract InHostTranslator, ITranslatingContext InContext)
             {
                 HostTranslator = InHostTranslator;
-                ExprTranslateContext = InContext;
+                ParentContext = InContext;
             }
 
             public ExprTranslatorAbstract HostTranslator { get; }
-            public IExprTranslateContext ExprTranslateContext { get; }
+            public ITranslatingContext ParentContext { get; }
 
             public List<ISTNodeTranslateSchemeInstance> TranslateSchemeInstances { get; } = new List<ISTNodeTranslateSchemeInstance>();
 
             public void Visit(ISyntaxTreeNode InOtherSTNode)
             {
+                var stmtCtx = new StatementContext(ParentContext, InOtherSTNode);
                 // Statement always starts with a getter visitor.
-                STNodeVisitor_GetNodeValue valueNodeVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ExprTranslateContext);
+                STNodeVisitor_GetNodeValue valueNodeVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, stmtCtx);
                 VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, valueNodeVisitor);
                 TranslateSchemeInstances.Add(valueNodeVisitor.ResultSchemeInstance);
             }
 
             public void Visit(STNodeSequence InNodes)
             {
+                // TODO Block statement
+
                 foreach (var subNode in InNodes.NodeList)
                 {
+                    var stmtCtx = new StatementContext(ParentContext, subNode);
+
                     // Statement always starts with a getter visitor.
-                    STNodeVisitor_Statement statementNodeVisitor = new STNodeVisitor_Statement(HostTranslator, ExprTranslateContext);
+                    STNodeVisitor_Statement statementNodeVisitor = new STNodeVisitor_Statement(HostTranslator, stmtCtx);
                     VisitByReflectionHelper.FindAndCallVisit(subNode, statementNodeVisitor);
 
                     // Merge translate-schemes of sub-statements.
@@ -330,14 +337,14 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public class STNodeVisitor_FunctionBody
         {
-            public STNodeVisitor_FunctionBody(ExprTranslatorAbstract InHostTranslator, IExprTranslateContext InContext)
+            public STNodeVisitor_FunctionBody(ExprTranslatorAbstract InHostTranslator, IExprTranslateEnvironment InEnvironment)
             {
                 HostTranslator = InHostTranslator;
-                ExprTranslateContext = InContext;
+                ExprTranslateEnvironment = InEnvironment;
             }
 
             public ExprTranslatorAbstract HostTranslator { get; }
-            public IExprTranslateContext ExprTranslateContext { get; }
+            public IExprTranslateEnvironment ExprTranslateEnvironment { get; }
             public List<ISTNodeTranslateSchemeInstance> TranslateSchemeInstances { get; private set; }
 
             /// <summary>
@@ -346,7 +353,8 @@ namespace nf.protoscript.translator.expression
             /// <param name="InOtherSTNode"></param>
             public void Visit(ISyntaxTreeNode InOtherSTNode)
             {
-                STNodeVisitor_Statement stmtVisitor = new STNodeVisitor_Statement(HostTranslator, ExprTranslateContext);
+                var rootCtx = new FuncBodyContext(ExprTranslateEnvironment);
+                STNodeVisitor_Statement stmtVisitor = new STNodeVisitor_Statement(HostTranslator, rootCtx);
                 VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, stmtVisitor);
                 TranslateSchemeInstances = stmtVisitor.TranslateSchemeInstances;
             }
@@ -355,7 +363,5 @@ namespace nf.protoscript.translator.expression
 
 
     }
-
-
 
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -25,13 +25,43 @@ namespace npsParser.test.ExpressionTranslator
 
             // Shared and generic schemes.
             {
+
+                // Default HostPresent Call
+                exprTrans.AddScheme("HostPresent"
+                    // %{HostPresent}% in the context.
+                    , new STNodeTranslateSnippet(
+                        new ElementReplaceSubNodeValue("HostPresent")
+                    )
+                );
+
+                // HostPresent for member call (HOST.MEMBER)
+                exprTrans.AddSchemeSelector(
+                    "HostPresent"
+                    , new STNodeTranslateSchemeSelector_Lambda(
+                        "HostPresent"
+                        , 0
+                        , ctx =>
+                        {
+                            return ctx is ExprTranslatorAbstract.MemberContext;
+                        }
+                        // TRef(%{HOST}%).
+                        , new STNodeTranslateSchemeDefault(
+                            new STNodeTranslateSnippet(
+                                new ElementConstString("TRef(")
+                                , new ElementReplaceSubNodeValue("HOST")
+                                , new ElementConstString(").")
+                            )
+                        )
+                    )
+                );
+
                 exprTrans.AddScheme("Getter"
                     , new STNodeTranslateSnippet(
                         new ElementConstString("get")
                         , new ElementVarName()
                         , new ElementConstString("()")
-                        )
-                    );
+                    )
+                );
 
                 exprTrans.AddScheme("Setter"
                     , new STNodeTranslateSnippet(
@@ -40,103 +70,110 @@ namespace npsParser.test.ExpressionTranslator
                         , new ElementConstString("(")
                         , new ElementReplaceSubNodeValue("RHS")
                         , new ElementConstString(")")
-                        )
-                    );
+                    )
+                );
 
-                exprTrans.AddScheme("InitTempVar"
+                exprTrans.AddScheme("InitTempVarBySelf"
                     , new STNodeTranslateSnippet(
                         new ElementConstString("auto ")
-                        , new ElementReplaceSubNodeValue("VARNAME")
+                        , new ElementTempVar("Var")
                         , new ElementConstString(" = ")
-                        , new ElementReplaceSubNodeValue("INITVAL")
-                        )
-                    );
+                        , new ElementCallOther(ExprTranslatorAbstract.SystemScheme_VarGet)
+                    )
+                );
+
             }
 
             // Default host object scheme for methods
             #region Default Schemes
 
             {
-                exprTrans.DefaultHostAccessScheme = new STNodeTranslateSchemeDefault()
-                {
-                    Present = new STNodeTranslateSnippet(
-                        new ElementConstString("TToRef(")
-                        , new ElementReplaceSubNodeValue("HOSTOBJ")
-                        , new ElementConstString(").")
-                        ),
-                };
-
-                exprTrans.DefaultVarGetScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
-                {
-                    //Present "%{VarName}%",
-                    ["Present"] = new STNodeTranslateSnippet(
-                        new ElementReplaceSubNodeValue("HOST")
-                        , new ElementVarName()
+                exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_Null
+                    , new Dictionary<string, STNodeTranslateSnippet>()
+                    {
+                        //Present "null",
+                        ["Present"] = new STNodeTranslateSnippet(
+                            new ElementConstString("null")
                         )
-                });
-                exprTrans.DefaultVarRefScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
-                {
-                    //Present "%{VarName}%",
-                    ["Present"] = new STNodeTranslateSnippet(
-                        new ElementReplaceSubNodeValue("HOST")
-                        , new ElementVarName()
+                    }
+                );
+                exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_Const
+                    , new Dictionary<string, STNodeTranslateSnippet>()
+                    {
+                        //Present "%{ValueString}%",
+                        ["Present"] = new STNodeTranslateSnippet(
+                            new ElementConstValueString()
                         )
-                    ,
-                });
-                exprTrans.DefaultVarSetScheme = new STNodeTranslateSchemeDefault()
-                {
-                    //Present: "%{VarName}%",
-                    Present = new STNodeTranslateSnippet(
-                        new ElementReplaceSubNodeValue("HOST")
-                        , new ElementVarName()
-                        , new ElementConstString(" = ")
-                        , new ElementReplaceSubNodeValue("RHS")
-                        ),
-                }
-                ;
-                exprTrans.DefaultConstScheme = new STNodeTranslateSchemeDefault()
-                {
-                    //Present: "%{ValueString}%)",
-                    Present = new STNodeTranslateSnippet(
-                                new ElementConstNodeValueString()
-                            ),
-                }
-                ;
+                    }
+                );
+                exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarGet
+                    , new Dictionary<string, STNodeTranslateSnippet>()
+                    {
+                        //Present "%{Host}%%{VarName}%",
+                        ["Present"] = new STNodeTranslateSnippet(
+                            new ElementCallOther("HostPresent")
+                            , new ElementVarName()
+                        )
+                    }
+                );
+                exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarRef
+                    , new Dictionary<string, STNodeTranslateSnippet>()
+                    {
+                        //Present "%{Host}%%{VarName}%",
+                        ["Present"] = new STNodeTranslateSnippet(
+                            new ElementCallOther("HostPresent")
+                            , new ElementVarName()
+                        )
+                    }
+                );
+                exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarSet
+                    , new Dictionary<string, STNodeTranslateSnippet>()
+                    {
+                        //Present "%{Host}%%{VarName}% = %{RHS}%",
+                        ["Present"] = new STNodeTranslateSnippet(
+                            new ElementCallOther("HostPresent")
+                            , new ElementVarName()
+                            , new ElementConstString(" = ")
+                            , new ElementReplaceSubNodeValue("RHS")
+                        )
+                    }
+                );
+                exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
+                    , new Dictionary<string, STNodeTranslateSnippet>()
+                    {
+                        // Present: "%{LHS}% %{OpCode}% %{RHS}%"
+                        ["Present"] = new STNodeTranslateSnippet(
+                            new ElementReplaceSubNodeValue("LHS")
+                            , new ElementConstString(" ")
+                            , new ElementReplaceSubNodeValue("OpCode")
+                            , new ElementConstString(" ")
+                            , new ElementReplaceSubNodeValue("RHS")
+                        )
+                    }
+                );
                 //exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                 //{
-                //    // Present: "%{LHS}% %{OpCode}% %{RHS}%"
+                //    ["PreStatement"] = new STNodeTranslateSnippet(
+                //        new ElementConstString("auto ")
+                //        , new ElementTempVar("LHS")
+                //        , new ElementConstString(" = ")
+                //        , new ElementReplaceSubNodeValue("LHS")
+                //        , new ElementNewLine()
+                //        , new ElementConstString("auto ")
+                //        , new ElementTempVar("RHS")
+                //        , new ElementConstString(" = ")
+                //        , new ElementReplaceSubNodeValue("RHS")
+                //        )
+                //        ,
                 //    ["Present"] = new STNodeTranslateSnippet(
-                //        new ElementReplaceSubNodeValue("LHS")
+                //        new ElementTempVar("LHS")
                 //        , new ElementConstString(" ")
                 //        , new ElementReplaceSubNodeValue("OpCode")
                 //        , new ElementConstString(" ")
-                //        , new ElementReplaceSubNodeValue("RHS")
-                //    )
-                //})
-                //;
-                exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
-                {
-                    ["PreStatement"] = new STNodeTranslateSnippet(
-                        new ElementConstString("auto ")
-                        , new ElementTempVar("LHS")
-                        , new ElementConstString(" = ")
-                        , new ElementReplaceSubNodeValue("LHS")
-                        , new ElementNewLine()
-                        , new ElementConstString("auto ")
-                        , new ElementTempVar("RHS")
-                        , new ElementConstString(" = ")
-                        , new ElementReplaceSubNodeValue("RHS")
-                        )
-                        ,
-                    ["Present"] = new STNodeTranslateSnippet(
-                        new ElementTempVar("LHS")
-                        , new ElementConstString(" ")
-                        , new ElementReplaceSubNodeValue("OpCode")
-                        , new ElementConstString(" ")
-                        , new ElementTempVar("RHS")
-                        )
+                //        , new ElementTempVar("RHS")
+                //        )
 
-                });
+                //});
             }
 
             #endregion
@@ -149,38 +186,73 @@ namespace npsParser.test.ExpressionTranslator
             {
                 #region Special Member Access for SetterProperty
 
+                // Special Member Access for RO Property 
+                // TODO disable SET/REF
+                {
+                    Func<ExprTranslatorAbstract.ITranslatingContext, bool> condROProperty = ctx =>
+                    {
+                        var readonlyAttr = ctx.BoundElementInfo.FindTheFirstSubInfoWithName<AttributeInfo>("readonly");
+                        if (null != readonlyAttr)
+                        {
+                            return true;
+                        }
+                        return false;
+                    };
+
+                    exprTrans.AddSchemeSelector(
+                        ExprTranslatorAbstract.SystemScheme_VarGet
+                        , new STNodeTranslateSchemeSelector_Lambda(
+                            "ROProperty_GET"
+                            , 0
+                            , condROProperty
+                            , new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
+                            {
+                                ["Present"] = new STNodeTranslateSnippet(
+                                    new ElementCallOther("HostPresent")
+                                    , new ElementCallOther("Getter")
+                                    )
+                            }
+                            )
+                        )
+                    );
+                }
+
                 // Special Member Access for SetterProperty 
                 {
-                    Func<TypeInfo, string, ElementInfo, bool> condSetterProperty = (InTypeInfo, InPropName, InElementInfo) =>
+                    Func<ExprTranslatorAbstract.ITranslatingContext, bool> condSetterProperty = ctx =>
                     {
-                        var setterAttr = InElementInfo.FindTheFirstSubInfoWithName<AttributeInfo>("setter");
+                        var setterAttr = ctx.BoundElementInfo.FindTheFirstSubInfoWithName<AttributeInfo>("setter");
                         if (null != setterAttr)
                         {
                             return true;
                         }
                         return false;
                     };
-                    exprTrans.AddMemberAccessSchemeSelector(
-                        new MemberAccessSchemeSelector_Lambda(
-                            "SetterProperty_Set"
+
+                    // Special SET process for a setter property
+                    exprTrans.AddSchemeSelector(
+                        ExprTranslatorAbstract.SystemScheme_VarSet
+                        , new STNodeTranslateSchemeSelector_Lambda(
+                            "SetterProperty_SET"
                             , 0
-                            , EExprVarAccessType.Set
                             , condSetterProperty
                             , new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                             {
                                 ["Present"] = new STNodeTranslateSnippet(
-                                    new ElementReplaceSubNodeValue("HOST")
+                                    new ElementCallOther("HostPresent")
                                     , new ElementCallOther("Setter")
                                     )
                             }
                             )
                         )
                     );
-                    exprTrans.AddMemberAccessSchemeSelector(
-                        new MemberAccessSchemeSelector_Lambda(
-                            "SetterProperty_Ref"
+
+                    // Handle the 'set-back' pattern in REF process for a setter property.
+                    exprTrans.AddSchemeSelector(
+                        ExprTranslatorAbstract.SystemScheme_VarRef
+                        , new STNodeTranslateSchemeSelector_Lambda(
+                            "SetterProperty_REF"
                             , 0
-                            , EExprVarAccessType.Ref
                             , condSetterProperty
                             , new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                             {
@@ -188,30 +260,20 @@ namespace npsParser.test.ExpressionTranslator
                                     new ElementConstString("// PreStatement for SetterProperty_Ref ")
                                     , new ElementVarName()
                                     , new ElementNewLine()
-                                    , new ElementCallOther("InitTempVar"
-                                        , new Dictionary<string, STNodeTranslateSnippet>()
-                                        {
-                                            ["VARNAME"] = new STNodeTranslateSnippet(
-                                                new ElementTempVar("Var")
-                                                )
-                                            ,
-                                            ["INITVAL"] = new STNodeTranslateSnippet(
-                                                new ElementCallOther("Getter")
-                                                )
-                                        }
-                                        )
+                                    , new ElementCallOther("InitTempVarBySelf")
                                     )
                                 ,
                                 ["Present"] = new STNodeTranslateSnippet(
                                     new ElementTempVar("Var")
                                     )
                                 ,
+                                // // PostStatement for SetterProperty_Ref: %{VarName}%
+                                // %{$$SYS_VAR_SET}|RHS=%{$TempVar}%%
                                 ["PostStatementRev"] = new STNodeTranslateSnippet(
                                     new ElementConstString("// PostStatement for SetterProperty_Ref ")
                                     , new ElementVarName()
                                     , new ElementNewLine()
-                                    , new ElementReplaceSubNodeValue("HOST")
-                                    , new ElementCallOther("Setter"
+                                    , new ElementCallOther(ExprTranslatorAbstract.SystemScheme_VarSet
                                         , new Dictionary<string, STNodeTranslateSnippet>()
                                         {
                                             ["RHS"] = new STNodeTranslateSnippet(
@@ -236,21 +298,22 @@ namespace npsParser.test.ExpressionTranslator
             //TestCases.BasicDataBinding().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
             _GenerateMethodsForType(exprTrans, TestCases.BasicExpressions());
             _GenerateMethodsForType(exprTrans, TestCases.BinOpExpressions());
+            //TestCases.BasicExprs().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
             TestCases.AdvancedExpressions().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
         }
 
-        private static void _GenerateMethodsForType(ExprTranslatorDefault InTranslator, TypeInfo InTargetType)
+        private static void _GenerateMethodsForType(ExprTranslatorDefault InTranslator, nf.protoscript.TypeInfo InTargetType)
         {
             Console.WriteLine($"Code emit sequences for Type: {InTargetType.Name}");
             // ctor
             {
                 Console.WriteLine($"    Code emit sequences for Ctor:");
 
-                var context = new ExprTranslateContextDefault(InTargetType
-                    , new ExprTranslateContextDefault.Scope[]
+                var context = new ExprTranslateEnvironmentDefault(InTargetType
+                    , new ExprTranslateEnvironmentDefault.Scope[]
                     {
-                        new ExprTranslateContextDefault.Scope(InTargetType, "this", "this->")
-                        , new ExprTranslateContextDefault.Scope(InTargetType.ParentInfo, "global", "::")
+                        new ExprTranslateEnvironmentDefault.Scope(InTargetType, "this", "this->")
+                        , new ExprTranslateEnvironmentDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
                     );
 
@@ -274,12 +337,12 @@ namespace npsParser.test.ExpressionTranslator
             {
                 Console.WriteLine($"    Code emit sequences for {mtdInfo.Name}:");
 
-                var context = new ExprTranslateContextDefault(mtdInfo
-                    , new ExprTranslateContextDefault.Scope[]
+                var context = new ExprTranslateEnvironmentDefault(mtdInfo
+                    , new ExprTranslateEnvironmentDefault.Scope[]
                     {
-                        new ExprTranslateContextDefault.Scope(mtdInfo, "local", "")
-                        , new ExprTranslateContextDefault.Scope(InTargetType, "this", "this->")
-                        , new ExprTranslateContextDefault.Scope(InTargetType.ParentInfo, "global", "::")
+                        new ExprTranslateEnvironmentDefault.Scope(mtdInfo, "local", "")
+                        , new ExprTranslateEnvironmentDefault.Scope(InTargetType, "this", "this->")
+                        , new ExprTranslateEnvironmentDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
                     );
                 var codes = InTranslator.Translate(context, mtdInfo.InitSyntax);

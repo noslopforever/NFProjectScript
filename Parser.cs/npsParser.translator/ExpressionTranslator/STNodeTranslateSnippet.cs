@@ -31,9 +31,9 @@ namespace nf.protoscript.translator.expression
         IElement[] SnippetElements { get; }
 
         /// <summary>
-        /// GetResult the context and return translated codes.
+        /// GetResult for the context and return translated codes.
         /// </summary>
-        /// <param name="InContext"></param>
+        /// <param name="InHolderSchemeInstance"></param>
         /// <returns></returns>
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {

@@ -57,19 +57,16 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            ISyntaxTreeNode nodeToTranslate = InHolderSchemeInstance.NodeToTranslate;
-            if (nodeToTranslate is STNodeVar)
+            try
             {
-                return new string[] { (nodeToTranslate as STNodeVar).IDName };
+                string varname = InHolderSchemeInstance.TranslatingContext.GetContextValueString("VarName");
+                return new string[] { varname };
             }
-            else if (nodeToTranslate is STNodeMemberAccess)
+            catch
             {
-                return new string[] { (nodeToTranslate as STNodeMemberAccess).MemberID };
-            }
 
-            // TODO log error
-            throw new InvalidCastException();
-            return new string[] { "<<ERROR NODE TYPE>>" };
+            }
+            return new string[] { "<<INVALID NODE TYPE to get VarName>>" };
         }
     }
 
@@ -77,7 +74,7 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
     /// <summary>
     /// A snippet element to retrieve constant value strings from STNodeConstant.
     /// </summary>
-    public class ElementConstNodeValueString
+    public class ElementConstValueString
         : STNodeTranslateSnippet.IElement
     {
         public override string ToString()
@@ -87,15 +84,17 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            ISyntaxTreeNode nodeToTranslate = InHolderSchemeInstance.NodeToTranslate;
-            if (nodeToTranslate is STNodeConstant)
+            try
             {
-                return new string[] { (nodeToTranslate as STNodeConstant).Value.ToString() };
+                string varname = InHolderSchemeInstance.TranslatingContext.GetContextValueString("ValueString");
+                return new string[] { varname };
+            }
+            catch
+            {
+
             }
 
-            // TODO log error
-            throw new InvalidCastException();
-            return new string[] { "<<ERROR NODE TYPE>>" };
+            return new string[] { "<<INVALID NODE TYPE to get Const>>" };
         }
     }
 
@@ -159,7 +158,7 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
 
     /// <summary>
-    /// Reference A temporary variable in current Context.
+    /// Reference A temporary variable in the current Context.
     /// </summary>
     public class ElementTempVar
         : STNodeTranslateSnippet.IElement
@@ -176,9 +175,16 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            var context = InHolderSchemeInstance.TranslateContext;
-            IExprTranslateContext.IVariable var = context.EnsureTempVar(InHolderSchemeInstance.NodeToTranslate, Key);
-            return new string[] { var.Name };
+            var env = InHolderSchemeInstance.TranslatingContext.RootEnvironment;
+            ISyntaxTreeNode translatingNode = null;
+            if (InHolderSchemeInstance.TranslatingContext is ExprTranslatorAbstract.INodeContext)
+            {
+                var nodeCtx = InHolderSchemeInstance.TranslatingContext as ExprTranslatorAbstract.INodeContext;
+                translatingNode = nodeCtx.TranslatingNode;
+            }
+
+            IExprTranslateEnvironment.IVariable nodeTempVar = env.EnsureTempVar(translatingNode, Key);
+            return new string[] { nodeTempVar.Name };
         }
 
     }
@@ -212,31 +218,19 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
         public virtual IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            // Get or create a scheme with only Present snippets.
-            if (_cachedScheme == null)
-            {
-                _cachedScheme = InHolderSchemeInstance.Translator.FindSchemeByName(SchemeName);
-            }
-            // Create inner proxy SI for applying
-            if (_cachedSchemeInstance == null)
-            {
-                _cachedSchemeInstance = _cachedScheme.CreateProxyInstance(InHolderSchemeInstance);
+            // Create a scheme with only Present snippets.
+            var refScheme = InHolderSchemeInstance.Translator.FindBestScheme(InHolderSchemeInstance.TranslatingContext, SchemeName);
+            var refSchemeInst = refScheme.CreateProxyInstance(InHolderSchemeInstance);
 
-                // Ensure and bind 'Parameter' SIs.
-                foreach (var varInitCode in _varInitCodes)
-                {
-                    var paramSchemeInst = varInitCode.EnsureSchemeInstance(InHolderSchemeInstance);
-                    _cachedSchemeInstance.AddPrerequisiteScheme(varInitCode.Key, paramSchemeInst);
-                }
+            // Ensure and bind 'Parameter' SIs.
+            foreach (var varInitCode in _varInitCodes)
+            {
+                var paramSchemeInst = varInitCode.EnsureSchemeInstance(InHolderSchemeInstance);
+                refSchemeInst.AddPrerequisiteScheme(varInitCode.Key, paramSchemeInst);
             }
 
-            return _cachedSchemeInstance.GetResult("Present");
+            return refSchemeInst.GetResult("Present");
         }
-
-        // The cache of the referenced scheme.
-        ISTNodeTranslateScheme _cachedScheme;
-        // The cache of the instance created by the referenced scheme.
-        ISTNodeTranslateSchemeInstance _cachedSchemeInstance;
 
         /// <summary>
         /// Helper class to cache var-init codes.
@@ -256,21 +250,13 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
             /// <returns></returns>
             public ISTNodeTranslateSchemeInstance EnsureSchemeInstance(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
             {
-                if (_cachedScheme == null)
-                {
-                    _cachedScheme = new STNodeTranslateSchemeDefault(_varSnippet);
-                }
-                if (_cachedSchemeInstance == null)
-                {
-                    _cachedSchemeInstance = _cachedScheme.CreateProxyInstance(InHolderSchemeInstance);
-                }
-                return _cachedSchemeInstance;
+                var varScheme = new STNodeTranslateSchemeDefault(_varSnippet);
+                var varSchemeInst = varScheme.CreateProxyInstance(InHolderSchemeInstance);
+                return varSchemeInst;
             }
 
             public string Key { get; }
             STNodeTranslateSnippet _varSnippet;
-            ISTNodeTranslateScheme _cachedScheme;
-            ISTNodeTranslateSchemeInstance _cachedSchemeInstance;
 
         }
         List<VarInitCodeCache> _varInitCodes = new List<VarInitCodeCache>();

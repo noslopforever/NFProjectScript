@@ -19,19 +19,17 @@ namespace nf.protoscript.translator.expression
         {
             public Instance(STNodeTranslateSchemeDefault InScheme
                 , ExprTranslatorAbstract InTranslator
-                , IExprTranslateContext InTranslateContext
-                , ISyntaxTreeNode InNodeToTranslate
+                , ExprTranslatorAbstract.ITranslatingContext InContext
                 )
             {
                 Scheme = InScheme;
                 Translator = InTranslator;
-                TranslateContext = InTranslateContext;
-                NodeToTranslate = InNodeToTranslate;
+                TranslatingContext = InContext;
             }
 
             public static ISTNodeTranslateSchemeInstance CreateProxyInstance(STNodeTranslateSchemeDefault InScheme, ISTNodeTranslateSchemeInstance InProxySI)
             {
-                Instance inst = new Instance(InScheme, InProxySI.Translator, InProxySI.TranslateContext, InProxySI.NodeToTranslate)
+                Instance inst = new Instance(InScheme, InProxySI.Translator, InProxySI.TranslatingContext)
                 {
                     ProxyInstance = InProxySI
                 };
@@ -47,8 +45,7 @@ namespace nf.protoscript.translator.expression
 
             public ISTNodeTranslateScheme Scheme { get; }
             public ExprTranslatorAbstract Translator { get; }
-            public IExprTranslateContext TranslateContext { get; }
-            public ISyntaxTreeNode NodeToTranslate { get; }
+            public ExprTranslatorAbstract.ITranslatingContext TranslatingContext { get; }
 
             public IReadOnlyList<string> GetResult(string InStageName)
             {
@@ -102,35 +99,8 @@ namespace nf.protoscript.translator.expression
                 return null;
             }
 
-            public void SetEnvVariable(string InVariableName, object InEnvVarValue)
-            {
-                _envVars[InVariableName] = InEnvVarValue;
-            }
-
-            public object FindEnvVariable(string InVariableName)
-            {
-                if (_envVars.TryGetValue(InVariableName, out var varValue))
-                {
-                    return varValue;
-                }
-
-                // If proxy, find in proxy's EnvVars.
-                if (ProxyInstance != null)
-                {
-                    return ProxyInstance.FindEnvVariable(InVariableName);
-                }
-                return null;
-            }
-
             public string GetVarValue(string InKey, string InStageName)
             {
-                // Find env-variables
-                var envVar = this.FindEnvVariable(InKey);
-                if (envVar != null)
-                {
-                    return envVar.ToString();
-                }
-
                 // Find prerequisite
                 var schemeInst = this.FindPrerequisite(InKey);
                 if (schemeInst != null)
@@ -144,26 +114,13 @@ namespace nf.protoscript.translator.expression
                     return result[0];
                 }
 
-                // Find node's properties
-                ISyntaxTreeNode nodeToTranslate = this.NodeToTranslate;
-                try
-                {
-                    var propVal = nodeToTranslate.GetType().GetProperty(InKey).GetValue(nodeToTranslate).ToString();
-                    return propVal;
-                }
-                catch (Exception ex)
-                {
-                    // TODO log error
-                }
-
-                return "<<INVALID_SUB_VALUE>>";
+                // Find data in context
+                var ctxValStr = TranslatingContext.GetContextValueString(InKey);
+                return ctxValStr;
             }
 
             // ~ End ISTNodeTranslateSchemeInstance interfaces
 
-
-            // Env-var table
-            Dictionary<string, object> _envVars = new Dictionary<string, object>();
 
             // Prerequisite scheme table and list.
             Dictionary<string, ISTNodeTranslateSchemeInstance> _prerequisitesTable = new Dictionary<string, ISTNodeTranslateSchemeInstance>();
@@ -228,9 +185,9 @@ namespace nf.protoscript.translator.expression
 
         // Begin ISTNodeTranslateScheme interfaces
 
-        public ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, IExprTranslateContext InExprContext, ISyntaxTreeNode InSTNode)
+        public ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, ExprTranslatorAbstract.ITranslatingContext InContext)
         {
-            return new Instance(this, InTranslator, InExprContext, InSTNode);
+            return new Instance(this, InTranslator, InContext);
         }
 
         public ISTNodeTranslateSchemeInstance CreateProxyInstance(ISTNodeTranslateSchemeInstance InSchemeInstanceToBeProxied)

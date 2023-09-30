@@ -1,7 +1,9 @@
-﻿namespace nf.protoscript.translator.expression
+﻿using nf.protoscript.syntaxtree;
+
+namespace nf.protoscript.translator.expression
 {
     /// <summary>
-    /// Scheme selector to select the best InScheme for the target context.
+    /// Scheme selector to select the best InScheme for the target translating-context.
     /// </summary>
     public interface ISTNodeTranslateSchemeSelector
     {
@@ -20,16 +22,12 @@
         /// </summary>
         ISTNodeTranslateScheme Scheme { get; }
 
-    }
-
-
-    /// <summary>
-    /// MemberAccess selector interface, to select scheme when handling the member-access operation.
-    /// </summary>
-    public interface IMemberAccessSchemeSelector : ISTNodeTranslateSchemeSelector
-    {
-
-        bool IsMatch(EExprVarAccessType InAccessType, TypeInfo InHostType, string InMemberName, ElementInfo InMemberElementInfo);
+        /// <summary>
+        /// Is Conditions matched.
+        /// </summary>
+        /// <param name="InContext"></param>
+        /// <returns></returns>
+        bool IsMatch(ExprTranslatorAbstract.ITranslatingContext InContext);
 
     }
 

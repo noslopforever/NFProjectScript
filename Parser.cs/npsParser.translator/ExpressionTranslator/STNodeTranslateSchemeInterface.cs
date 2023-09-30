@@ -6,7 +6,7 @@ namespace nf.protoscript.translator.expression
 
 
     /// <summary>
-    /// Created by ISTNodeTranslateScheme and bound with Translator/ExprTranslateContext/STNodes.
+    /// Created by ISTNodeTranslateScheme and bound with Translator/ExprTranslateEnvironment/STNodes.
     /// </summary>
     public interface ISTNodeTranslateSchemeInstance
     {
@@ -22,16 +22,9 @@ namespace nf.protoscript.translator.expression
         ExprTranslatorAbstract Translator { get; }
 
         /// <summary>
-        /// ExprTranslateContext of this scheme instance.
+        /// Translating Context.
         /// </summary>
-        IExprTranslateContext TranslateContext { get; }
-
-        /// <summary>
-        /// Node to be translated by this scheme instance.
-        /// </summary>
-        ISyntaxTreeNode NodeToTranslate { get; }
-
-
+        ExprTranslatorAbstract.ITranslatingContext TranslatingContext { get; }
 
         /// <summary>
         /// GetResult this instance and get result for the target stage which has been decided by translator.
@@ -39,8 +32,6 @@ namespace nf.protoscript.translator.expression
         /// <param name="InStageName"></param>
         /// <returns></returns>
         IReadOnlyList<string> GetResult(string InStageName);
-
-
 
 
         /// <summary>
@@ -61,20 +52,6 @@ namespace nf.protoscript.translator.expression
         /// <param name="InKey"></param>
         /// <returns></returns>
         ISTNodeTranslateSchemeInstance FindPrerequisite(string InKey);
-
-        /// <summary>
-        /// Set Environment Variable 
-        /// </summary>
-        /// <param name="InVariableName"></param>
-        /// <param name="InEnvVarValue"></param>
-        void SetEnvVariable(string InVariableName, object InEnvVarValue);
-
-        /// <summary>
-        /// Get Environment Variable Value
-        /// </summary>
-        /// <param name="InVariableName"></param>
-        /// <returns></returns>
-        object FindEnvVariable(string InVariableName);
 
         /// <summary>
         /// Get Var value, the var may comes from EnvVariable, NodeValue, or Referenced-SchemeInstances.
@@ -104,7 +81,7 @@ namespace nf.protoscript.translator.expression
         /// Create instance to do translate for the target STNode.
         /// </summary>
         /// <returns></returns>
-        ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, IExprTranslateContext InExprContext, ISyntaxTreeNode InSTNode);
+        ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, ExprTranslatorAbstract.ITranslatingContext InContext);
 
         /// <summary>
         /// Create a instance and set it as the 'proxy' of another instance.
@@ -112,6 +89,7 @@ namespace nf.protoscript.translator.expression
         /// <param name="InSchemeInstanceToBeProxied"></param>
         /// <returns></returns>
         ISTNodeTranslateSchemeInstance CreateProxyInstance(ISTNodeTranslateSchemeInstance InSchemeInstanceToBeProxied);
+
 
     }
 

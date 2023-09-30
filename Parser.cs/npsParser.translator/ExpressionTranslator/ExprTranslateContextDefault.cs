@@ -7,12 +7,12 @@ using System.Xml.Linq;
 namespace nf.protoscript.translator.expression
 {
     /// <summary>
-    /// Default implementation of ExprTranslateContext
+    /// Default implementation of ExprTranslateEnvironment
     /// </summary>
-    public class ExprTranslateContextDefault
-        : IExprTranslateContext
+    public class ExprTranslateEnvironmentDefault
+        : IExprTranslateEnvironment
     {
-        public ExprTranslateContextDefault(
+        public ExprTranslateEnvironmentDefault(
             Info InHostInfo
             , IEnumerable<Scope> InScopeChain
             )
@@ -25,7 +25,7 @@ namespace nf.protoscript.translator.expression
         /// scope to find variables.
         /// </summary>
         public class Scope
-            : IExprTranslateContext.IScope
+            : IExprTranslateEnvironment.IScope
         {
 
             public Scope(Info InScopeInfo
@@ -44,12 +44,12 @@ namespace nf.protoscript.translator.expression
             public Info ScopeInfo { get; }
 
             /// <summary>
-            /// Host Name of the scope, <see cref="IExprTranslateContext.IVariable"/>  for more informations.
+            /// Host Name of the scope, <see cref="IExprTranslateEnvironment.IVariable"/>  for more informations.
             /// </summary>
             public string ScopeName { get; }
 
             /// <summary>
-            /// Host Present of the scope, <see cref="IExprTranslateContext.IVariable"/>  for more informations.
+            /// Host Present of the scope, <see cref="IExprTranslateEnvironment.IVariable"/>  for more informations.
             /// </summary>
             public string ScopePresentCode { get; }
 
@@ -59,7 +59,7 @@ namespace nf.protoscript.translator.expression
         /// Variable from ElementInfo
         /// </summary>
         public class ElementInfoVar
-            : IExprTranslateContext.IVariable
+            : IExprTranslateEnvironment.IVariable
         {
             public ElementInfoVar(ElementInfo InVarElement, Scope InScope)
             {
@@ -72,14 +72,15 @@ namespace nf.protoscript.translator.expression
             // Begin IVariable interfaces
             public string Name { get { return VarElement.Name; } }
             public TypeInfo VarType { get { return VarElement.ElementType; } }
-            public IExprTranslateContext.IScope HostScope { get; }
+            public IExprTranslateEnvironment.IScope HostScope { get; }
+            public ElementInfo ElementInfo { get { return VarElement; } }
             // ~ End IVariable interfaces.
         }
 
         public Info HostInfo { get; }
         public IEnumerable<Scope> ScopeChain { get; }
 
-        public IExprTranslateContext.IVariable FindVariable(string InName)
+        public IExprTranslateEnvironment.IVariable FindVariable(string InName)
         {
             // TODO Find local vars first
 
@@ -118,19 +119,24 @@ namespace nf.protoscript.translator.expression
             return null;
         }
 
-        public IExprTranslateContext.IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey)
+        public IExprTranslateEnvironment.IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey)
         {
-            string nodeTypeName = InNodeToTranslate.GetType().Name;
             int uniqueID = _localScope.TempVarTable.Count;
 
-            string uniqueTempVarName = $"TMP_{nodeTypeName}_{InKey}_{uniqueID}";
+            //string nodeTypeName = "Null";
+            //if (InNodeToTranslate != null)
+            //{
+            //    nodeTypeName = InNodeToTranslate.GetType().Name;
+            //}
+            //string uniqueTempVarName = $"TMP_{nodeTypeName}_{InKey}_{uniqueID}";
+            string uniqueTempVarName = $"TMP_{InKey}{uniqueID}";
             var tempVar = new TempVar(_localScope, uniqueTempVarName, InNodeToTranslate, InKey);
 
             _localScope.AddTempVar(InNodeToTranslate, InKey, tempVar);
             return tempVar;
         }
 
-        public IExprTranslateContext.IVariable EnsureTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey)
+        public IExprTranslateEnvironment.IVariable EnsureTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey)
         {
             if (_localScope.TryGetTempVar(InNodeToTranslate, InKey, out var tempVar))
             {
@@ -141,20 +147,20 @@ namespace nf.protoscript.translator.expression
 
 
         /// <summary>
-        /// The Special 'Local' Scope of the context to save local and temp variables.
+        /// The Special 'Local' Scope of the environment to save local and temp variables.
         /// It should always be the first scope when finding variables.
         /// </summary>
         internal class LocalScope
-            : IExprTranslateContext.IScope
+            : IExprTranslateEnvironment.IScope
         {
             internal LocalScope()
             {}
 
-            // Begin IExprTranslateContext.IScope interfaces
+            // Begin IExprTranslateEnvironment.IScope interfaces
             public Info ScopeInfo { get { return null; } }
-            public string ScopeName { get { return "ContextLocal"; } }
+            public string ScopeName { get { return "Local"; } }
             public string ScopePresentCode { get { return ""; } }
-            // ~ End IExprTranslateContext.IScope interfaces
+            // ~ End IExprTranslateEnvironment.IScope interfaces
 
             /// <summary>
             /// Key to find a temp var.
@@ -198,14 +204,14 @@ namespace nf.protoscript.translator.expression
 
         }
 
-        // the local scope bound with this context
+        // the local scope bound with this environment
         LocalScope _localScope = new LocalScope();
 
         /// <summary>
-        /// Temporary variable registered in this context.
+        /// Temporary variable registered in this environment.
         /// </summary>
         public class TempVar
-            : IExprTranslateContext.IVariable
+            : IExprTranslateEnvironment.IVariable
         {
             internal TempVar(
                 LocalScope InLocalScope
@@ -224,7 +230,8 @@ namespace nf.protoscript.translator.expression
             // Begin IVariable interfaces
             public string Name { get; }
             public TypeInfo VarType { get; }
-            public IExprTranslateContext.IScope HostScope { get; }
+            public IExprTranslateEnvironment.IScope HostScope { get; }
+            public ElementInfo ElementInfo { get { return null; } }
             // ~ End IVariable interfaces.
 
             /// <summary>

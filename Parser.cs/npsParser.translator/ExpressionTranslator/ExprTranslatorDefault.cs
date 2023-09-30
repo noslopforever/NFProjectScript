@@ -1,6 +1,7 @@
 ﻿using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace nf.protoscript.translator.expression
 {
@@ -12,141 +13,25 @@ namespace nf.protoscript.translator.expression
 
         // Begin ExprTranslatorAbstract interfaces
 
-        protected override ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode)
+        public override ISTNodeTranslateScheme FindBestScheme(ITranslatingContext InContext, string InSchemeName)
         {
-            throw new NotImplementedException();
-        }
-
-        public override ISTNodeTranslateScheme FindSchemeByName(string InSchemeName)
-        {
-            if (_genericSchemes.TryGetValue(InSchemeName, out var scheme))
+            if (_schemeGroups.TryGetValue(InSchemeName, out var schemeGroup))
             {
-                return scheme;
+                return schemeGroup.FindBestScheme(InContext);
             }
             return null;
-        }
-
-        protected override ISTNodeTranslateScheme QueryNullScheme(TypeInfo InConstType)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override ISTNodeTranslateScheme QueryConstGetScheme(TypeInfo InConstType, string InValueString)
-        {
-            return DefaultConstScheme;
-        }
-
-        protected override ISTNodeTranslateScheme QueryConstGetStringScheme(TypeInfo InConstType, string InString)
-        {
-            return DefaultConstScheme;
-        }
-
-        protected override ISTNodeTranslateScheme QueryConstGetInfoScheme(TypeInfo InConstType, Info InInfo)
-        {
-            return DefaultConstScheme;
-        }
-
-        protected override ISTNodeTranslateScheme QueryMemberAccessScheme(
-            EExprVarAccessType InAccessType
-            , TypeInfo InContextType
-            , string InMemberID
-            , out TypeInfo OutMemberType
-            )
-        {
-            var elemInfo = InfoHelper.FindPropertyOfType(InContextType, InMemberID);
-            if (elemInfo == null)
-            {
-                OutMemberType = CommonTypeInfos.Any;
-                // TODO log warning: cannot find the property in type.
-            }
-            else
-            {
-                OutMemberType = elemInfo.ElementType;
-            }
-
-            // Find special MemberAccess schemes by (HostType, PropertyName)
-            foreach (var selectorKvp in _memberAccessSelectors)
-            {
-                if (selectorKvp.Value.IsMatch(InAccessType, InContextType, InMemberID, elemInfo))
-                {
-                    return selectorKvp.Value.Scheme;
-                }
-            }
-
-            // Return default InScheme.
-            switch (InAccessType)
-            {
-                case EExprVarAccessType.Get:
-                    return DefaultVarGetScheme;
-                case EExprVarAccessType.Set:
-                    return DefaultVarSetScheme;
-                case EExprVarAccessType.Ref:
-                    return DefaultVarRefScheme;
-            }
-            return null;
-        }
-
-        protected override ISTNodeTranslateScheme QueryGlobalVarAccessScheme(
-            EExprVarAccessType InAccessType
-            , Info InGlobalInfo
-            , string InVarName
-            )
-        {
-            switch (InAccessType)
-            {
-                case EExprVarAccessType.Get:
-                    return DefaultVarGetScheme;
-                case EExprVarAccessType.Set:
-                    return DefaultVarSetScheme;
-                case EExprVarAccessType.Ref:
-                    return DefaultVarRefScheme;
-            }
-            return null;
-        }
-
-        protected override ISTNodeTranslateScheme QueryMethodVarAccessScheme(
-            EExprVarAccessType InAccessType
-            , IExprTranslateContext InTranslatingContext
-            , ElementInfo InMethodInfo
-            , string InVarName
-            )
-        {
-            switch (InAccessType)
-            {
-                case EExprVarAccessType.Get:
-                    return DefaultVarGetScheme;
-                case EExprVarAccessType.Set:
-                    return DefaultVarSetScheme;
-                case EExprVarAccessType.Ref:
-                    return DefaultVarRefScheme;
-            }
-            return null;
-        }
-
-
-
-        protected override ISTNodeTranslateScheme QueryBinOpScheme(STNodeBinaryOp InBinOpNode, TypeInfo InLhsType, TypeInfo InRhsType, out TypeInfo OutResultType)
-        {
-            // TODO decide OutResultType by InBinOpNode.OpCode
-            OutResultType = CommonTypeInfos.Any;
-            return DefaultBinOpScheme;
-        }
-
-        protected override ISTNodeTranslateScheme QueryHostAccessScheme(STNodeMemberAccess InMemberAccessNode, TypeInfo InHostType)
-        {
-            return DefaultHostAccessScheme;
         }
 
         // ~ End ExprTranslatorAbstract interfaces
 
 
         /// <summary>
-        /// Register a MemberAccess SchemeSelector.
+        /// Register a SchemeSelector.
         /// </summary>
         /// <param name="InSelector"></param>
-        public void AddMemberAccessSchemeSelector(IMemberAccessSchemeSelector InSelector)
+        public void AddSchemeSelector(string InKey, ISTNodeTranslateSchemeSelector InSelector)
         {
-            _memberAccessSelectors.Add(InSelector.Priority, InSelector);
+            EnsureGroup(InKey).AddSelector(InSelector.Priority, InSelector);
         }
 
         /// <summary>
@@ -156,30 +41,111 @@ namespace nf.protoscript.translator.expression
         /// <param name="InSnippet"></param>
         public void AddScheme(string InKey, STNodeTranslateSnippet InSnippet)
         {
-            _genericSchemes[InKey] = new STNodeTranslateSchemeDefault(InSnippet);
+            var newScheme = new STNodeTranslateSchemeDefault(InSnippet);
+            EnsureGroup(InKey).DefaultScheme = newScheme;
         }
 
-        //
-        // Default schemes
-        //
+        /// <summary>
+        /// Add generic scheme with multiple snippets.
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="InSnippet"></param>
+        public void AddScheme(string InKey, Dictionary<string, STNodeTranslateSnippet> InSnippets)
+        {
+            var newScheme = new STNodeTranslateSchemeDefault(InSnippets);
+            EnsureGroup(InKey).DefaultScheme = newScheme;
+        }
 
-        public ISTNodeTranslateScheme DefaultConstScheme { get; set; }
-        public ISTNodeTranslateScheme DefaultVarGetScheme { get; set; }
-        public ISTNodeTranslateScheme DefaultVarRefScheme { get; set; }
-        public ISTNodeTranslateScheme DefaultVarSetScheme { get; set; }
-        public ISTNodeTranslateScheme DefaultBinOpScheme { get; set; }
-        public ISTNodeTranslateScheme DefaultHostAccessScheme { get; set; }
+        /// <summary>
+        /// Find Or Add a scheme group with InSchemeName.
+        /// </summary>
+        /// <param name="InSchemeName"></param>
+        /// <returns></returns>
+        protected SchemeGroup EnsureGroup(string InSchemeName)
+        {
+            if (_schemeGroups.TryGetValue(InSchemeName, out var group))
+            {
+                return group;
+            }
+            var newGrp = new SchemeGroup(InSchemeName);
+            _schemeGroups.Add(InSchemeName, newGrp);
+            return newGrp;
+        }
 
-        //
-        // Scheme Selectors
-        //
 
-        SortedList<int, IMemberAccessSchemeSelector> _memberAccessSelectors 
-            = new SortedList<int, IMemberAccessSchemeSelector>(new DuplicateKeyComparer<int>());
+        /// <summary>
+        /// Use a group to manage all schemes with the same name but different trigger conditions (selectors).
+        /// </summary>
+        public class SchemeGroup
+        {
+            internal SchemeGroup(string InSchemeName)
+            {
+                SchemeName = InSchemeName;
+            }
 
-        // Generic schemes
-        Dictionary<string, ISTNodeTranslateScheme> _genericSchemes
-            = new Dictionary<string, ISTNodeTranslateScheme>();
+            /// <summary>
+            /// Name of the scheme group
+            /// </summary>
+            public string SchemeName { get; }
+
+            /// <summary>
+            /// The default scheme, if no selector matched, return this scheme.
+            /// Only one default scheme can be assigned to a group.
+            /// </summary>
+            /// <exception cref="InvalidOperationException">Triggered if the default scheme has been set twice.</exception>
+            public ISTNodeTranslateScheme DefaultScheme
+            { 
+                get { return _default; }
+                internal set
+                {
+                    if (_default != null)
+                    {
+                        // TODO log error
+                        throw new InvalidOperationException("Cannot set default scheme twice!");
+                    }
+                    _default = value;
+                }
+            }
+            ISTNodeTranslateScheme _default = null;
+
+            /// <summary>
+            /// Add a selector.
+            /// </summary>
+            /// <param name="InPriority"></param>
+            /// <param name="InSelector"></param>
+            internal void AddSelector(int InPriority, ISTNodeTranslateSchemeSelector InSelector)
+            {
+                _selectors.Add(InPriority, InSelector);
+            }
+
+            /// <summary>
+            /// Find a best scheme to match the InContext.
+            /// </summary>
+            /// <param name="InContext"></param>
+            /// <returns></returns>
+            internal ISTNodeTranslateScheme FindBestScheme(ITranslatingContext InContext)
+            {
+                // Find special MemberAccess schemes by (HostType, PropertyName)
+                foreach (var selectorKvp in _selectors)
+                {
+                    if (selectorKvp.Value.IsMatch(InContext))
+                    {
+                        return selectorKvp.Value.Scheme;
+                    }
+                }
+
+                // return default scheme if have
+                return DefaultScheme;
+            }
+
+            // selectors
+            SortedList<int, ISTNodeTranslateSchemeSelector> _selectors
+                = new SortedList<int, ISTNodeTranslateSchemeSelector>(new DuplicateKeyComparer<int>());
+
+        }
+
+        // Scheme groups
+        Dictionary<string, SchemeGroup> _schemeGroups = new Dictionary<string, SchemeGroup>();
 
         // TODO Move it into the 'Base' project.
         class DuplicateKeyComparer<TKey>

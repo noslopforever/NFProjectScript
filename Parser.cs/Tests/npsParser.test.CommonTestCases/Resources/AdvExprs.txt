@@ -5,9 +5,14 @@ value IntColor
 
 model TestObj
 	-IntColor Color @setter
+	-IntColor ColorRO @readonly
 	+TestSetterProp(InParam:IntColor)
 		> Color = InParam
 
-model Test
+model TestSetBack
+	-tm0
+	-tm1
 	+TestMethod(InParam0:TestObj)
 		> InParam0.Color.R = 100
+		> tm0 = InParam0.ColorRO - InParam0.ColorRO
+		> tm1 = InParam0.ColorRO.R - InParam0.ColorRO.G
