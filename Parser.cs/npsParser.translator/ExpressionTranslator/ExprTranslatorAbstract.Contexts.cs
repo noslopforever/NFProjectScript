@@ -95,6 +95,7 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public abstract class NodeContextBase
             : ContextBase
+            , INodeContext
         {
             public NodeContextBase(ITranslatingContext InParentContext, ISyntaxTreeNode InNode)
                 : base(InParentContext)
