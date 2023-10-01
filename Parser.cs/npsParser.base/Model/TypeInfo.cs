@@ -26,7 +26,7 @@ namespace nf.protoscript
         /// Base types of the type.
         /// </summary>
         [Serialization.SerializableInfo]
-        public TypeInfo BaseType { get; private set; }
+        public TypeInfo BaseType { get; protected set; }
 
         /// <summary>
         /// Set Base Type internally.
