@@ -17,16 +17,19 @@
         /// </summary>
         public string SingletonName { get; }
 
+        TypeInfo _singletonType = null;
+
         // implement abstract methods
         //
         public override void TryCollectTypes(ProjectInfo InProjectInfo)
         {
+            _singletonType = new TypeInfo(InProjectInfo, "model", SingletonName);
         }
 
         protected override Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector)
         {
-            ElementInfo singleton = new ElementInfo(InProjectInfo, "singleton", SingletonName, null, null);
-            return singleton;
+            var singleton = new ElementInfo(InProjectInfo, "singleton", SingletonName, _singletonType, null);
+            return _singletonType;
         }
 
     }
