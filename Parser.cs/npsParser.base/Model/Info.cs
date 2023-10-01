@@ -82,6 +82,14 @@ namespace nf.protoscript
         // internal sub-infos.
         private List<Info> mSubInfos = new List<Info>();
 
+        /// <summary>
+        /// Show debug string of this info.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return InfoHelper.GetFullnameOfInfo(this);
+        }
 
         /// <summary>
         /// Extra infos registered in this info.
