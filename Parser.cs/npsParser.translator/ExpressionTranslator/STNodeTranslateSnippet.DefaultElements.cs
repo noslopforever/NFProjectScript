@@ -43,37 +43,6 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
 
     /// <summary>
-    /// A snippet element to retrieve variable-names from STNodeVar/STNodeMemberAccess.
-    /// </summary>
-    public class ElementVarName
-        : STNodeTranslateSnippet.IElement
-    {
-        public ElementVarName()
-        {
-        }
-
-        public override string ToString()
-        {
-            return $"%{{VarName}}%";
-        }
-
-        public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
-        {
-            try
-            {
-                string varname = InHolderSchemeInstance.TranslatingContext.GetContextValueString("VarName");
-                return new string[] { varname };
-            }
-            catch
-            {
-
-            }
-            return new string[] { "<<INVALID NODE TYPE to get VarName>>" };
-        }
-    }
-
-
-    /// <summary>
     /// A snippet element to get value strings from the translating Context.
     /// </summary>
     public class ElementNodeValue
