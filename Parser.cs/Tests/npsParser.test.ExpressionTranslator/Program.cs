@@ -138,44 +138,44 @@ namespace npsParser.test.ExpressionTranslator
                         )
                     }
                 );
-                //exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
-                //    , new Dictionary<string, STNodeTranslateSnippet>()
-                //    {
-                //        // Present: "%{LHS}% %{OpCode}% %{RHS}%"
-                //        ["Present"] = new STNodeTranslateSnippet(
-                //            new ElementReplaceSubNodeValue("LHS")
-                //            , new ElementConstString(" ")
-                //            , new ElementReplaceSubNodeValue("OpCode")
-                //            , new ElementConstString(" ")
-                //            , new ElementReplaceSubNodeValue("RHS")
-                //        )
-                //    }
-                //);
                 exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
                     , new Dictionary<string, STNodeTranslateSnippet>()
                     {
-                        ["PreStatement"] = new STNodeTranslateSnippet(
-                            new ElementConstString("auto ")
-                            , new ElementTempVar("LHS")
-                            , new ElementConstString(" = ")
-                            , new ElementReplaceSubNodeValue("LHS")
-                            , new ElementNewLine()
-                            , new ElementConstString("auto ")
-                            , new ElementTempVar("RHS")
-                            , new ElementConstString(" = ")
-                            , new ElementReplaceSubNodeValue("RHS")
-                        )
-                        ,
                         // Present: "%{LHS}% %{OpCode}% %{RHS}%"
                         ["Present"] = new STNodeTranslateSnippet(
-                            new ElementTempVar("LHS")
+                            new ElementReplaceSubNodeValue("LHS")
                             , new ElementConstString(" ")
                             , new ElementReplaceSubNodeValue("OpCode")
                             , new ElementConstString(" ")
-                            , new ElementTempVar("RHS")
+                            , new ElementReplaceSubNodeValue("RHS")
                         )
                     }
                 );
+                //exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
+                //    , new Dictionary<string, STNodeTranslateSnippet>()
+                //    {
+                //        ["PreStatement"] = new STNodeTranslateSnippet(
+                //            new ElementConstString("auto ")
+                //            , new ElementTempVar("LHS")
+                //            , new ElementConstString(" = ")
+                //            , new ElementReplaceSubNodeValue("LHS")
+                //            , new ElementNewLine()
+                //            , new ElementConstString("auto ")
+                //            , new ElementTempVar("RHS")
+                //            , new ElementConstString(" = ")
+                //            , new ElementReplaceSubNodeValue("RHS")
+                //        )
+                //        ,
+                //        // Present: "%{LHS}% %{OpCode}% %{RHS}%"
+                //        ["Present"] = new STNodeTranslateSnippet(
+                //            new ElementTempVar("LHS")
+                //            , new ElementConstString(" ")
+                //            , new ElementReplaceSubNodeValue("OpCode")
+                //            , new ElementConstString(" ")
+                //            , new ElementTempVar("RHS")
+                //        )
+                //    }
+                //);
 
             }
 
@@ -208,27 +208,27 @@ namespace npsParser.test.ExpressionTranslator
                             "ROProperty_GET"
                             , 0
                             , condROProperty
-                            //, new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
-                            //{
-                            //    ["Present"] = new STNodeTranslateSnippet(
-                            //        new ElementCallOther("HostPresent")
-                            //        , new ElementCallOther("Getter")
-                            //        )
-                            //}
                             , new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                             {
-                                ["PreStatement"] = new STNodeTranslateSnippet(
-                                    new ElementConstString("auto ")
-                                    , new ElementTempVar("Var")
-                                    , new ElementConstString(" = ")
-                                    , new ElementCallOther("HostPresent")
-                                    , new ElementCallOther("Getter")
-                                )
-                                ,
                                 ["Present"] = new STNodeTranslateSnippet(
-                                    new ElementTempVar("Var")
-                                )
+                                    new ElementCallOther("HostPresent")
+                                    , new ElementCallOther("Getter")
+                                    )
                             }
+                            //, new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
+                            //{
+                            //    ["PreStatement"] = new STNodeTranslateSnippet(
+                            //        new ElementConstString("auto ")
+                            //        , new ElementTempVar("Var")
+                            //        , new ElementConstString(" = ")
+                            //        , new ElementCallOther("HostPresent")
+                            //        , new ElementCallOther("Getter")
+                            //    )
+                            //    ,
+                            //    ["Present"] = new STNodeTranslateSnippet(
+                            //        new ElementTempVar("Var")
+                            //    )
+                            //}
                             )
                         )
                     );
