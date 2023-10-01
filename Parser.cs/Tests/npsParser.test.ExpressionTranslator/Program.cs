@@ -30,7 +30,7 @@ namespace npsParser.test.ExpressionTranslator
                 exprTrans.AddScheme("HostPresent"
                     // %{HostPresent}% in the context.
                     , new STNodeTranslateSnippet(
-                        new ElementReplaceSubNodeValue("HostPresent")
+                        new ElementNodeValue("HostPresent")
                     )
                 );
 
@@ -48,7 +48,7 @@ namespace npsParser.test.ExpressionTranslator
                         , new STNodeTranslateSchemeDefault(
                             new STNodeTranslateSnippet(
                                 new ElementConstString("TRef(")
-                                , new ElementReplaceSubNodeValue("HOST")
+                                , new ElementNodeValue("HOST")
                                 , new ElementConstString(").")
                             )
                         )
@@ -68,7 +68,7 @@ namespace npsParser.test.ExpressionTranslator
                         new ElementConstString("set")
                         , new ElementVarName()
                         , new ElementConstString("(")
-                        , new ElementReplaceSubNodeValue("RHS")
+                        , new ElementNodeValue("RHS")
                         , new ElementConstString(")")
                     )
                 );
@@ -102,7 +102,7 @@ namespace npsParser.test.ExpressionTranslator
                     {
                         //Present "%{ValueString}%",
                         ["Present"] = new STNodeTranslateSnippet(
-                            new ElementConstValueString()
+                            new ElementNodeValue("ValueString")
                         )
                     }
                 );
@@ -134,7 +134,7 @@ namespace npsParser.test.ExpressionTranslator
                             new ElementCallOther("HostPresent")
                             , new ElementVarName()
                             , new ElementConstString(" = ")
-                            , new ElementReplaceSubNodeValue("RHS")
+                            , new ElementNodeValue("RHS")
                         )
                     }
                 );
@@ -143,11 +143,11 @@ namespace npsParser.test.ExpressionTranslator
                     {
                         // Present: "%{LHS}% %{OpCode}% %{RHS}%"
                         ["Present"] = new STNodeTranslateSnippet(
-                            new ElementReplaceSubNodeValue("LHS")
+                            new ElementNodeValue("LHS")
                             , new ElementConstString(" ")
-                            , new ElementReplaceSubNodeValue("OpCode")
+                            , new ElementNodeValue("OpCode")
                             , new ElementConstString(" ")
-                            , new ElementReplaceSubNodeValue("RHS")
+                            , new ElementNodeValue("RHS")
                         )
                     }
                 );
@@ -158,19 +158,19 @@ namespace npsParser.test.ExpressionTranslator
                 //            new ElementConstString("auto ")
                 //            , new ElementTempVar("LHS")
                 //            , new ElementConstString(" = ")
-                //            , new ElementReplaceSubNodeValue("LHS")
+                //            , new ElementNodeValue("LHS")
                 //            , new ElementNewLine()
                 //            , new ElementConstString("auto ")
                 //            , new ElementTempVar("RHS")
                 //            , new ElementConstString(" = ")
-                //            , new ElementReplaceSubNodeValue("RHS")
+                //            , new ElementNodeValue("RHS")
                 //        )
                 //        ,
                 //        // Present: "%{LHS}% %{OpCode}% %{RHS}%"
                 //        ["Present"] = new STNodeTranslateSnippet(
                 //            new ElementTempVar("LHS")
                 //            , new ElementConstString(" ")
-                //            , new ElementReplaceSubNodeValue("OpCode")
+                //            , new ElementNodeValue("OpCode")
                 //            , new ElementConstString(" ")
                 //            , new ElementTempVar("RHS")
                 //        )

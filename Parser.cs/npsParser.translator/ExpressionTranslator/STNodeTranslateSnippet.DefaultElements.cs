@@ -74,36 +74,12 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
 
     /// <summary>
-    /// A snippet element to retrieve constant value strings from STNodeConstant.
+    /// A snippet element to get value strings from the translating Context.
     /// </summary>
-    public class ElementConstValueString
+    public class ElementNodeValue
         : STNodeTranslateSnippet.IElement
     {
-        public override string ToString()
-        {
-            return $"%{{ValueString}}%";
-        }
-
-        public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
-        {
-            try
-            {
-                string varname = InHolderSchemeInstance.TranslatingContext.GetContextValueString("ValueString");
-                return new string[] { varname };
-            }
-            catch
-            {
-
-            }
-
-            return new string[] { "<<INVALID NODE TYPE to get Const>>" };
-        }
-    }
-
-    public class ElementReplaceSubNodeValue
-        : STNodeTranslateSnippet.IElement
-    {
-        public ElementReplaceSubNodeValue(string InKey, string InStageName = "Present")
+        public ElementNodeValue(string InKey, string InStageName = "Present")
         {
             Key = InKey;
         }
