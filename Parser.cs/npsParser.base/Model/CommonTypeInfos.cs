@@ -35,6 +35,11 @@ namespace nf.protoscript
         public static TypeInfo Any { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "any");
 
         /// <summary>
+        /// Boolean types.
+        /// </summary>
+        public static TypeInfo Boolean { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "bool");
+
+        /// <summary>
         /// Integer numbers.
         /// </summary>
         public static TypeInfo Integer { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "integer");
@@ -63,11 +68,6 @@ namespace nf.protoscript
         /// Type-references
         /// </summary>
         public static TypeInfo TypeRef { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "type_ref");
-
-        /// <summary>
-        /// Nullable types
-        /// </summary>
-        public static TypeInfo Nullable { get; } = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "nullable");
 
 
         public static bool IsInteger32Type(TypeInfo InType)

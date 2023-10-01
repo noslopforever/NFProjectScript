@@ -158,6 +158,36 @@ namespace nf.protoscript.translator.expression
             return "";
         }
 
+        /// <summary>
+        /// Predict the type of a binary-operator.
+        /// </summary>
+        /// <param name="InOpDef"></param>
+        /// <param name="InLHSType"></param>
+        /// <param name="InRHSType"></param>
+        /// <returns></returns>
+        protected virtual TypeInfo PredictBinOpResultType(OpDefinition InOpDef, TypeInfo InLHSType, TypeInfo InRHSType)
+        {
+            var usage = InOpDef.Usage;
+            switch (usage)
+            {
+                case EOpUsage.Comparer:
+                    return CommonTypeInfos.Boolean;
+                case EOpUsage.LOperator:
+                    return InLHSType;
+                case EOpUsage.ROperator:
+                    return InRHSType;
+                case EOpUsage.BooleanOperator:
+                    return CommonTypeInfos.Boolean;
+                case EOpUsage.BitwiseOperator:
+                    return InLHSType;
+                case EOpUsage.UnaryBooleanOperator:
+                case EOpUsage.UnaryOperator:
+                    throw new InvalidOperationException("Cannot apply bin-op actions to a unary operator");
+            }
+            // TODO log error
+            throw new InvalidOperationException();
+            return CommonTypeInfos.Unknown;
+        }
 
 
         /// <summary>

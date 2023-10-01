@@ -139,9 +139,8 @@ namespace nf.protoscript.translator.expression
                 ResultSchemeInstance.AddPrerequisiteScheme("LHS", lhsVisitor.ResultSchemeInstance);
                 ResultSchemeInstance.AddPrerequisiteScheme("RHS", rhsVisitor.ResultSchemeInstance);
 
-                // TODO Let Parser decide the result type of a bin-op.
-                //throw new NotImplementedException();
-                PredictScope = CommonTypeInfos.Any;
+                // Let the host translator to decide the result type of the current bin-op.
+                PredictScope = HostTranslator.PredictBinOpResultType(InBinOpNode.OpDef, lhsVisitor.PredictScope, rhsVisitor.PredictScope);
             }
             public virtual void Visit(STNodeCall InCallNode)
             {
