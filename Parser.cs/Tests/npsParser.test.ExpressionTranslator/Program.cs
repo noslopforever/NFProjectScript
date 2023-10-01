@@ -138,42 +138,45 @@ namespace npsParser.test.ExpressionTranslator
                         )
                     }
                 );
+                //exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
+                //    , new Dictionary<string, STNodeTranslateSnippet>()
+                //    {
+                //        // Present: "%{LHS}% %{OpCode}% %{RHS}%"
+                //        ["Present"] = new STNodeTranslateSnippet(
+                //            new ElementReplaceSubNodeValue("LHS")
+                //            , new ElementConstString(" ")
+                //            , new ElementReplaceSubNodeValue("OpCode")
+                //            , new ElementConstString(" ")
+                //            , new ElementReplaceSubNodeValue("RHS")
+                //        )
+                //    }
+                //);
                 exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
                     , new Dictionary<string, STNodeTranslateSnippet>()
                     {
+                        ["PreStatement"] = new STNodeTranslateSnippet(
+                            new ElementConstString("auto ")
+                            , new ElementTempVar("LHS")
+                            , new ElementConstString(" = ")
+                            , new ElementReplaceSubNodeValue("LHS")
+                            , new ElementNewLine()
+                            , new ElementConstString("auto ")
+                            , new ElementTempVar("RHS")
+                            , new ElementConstString(" = ")
+                            , new ElementReplaceSubNodeValue("RHS")
+                        )
+                        ,
                         // Present: "%{LHS}% %{OpCode}% %{RHS}%"
                         ["Present"] = new STNodeTranslateSnippet(
-                            new ElementReplaceSubNodeValue("LHS")
+                            new ElementTempVar("LHS")
                             , new ElementConstString(" ")
                             , new ElementReplaceSubNodeValue("OpCode")
                             , new ElementConstString(" ")
-                            , new ElementReplaceSubNodeValue("RHS")
+                            , new ElementTempVar("RHS")
                         )
                     }
                 );
-                //exprTrans.DefaultBinOpScheme = new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
-                //{
-                //    ["PreStatement"] = new STNodeTranslateSnippet(
-                //        new ElementConstString("auto ")
-                //        , new ElementTempVar("LHS")
-                //        , new ElementConstString(" = ")
-                //        , new ElementReplaceSubNodeValue("LHS")
-                //        , new ElementNewLine()
-                //        , new ElementConstString("auto ")
-                //        , new ElementTempVar("RHS")
-                //        , new ElementConstString(" = ")
-                //        , new ElementReplaceSubNodeValue("RHS")
-                //        )
-                //        ,
-                //    ["Present"] = new STNodeTranslateSnippet(
-                //        new ElementTempVar("LHS")
-                //        , new ElementConstString(" ")
-                //        , new ElementReplaceSubNodeValue("OpCode")
-                //        , new ElementConstString(" ")
-                //        , new ElementTempVar("RHS")
-                //        )
 
-                //});
             }
 
             #endregion
