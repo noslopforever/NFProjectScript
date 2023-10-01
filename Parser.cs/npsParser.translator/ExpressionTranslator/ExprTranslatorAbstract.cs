@@ -173,6 +173,7 @@ namespace nf.protoscript.translator.expression
                 case EOpUsage.Comparer:
                     return CommonTypeInfos.Boolean;
                 case EOpUsage.LOperator:
+                    // TODO support overrided-operators, let the LHS/RHS to decide the result type of overrided-operators.
                     return InLHSType;
                 case EOpUsage.ROperator:
                     return InRHSType;

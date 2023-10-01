@@ -197,8 +197,11 @@ namespace nf.protoscript.Serialization
         }
 
 
+
+        // TODO Support custom serializer in SerializableInfoAttribute
+
         /// <summary>
-        /// Convert a Info to a InfoRefData
+        /// Convert a OpDefinition to a OpDefData
         /// </summary>
         /// <param name="InInfo"></param>
         /// <returns></returns>
@@ -211,7 +214,7 @@ namespace nf.protoscript.Serialization
         }
 
         /// <summary>
-        /// Restore a Info from a InfoRefData.
+        /// Restore a OpDefinition from a OpDefData.
         /// </summary>
         /// <param name="InTypeRefData"></param>
         /// <returns></returns>
