@@ -68,6 +68,8 @@ namespace nf.protoscript.test {
         ///
         ///model TestObj
         ///	-IntColor Color @setter
+        ///	+TestSetterProp(InParam:IntColor)
+        ///		&gt; Color = InParam
         ///
         ///model Test
         ///	+TestMethod(InParam0:TestObj)
@@ -117,6 +119,15 @@ namespace nf.protoscript.test {
         public static string Asteroid {
             get {
                 return ResourceManager.GetString("Asteroid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string BasicExprs {
+            get {
+                return ResourceManager.GetString("BasicExprs", resourceCulture);
             }
         }
         

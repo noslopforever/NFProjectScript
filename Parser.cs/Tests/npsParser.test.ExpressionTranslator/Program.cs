@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -296,9 +296,7 @@ namespace npsParser.test.ExpressionTranslator
 
             //TestCases.BasicLanguage().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
             //TestCases.BasicDataBinding().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
-            _GenerateMethodsForType(exprTrans, TestCases.BasicExpressions());
-            _GenerateMethodsForType(exprTrans, TestCases.BinOpExpressions());
-            //TestCases.BasicExprs().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
+            TestCases.BasicExprs().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
             TestCases.AdvancedExpressions().ForeachSubInfo<TypeInfo>(type => _GenerateMethodsForType(exprTrans, type));
         }
 
@@ -309,7 +307,7 @@ namespace npsParser.test.ExpressionTranslator
             {
                 Console.WriteLine($"    Code emit sequences for Ctor:");
 
-                var context = new ExprTranslateEnvironmentDefault(InTargetType
+                var ctorEnv = new ExprTranslateEnvironmentDefault(InTargetType
                     , new ExprTranslateEnvironmentDefault.Scope[]
                     {
                         new ExprTranslateEnvironmentDefault.Scope(InTargetType, "this", "this->")
@@ -321,7 +319,7 @@ namespace npsParser.test.ExpressionTranslator
                 {
                     if (memberInfo.InitSyntax != null)
                     {
-                        var codes = InTranslator.Translate(context, memberInfo.InitSyntax);
+                        var codes = InTranslator.Translate(ctorEnv, memberInfo.InitSyntax);
                         foreach (var code in codes)
                         {
                             // TODO "this->member = %{RHS}%" should comes from MemberInitScheme
@@ -337,7 +335,7 @@ namespace npsParser.test.ExpressionTranslator
             {
                 Console.WriteLine($"    Code emit sequences for {mtdInfo.Name}:");
 
-                var context = new ExprTranslateEnvironmentDefault(mtdInfo
+                var mtdEnv = new ExprTranslateEnvironmentDefault(mtdInfo
                     , new ExprTranslateEnvironmentDefault.Scope[]
                     {
                         new ExprTranslateEnvironmentDefault.Scope(mtdInfo, "local", "")
@@ -345,7 +343,7 @@ namespace npsParser.test.ExpressionTranslator
                         , new ExprTranslateEnvironmentDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
                     );
-                var codes = InTranslator.Translate(context, mtdInfo.InitSyntax);
+                var codes = InTranslator.Translate(mtdEnv, mtdInfo.InitSyntax);
                 foreach (var code in codes)
                 {
                     Console.WriteLine("        " + code);

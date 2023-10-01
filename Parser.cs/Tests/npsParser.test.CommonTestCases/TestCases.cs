@@ -175,167 +175,186 @@ namespace nf.protoscript.test
         }
 
 
+        ///// <summary>
+        ///// Basic expression test:
+        ///// </summary>
+        ///// <returns></returns>
+        //public static TypeInfo BasicExpressions()
+        //{
+        //    ProjectInfo testProj = new ProjectInfo("TestProj");
+
+        //    {
+        //        ElementInfo global0 = new ElementInfo(testProj, "global"
+        //            , "global0"
+        //            , CommonTypeInfos.Integer
+        //            , new STNodeConstant(1)
+        //            );
+        //    }
+
+        //    TypeInfo testType = new TypeInfo(testProj, "model", "TestClass");
+        //    {
+        //        ElementInfo member0 = new ElementInfo(testType, "property"
+        //            , "member0"
+        //            , CommonTypeInfos.Integer
+        //            , new STNodeConstant(100)
+        //            );
+
+        //        ElementInfo getset0 = new ElementInfo(testType, "property"
+        //            , "getset0"
+        //            , CommonTypeInfos.Integer
+        //            , null
+        //            );
+
+        //        // member0 = 0
+        //        ElementInfo member_assign_by_const = new ElementInfo(testType, "method"
+        //            , "member_assign_by_const"
+        //            , func_V_V_Type
+        //            , new STNodeAssign(
+        //                new STNodeVar("member0")
+        //                , new STNodeConstant(0)
+        //                )
+        //            );
+
+
+        //        // delegate void func_V_TestClass_Type(TestClass InParam)
+        //        DelegateTypeInfo func_V_TestClass_Type = new DelegateTypeInfo(testProj, "FuncType", "func_V_TestClass_Type");
+        //        {
+        //            ElementInfo inParam0 = new ElementInfo(func_V_TestClass_Type, "param", "InParam0"
+        //                , testType
+        //                , null
+        //                );
+        //        }
+        //        // InParam0.member0 = member0
+        //        ElementInfo other_member_assign_by_this = new ElementInfo(testType, "method"
+        //            , "other_member_assign_by_this"
+        //            , func_V_TestClass_Type
+        //            , new STNodeAssign(
+        //                    new STNodeMemberAccess(
+        //                        new STNodeVar("InParam0")
+        //                        , "member0"
+        //                    )
+        //                    , new STNodeVar("member0")
+        //                )
+        //            );
+
+        //        // member0 = member0
+        //        ElementInfo member_assign_by_member = new ElementInfo(testType, "method"
+        //            , "member_assign_by_member"
+        //            , func_V_V_Type
+        //            , new STNodeAssign(
+        //                new STNodeVar("member0")
+        //                , new STNodeVar("member0")
+        //                )
+        //            );
+
+
+        //        // global0 = 0
+        //        ElementInfo global_assign_by_const = new ElementInfo(testType, "method"
+        //            , "global_assign_by_const"
+        //            , func_V_V_Type
+        //            , new STNodeAssign(
+        //                new STNodeVar("global0")
+        //                , new STNodeConstant(0)
+        //                )
+        //            );
+        //    }
+
+        //    return testType;
+        //}
+        ///// <summary>
+        ///// BinOP expression test:
+        ///// </summary>
+        ///// <returns></returns>
+        //public static TypeInfo BinOpExpressions()
+        //{
+        //    ProjectInfo testProj = new ProjectInfo("TestProj");
+
+        //    {
+        //        ElementInfo global0 = new ElementInfo(testProj, "global"
+        //            , "global0"
+        //            , CommonTypeInfos.Integer
+        //            , new STNodeConstant(1)
+        //            );
+        //    }
+
+        //    TypeInfo testType = new TypeInfo(testProj, "model", "Variables");
+        //    {
+        //        ElementInfo member0 = new ElementInfo(testType, "member"
+        //            , "member0"
+        //            , CommonTypeInfos.Integer
+        //            , new STNodeConstant(100)
+        //            );
+
+        //        ElementInfo getset0 = new ElementInfo(testType, "setterproperty"
+        //            , "getset0"
+        //            , CommonTypeInfos.Integer
+        //            , null
+        //            );
+
+        //        // member0 = member0 + 10
+        //        ElementInfo member_binop_const = new ElementInfo(testType, "method"
+        //            , "member_binop_const"
+        //            , func_V_V_Type
+        //            , new STNodeAssign(
+        //                new STNodeVar("member0")
+        //                , new STNodeBinaryOp(
+        //                    "+"
+        //                    , new STNodeVar("member0")
+        //                    , new STNodeConstant(10)
+        //                    )
+        //                )
+        //            );
+
+        //        // member0 = member0 - member0
+        //        ElementInfo member_binop_member = new ElementInfo(testType, "method"
+        //            , "member_binop_member"
+        //            , func_V_V_Type
+        //            , new STNodeAssign(
+        //                new STNodeVar("member0")
+        //                , new STNodeBinaryOp(
+        //                    "+"
+        //                    , new STNodeVar("member0")
+        //                    , new STNodeVar("member0")
+        //                    )
+        //                )
+        //            );
+
+        //        // member0 = 20 * 30
+        //        ElementInfo const_binop_const = new ElementInfo(testType, "method"
+        //            , "const_binop_const"
+        //            , func_V_V_Type
+        //            , new STNodeAssign(
+        //                new STNodeVar("member0")
+        //                , new STNodeBinaryOp(
+        //                    "+"
+        //                    , new STNodeConstant(20)
+        //                    , new STNodeConstant(30)
+        //                    )
+        //                )
+        //            );
+
+        //    }
+        //    return testType;
+        //}
+
         /// <summary>
-        /// Basic expression test:
+        /// Basic exprs like Assignments, BinOps, Calls.
         /// </summary>
         /// <returns></returns>
-        public static TypeInfo BasicExpressions()
+        public static ProjectInfo BasicExprs()
         {
-            ProjectInfo testProj = new ProjectInfo("TestProj");
+            parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
 
-            {
-                ElementInfo global0 = new ElementInfo(testProj, "global"
-                    , "global0"
-                    , CommonTypeInfos.Integer
-                    , new STNodeConstant(1)
-                    );
-            }
+            ProjectInfo testProj = new ProjectInfo("TestProject");
+            parser.ICodeContentReader reader = parser.StringCodeContentReader.LoadFromString(
+                "BasicExprs"
+                , TestNpsScripts.BasicExprs
+                );
 
-            TypeInfo testType = new TypeInfo(testProj, "model", "TestClass");
-            {
-                ElementInfo member0 = new ElementInfo(testType, "property"
-                    , "member0"
-                    , CommonTypeInfos.Integer
-                    , new STNodeConstant(100)
-                    );
-
-                ElementInfo getset0 = new ElementInfo(testType, "property"
-                    , "getset0"
-                    , CommonTypeInfos.Integer
-                    , null
-                    );
-
-                // member0 = 0
-                ElementInfo member_assign_by_const = new ElementInfo(testType, "method"
-                    , "member_assign_by_const"
-                    , func_V_V_Type
-                    , new STNodeAssign(
-                        new STNodeVar("member0")
-                        , new STNodeConstant(0)
-                        )
-                    );
-
-
-                // delegate void func_V_TestClass_Type(TestClass InParam)
-                DelegateTypeInfo func_V_TestClass_Type = new DelegateTypeInfo(testProj, "FuncType", "func_V_TestClass_Type");
-                {
-                    ElementInfo inParam0 = new ElementInfo(func_V_TestClass_Type, "param", "InParam0"
-                        , testType
-                        , null
-                        );
-                }
-                // InParam0.member0 = member0
-                ElementInfo other_member_assign_by_this = new ElementInfo(testType, "method"
-                    , "other_member_assign_by_this"
-                    , func_V_TestClass_Type
-                    , new STNodeAssign(
-                            new STNodeMemberAccess(
-                                new STNodeVar("InParam0")
-                                , "member0"
-                            )
-                            , new STNodeVar("member0")
-                        )
-                    );
-
-                // member0 = member0
-                ElementInfo member_assign_by_member = new ElementInfo(testType, "method"
-                    , "member_assign_by_member"
-                    , func_V_V_Type
-                    , new STNodeAssign(
-                        new STNodeVar("member0")
-                        , new STNodeVar("member0")
-                        )
-                    );
-
-
-                // global0 = 0
-                ElementInfo global_assign_by_const = new ElementInfo(testType, "method"
-                    , "global_assign_by_const"
-                    , func_V_V_Type
-                    , new STNodeAssign(
-                        new STNodeVar("global0")
-                        , new STNodeConstant(0)
-                        )
-                    );
-            }
-
-            return testType;
+            testParser.Parse(testProj, reader);
+            return testProj;
         }
-        /// <summary>
-        /// BinOP expression test:
-        /// </summary>
-        /// <returns></returns>
-        public static TypeInfo BinOpExpressions()
-        {
-            ProjectInfo testProj = new ProjectInfo("TestProj");
 
-            {
-                ElementInfo global0 = new ElementInfo(testProj, "global"
-                    , "global0"
-                    , CommonTypeInfos.Integer
-                    , new STNodeConstant(1)
-                    );
-            }
-
-            TypeInfo testType = new TypeInfo(testProj, "model", "Variables");
-            {
-                ElementInfo member0 = new ElementInfo(testType, "member"
-                    , "member0"
-                    , CommonTypeInfos.Integer
-                    , new STNodeConstant(100)
-                    );
-
-                ElementInfo getset0 = new ElementInfo(testType, "setterproperty"
-                    , "getset0"
-                    , CommonTypeInfos.Integer
-                    , null
-                    );
-
-                // member0 = member0 + 10
-                ElementInfo member_binop_const = new ElementInfo(testType, "method"
-                    , "member_binop_const"
-                    , func_V_V_Type
-                    , new STNodeAssign(
-                        new STNodeVar("member0")
-                        , new STNodeBinaryOp(
-                            "+"
-                            , new STNodeVar("member0")
-                            , new STNodeConstant(10)
-                            )
-                        )
-                    );
-
-                // member0 = member0 - member0
-                ElementInfo member_binop_member = new ElementInfo(testType, "method"
-                    , "member_binop_member"
-                    , func_V_V_Type
-                    , new STNodeAssign(
-                        new STNodeVar("member0")
-                        , new STNodeBinaryOp(
-                            "+"
-                            , new STNodeVar("member0")
-                            , new STNodeVar("member0")
-                            )
-                        )
-                    );
-
-                // member0 = 20 * 30
-                ElementInfo const_binop_const = new ElementInfo(testType, "method"
-                    , "const_binop_const"
-                    , func_V_V_Type
-                    , new STNodeAssign(
-                        new STNodeVar("member0")
-                        , new STNodeBinaryOp(
-                            "+"
-                            , new STNodeConstant(20)
-                            , new STNodeConstant(30)
-                            )
-                        )
-                    );
-
-            }
-            return testType;
-        }
 
         /// <summary>
         /// Adv exprs like auto set-back, data-changed notification, mass-unit, etc.

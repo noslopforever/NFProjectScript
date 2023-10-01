@@ -124,6 +124,9 @@
   <data name="Asteroid" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Asteroid.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
   </data>
+  <data name="BasicExprs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\BasicExprs.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
+  </data>
   <data name="OXChess" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\OXChess.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
   </data>

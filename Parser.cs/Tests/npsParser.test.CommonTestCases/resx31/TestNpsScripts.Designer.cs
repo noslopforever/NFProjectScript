@@ -121,6 +121,15 @@ namespace nf.protoscript.test {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string BasicExprs {
+            get {
+                return ResourceManager.GetString("BasicExprs", resourceCulture);
+            }
+        }
+     
+        /// <summary>
         ///   Looks up a localized string similar to map chess
         ///	@tile
         ///		-state = EState.Null
