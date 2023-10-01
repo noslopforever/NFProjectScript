@@ -146,6 +146,19 @@ namespace nf.protoscript.translator.expression
         public abstract ISTNodeTranslateScheme FindBestScheme(ITranslatingContext InTranslatingContext, string InSchemeName);
 
 
+        /// <summary>
+        /// Get override op code for the target context.
+        /// </summary>
+        /// <param name="opDef"></param>
+        /// <param name="predictScope1"></param>
+        /// <param name="predictScope2"></param>
+        /// <returns>Return a non-empty string means we override the op code. Return an empty string if no overriding, use OpDef's default op-code in this case.</returns>
+        protected virtual string GetOverrideOpCode(OpDefinition InOpDef, TypeInfo InLHSType, TypeInfo InRHSType)
+        {
+            return "";
+        }
+
+
 
         /// <summary>
         /// Context which preserves states for a translating process.

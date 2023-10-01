@@ -131,7 +131,8 @@ namespace nf.protoscript.translator.expression
                 VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InBinOpNode.RHS, rhsVisitor);
 
                 // Construct op scheme and return.
-                var ctx = new OnlyNodeContext(ParentContext, InBinOpNode);
+                var ovrOpCode = HostTranslator.GetOverrideOpCode(InBinOpNode.OpDef, lhsVisitor.PredictScope, rhsVisitor.PredictScope);
+                var ctx = new OpContext(ParentContext, InBinOpNode);
                 var opScheme = HostTranslator.FindBestScheme(ctx, SystemScheme_BinOp);
                 ResultSchemeInstance = opScheme.CreateInstance(HostTranslator, ctx);
 

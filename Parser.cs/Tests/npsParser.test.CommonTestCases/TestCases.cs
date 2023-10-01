@@ -68,7 +68,7 @@ namespace nf.protoscript.test
                     // int propB = propA + 100
                     ElementInfo propB = new ElementInfo(classA, "property", "propB"
                         , CommonTypeInfos.Integer
-                        , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
+                        , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Add)
                             , new STNodeVar("propA")
                             , new STNodeConstant(100)
                             )
@@ -99,7 +99,7 @@ namespace nf.protoscript.test
                             // code ln 0: propA = propB + InParam.
                             new STNodeAssign(
                                 new STNodeVar("propA")
-                                , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
+                                , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Add)
                                     , new STNodeVar("propB")
                                     , new STNodeVar("InParam")
                                     )
@@ -131,7 +131,7 @@ namespace nf.protoscript.test
                                 // code ln 0: propA = propA + RefParam
                                 new STNodeAssign(
                                     new STNodeVar("propA")
-                                    , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
+                                    , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Add)
                                         , new STNodeVar("propA")
                                         , new STNodeVar("RefParam")
                                         )
@@ -266,7 +266,7 @@ namespace nf.protoscript.test
                         , new STNodeSequence(new ISyntaxTreeNode[] {
                             new STNodeAssign(
                                 new STNodeVar("HP")
-                                , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
+                                , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Add)
                                     , new STNodeVar("HP")
                                     , new STNodeConstant(1)
                                 )
@@ -372,7 +372,7 @@ namespace nf.protoscript.test
                                             new STNodeVar("dataContext")
                                             , "HP"
                                             )
-                                        , new STNodeBinaryOp(STNodeBinaryOp.Def.Sub
+                                        , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Substract)
                                             , new STNodeMemberAccess(
                                                 new STNodeVar("dataContext")
                                                 , "HP"

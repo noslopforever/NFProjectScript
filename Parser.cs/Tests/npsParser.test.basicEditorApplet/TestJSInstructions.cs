@@ -75,18 +75,18 @@ namespace nf.protoscript.test
 
                 return inst;
             }
-            // BinOp => binop
+            // OpDefinition => binop
             STNodeBinaryOp stnBinOp = InSTNode as STNodeBinaryOp;
             if (stnBinOp != null)
             {
                 string opcode = "$ERR";
-                switch (stnBinOp.OpCode)
+                switch (stnBinOp.OpDef.Function)
                 {
-                    case STNodeBinaryOp.Def.Add: opcode = "+"; break;
-                    case STNodeBinaryOp.Def.Sub: opcode = "-"; break;
-                    case STNodeBinaryOp.Def.Mul: opcode = "*"; break;
-                    case STNodeBinaryOp.Def.Div: opcode = "/"; break;
-                    case STNodeBinaryOp.Def.Mod: opcode = "%"; break;
+                    case EOpFunction.Add: opcode = "+"; break;
+                    case EOpFunction.Substract: opcode = "-"; break;
+                    case EOpFunction.Multiply: opcode = "*"; break;
+                    case EOpFunction.Divide: opcode = "/"; break;
+                    case EOpFunction.Mod: opcode = "%"; break;
                 }
 
                 // Exact Instructions of sub ST tree

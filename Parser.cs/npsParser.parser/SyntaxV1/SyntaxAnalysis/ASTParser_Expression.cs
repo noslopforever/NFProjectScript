@@ -16,13 +16,38 @@ namespace nf.protoscript.parser.syntax1.analysis
         /// </summary>
         static ASTParser_ExprBase GDefaultOpExprParsers =
             new ASTParser_ExprAssign(new string[] { "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=" }
-            , new ASTParser_ExprOperator("|"
-            , new ASTParser_ExprOperator("&"
-            , new ASTParser_ExprOperator(new string[] { "==", "!=" }
-            , new ASTParser_ExprOperator(new string[] { "<", "<=", ">", ">=" }
-            , new ASTParser_ExprOperator(new string[] { "+", "-" }
-            , new ASTParser_ExprOperator(new string[] { "*", "/", "%" }
-            , new ASTParser_ExprUnary(new string[] { "~", "+", "-", "!" }
+            , new ASTParser_ExprOperator(new OpCodeWithDef("|", EOpFunction.Or)
+            , new ASTParser_ExprOperator(new OpCodeWithDef("&", EOpFunction.And)
+            , new ASTParser_ExprOperator(new OpCodeWithDef[]
+            {
+                new OpCodeWithDef("==", EOpFunction.Equal)
+                , new OpCodeWithDef("!=", EOpFunction.NotEqual)
+            }
+            , new ASTParser_ExprOperator(new OpCodeWithDef[]
+            { 
+                new OpCodeWithDef("<", EOpFunction.LessThan)
+                , new OpCodeWithDef("<=", EOpFunction.LessThanOrEqual)
+                , new OpCodeWithDef(">", EOpFunction.GreaterThan)
+                , new OpCodeWithDef(">=", EOpFunction.GreaterThanOrEqual)
+            }
+            , new ASTParser_ExprOperator(new OpCodeWithDef[]
+            {
+                new OpCodeWithDef("+", EOpFunction.Add)
+                , new OpCodeWithDef("-", EOpFunction.Substract)
+            }
+            , new ASTParser_ExprOperator(new OpCodeWithDef[]
+            { 
+                new OpCodeWithDef("*", EOpFunction.Multiply)
+                , new OpCodeWithDef("/", EOpFunction.Divide)
+                , new OpCodeWithDef("%", EOpFunction.Mod)
+            }
+            , new ASTParser_ExprUnary(new OpCodeWithDef[]
+            { 
+                new OpCodeWithDef("~", EOpFunction.BitwiseNot)
+                , new OpCodeWithDef("+", EOpFunction.Positive)
+                , new OpCodeWithDef("-", EOpFunction.Negative)
+                , new OpCodeWithDef("!", EOpFunction.Not)
+            }
             , new ASTParser_ExprAccessOrCall(new ASTParser_ExprTerm())
             ))))))));
 

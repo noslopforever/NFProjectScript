@@ -189,6 +189,38 @@ namespace nf.protoscript.translator.expression
         }
 
         /// <summary>
+        /// Context when translating a bin-op or unary-op node
+        /// </summary>
+        public class OpContext
+            : NodeContextBase
+        {
+            public OpContext(ITranslatingContext InParentContext, STNodeBinaryOp InNode, string InOverrideOpCode = "")
+                : base(InParentContext, InNode)
+            {
+                OpCode = InNode.OpDef.DefaultOpCode != null? InNode.OpDef.DefaultOpCode : "<<INVALID OP CODE>>";
+                if (InOverrideOpCode != "")
+                {
+                    OpCode = InOverrideOpCode;
+                }
+            }
+            public OpContext(ITranslatingContext InParentContext, STNodeUnaryOp InNode, string InOverrideOpCode = "")
+                : base(InParentContext, InNode)
+            {
+                OpCode = InNode.OpDef.DefaultOpCode != null ? InNode.OpDef.DefaultOpCode : "<<INVALID OP CODE>>";
+                if (InOverrideOpCode != "")
+                {
+                    OpCode = InOverrideOpCode;
+                }
+            }
+
+            /// <summary>
+            /// OpCode
+            /// </summary>
+            public string OpCode { get; }
+
+        }
+
+        /// <summary>
         /// Context when translating a variable-access node.
         /// </summary>
         public class VarContext

@@ -1,5 +1,4 @@
 ﻿using nf.protoscript.parser.token;
-using nf.protoscript.syntaxtree;
 using System;
 using System.Linq;
 
@@ -14,12 +13,14 @@ namespace nf.protoscript.parser.syntax1.analysis
     /// A.B.foo(C.D.E, F)[0, G.H].I
     /// </example>
     class ASTParser_ExprAccessOrCall
-        : ASTParser_ExprOperator
+        : ASTParser_ExprBase
     {
         public ASTParser_ExprAccessOrCall(ASTParser_ExprBase InNextExprParser)
-            : base(".", InNextExprParser)
+            : base(InNextExprParser)
         {
         }
+
+        public string[] Ops = new string[] { "." };
 
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)
         {
@@ -39,9 +40,9 @@ namespace nf.protoscript.parser.syntax1.analysis
                     // Try parse the next token as an 'ID' token.
                     var curToken = InTokenList.CurrentToken;
                     var nextTerm = NextParser.Parse(InTokenList);
-                    if (nextTerm is STNodeVar)
+                    if (nextTerm is syntaxtree.STNodeVar)
                     {
-                        var memberAccess = new syntaxtree.STNodeMemberAccess(lhs, (nextTerm as STNodeVar).IDName);
+                        var memberAccess = new syntaxtree.STNodeMemberAccess(lhs, (nextTerm as syntaxtree.STNodeVar).IDName);
                         lhs = memberAccess;
                     }
                     else

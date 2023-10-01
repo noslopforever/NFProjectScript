@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace nf.protoscript.syntaxtree
@@ -12,23 +13,18 @@ namespace nf.protoscript.syntaxtree
     public class STNodeUnaryOp
         : STNodeBase
     {
-        public STNodeUnaryOp(string InUnaryOpStr, ISyntaxTreeNode InRhs)
+        public STNodeUnaryOp(OpDefinition InOpDef, ISyntaxTreeNode InRhs)
         {
-            OpCode = InUnaryOpStr;
+            Debug.Assert(InOpDef.Usage == EOpUsage.UnaryBooleanOperator || InOpDef.Usage == EOpUsage.UnaryOperator);
+            OpDef = InOpDef;
             RHS = InRhs;
-        }
-
-        public class Def
-        {
-            public const string Positive = "+";
-            public const string Negative = "-";
         }
 
         /// <summary>
         /// Operator character
         /// </summary>
         [Serialization.SerializableInfo]
-        public string OpCode { get; private set; } = "";
+        public OpDefinition OpDef { get; private set; }
 
         /// <summary>
         /// Right-hand expression
@@ -36,7 +32,7 @@ namespace nf.protoscript.syntaxtree
         [Serialization.SerializableInfo]
         public ISyntaxTreeNode RHS { get; private set; }
 
-
+        
     }
 
 }
