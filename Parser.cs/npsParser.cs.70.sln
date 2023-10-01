@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.parserBasics
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.serializationBasics.70", "Tests\npsParser.test.serializationBasics\npsParser.test.serializationBasics.70.csproj", "{1CF8F955-7FEC-44BC-921E-E8C9D6E0A4C9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.ClassTranslator.70", "Tests\npsParser.test.ClassTranslator\npsParser.test.ClassTranslator.70.csproj", "{3BBF9C06-2F3F-492B-9853-C7633922926C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{1CF8F955-7FEC-44BC-921E-E8C9D6E0A4C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CF8F955-7FEC-44BC-921E-E8C9D6E0A4C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CF8F955-7FEC-44BC-921E-E8C9D6E0A4C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BBF9C06-2F3F-492B-9853-C7633922926C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BBF9C06-2F3F-492B-9853-C7633922926C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BBF9C06-2F3F-492B-9853-C7633922926C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BBF9C06-2F3F-492B-9853-C7633922926C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +94,7 @@ Global
 		{79FC292B-D27D-48E5-A2B3-93BD3F698B85} = {61F8F215-4DAA-4F1F-8A15-20312F349287}
 		{499044D8-9F4A-4F10-B7BC-B93C3F5AFE5A} = {61F8F215-4DAA-4F1F-8A15-20312F349287}
 		{1CF8F955-7FEC-44BC-921E-E8C9D6E0A4C9} = {61F8F215-4DAA-4F1F-8A15-20312F349287}
+		{3BBF9C06-2F3F-492B-9853-C7633922926C} = {61F8F215-4DAA-4F1F-8A15-20312F349287}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B5231334-4CDB-4E46-AAD8-7F9DC204CF23}
