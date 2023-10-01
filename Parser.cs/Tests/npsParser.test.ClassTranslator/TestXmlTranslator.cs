@@ -17,50 +17,61 @@ namespace npsParser.test.ClassTranslator
                     , new ElementConstString("\">")
                     , new ElementNewLine()
                     , new ElementIndentBlock(
-                        new ElementConstString("<infos>")
+                        new ElementConstString("<properties>")
                         , new ElementNewLine()
                         , new ElementIndentBlock(
-                            new ElementForEachSubCall("InfoTranslator", "")
+                            new ElementForEachSubCall("PropertyTranslator", "member")
                         )
                         , new ElementNewLine()
-                        , new ElementConstString("</infos>")
+                        , new ElementConstString("</properties>")
                     )
                     , new ElementNewLine()
-                    //, new ElementIndentBlock(
-                    //    new ElementConstString("<properties>")
-                    //    , new ElementIndentBlock(
-                    //        new ElementForeachSubCall("PropertyTranslator", "property")
-                    //    )
-                    //    , new ElementConstString("</properties>")
-                    //)
-                    //, new ElementIndentBlock(
-                    //    new ElementConstString("<methods>")
-                    //    , new ElementIndentBlock(
-                    //        new ElementForeachSubCall("MethodTranslator", "method")
-                    //    )
-                    //    , new ElementConstString("</methods>")
-                    //)
+                    , new ElementIndentBlock(
+                        new ElementConstString("<methods>")
+                        , new ElementNewLine()
+                        , new ElementIndentBlock(
+                            new ElementForEachSubCall("MethodTranslator", "method")
+                        )
+                        , new ElementNewLine()
+                        , new ElementConstString("</methods>")
+                    )
+                    , new ElementNewLine()
                     , new ElementConstString("</")
                     , new ElementNodeValue("Header")
                     , new ElementConstString(">")
                 )
             );
 
-            xmlTrans.AddScheme("InfoTranslator",
+            xmlTrans.AddScheme("PropertyTranslator",
+                new InfoTranslateSnippet(
+                    new ElementConstString("<")
+                    , new ElementNodeValue("Header")
+                    , new ElementConstString(" Name=\"")
+                    , new ElementNodeValue("Name")
+                    , new ElementConstString("\" ")
+                    , new ElementConstString(" Type=\"")
+                    , new ElementNodeValue("ElementType")
+                    , new ElementConstString("\">")
+                    , new ElementNewLine()
+                    , new ElementConstString("</")
+                    , new ElementNodeValue("Header")
+                    , new ElementConstString(">")
+                )
+            );
+
+            xmlTrans.AddScheme("MethodTranslator",
                 new InfoTranslateSnippet(
                     new ElementConstString("<")
                     , new ElementNodeValue("Header")
                     , new ElementConstString(" Name=\"")
                     , new ElementNodeValue("Name")
                     , new ElementConstString("\" />")
+                    , new ElementNewLine()
+                    , new ElementConstString("</")
+                    , new ElementNodeValue("Header")
+                    , new ElementConstString(">")
                 )
             );
-
-            //xmlTrans.AddScheme("PropertyTranslator",
-            //);
-
-            //xmlTrans.AddScheme("MethodTranslator",
-            //);
 
             return xmlTrans;
         }
