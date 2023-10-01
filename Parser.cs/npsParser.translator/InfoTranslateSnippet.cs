@@ -53,9 +53,15 @@ namespace nf.protoscript.translator
                     continue;
                 }
 
+                // Get results applied by the element.
+                var elemCodeLns = snippetElem.Apply(InHolderSchemeInstance).ToArray();
+                if (elemCodeLns.Length == 0)
+                {
+                    continue;
+                }
+
                 // The first line of the snippet will be applied to the current writing-line.
                 // Other lines will be pushed to new lines.
-                var elemCodeLns = snippetElem.Apply(InHolderSchemeInstance).ToArray();
                 codeLines[writingLineIndex] += elemCodeLns[0];
                 for (int elemLnIndex = 1; elemLnIndex < elemCodeLns.Length; elemLnIndex++)
                 {
