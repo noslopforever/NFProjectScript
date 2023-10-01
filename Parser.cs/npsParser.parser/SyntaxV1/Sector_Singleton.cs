@@ -23,7 +23,8 @@
         //
         public override void TryCollectTypes(ProjectInfo InProjectInfo)
         {
-            _singletonType = new TypeInfo(InProjectInfo, "model", SingletonName);
+            string typeName = SingletonName.Remove(0, 1);
+            _singletonType = new TypeInfo(InProjectInfo, "model", typeName);
         }
 
         protected override Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector)
