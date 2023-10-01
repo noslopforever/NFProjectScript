@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -208,12 +208,26 @@ namespace npsParser.test.ExpressionTranslator
                             "ROProperty_GET"
                             , 0
                             , condROProperty
+                            //, new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
+                            //{
+                            //    ["Present"] = new STNodeTranslateSnippet(
+                            //        new ElementCallOther("HostPresent")
+                            //        , new ElementCallOther("Getter")
+                            //        )
+                            //}
                             , new STNodeTranslateSchemeDefault(new Dictionary<string, STNodeTranslateSnippet>()
                             {
-                                ["Present"] = new STNodeTranslateSnippet(
-                                    new ElementCallOther("HostPresent")
+                                ["PreStatement"] = new STNodeTranslateSnippet(
+                                    new ElementConstString("auto ")
+                                    , new ElementTempVar("Var")
+                                    , new ElementConstString(" = ")
+                                    , new ElementCallOther("HostPresent")
                                     , new ElementCallOther("Getter")
-                                    )
+                                )
+                                ,
+                                ["Present"] = new STNodeTranslateSnippet(
+                                    new ElementTempVar("Var")
+                                )
                             }
                             )
                         )
