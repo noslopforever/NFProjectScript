@@ -1,5 +1,4 @@
-﻿using nf.protoscript.translator.expression;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +18,16 @@ namespace nf.protoscript.translator
             }
             return null;
         }
+
+        public override expression.ExprTranslatorAbstract CreateExprTranslator(string InTranslatorType)
+        {
+            return DefaultExprTranslator;
+        }
+
+        /// <summary>
+        /// Default ExprTranslator
+        /// </summary>
+        public expression.ExprTranslatorAbstract DefaultExprTranslator { get; set; }
 
         /// <summary>
         /// Add generic schemes

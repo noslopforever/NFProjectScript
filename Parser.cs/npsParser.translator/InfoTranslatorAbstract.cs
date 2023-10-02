@@ -35,10 +35,7 @@ namespace nf.protoscript.translator
         /// </summary>
         /// <param name="InTranslatorType"></param>
         /// <returns></returns>
-        public virtual expression.ExprTranslatorAbstract CreateExprTranslator(string InTranslatorType)
-        {
-            return new expression.ExprTranslatorDefault();
-        }
+        public abstract expression.ExprTranslatorAbstract CreateExprTranslator(string InTranslatorType);
 
     }
 

@@ -8,6 +8,8 @@ namespace npsParser.test.ClassTranslator
         public static InfoTranslatorDefault Load()
         {
             var xmlTrans = new InfoTranslatorDefault();
+            xmlTrans.DefaultExprTranslator = new TestExprTranslatorCpp();
+
             xmlTrans.AddScheme("TypeTranslator",
                 new InfoTranslateSnippet(
                     new ElementConstString("<")
@@ -51,11 +53,7 @@ namespace npsParser.test.ClassTranslator
                     , new ElementConstString("\" ")
                     , new ElementConstString(" Type=\"")
                     , new ElementNodeValue("ElementType")
-                    , new ElementConstString("\">")
-                    , new ElementNewLine()
-                    , new ElementConstString("</")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(">")
+                    , new ElementConstString("\" />")
                 )
             );
 
@@ -65,7 +63,11 @@ namespace npsParser.test.ClassTranslator
                     , new ElementNodeValue("Header")
                     , new ElementConstString(" Name=\"")
                     , new ElementNodeValue("Name")
-                    , new ElementConstString("\" />")
+                    , new ElementConstString("\" >")
+                    , new ElementNewLine()
+                    , new ElementIndentBlock(
+                        new ElementMethodBody()
+                    )
                     , new ElementNewLine()
                     , new ElementConstString("</")
                     , new ElementNodeValue("Header")
