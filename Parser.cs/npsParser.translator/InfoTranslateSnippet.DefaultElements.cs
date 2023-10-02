@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace nf.protoscript.translator.DefaultSnippetElements
 {
@@ -129,6 +130,56 @@ namespace nf.protoscript.translator.DefaultSnippetElements
                 , info => info.Header.Contains(HeaderFilter)
                 );
             return result;
+        }
+
+    }
+
+    /// <summary>
+    /// Element which creates a MethodBodyContext and translate expressions of the method.
+    /// The context of this Element must be a method context (Context with a valid MethodInfo).
+    /// </summary>
+    public class ElementMethodBody
+        : InfoTranslateSnippet.IElement
+    {
+        public ElementMethodBody()
+        {
+        }
+
+
+        public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            var translator = InHolderSchemeInstance.HostTranslator;
+            ITranslatingContext ctx = InHolderSchemeInstance.Context;
+
+            // Exact parameters from the context.
+            // This element must be called when the context is a 'ElementInfo' context.
+            ElementInfo mtdInfo = (ctx as ITranslatingInfoContext)?.TranslatingInfo as ElementInfo;
+            TypeInfo mtdHostType = mtdInfo.FindTheFirstParent<TypeInfo>();
+            ProjectInfo globalInfo = mtdInfo.FindTheFirstParent<ProjectInfo>();
+
+            Debug.Assert(mtdInfo != null);
+            Debug.Assert(mtdHostType != null);
+            Debug.Assert(globalInfo != null);
+
+            // Create Method Body Context
+            var env = new expression.ExprTranslateEnvironmentDefault(mtdInfo
+                , new expression.ExprTranslateEnvironmentDefault.Scope[]
+                {
+                        new expression.ExprTranslateEnvironmentDefault.Scope(mtdInfo, "local", "")
+                        , new expression.ExprTranslateEnvironmentDefault.Scope(mtdHostType, "this", "this->")
+                        , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
+                }
+                );
+            expression.FuncBodyContext mtdCtx = new expression.FuncBodyContext(ctx, mtdInfo, env);
+
+            // TODO let the translator decide how to create a MethodBodyContext.
+            //expression.FuncBodyContext mtdCtx = translator.AllocBodyContextForMethod(ctx);
+
+            // Select an expr-translator and do translating.
+            expression.ExprTranslatorAbstract exprTranslator = translator.CreateExprTranslator("");
+            var codes = exprTranslator.Translate(mtdCtx, mtdInfo.InitSyntax);
+
+            return codes;
         }
 
     }

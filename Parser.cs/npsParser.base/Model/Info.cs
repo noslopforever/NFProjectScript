@@ -140,6 +140,25 @@ namespace nf.protoscript
         }
 
         /// <summary>
+        /// Find the first Parent with type T.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T FindTheFirstParent<T>()
+            where T : Info
+        {
+            Info check = ParentInfo;
+            while (check != null)
+            {
+                if (check is T)
+                    return check as T;
+                check = check.ParentInfo;
+            }
+            return null;
+        }
+
+
+        /// <summary>
         /// Check if the info has a sub-info with InSubName.
         /// </summary>
         /// <typeparam name="T"></typeparam>
