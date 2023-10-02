@@ -9,10 +9,10 @@ namespace nf.protoscript.translator
     public abstract class InfoTranslatorAbstract
     {
 
-        public virtual IReadOnlyList<string> TranslateInfo(Info InTargetInfo, string InSchemeName)
+        public virtual IReadOnlyList<string> TranslateInfo(ITranslatingContext InTranslatingContext, string InSchemeName)
         {
-            var scheme = FindBestScheme(InTargetInfo, InSchemeName);
-            var si = scheme.CreateInstance(this, InTargetInfo);
+            var scheme = FindBestScheme(InTranslatingContext, InSchemeName);
+            var si = scheme.CreateInstance(this, InTranslatingContext);
             return si.GetResult();
         }
 
@@ -22,7 +22,7 @@ namespace nf.protoscript.translator
         /// <param name="InContext"></param>
         /// <param name="InSchemeName"></param>
         /// <returns></returns>
-        public abstract IInfoTranslateScheme FindBestScheme(Info InContext, string InSchemeName);
+        public abstract IInfoTranslateScheme FindBestScheme(ITranslatingContext InTranslatingContext, string InSchemeName);
 
     }
 

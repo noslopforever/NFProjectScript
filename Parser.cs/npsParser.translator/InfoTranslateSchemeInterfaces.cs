@@ -16,11 +16,19 @@ namespace nf.protoscript.translator
     {
 
         /// <summary>
-        /// Create instance to 
+        /// TODO
         /// </summary>
         /// <param name="InTranslator"></param>
+        /// <param name="InContext"></param>
         /// <returns></returns>
-        IInfoTranslateSchemeInstance CreateInstance(InfoTranslatorAbstract InTranslator, Info InContextInfo);
+        IInfoTranslateSchemeInstance CreateInstance(InfoTranslatorAbstract InTranslator, ITranslatingContext InContext);
+
+        /// <summary>
+        /// Create a instance and set it as the 'proxy' of another instance.
+        /// </summary>
+        /// <param name="InSchemeInstanceToBeProxied"></param>
+        /// <returns></returns>
+        IInfoTranslateSchemeInstance CreateProxyInstance(IInfoTranslateSchemeInstance InSchemeInstanceToBeProxied);
 
     }
 
@@ -36,22 +44,15 @@ namespace nf.protoscript.translator
         InfoTranslatorAbstract HostTranslator { get; }
 
         /// <summary>
-        /// Info bound with this scheme instance.
+        /// Context bound with this scheme instance.
         /// </summary>
-        Info ContextInfo { get; }
+        ITranslatingContext Context { get; }
 
         /// <summary>
         /// Apply the scheme and get translated codes
         /// </summary>
         /// <returns></returns>
         IReadOnlyList<string> GetResult();
-
-        /// <summary>
-        /// Get the value of the Context variable bound with this scheme instance.
-        /// </summary>
-        /// <param name="InContextVarName"></param>
-        /// <returns></returns>
-        string GetContextVarValueString(string InContextVarName);
 
     }
 
@@ -81,7 +82,7 @@ namespace nf.protoscript.translator
         /// </summary>
         /// <param name="InContext"></param>
         /// <returns></returns>
-        bool IsMatch(Info InContext);
+        bool IsMatch(ITranslatingContext InContext);
 
     }
 

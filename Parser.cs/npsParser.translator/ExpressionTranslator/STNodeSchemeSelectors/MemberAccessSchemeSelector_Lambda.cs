@@ -13,7 +13,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
         public STNodeTranslateSchemeSelector_Lambda(
             string InSelectorName
             , int InPriority
-            , Func<ExprTranslatorAbstract.ITranslatingContext, bool> InConditionChecker
+            , Func<ITranslatingContext, bool> InConditionChecker
             , ISTNodeTranslateScheme InScheme
             )
         {
@@ -28,7 +28,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
         public int Priority { get; } = 0;
         public ISTNodeTranslateScheme Scheme { get; }
 
-        public bool IsMatch(ExprTranslatorAbstract.ITranslatingContext InContext)
+        public bool IsMatch(ITranslatingContext InContext)
         {
             return ConditionChecker(InContext);
         }
@@ -38,7 +38,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
         /// <summary>
         /// The lambda to check the codition.
         /// </summary>
-        public Func<ExprTranslatorAbstract.ITranslatingContext, bool> ConditionChecker { get; }
+        public Func<ITranslatingContext, bool> ConditionChecker { get; }
 
     }
 

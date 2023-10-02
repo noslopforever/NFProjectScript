@@ -24,7 +24,7 @@ namespace nf.protoscript.translator.expression
         /// <summary>
         /// Translating Context.
         /// </summary>
-        ExprTranslatorAbstract.ITranslatingContext TranslatingContext { get; }
+        ExprTranslatorAbstract.IExprContext TranslatingContext { get; }
 
         /// <summary>
         /// GetResult this instance and get result for the target stage which has been decided by translator.
@@ -73,7 +73,7 @@ namespace nf.protoscript.translator.expression
         /// Create instance to do translate for the target STNode.
         /// </summary>
         /// <returns></returns>
-        ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, ExprTranslatorAbstract.ITranslatingContext InContext);
+        ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, ExprTranslatorAbstract.IExprContext InContext);
 
         /// <summary>
         /// Create a instance and set it as the 'proxy' of another instance.

@@ -26,7 +26,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
         public int Priority { get; } = 0;
         public ISTNodeTranslateScheme Scheme { get; }
 
-        public bool IsMatch(ExprTranslatorAbstract.ITranslatingContext InContext)
+        public bool IsMatch(ITranslatingContext InContext)
         {
             throw new NotImplementedException();
             //return ConditionSnippet.Check(InContext);
@@ -57,7 +57,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
         /// </summary>
         public interface ICondition
         {
-            bool Check(ExprTranslatorAbstract.ITranslatingContext InContext);
+            bool Check(ITranslatingContext InContext);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
         /// </summary>
         /// <param name="InSchemeInstance"></param>
         /// <returns></returns>
-        public bool Check(ExprTranslatorAbstract.ITranslatingContext InContext)
+        public bool Check(ITranslatingContext InContext)
         {
             return RootChecker.Check(InContext);
         }
@@ -86,7 +86,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
             }
 
             ICondition[] SubConditions { get; }
-            public bool Check(ExprTranslatorAbstract.ITranslatingContext InContext)
+            public bool Check(ITranslatingContext InContext)
             {
                 foreach (var SubChecker in SubConditions)
                 {
@@ -107,7 +107,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
             }
 
             ICondition[] SubConditions { get; }
-            public bool Check(ExprTranslatorAbstract.ITranslatingContext InContext)
+            public bool Check(ITranslatingContext InContext)
             {
                 foreach (var SubChecker in SubConditions)
                 {
@@ -127,7 +127,7 @@ namespace nf.protoscript.translator.expression.schemeSelectors
                 SubCondition = InSubCondition;
             }
             ICondition SubCondition { get; }
-            public bool Check(ExprTranslatorAbstract.ITranslatingContext InContext)
+            public bool Check(ITranslatingContext InContext)
             {
                 return !SubCondition.Check(InContext);
             }

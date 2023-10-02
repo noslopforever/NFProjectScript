@@ -132,7 +132,7 @@ namespace nf.protoscript.translator.expression.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(ISTNodeTranslateSchemeInstance InHolderSchemeInstance)
         {
-            var env = InHolderSchemeInstance.TranslatingContext.RootEnvironment;
+            var env = InHolderSchemeInstance.TranslatingContext.HostMethodBody.RootEnvironment;
             ISyntaxTreeNode translatingNode = null;
             if (InHolderSchemeInstance.TranslatingContext is ExprTranslatorAbstract.INodeContext)
             {

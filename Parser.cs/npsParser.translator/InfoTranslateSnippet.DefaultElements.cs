@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace nf.protoscript.translator.DefaultSnippetElements
@@ -55,7 +55,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
             // Find data value from SI's context
-            var ctxValStr = InHolderSchemeInstance.GetContextVarValueString(Key);
+            var ctxValStr = InHolderSchemeInstance.Context.GetContextValueString(Key);
             return new string[] { ctxValStr };
         }
     }
@@ -91,10 +91,13 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         }
     }
 
-    public class ElementForEachSubCall
+    /// <summary>
+    /// For each sub info and call another scheme for it.
+    /// </summary>
+    public class ElementForeachSubCall
         : InfoTranslateSnippet.IElement
     {
-        public ElementForEachSubCall(string InSchemeName, string InHeaderFilter)
+        public ElementForeachSubCall(string InSchemeName, string InHeaderFilter)
         {
             SchemeName = InSchemeName;
             HeaderFilter = InHeaderFilter;
@@ -113,15 +116,17 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
             var translator = InHolderSchemeInstance.HostTranslator;
-
+            var context = InHolderSchemeInstance.Context;
             List<string> result = new List<string>();
-            InHolderSchemeInstance.ContextInfo.ForeachSubInfo<Info>(
-                i => {
-                    var scheme = translator.FindBestScheme(i, SchemeName);
-                    var si = scheme.CreateInstance(translator, i);
+            (context as ITranslatingInfoContext)?.TranslatingInfo.ForeachSubInfo<Info>(
+                info =>
+                {
+                    TranslatingInfoContext infoCtx = new TranslatingInfoContext(context, info);
+                    var scheme = translator.FindBestScheme(infoCtx, SchemeName);
+                    var si = scheme.CreateInstance(translator, infoCtx);
                     result.AddRange(si.GetResult());
                 }
-                , i => i.Header.Contains(HeaderFilter)
+                , info => info.Header.Contains(HeaderFilter)
                 );
             return result;
         }

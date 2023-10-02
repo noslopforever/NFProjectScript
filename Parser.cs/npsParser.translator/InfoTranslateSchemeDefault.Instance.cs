@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nf.protoscript.translator.expression;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,39 +17,34 @@ namespace nf.protoscript.translator
         public class Instance
             : IInfoTranslateSchemeInstance
         {
-            public Instance(InfoTranslatorAbstract InTranslator, InfoTranslateSchemeDefault InScheme, Info InContextInfo)
+            public Instance(InfoTranslateSchemeDefault InScheme, InfoTranslatorAbstract InTranslator, ITranslatingContext InContext)
             {
                 HostTranslator = InTranslator;
                 Scheme = InScheme;
-                ContextInfo = InContextInfo;
+                Context = InContext;
             }
+            public static Instance CreateProxyInstance(InfoTranslateSchemeDefault InScheme, IInfoTranslateSchemeInstance InProxySI)
+            {
+                Instance inst = new Instance(InScheme, InProxySI.HostTranslator, InProxySI.Context)
+                {
+                    ProxyInstance = InProxySI
+                };
+                return inst;
+            }
+
+            /// <summary>
+            /// The Proxy SI if this instance is a proxy instance.
+            /// </summary>
+            public IInfoTranslateSchemeInstance ProxyInstance { get; private set; }
 
             // Begin IInfoTranslateSchemeInstance interfaces
             public InfoTranslatorAbstract HostTranslator { get; }
             public InfoTranslateSchemeDefault Scheme { get; }
-            public Info ContextInfo { get; }
+            public ITranslatingContext Context { get; }
 
             public IReadOnlyList<string> GetResult()
             {
                 return Scheme.Snippet.Apply(this);
-            }
-
-            public string GetContextVarValueString(string InContextVarName)
-            {
-                try
-                {
-                    var prop = ContextInfo.GetType().GetProperty(InContextVarName);
-                    if (prop != null)
-                    {
-                        return prop.GetValue(ContextInfo).ToString();
-                    }
-                }
-                catch
-                {
-                    // TODO log error.
-                }
-
-                return "<<Invalid Context Var>>";
             }
             // ~ End IInfoTranslateSchemeInstance interfaces
 

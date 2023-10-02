@@ -18,7 +18,7 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public class STNodeVisitor_GetNodeValue
         {
-            public STNodeVisitor_GetNodeValue(ExprTranslatorAbstract InHostTranslator, ITranslatingContext InParentContext)
+            public STNodeVisitor_GetNodeValue(ExprTranslatorAbstract InHostTranslator, ExprContextBase InParentContext)
             {
                 HostTranslator = InHostTranslator;
                 ParentContext = InParentContext;
@@ -32,7 +32,7 @@ namespace nf.protoscript.translator.expression
             /// <summary>
             /// Translating Context.
             /// </summary>
-            public ITranslatingContext ParentContext { get; }
+            public ExprContextBase ParentContext { get; }
 
             /// <summary>
             /// The scheme to translate the visiting STNode, found by this visitor after Visit .
@@ -49,7 +49,7 @@ namespace nf.protoscript.translator.expression
             /// </summary>
             public virtual void Visit(STNodeConstant InConst)
             {
-                ITranslatingContext ctx = null;
+                IExprContext ctx = null;
                 ISTNodeTranslateScheme scheme = null;
                 if (InConst.Value == null)
                 {
@@ -159,7 +159,7 @@ namespace nf.protoscript.translator.expression
             {
 
                 // Try find the variable in the environment's scope-chain.
-                var hostScopeVar = ParentContext.RootEnvironment.FindVariable(InVarNode.IDName);
+                var hostScopeVar = ParentContext.HostMethodBody.RootEnvironment.FindVariable(InVarNode.IDName);
                 if (hostScopeVar == null)
                 {
                     OutPredictType = null;
@@ -216,7 +216,7 @@ namespace nf.protoscript.translator.expression
         public class STNodeVisitor_GatherSetScheme
             : STNodeVisitor_GetNodeValue
         {
-            public STNodeVisitor_GatherSetScheme(ExprTranslatorAbstract InHostTranslator, ITranslatingContext InContext, TypeInfo InRHSScope)
+            public STNodeVisitor_GatherSetScheme(ExprTranslatorAbstract InHostTranslator, ExprContextBase InContext, TypeInfo InRHSScope)
                 : base(InHostTranslator, InContext)
             {
                 RHSScope = InRHSScope;
@@ -258,7 +258,7 @@ namespace nf.protoscript.translator.expression
         public class STNodeVisitor_GatherRefScheme
             : STNodeVisitor_GetNodeValue
         {
-            public STNodeVisitor_GatherRefScheme(ExprTranslatorAbstract InHostTranslator, ITranslatingContext InContext)
+            public STNodeVisitor_GatherRefScheme(ExprTranslatorAbstract InHostTranslator, ExprContextBase InContext)
                 : base(InHostTranslator, InContext)
             {
             }
@@ -294,14 +294,14 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public class STNodeVisitor_Statement
         {
-            public STNodeVisitor_Statement(ExprTranslatorAbstract InHostTranslator, ITranslatingContext InContext)
+            public STNodeVisitor_Statement(ExprTranslatorAbstract InHostTranslator, IMethodBodyContext InContext)
             {
                 HostTranslator = InHostTranslator;
                 ParentContext = InContext;
             }
 
             public ExprTranslatorAbstract HostTranslator { get; }
-            public ITranslatingContext ParentContext { get; }
+            public IMethodBodyContext ParentContext { get; }
 
             public List<ISTNodeTranslateSchemeInstance> TranslateSchemeInstances { get; } = new List<ISTNodeTranslateSchemeInstance>();
 
@@ -316,14 +316,12 @@ namespace nf.protoscript.translator.expression
 
             public void Visit(STNodeSequence InNodes)
             {
-                // TODO Block statement
+                // TODO Block statements
 
                 foreach (var subNode in InNodes.NodeList)
                 {
-                    var stmtCtx = new StatementContext(ParentContext, subNode);
-
                     // Statement always starts with a getter visitor.
-                    STNodeVisitor_Statement statementNodeVisitor = new STNodeVisitor_Statement(HostTranslator, stmtCtx);
+                    STNodeVisitor_Statement statementNodeVisitor = new STNodeVisitor_Statement(HostTranslator, ParentContext);
                     VisitByReflectionHelper.FindAndCallVisit(subNode, statementNodeVisitor);
 
                     // Merge translate-schemes of sub-statements.
@@ -337,14 +335,14 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public class STNodeVisitor_FunctionBody
         {
-            public STNodeVisitor_FunctionBody(ExprTranslatorAbstract InHostTranslator, IExprTranslateEnvironment InEnvironment)
+            public STNodeVisitor_FunctionBody(ExprTranslatorAbstract InHostTranslator, IMethodBodyContext InMethodBodyContext)
             {
                 HostTranslator = InHostTranslator;
-                ExprTranslateEnvironment = InEnvironment;
+                MethodBodyContext = InMethodBodyContext;
             }
 
             public ExprTranslatorAbstract HostTranslator { get; }
-            public IExprTranslateEnvironment ExprTranslateEnvironment { get; }
+            public IMethodBodyContext MethodBodyContext { get; }
             public List<ISTNodeTranslateSchemeInstance> TranslateSchemeInstances { get; private set; }
 
             /// <summary>
@@ -353,8 +351,7 @@ namespace nf.protoscript.translator.expression
             /// <param name="InOtherSTNode"></param>
             public void Visit(ISyntaxTreeNode InOtherSTNode)
             {
-                var rootCtx = new FuncBodyContext(ExprTranslateEnvironment);
-                STNodeVisitor_Statement stmtVisitor = new STNodeVisitor_Statement(HostTranslator, rootCtx);
+                STNodeVisitor_Statement stmtVisitor = new STNodeVisitor_Statement(HostTranslator, MethodBodyContext);
                 VisitByReflectionHelper.FindAndCallVisit(InOtherSTNode, stmtVisitor);
                 TranslateSchemeInstances = stmtVisitor.TranslateSchemeInstances;
             }

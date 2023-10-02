@@ -14,7 +14,7 @@ namespace nf.protoscript.translator.expression
         {
             public Instance(STNodeTranslateSchemeDefault InScheme
                 , ExprTranslatorAbstract InTranslator
-                , ExprTranslatorAbstract.ITranslatingContext InContext
+                , ExprTranslatorAbstract.IExprContext InContext
                 )
             {
                 Scheme = InScheme;
@@ -40,7 +40,7 @@ namespace nf.protoscript.translator.expression
 
             public ISTNodeTranslateScheme Scheme { get; }
             public ExprTranslatorAbstract Translator { get; }
-            public ExprTranslatorAbstract.ITranslatingContext TranslatingContext { get; }
+            public ExprTranslatorAbstract.IExprContext TranslatingContext { get; }
 
             public IReadOnlyList<string> GetResult(string InStageName)
             {

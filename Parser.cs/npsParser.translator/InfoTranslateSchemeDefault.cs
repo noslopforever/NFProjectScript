@@ -15,12 +15,18 @@ namespace nf.protoscript.translator
             Snippet = InSnippet;
         }
 
-        public IInfoTranslateSchemeInstance CreateInstance(InfoTranslatorAbstract InTranslator, Info InContextInfo)
+        public InfoTranslateSnippet Snippet { get; }
+
+        public IInfoTranslateSchemeInstance CreateInstance(InfoTranslatorAbstract InTranslator, ITranslatingContext InContext)
         {
-            return new Instance(InTranslator, this, InContextInfo);
+            return new Instance(this, InTranslator, InContext);
         }
 
-        public InfoTranslateSnippet Snippet { get; }
+        public IInfoTranslateSchemeInstance CreateProxyInstance(IInfoTranslateSchemeInstance InSchemeInstanceToBeProxied)
+        {
+            return Instance.CreateProxyInstance(this, InSchemeInstanceToBeProxied);
+
+        }
 
     }
 

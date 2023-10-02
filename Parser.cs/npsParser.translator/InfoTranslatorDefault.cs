@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static nf.protoscript.translator.expression.ExprTranslatorAbstract;
-using static nf.protoscript.translator.expression.ExprTranslatorDefault;
 
 namespace nf.protoscript.translator
 {
@@ -13,11 +11,11 @@ namespace nf.protoscript.translator
         : InfoTranslatorAbstract
     {
 
-        public override IInfoTranslateScheme FindBestScheme(Info InContext, string InSchemeName)
+        public override IInfoTranslateScheme FindBestScheme(ITranslatingContext InTranslatingContext, string InSchemeName)
         {
             if (_schemeGroups.TryGetValue(InSchemeName, out var schemeGroup))
             {
-                return schemeGroup.FindBestScheme(InContext);
+                return schemeGroup.FindBestScheme(InTranslatingContext);
             }
             return null;
         }
@@ -101,12 +99,12 @@ namespace nf.protoscript.translator
             /// </summary>
             /// <param name="InContext"></param>
             /// <returns></returns>
-            internal IInfoTranslateScheme FindBestScheme(Info InContext)
+            internal IInfoTranslateScheme FindBestScheme(ITranslatingContext InTranslatingContext)
             {
                 // Find special MemberAccess schemes by (HostType, PropertyName)
                 foreach (var selectorKvp in _selectors)
                 {
-                    if (selectorKvp.Value.IsMatch(InContext))
+                    if (selectorKvp.Value.IsMatch(InTranslatingContext))
                     {
                         return selectorKvp.Value.Scheme;
                     }

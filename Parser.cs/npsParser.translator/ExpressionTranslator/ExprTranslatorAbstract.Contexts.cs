@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Security.Cryptography;
-using static nf.protoscript.translator.expression.ExprTranslatorAbstract;
 
 namespace nf.protoscript.translator.expression
 {
@@ -11,65 +10,29 @@ namespace nf.protoscript.translator.expression
     public partial class ExprTranslatorAbstract
     {
 
-        /// <summary>
-        /// Context of the 'Root' body.
-        /// Root body is a special body with non-parent.
-        /// </summary>
-        public class FuncBodyContext
-            : ITranslatingContext
-        {
-            public FuncBodyContext(IExprTranslateEnvironment InEnvironment)
-            {
-                RootEnvironment = InEnvironment;
-            }
-
-            public IExprTranslateEnvironment RootEnvironment { get; }
-            public ITranslatingContext ParentContext { get { return null; } }
-            public virtual ElementInfo BoundElementInfo { get { return null; } }
-
-            public string GetContextValueString(string InKey)
-            {
-                // TODO return value string registered in the root environment.
-                return $"<<NULL VALUE for {InKey}>>";
-            }
-
-        }
-
 
         /// <summary>
-        /// Base of all Contexts implemented in the project.
+        /// Base of all Contexts based on expression nodes.
         /// </summary>
-        public abstract class ContextBase
-           : ITranslatingContext
+        public abstract class ExprContextBase
+            : TranslatingContextBase
+            , IExprContext
         {
-            public ContextBase(ITranslatingContext InParentContext)
+            public ExprContextBase(IMethodBodyContext InParentContext)
+                : base(InParentContext)
             {
-                RootEnvironment = InParentContext.RootEnvironment;
-                ParentContext = InParentContext;
+                HostMethodBody = InParentContext;
+            }
+            public ExprContextBase(ExprContextBase InParentContext)
+                : base(InParentContext)
+            {
+                HostMethodBody = InParentContext.HostMethodBody;
             }
 
-            public IExprTranslateEnvironment RootEnvironment { get; }
-            public ITranslatingContext ParentContext { get; }
-            public virtual ElementInfo BoundElementInfo { get { return ParentContext?.BoundElementInfo; } }
-
-            public virtual string GetContextValueString(string InKey)
-            {
-                try
-                {
-                    var keyProp = GetType().GetProperty(InKey);
-                    if (keyProp != null)
-                    {
-                        var propVal = keyProp.GetValue(this).ToString();
-                        return propVal;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // TODO log error
-                }
-
-                return ParentContext?.GetContextValueString(InKey);
-            }
+            /// <summary>
+            /// Root Environment inherit from the last HostMethodBody parent.
+            /// </summary>
+            public IMethodBodyContext HostMethodBody { get; }
 
         }
 
@@ -77,10 +40,15 @@ namespace nf.protoscript.translator.expression
         /// Context of a statement.
         /// </summary>
         public class StatementContext
-            : ContextBase
+            : ExprContextBase
         {
 
-            public StatementContext(ITranslatingContext InParentContext, ISyntaxTreeNode InNode)
+            public StatementContext(IMethodBodyContext InParentContext, ISyntaxTreeNode InNode)
+                : base(InParentContext)
+            {
+                StatementRoot = InNode;
+            }
+            public StatementContext(ExprContextBase InParentContext, ISyntaxTreeNode InNode)
                 : base(InParentContext)
             {
                 StatementRoot = InNode;
@@ -94,10 +62,10 @@ namespace nf.protoscript.translator.expression
         /// Base of all Context bound with a syntax tree node.
         /// </summary>
         public abstract class NodeContextBase
-            : ContextBase
+            : ExprContextBase
             , INodeContext
         {
-            public NodeContextBase(ITranslatingContext InParentContext, ISyntaxTreeNode InNode)
+            public NodeContextBase(ExprContextBase InParentContext, ISyntaxTreeNode InNode)
                 : base(InParentContext)
             {
                 TranslatingNode = InNode;
@@ -134,7 +102,7 @@ namespace nf.protoscript.translator.expression
         public class OnlyNodeContext
             : NodeContextBase
         {
-            public OnlyNodeContext(ITranslatingContext InParentContext, ISyntaxTreeNode InNode)
+            public OnlyNodeContext(ExprContextBase InParentContext, ISyntaxTreeNode InNode)
                 : base(InParentContext, InNode)
             {
             }
@@ -146,22 +114,22 @@ namespace nf.protoscript.translator.expression
         public class ConstNodeContext
             : NodeContextBase
         {
-            public ConstNodeContext(ITranslatingContext InParentContext, ISyntaxTreeNode InNode)
+            public ConstNodeContext(ExprContextBase InParentContext, ISyntaxTreeNode InNode)
                 : base(InParentContext, InNode)
             {
             }
 
-            public static ITranslatingContext Const(ITranslatingContext InParentContext, STNodeConstant InConst, string InValue)
+            public static ConstNodeContext Const(ExprContextBase InParentContext, STNodeConstant InConst, string InValue)
             {
                 return new ConstNodeContext(InParentContext, InConst) { Value = InValue, ValueString = InValue };
             }
 
-            public static ITranslatingContext Const(ITranslatingContext InParentContext, STNodeConstant InConst, Info InInfo)
+            public static ConstNodeContext Const(ExprContextBase InParentContext, STNodeConstant InConst, Info InInfo)
             {
                 return new ConstNodeContext(InParentContext, InConst) { Value = InInfo, ValueString = InInfo.ToString() };
             }
 
-            public static ITranslatingContext Null(ITranslatingContext InParentContext, STNodeConstant InConst)
+            public static ConstNodeContext Null(ExprContextBase InParentContext, STNodeConstant InConst)
             {
                 return new ConstNodeContext(InParentContext, InConst) { Value = null, ValueString = "null" };
             }
@@ -194,16 +162,16 @@ namespace nf.protoscript.translator.expression
         public class OpContext
             : NodeContextBase
         {
-            public OpContext(ITranslatingContext InParentContext, STNodeBinaryOp InNode, string InOverrideOpCode = "")
+            public OpContext(ExprContextBase InParentContext, STNodeBinaryOp InNode, string InOverrideOpCode = "")
                 : base(InParentContext, InNode)
             {
-                OpCode = InNode.OpDef.DefaultOpCode != null? InNode.OpDef.DefaultOpCode : "<<INVALID OP CODE>>";
+                OpCode = InNode.OpDef.DefaultOpCode != null ? InNode.OpDef.DefaultOpCode : "<<INVALID OP CODE>>";
                 if (InOverrideOpCode != "")
                 {
                     OpCode = InOverrideOpCode;
                 }
             }
-            public OpContext(ITranslatingContext InParentContext, STNodeUnaryOp InNode, string InOverrideOpCode = "")
+            public OpContext(ExprContextBase InParentContext, STNodeUnaryOp InNode, string InOverrideOpCode = "")
                 : base(InParentContext, InNode)
             {
                 OpCode = InNode.OpDef.DefaultOpCode != null ? InNode.OpDef.DefaultOpCode : "<<INVALID OP CODE>>";
@@ -225,8 +193,9 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public class VarContext
             : NodeContextBase
+            , IVariableContext
         {
-            public VarContext(ITranslatingContext InParentContext
+            public VarContext(ExprContextBase InParentContext
                 , STNodeVar InNode
                 , IExprTranslateEnvironment.IVariable InHostScopeVar
                 ) : base(InParentContext, InNode)
@@ -235,7 +204,9 @@ namespace nf.protoscript.translator.expression
                 _variable = InHostScopeVar;
             }
 
-            public override ElementInfo BoundElementInfo { get; }
+            // Begin IVariableContext interfaces
+            public ElementInfo BoundElementInfo { get; }
+            // ~ End IVariableContext interfaces
 
             /// <summary>
             /// VarNode bound with this context.
@@ -266,14 +237,17 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         public class MemberContext
             : NodeContextBase
+            , IVariableContext
         {
-            public MemberContext(ITranslatingContext InParentContext, STNodeMemberAccess InNode, ElementInfo InBoundElementInfo)
+            public MemberContext(ExprContextBase InParentContext, STNodeMemberAccess InNode, ElementInfo InBoundElementInfo)
                 : base(InParentContext, InNode)
             {
                 BoundElementInfo = InBoundElementInfo;
             }
 
-            public override ElementInfo BoundElementInfo { get; }
+            // Begin IVariableContext interfaces
+            public ElementInfo BoundElementInfo { get; }
+            // ~ End IVariableContext interfaces
 
             /// <summary>
             /// Node bound with this context.

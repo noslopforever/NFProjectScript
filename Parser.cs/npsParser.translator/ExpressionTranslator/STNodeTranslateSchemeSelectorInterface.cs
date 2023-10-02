@@ -27,7 +27,7 @@ namespace nf.protoscript.translator.expression
         /// </summary>
         /// <param name="InContext"></param>
         /// <returns></returns>
-        bool IsMatch(ExprTranslatorAbstract.ITranslatingContext InContext);
+        bool IsMatch(ITranslatingContext InContext);
 
     }
 

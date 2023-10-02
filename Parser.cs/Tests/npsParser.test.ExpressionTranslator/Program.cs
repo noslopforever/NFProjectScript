@@ -5,6 +5,7 @@ using System.Diagnostics.Metrics;
 using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using nf.protoscript.test;
+using nf.protoscript.translator;
 using nf.protoscript.translator.expression;
 using nf.protoscript.translator.expression.DefaultSnippetElements;
 using nf.protoscript.translator.expression.schemeSelectors;
@@ -192,9 +193,14 @@ namespace npsParser.test.ExpressionTranslator
                 // Special Member Access for RO Property 
                 // TODO disable SET/REF
                 {
-                    Func<ExprTranslatorAbstract.ITranslatingContext, bool> condROProperty = ctx =>
+                    Func<ITranslatingContext, bool> condROProperty = ctx =>
                     {
-                        var readonlyAttr = ctx.BoundElementInfo.FindTheFirstSubInfoWithName<AttributeInfo>("readonly");
+                        var varCtx = ctx as ExprTranslatorAbstract.IVariableContext;
+                        if (varCtx == null)
+                        {
+                            return false;
+                        }
+                        var readonlyAttr = varCtx.BoundElementInfo.FindTheFirstSubInfoWithName<AttributeInfo>("readonly");
                         if (null != readonlyAttr)
                         {
                             return true;
@@ -236,9 +242,14 @@ namespace npsParser.test.ExpressionTranslator
 
                 // Special Member Access for SetterProperty 
                 {
-                    Func<ExprTranslatorAbstract.ITranslatingContext, bool> condSetterProperty = ctx =>
+                    Func<ITranslatingContext, bool> condSetterProperty = ctx =>
                     {
-                        var setterAttr = ctx.BoundElementInfo.FindTheFirstSubInfoWithName<AttributeInfo>("setter");
+                        var varCtx = ctx as ExprTranslatorAbstract.IVariableContext;
+                        if (varCtx == null)
+                        {
+                            return false;
+                        }
+                        var setterAttr = varCtx.BoundElementInfo.FindTheFirstSubInfoWithName<AttributeInfo>("setter");
                         if (null != setterAttr)
                         {
                             return true;
@@ -330,13 +341,14 @@ namespace npsParser.test.ExpressionTranslator
                         new ExprTranslateEnvironmentDefault.Scope(InTargetType, "this", "this->")
                         , new ExprTranslateEnvironmentDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
-                    );
+                );
+                FuncBodyContext funcBodyCtx = new FuncBodyContext(null, "ctor", ctorEnv);
 
                 InTargetType.ForeachSubInfoByHeader<ElementInfo>("property", memberInfo =>
                 {
                     if (memberInfo.InitSyntax != null)
                     {
-                        var codes = InTranslator.Translate(ctorEnv, memberInfo.InitSyntax);
+                        var codes = InTranslator.Translate(funcBodyCtx, memberInfo.InitSyntax);
                         foreach (var code in codes)
                         {
                             // TODO "this->member = %{RHS}%" should comes from MemberInitScheme
@@ -360,7 +372,8 @@ namespace npsParser.test.ExpressionTranslator
                         , new ExprTranslateEnvironmentDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
                     );
-                var codes = InTranslator.Translate(mtdEnv, mtdInfo.InitSyntax);
+                FuncBodyContext funcBodyCtx = new FuncBodyContext(null, mtdInfo, mtdEnv);
+                var codes = InTranslator.Translate(funcBodyCtx, mtdInfo.InitSyntax);
                 foreach (var code in codes)
                 {
                     Console.WriteLine("        " + code);

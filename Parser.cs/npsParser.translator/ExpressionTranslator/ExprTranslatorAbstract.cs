@@ -28,10 +28,10 @@ namespace nf.protoscript.translator.expression
         /// Translate syntax tree into codes.
         /// </summary>
         /// <returns></returns>
-        public IReadOnlyList<string> Translate(IExprTranslateEnvironment InEnvironment, ISyntaxTreeNode InSyntaxTree)
+        public IReadOnlyList<string> Translate(IMethodBodyContext InMethodBodyContext, ISyntaxTreeNode InSyntaxTree)
         {
             // Gather schemeInstances.
-            STNodeVisitor_FunctionBody visitor = new STNodeVisitor_FunctionBody(this, InEnvironment);
+            STNodeVisitor_FunctionBody visitor = new STNodeVisitor_FunctionBody(this, InMethodBodyContext);
             VisitByReflectionHelper.FindAndCallVisit(InSyntaxTree, visitor);
 
             // Take each scheme-instance as a statement and try to translate it.
@@ -192,33 +192,15 @@ namespace nf.protoscript.translator.expression
 
 
         /// <summary>
-        /// Context which preserves states for a translating process.
-        /// Translating context will be organized in a tree.
+        /// Context for all nodes used in expression translating.
         /// </summary>
-        public interface ITranslatingContext
+        public interface IExprContext
+            : ITranslatingContext
         {
-
             /// <summary>
-            /// The root ExprTranslateEnvironment assigned by external.
+            /// The method holds this expression context.
             /// </summary>
-            IExprTranslateEnvironment RootEnvironment { get; }
-
-            /// <summary>
-            /// The parent context of this context.
-            /// </summary>
-            ITranslatingContext ParentContext { get; }
-
-            /// <summary>
-            /// Element Info bound with this context.
-            /// </summary>
-            ElementInfo BoundElementInfo { get; }
-
-            /// <summary>
-            /// Get value string by InKey from this context.
-            /// </summary>
-            /// <param name="InKey"></param>
-            /// <returns></returns>
-            string GetContextValueString(string InKey);
+            public IMethodBodyContext HostMethodBody { get; }
 
         }
 
@@ -226,7 +208,7 @@ namespace nf.protoscript.translator.expression
         /// Context for a translating block to indicate states of the block.
         /// </summary>
         public interface IBlockContext
-            : ITranslatingContext
+            : IExprContext
         {
             int BlockDepth { get; }
 
@@ -237,7 +219,7 @@ namespace nf.protoscript.translator.expression
         /// Context for a translating statement.
         /// </summary>
         public interface IStatementContext
-            : ITranslatingContext
+            : IExprContext
         {
             /// <summary>
             /// Root node bound with the statement.
@@ -252,129 +234,91 @@ namespace nf.protoscript.translator.expression
         /// Context for a translating node.
         /// </summary>
         public interface INodeContext
-            : ITranslatingContext
+            : IExprContext
         {
-
+            /// <summary>
+            /// The node being translated.
+            /// </summary>
             ISyntaxTreeNode TranslatingNode { get; }
 
             // TODO usage of the node (GET/SET/REF), or something like that.
 
         }
 
+        /// <summary>
+        /// Context for a translating variable-access node like STNodeVar/STNodeMemberAccess
+        /// </summary>
+        public interface IVariableContext
+            : INodeContext
+        {
+            /// <summary>
+            /// Info of the variable.
+            /// </summary>
+            ElementInfo BoundElementInfo { get; }
 
-
-        ////
-        //// System Schemes
-        //// 
-
-        ///// <summary>
-        ///// Return the scheme when error occurs in translating.
-        ///// </summary>
-        ///// <param name="InErrorNode"></param>
-        ///// <returns></returns>
-        //protected abstract ISTNodeTranslateScheme ErrorScheme(STNodeBase InErrorNode);
-        ////
-        //// Constant access Schemes
-        ////
-
-        //protected abstract ISTNodeTranslateScheme QueryNullScheme(TypeInfo InConstType);
-
-        //protected abstract ISTNodeTranslateScheme QueryConstGetInfoScheme(
-        //    TypeInfo InConstType
-        //    , Info InInfo
-        //    );
-
-        //protected abstract ISTNodeTranslateScheme QueryConstGetStringScheme(
-        //    TypeInfo InConstType
-        //    , string InString
-        //    );
-
-        //protected abstract ISTNodeTranslateScheme QueryConstGetScheme(
-        //    TypeInfo InConstType
-        //    , string InValueString
-        //    );
-
-
-        ////
-        //// var access Schemes
-        ////
-
-        ///// <summary>
-        ///// Find Scheme for translating member-accesses.
-        ///// </summary>
-        ///// <param name="InAccessType"></param>
-        ///// <param name="InContextType"></param>
-        ///// <param name="InMemberID"></param>
-        ///// <param name="OutMemberType"></param>
-        ///// <returns></returns>
-        //protected abstract ISTNodeTranslateScheme QueryMemberAccessScheme(
-        //    EExprVarAccessType InAccessType
-        //    , TypeInfo InContextType
-        //    , string InMemberID
-        //    , out TypeInfo OutMemberType
-        //    );
-
-        ///// <summary>
-        ///// Find Scheme for translating global-var accesses.
-        ///// </summary>
-        ///// <param name="InAccessType"></param>
-        ///// <param name="InGlobalInfo"></param>
-        ///// <param name="InVarName"></param>
-        ///// <param name="OutVarType"></param>
-        ///// <returns></returns>
-        //protected abstract ISTNodeTranslateScheme QueryGlobalVarAccessScheme(
-        //    EExprVarAccessType InAccessType
-        //    , Info InGlobalInfo
-        //    , string InVarName
-        //    );
-
-        ///// <summary>
-        ///// Find Scheme for translating method-scope vars (parameters and locals).
-        ///// </summary>
-        ///// <param name="InAccessType"></param>
-        ///// <param name="InTranslatingContext"></param>
-        ///// <param name="InMethodInfo"></param>
-        ///// <param name="InVarName"></param>
-        ///// <param name="OutVarType"></param>
-        ///// <returns></returns>
-        //protected abstract ISTNodeTranslateScheme QueryMethodVarAccessScheme(
-        //    EExprVarAccessType InAccessType
-        //    , IExprTranslateEnvironment InTranslatingContext
-        //    , ElementInfo InMethodInfo
-        //    , string InVarName
-        //    );
-
-        ////
-        //// Operation Schemes.
-        ////
-
-        ///// <summary>
-        ///// Query scheme to generate Bin-Op codes.
-        ///// </summary>
-        ///// <param name="InBinOpNode"></param>
-        ///// <param name="InLhsType"></param>
-        ///// <param name="InRhsType"></param>
-        ///// <param name="OutResultType"></param>
-        ///// <returns></returns>
-        //protected abstract ISTNodeTranslateScheme QueryBinOpScheme(
-        //    STNodeBinaryOp InBinOpNode
-        //    , TypeInfo InLhsType
-        //    , TypeInfo InRhsType
-        //    , out TypeInfo OutResultType
-        //    );
-
-        ///// <summary>
-        ///// Query scheme to generate host-access codes like "Host.Member"
-        ///// </summary>
-        ///// <param name="InMemberAccessNode"></param>
-        ///// <param name="InHostElement"></param>
-        ///// <returns></returns>
-        //protected abstract ISTNodeTranslateScheme QueryHostAccessScheme(
-        //    STNodeMemberAccess InMemberAccessNode
-        //    , TypeInfo InHostType
-        //    );
+        }
 
     }
+
+
+    /// <summary>
+    /// Method body context
+    /// </summary>
+    public interface IMethodBodyContext
+        : ITranslatingContext
+    {
+        /// <summary>
+        /// Name of the method
+        /// </summary>
+        string MethodName { get; }
+
+        /// <summary>
+        /// Expression translate environment created for this context.
+        /// </summary>
+        IExprTranslateEnvironment RootEnvironment { get; }
+
+    }
+
+    /// <summary>
+    /// Context of the 'Root' body.
+    /// Root body is a special body with non-parent.
+    /// </summary>
+    public class FuncBodyContext
+        : TranslatingContextBase
+        , IMethodBodyContext
+    {
+        public FuncBodyContext(ITranslatingContext InParentContext, string InMethodName, IExprTranslateEnvironment InEnvironment)
+            : base(InParentContext)
+        {
+            RootEnvironment = InEnvironment;
+            MethodName = InMethodName;
+        }
+        public FuncBodyContext(ITranslatingContext InParentContext, ElementInfo InBoundMethodInfo, IExprTranslateEnvironment InEnvironment)
+            : base(InParentContext)
+        {
+            MethodInfo = InBoundMethodInfo;
+            MethodName = MethodInfo.Name;
+            RootEnvironment = InEnvironment;
+        }
+
+        public ElementInfo MethodInfo { get; }
+
+        // Begin ITranslatingContext interfaces
+        public override string GetContextValueString(string InKey)
+        {
+            // TODO return value string registered in the root environment.
+            return base.GetContextValueString(InKey);
+        }
+        // ~ End ITranslatingContext interfaces
+
+        // Begin IMethodBodyContext interfaces
+        public string MethodName { get; }
+        public IExprTranslateEnvironment RootEnvironment { get; }
+        // ~ End IMethodBodyContext interfaces
+
+    }
+
+
 
 
 }

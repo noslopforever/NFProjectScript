@@ -20,7 +20,7 @@ namespace npsParser.test.ClassTranslator
                         new ElementConstString("<properties>")
                         , new ElementNewLine()
                         , new ElementIndentBlock(
-                            new ElementForEachSubCall("PropertyTranslator", "member")
+                            new ElementForeachSubCall("PropertyTranslator", "member")
                         )
                         , new ElementNewLine()
                         , new ElementConstString("</properties>")
@@ -30,7 +30,7 @@ namespace npsParser.test.ClassTranslator
                         new ElementConstString("<methods>")
                         , new ElementNewLine()
                         , new ElementIndentBlock(
-                            new ElementForEachSubCall("MethodTranslator", "method")
+                            new ElementForeachSubCall("MethodTranslator", "method")
                         )
                         , new ElementNewLine()
                         , new ElementConstString("</methods>")

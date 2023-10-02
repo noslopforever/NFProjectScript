@@ -32,7 +32,8 @@ namespace npsParser.test.ClassTranslator
         {
             Console.WriteLine($"Code emit sequences for Type: {InTargetType.Name}");
 
-            var codeLns = InTranslator.TranslateInfo(InTargetType, "TypeTranslator");
+            TranslatingInfoContext typeCtx = new TranslatingInfoContext(null, InTargetType);
+            var codeLns = InTranslator.TranslateInfo(typeCtx, "TypeTranslator");
             foreach ( var code in codeLns )
             {
                 Console.WriteLine(code);

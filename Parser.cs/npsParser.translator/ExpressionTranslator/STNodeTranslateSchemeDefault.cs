@@ -67,7 +67,7 @@ namespace nf.protoscript.translator.expression
 
         // Begin ISTNodeTranslateScheme interfaces
 
-        public ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, ExprTranslatorAbstract.ITranslatingContext InContext)
+        public ISTNodeTranslateSchemeInstance CreateInstance(ExprTranslatorAbstract InTranslator, ExprTranslatorAbstract.IExprContext InContext)
         {
             return new Instance(this, InTranslator, InContext);
         }
