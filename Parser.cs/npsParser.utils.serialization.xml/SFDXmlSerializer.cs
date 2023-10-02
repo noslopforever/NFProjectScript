@@ -40,38 +40,53 @@ namespace nf.protoscript.utils.serialization.xml
         /// <param name="InWriter"></param>
         /// <param name="InName"></param>
         /// <param name="InDataObj"></param>
-        public static void WriteSFDProperty(XmlWriter InWriter, string InName, object InDataObj)
+        public static void WriteSFDProperty(XmlWriter InWriter, string InName, object InDataObj, bool InWriteAttributes = true, bool InWriteSubNodes = true)
         {
             SerializationFriendlyData propData = InDataObj as SerializationFriendlyData;
 
             // not data, take it as POD values.
             if (propData == null)
             {
-                InWriter.WriteAttributeString(InName, _MakePureValueString(InDataObj));
+                if (InWriteAttributes)
+                {
+                    InWriter.WriteAttributeString(InName, _MakePureValueString(InDataObj));
+                }
             }
             // data, exact it.
-            else
+            else if (propData.IsPODData())
             {
-                if (propData.IsPODData())
+                object podVal = propData.AsPODData();
+                if (InWriteAttributes)
                 {
-                    object podVal = propData.AsPODData();
                     InWriter.WriteAttributeString(InName, _MakePureValueString(podVal));
                     // No need for a complex version: there are no Non-SFD PODValues saved in any level of SFDs for now.
                     //InWriter.WriteAttributeString(InName, _MakeValueString(podVal));
                 }
-                else if (propData.IsType())
+            }
+            else if (propData.IsType())
+            {
+                if (InWriteAttributes)
                 {
                     InWriter.WriteAttributeString(InName, MakeTypeString(propData.AsType()));
                 }
-                else if (propData.IsInfoRef())
+            }
+            else if (propData.IsInfoRef())
+            {
+                if (InWriteAttributes)
                 {
                     InWriter.WriteAttributeString(InName, _MakeInfoRefString(propData.AsInfoRefName()));
                 }
-                else if (propData.IsNull())
+            }
+            else if (propData.IsNull())
+            {
+                if (InWriteAttributes)
                 {
                     InWriter.WriteAttributeString(InName, _MakeNullString(propData.GetNullType()));
                 }
-                else if (propData.IsCollection())
+            }
+            else if (propData.IsCollection())
+            {
+                if (InWriteSubNodes)
                 {
                     InWriter.WriteStartElement(InName);
 
@@ -87,7 +102,10 @@ namespace nf.protoscript.utils.serialization.xml
 
                     InWriter.WriteEndElement();
                 }
-                else if (propData.IsDictionary())
+            }
+            else if (propData.IsDictionary())
+            {
+                if (InWriteSubNodes)
                 {
                     InWriter.WriteStartElement(InName);
 
@@ -106,15 +124,24 @@ namespace nf.protoscript.utils.serialization.xml
 
                     InWriter.WriteEndElement();
                 }
-                else
+            }
+            else
+            {
+                if (InWriteSubNodes)
                 {
                     InWriter.WriteStartElement(InName);
 
-                    // Write sub properties.
+                    // Write sub attributes first.
                     foreach (var kvp in propData)
                     {
                         // Write subs.
-                        WriteSFDProperty(InWriter, kvp.Key, kvp.Value);
+                        WriteSFDProperty(InWriter, kvp.Key, kvp.Value, true, false);
+                    }
+                    // Write sub nodes.
+                    foreach (var kvp in propData)
+                    {
+                        // Write subs.
+                        WriteSFDProperty(InWriter, kvp.Key, kvp.Value, false, true);
                     }
 
                     InWriter.WriteEndElement();
@@ -324,7 +351,8 @@ namespace nf.protoscript.utils.serialization.xml
             // Remove auto-fill-NSs from string
             foreach (var ns in _AutoFillNS)
             {
-                if (typeName.StartsWith(ns)) {
+                if (typeName.StartsWith(ns))
+                {
                     typeName = typeName.Substring(ns.Length + 1);
                 }
             }

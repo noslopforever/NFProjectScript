@@ -13,12 +13,14 @@ namespace nf.protoscript.parser.syntax1.analysis
     /// A.B.foo(C.D.E, F)[0, G.H].I
     /// </example>
     class ASTParser_ExprAccessOrCall
-        : ASTParser_ExprOperator
+        : ASTParser_ExprBase
     {
         public ASTParser_ExprAccessOrCall(ASTParser_ExprBase InNextExprParser)
-            : base(".", InNextExprParser)
+            : base(InNextExprParser)
         {
         }
+
+        public string[] Ops = new string[] { "." };
 
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)
         {
@@ -35,11 +37,23 @@ namespace nf.protoscript.parser.syntax1.analysis
                 {
                     InTokenList.Consume();
 
-                    // All 'Ops' have rhs.
-                    var rhs = NextParser.Parse(InTokenList);
-
-                    var sub = new syntaxtree.STNodeSub(lhs, rhs);
-                    lhs = sub;
+                    // Try parse the next token as an 'ID' token.
+                    var curToken = InTokenList.CurrentToken;
+                    var nextTerm = NextParser.Parse(InTokenList);
+                    if (nextTerm is syntaxtree.STNodeVar)
+                    {
+                        var memberAccess = new syntaxtree.STNodeMemberAccess(lhs, (nextTerm as syntaxtree.STNodeVar).IDName);
+                        lhs = memberAccess;
+                    }
+                    else
+                    {
+                        throw new ParserException(
+                            ParserErrorType.AST_UnexpectedToken
+                            , curToken
+                            , ETokenType.ID
+                            );
+                        return null;
+                    }
                 }
                 // Handle CALL:  <Term> (EXPRs)
                 else if (InTokenList.CheckToken(ETokenType.OpenParen))

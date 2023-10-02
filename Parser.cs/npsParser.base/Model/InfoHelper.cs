@@ -76,25 +76,91 @@ namespace nf.protoscript
         }
 
         /// <summary>
+        /// Try find variables in global.
+        /// </summary>
+        /// <param name="InProjectInfo"></param>
+        /// <param name="InIDName"></param>
+        /// <returns></returns>
+        public static ElementInfo FindPropertyInGlobal(ProjectInfo InProjectInfo, string InIDName)
+        {
+            ElementInfo foundInfo = InProjectInfo.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
+
+            return foundInfo;
+
+            // TODO global object or singleton object
+            throw new NotImplementedException();
+        }
+
+
+        /// <summary>
+        /// Try find variables in element's archetype
+        /// </summary>
+        /// <param name="InElementInfo"></param>
+        /// <param name="InIDName"></param>
+        /// <returns></returns>
+        public static ElementInfo FindPropertyInArchetype(ElementInfo InElementInfo, string InIDName)
+        {
+            ElementInfo foundInfo = null;
+
+            // If the context is a member/method, try find properties in its archetype first.
+            // We can find parameters (of method) or subs (of members) here.
+            foundInfo = FindPropertyOfType(InElementInfo.ElementType, InIDName);
+            if (foundInfo != null)
+            {
+                return foundInfo;
+            }
+
+            // find in context's sub-elements.
+            //
+            // These sub-elements will be taken as members of the 'inline' archetype of the InElement.
+            foundInfo = InElementInfo.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
+            if (foundInfo != null)
+            {
+                return foundInfo;
+
+                // TODO The conception of Inline-Archetype should be more clear.
+                throw new NotImplementedException();
+            }
+
+            return null;
+        }
+
+
+        /// <summary>
         /// Find property along scope tree.
         /// </summary>
         /// <param name="InContextInfo">The first scope to find the target property.</param>
         /// <param name="InIDName"></param>
         /// <returns></returns>
+        /// TODO Deprecate, Replaced by FindInXXXX series.
         public static ElementInfo FindPropertyAlongScopeTree(Info InContextInfo, string InIDName)
         {
-            if (InContextInfo is TypeInfo)
-            { return FindPropertyOfType(InContextInfo as TypeInfo, InIDName); }
-
             Info contextInfo = InContextInfo;
             while (contextInfo != null)
             {
-                // find in context's properties.
-                // Most of times, the context should be a method.
-                // We can find local-parameters here.
-                Info foundInfo = contextInfo.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
-                if (foundInfo != null)
-                { return foundInfo as ElementInfo; }
+                ElementInfo foundInfo = null;
+
+                // if current context is a Type, try find its properties.
+                if (contextInfo is TypeInfo)
+                {
+                    foundInfo = FindPropertyOfType(InContextInfo as TypeInfo, InIDName);
+                    if (foundInfo != null)
+                    {
+                        return foundInfo;
+                    }
+                }
+                else
+                {
+                    // find in context's sub-elements.
+                    //
+                    // Most of times, the context should be a method.
+                    // We can find local-parameters here.
+                    foundInfo = contextInfo.FindTheFirstSubInfoWithName<ElementInfo>(InIDName);
+                    if (foundInfo != null)
+                    {
+                        return foundInfo;
+                    }
+                }
 
                 // If the context is a member/method, try find properties in its archetype.
                 // We can find parameters (of method) or subs (of members) here.
@@ -103,13 +169,17 @@ namespace nf.protoscript
                 {
                     foundInfo = FindPropertyOfType(member.ElementType, InIDName);
                     if (foundInfo != null)
-                    { return foundInfo as ElementInfo; }
+                    {
+                        return foundInfo;
+                    }
                 }
 
+                // Cannot found in this level, try the parent level.
                 contextInfo = contextInfo.ParentInfo;
             }
             return null;
         }
+
 
         /// <summary>
         /// Find property of Type.

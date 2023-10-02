@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="resx31\**" />
+    <EmbeddedResource Remove="resx31\**" />
+    <None Remove="resx31\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\npsParser.base\npsParser.base.70.csproj" />
+    <ProjectReference Include="..\..\npsParser.parser\npsParser.parser.70.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="resx70\TestNpsScripts.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestNpsScripts.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="resx70\TestNpsScripts.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>TestNpsScripts.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>nf.protoscript.test</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

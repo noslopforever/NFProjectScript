@@ -35,6 +35,11 @@ namespace nf.protoscript.Serialization
                 throw new InvalidProgramException();
             }
 
+            if (InData.IsObjectOf(typeof(OpDefinition)))
+            {
+                return _RestoreAsOpDef(InData);
+            }
+
             // SyntaxData : always be read as a STNode****
             if (InData.IsObjectOf(typeof(STNodeBase)))
             {
@@ -122,6 +127,12 @@ namespace nf.protoscript.Serialization
                 return data;
             }
 
+            if (InValue is OpDefinition)
+            {
+                var data = _ConvertToOpDef(InValue as OpDefinition);
+                return data;
+            }
+
             // STNode****: Always convert to SyntaxData
             if (InValue is STNodeBase)
             {
@@ -184,6 +195,47 @@ namespace nf.protoscript.Serialization
             Info foundInfo = InfoHelper.FindInfoByFullname(InTypeRefData.AsInfoRefName());
             return foundInfo;
         }
+
+
+
+        // TODO Support custom serializer in SerializableInfoAttribute
+
+        /// <summary>
+        /// Convert a OpDefinition to a OpDefData
+        /// </summary>
+        /// <param name="InInfo"></param>
+        /// <returns></returns>
+        private static SerializationFriendlyData _ConvertToOpDef(OpDefinition InOpDef)
+        {
+            var targetData = SerializationFriendlyData.NewObject(typeof(OpDefinition));
+            targetData.Add("Func", ConvertValueToData(typeof(string), InOpDef.Function.ToString()));
+            targetData.Add("Custom", ConvertValueToData(typeof(string), InOpDef.CustomFunction));
+            return targetData;
+        }
+
+        /// <summary>
+        /// Restore a OpDefinition from a OpDefData.
+        /// </summary>
+        /// <param name="InTypeRefData"></param>
+        /// <returns></returns>
+        private static OpDefinition _RestoreAsOpDef(SerializationFriendlyData InOpDefData)
+        {
+            System.Diagnostics.Debug.Assert(InOpDefData.IsObjectOf(typeof(OpDefinition)));
+            EOpFunction func = EOpFunction.Unknown;
+            if (InOpDefData.TryGetExtra("Func", out var funcData))
+            {
+                string funcName = RestoreValueFromData(typeof(string), funcData) as string;
+                func = Enum.Parse<EOpFunction>(funcName);
+            }
+            string customName = "";
+            if (InOpDefData.TryGetExtra("Custom", out var customData))
+            {
+                customName = RestoreValueFromData(typeof(string), customData) as string;
+            }
+
+            return OpDefManager.Instance.Get(func, customName);
+        }
+
 
         /// <summary>
         /// Convert SyntaxTree into SyntaxData.

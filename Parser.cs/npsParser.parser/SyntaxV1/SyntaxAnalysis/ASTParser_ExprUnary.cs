@@ -10,25 +10,26 @@ namespace nf.protoscript.parser.syntax1.analysis
     /// </summary>
     class ASTParser_ExprUnary : ASTParser_ExprBase
     {
-        public ASTParser_ExprUnary(string[] InUnaryOps, ASTParser_ExprBase InNextExprParser)
+        public ASTParser_ExprUnary(OpCodeWithDef[] InUnaryOps, ASTParser_ExprBase InNextExprParser)
             : base(InNextExprParser)
         {
             UnaryOps = InUnaryOps;
         }
-        public string[] UnaryOps { get; private set; }
+        public OpCodeWithDef[] UnaryOps { get; private set; }
 
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)
         {
             // Try parse and consume Unary 'op'
-            List<string> unaryTokens = new List<string>();
+            List<OpDefinition> unaryTokens = new List<OpDefinition>();
+            OpDefinition opDef = null;
             while (InTokenList.CheckToken(ETokenType.Operator)
-                && UnaryOps.Contains(InTokenList.CurrentToken.Code)
+                && null != (opDef = OpCodeWithDef.FindDefByCode(UnaryOps, InTokenList.CurrentToken.Code))
                 )
             {
                 var opToken = InTokenList.CurrentToken;
                 InTokenList.Consume();
 
-                unaryTokens.Add(opToken.Code);
+                unaryTokens.Add(opDef);
             }
 
             // rhs value

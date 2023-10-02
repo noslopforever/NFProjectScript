@@ -9,17 +9,32 @@ namespace nf.protoscript.parser.syntax1.analysis
     /// Assign operator parser. A = B.
     /// </summary>
     class ASTParser_ExprAssign
-        : ASTParser_ExprOperator
+        : ASTParser_ExprBase
     {
         public ASTParser_ExprAssign(ASTParser_ExprBase InNextExprParser)
-            : base(ETokenType.Assign, "=", InNextExprParser)
+            : base(InNextExprParser)
         {
+            TokenType = ETokenType.Assign;
+            Ops = new string[] { "=" };
         }
 
         public ASTParser_ExprAssign(string[] InAssignCodes, ASTParser_ExprBase InNextExprParser)
-            : base(ETokenType.Assign, InAssignCodes, InNextExprParser)
+            : base(InNextExprParser)
         {
+            Ops = InAssignCodes;
+            TokenType = ETokenType.Assign;
         }
+
+        /// <summary>
+        /// Operators
+        /// </summary>
+        public string[] Ops { get; private set; }
+
+        /// <summary>
+        /// TokenType
+        /// </summary>
+        public ETokenType TokenType { get; private set; } = ETokenType.Operator;
+
 
         public override syntaxtree.STNodeBase Parse(TokenList InTokenList)
         {

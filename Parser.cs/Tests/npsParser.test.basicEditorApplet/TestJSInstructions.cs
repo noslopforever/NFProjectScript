@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -75,18 +75,18 @@ namespace nf.protoscript.test
 
                 return inst;
             }
-            // BinOp => binop
+            // OpDefinition => binop
             STNodeBinaryOp stnBinOp = InSTNode as STNodeBinaryOp;
             if (stnBinOp != null)
             {
                 string opcode = "$ERR";
-                switch (stnBinOp.OpCode)
+                switch (stnBinOp.OpDef.Function)
                 {
-                    case STNodeBinaryOp.Def.Add: opcode = "+"; break;
-                    case STNodeBinaryOp.Def.Sub: opcode = "-"; break;
-                    case STNodeBinaryOp.Def.Mul: opcode = "*"; break;
-                    case STNodeBinaryOp.Def.Div: opcode = "/"; break;
-                    case STNodeBinaryOp.Def.Mod: opcode = "%"; break;
+                    case EOpFunction.Add: opcode = "+"; break;
+                    case EOpFunction.Substract: opcode = "-"; break;
+                    case EOpFunction.Multiply: opcode = "*"; break;
+                    case EOpFunction.Divide: opcode = "/"; break;
+                    case EOpFunction.Mod: opcode = "%"; break;
                 }
 
                 // Exact Instructions of sub ST tree
@@ -102,23 +102,22 @@ namespace nf.protoscript.test
                 return inst;
             }
             // Sub => binOp .
-            STNodeSub stnSub = InSTNode as STNodeSub;
-            if (stnSub != null)
+            STNodeMemberAccess stnMemberAccess = InSTNode as STNodeMemberAccess;
+            if (stnMemberAccess != null)
             {
                 // Exact Instructions of sub ST tree
-                var instLhs = _ExactInstructions(InFunction, stnSub.LHS);
-                var instRhs = _ExactInstructions(InFunction, stnSub.RHS);
+                var instLhs = _ExactInstructions(InFunction, stnMemberAccess.LHS);
                 var inst = new JsILInstruction_Sub(
                     InFunction
                     , instLhs
-                    , instRhs
+                    , stnMemberAccess.MemberID
                     );
 
                 return inst;
             }
 
             // VarGet => ref
-            STNodeGetVar stnVarGet = InSTNode as STNodeGetVar;
+            STNodeVar stnVarGet = InSTNode as STNodeVar;
             if (stnVarGet != null)
             {
                 ElementInfo propInfo = InfoHelper.FindPropertyAlongScopeTree(InFunction.ContextInfo, stnVarGet.IDName);
@@ -330,7 +329,7 @@ namespace nf.protoscript.test
         internal protected override string GenCode(IList<String> InCodeList)
         {
             string filtedGetCode = GetCode.Replace("$OWNER", $"{OwnerPrefix}");
-            string filtedRefCode = RefCode == null? RefCode: RefCode.Replace("$OWNER", $"{OwnerPrefix}");
+            string filtedRefCode = RefCode == null ? RefCode : RefCode.Replace("$OWNER", $"{OwnerPrefix}");
 
             // not ref-required, return getter immediately.
             if (!IsRefRequired)
@@ -428,12 +427,12 @@ namespace nf.protoscript.test
     class JsILInstruction_Sub
     : JsInstruction
     {
-        public JsILInstruction_Sub(JsFunction InHostFunction, JsInstruction InLhs, JsInstruction InRhs)
+        public JsILInstruction_Sub(JsFunction InHostFunction, JsInstruction InLhs, string InMemberID)
             : base(InHostFunction)
         {
-            this.LhsInstruction = InLhs;
-            this.RhsInstruction = InRhs;
-            RefInstructions = new JsInstruction[] { InLhs, InRhs };
+            LhsInstruction = InLhs;
+            MemberID = InMemberID;
+            RefInstructions = new JsInstruction[] { InLhs };
         }
 
         /// <summary>
@@ -442,24 +441,20 @@ namespace nf.protoscript.test
         public JsInstruction LhsInstruction { get; }
 
         /// <summary>
-        /// The rhs instruction.
+        /// The member's name.
         /// </summary>
-        public JsInstruction RhsInstruction { get; }
+        public string MemberID { get; }
 
         internal protected override string GenCode(IList<String> InCodeList)
         {
             string lhs = LhsInstruction.GenCode(InCodeList);
-            string rhs = RhsInstruction.GenCode(InCodeList);
-            return $"({lhs}.{rhs})";
+            return $"({lhs}.{MemberID})";
         }
 
         protected internal override void MarkModified()
         {
             // Lhs's sub has been modified.
             LhsInstruction.MarkSubModified();
-
-            // Only the rhs has been modified.
-            RhsInstruction.MarkModified();
         }
 
         internal protected override void RequestRef()

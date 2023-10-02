@@ -17,16 +17,20 @@
         /// </summary>
         public string SingletonName { get; }
 
+        TypeInfo _singletonType = null;
+
         // implement abstract methods
         //
         public override void TryCollectTypes(ProjectInfo InProjectInfo)
         {
+            string typeName = SingletonName.Remove(0, 1);
+            _singletonType = new TypeInfo(InProjectInfo, "model", typeName);
         }
 
         protected override Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector)
         {
-            ElementInfo singleton = new ElementInfo(InProjectInfo, "singleton", SingletonName, null, null);
-            return singleton;
+            var singleton = new ElementInfo(InProjectInfo, "singleton", SingletonName, _singletonType, null);
+            return _singletonType;
         }
 
     }

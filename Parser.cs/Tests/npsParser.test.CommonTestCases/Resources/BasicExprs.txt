@@ -1,0 +1,23 @@
+$singleton
+	-n g0 = 1
+
+
+model TestClass
+	-n member0 = 100
+	+member_assign_by_const
+		>member0 = 0
+	+other_member_assign_by_this(InParam0:TestClass)
+		>InParam0.member0 = member0
+	+member_assign_by_member
+		>member0 = member0
+	+global_assign_by_const
+		>$singleton.g0 = 0
+
+model TestBinOp
+	-n member0 = 100
+	+member_binop_const
+		>member0 = member0 + 10
+	+member_binop_member
+		>member0 = member0 - member0
+	+const_binop_const
+		>member0 = 20 * 30

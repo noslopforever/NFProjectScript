@@ -10,6 +10,7 @@ namespace nf.protoscript.test
 
         public static TypeInfo __internal_UIBaseType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "uibase");
         public static TypeInfo __internal_PanelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "panel", __internal_UIBaseType);
+
         public static TypeInfo __internal_LabelType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "label", __internal_UIBaseType);
         public static TypeInfo __internal_ButtonType = new TypeInfo(SystemTypePackageInfo.Instance, "ui", "button", __internal_UIBaseType);
 
@@ -67,8 +68,8 @@ namespace nf.protoscript.test
                     // int propB = propA + 100
                     ElementInfo propB = new ElementInfo(classA, "property", "propB"
                         , CommonTypeInfos.Integer
-                        , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                            , new STNodeGetVar("propA")
+                        , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Add)
+                            , new STNodeVar("propA")
                             , new STNodeConstant(100)
                             )
                         );
@@ -97,17 +98,17 @@ namespace nf.protoscript.test
                         , new STNodeSequence(
                             // code ln 0: propA = propB + InParam.
                             new STNodeAssign(
-                                new STNodeGetVar("propA", true)
-                                , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                    , new STNodeGetVar("propB")
-                                    , new STNodeGetVar("InParam")
+                                new STNodeVar("propA")
+                                , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Add)
+                                    , new STNodeVar("propB")
+                                    , new STNodeVar("InParam")
                                     )
                                 ),
                             // code ln 1: return propA (return = propA)
                             // TODO a better __return__ var
                             new STNodeAssign(
-                                new STNodeGetVar("___return___", true)
-                                , new STNodeGetVar("propA")
+                                new STNodeVar("___return___")
+                                , new STNodeVar("propA")
                                 )
                             )
                         );
@@ -115,7 +116,7 @@ namespace nf.protoscript.test
                     // delegate void func_V_IR_Type(int&)
                     DelegateTypeInfo func_V_IR_Type = new DelegateTypeInfo(testProj, "FuncType", "funcV_IR_Type");
                     {
-                        ElementInfo refParam0 = new ElementInfo(func_I_I_Type, "param", "RefParam"
+                        ElementInfo refParam0 = new ElementInfo(func_V_IR_Type, "param", "RefParam"
                             , CommonTypeInfos.Integer
                             , null
                             );
@@ -129,16 +130,16 @@ namespace nf.protoscript.test
                         , new STNodeSequence(
                                 // code ln 0: propA = propA + RefParam
                                 new STNodeAssign(
-                                    new STNodeGetVar("propA", true)
-                                    , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                        , new STNodeGetVar("propA", false)
-                                        , new STNodeGetVar("RefParam")
+                                    new STNodeVar("propA")
+                                    , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Add)
+                                        , new STNodeVar("propA")
+                                        , new STNodeVar("RefParam")
                                         )
                                     ),
                                 // code ln 1: RefParam = propA
                                 new STNodeAssign(
-                                    new STNodeGetVar("RefParam", true)
-                                    , new STNodeGetVar("propA")
+                                    new STNodeVar("RefParam")
+                                    , new STNodeVar("propA")
                                     )
                             )
                         );
@@ -161,8 +162,8 @@ namespace nf.protoscript.test
                         , new STNodeSequence(
                             // code ln 0: TestMethodB(propA)
                             new STNodeCall(
-                                new STNodeGetVar("TestMethodB")
-                                , new STNodeGetVar("propA", true))
+                                new STNodeVar("TestMethodB")
+                                , new STNodeVar("propA"))
                             )
                         );
 
@@ -173,6 +174,42 @@ namespace nf.protoscript.test
             return testProj;
         }
 
+        /// <summary>
+        /// Basic exprs like Assignments, BinOps, Calls.
+        /// </summary>
+        /// <returns></returns>
+        public static ProjectInfo BasicExprs()
+        {
+            parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
+
+            ProjectInfo testProj = new ProjectInfo("TestProject");
+            parser.ICodeContentReader reader = parser.StringCodeContentReader.LoadFromString(
+                "BasicExprs"
+                , TestNpsScripts.BasicExprs
+                );
+
+            testParser.Parse(testProj, reader);
+            return testProj;
+        }
+
+
+        /// <summary>
+        /// Adv exprs like auto set-back, data-changed notification, mass-unit, etc.
+        /// </summary>
+        /// <returns></returns>
+        public static ProjectInfo AdvancedExpressions()
+        {
+            parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
+
+            ProjectInfo testProj = new ProjectInfo("TestProject");
+            parser.ICodeContentReader reader = parser.StringCodeContentReader.LoadFromString(
+                "AdvExprs"
+                , TestNpsScripts.AdvExprs
+                );
+
+            testParser.Parse(testProj, reader);
+            return testProj;
+        }
 
         /// <summary>
         /// Basic data-binding test:
@@ -228,9 +265,9 @@ namespace nf.protoscript.test
                         , func_V_V_Type
                         , new STNodeSequence(new ISyntaxTreeNode[] {
                             new STNodeAssign(
-                                new STNodeGetVar("HP", true)
-                                , new STNodeBinaryOp(STNodeBinaryOp.Def.Add
-                                    , new STNodeGetVar("HP")
+                                new STNodeVar("HP")
+                                , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Add)
+                                    , new STNodeVar("HP")
                                     , new STNodeConstant(1)
                                 )
                             )
@@ -331,14 +368,14 @@ namespace nf.protoscript.test
                                 // dataContext.Hp = dataContext.Hp - 1
                                 , new STNodeSequence(new ISyntaxTreeNode[] {
                                     new STNodeAssign(
-                                        new STNodeSub(
-                                            new STNodeGetVar("dataContext")
-                                            , new STNodeGetVar("HP", true)
+                                        new STNodeMemberAccess(
+                                            new STNodeVar("dataContext")
+                                            , "HP"
                                             )
-                                        , new STNodeBinaryOp(STNodeBinaryOp.Def.Sub
-                                            , new STNodeSub(
-                                                new STNodeGetVar("dataContext")
-                                                , new STNodeGetVar("HP", true)
+                                        , new STNodeBinaryOp(OpDefManager.Instance.Get(EOpFunction.Substract)
+                                            , new STNodeMemberAccess(
+                                                new STNodeVar("dataContext")
+                                                , "HP"
                                                 )
                                             , new STNodeConstant(1)
                                         )

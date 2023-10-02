@@ -1,0 +1,46 @@
+﻿
+                            //// Special Domain Templates: with try catch codes:
+                            ////  MAY BE:
+                            ////      try {
+                            ////          %PRESENT%
+                            ////      }
+                            ////      catch {
+                            ////          %EXCEPT%
+                            ////      }
+                            ////      finally {
+                            ////          %FINAL%
+                            ////      }
+                            ////  OR:
+                            ////      %PRESENT%
+                            ////
+                            //DomainBasedCodeTemplate tryCatchTemplate = new DomainBasedCodeTemplate(); ;
+                            //tryCatchTemplate.AddConditionalSnippets(
+                            //    dph => dph.HasDomain("except") || dph.HasDomain("final")
+                            //        , new SnippetBase[] 
+                            //        {
+                            //            new SnippetConst("try {" + Environment.NewLine)
+                            //            , new SnippetPresent() { Indent = 1 }
+                            //            , new SnippetConst("}")
+                            //        }
+                            //        // No except or final codes, present code only.
+                            //        , new SnippetPresent()
+                            //    );
+                            //tryCatchTemplate.AddConditionalSnippets(
+                            //    dph => dph.HasDomain("except")
+                            //    , new SnippetBase[]
+                            //        {
+                            //            new SnippetConst("catch () { ")
+                            //            , new SnippetDomain("except") { Indent = 1 }
+                            //            , new SnippetConst("}")
+                            //        }
+                            //    );
+                            //tryCatchTemplate.AddConditionalSnippets(
+                            //    dph => dph.HasDomain("final")
+                            //    , new SnippetBase[]
+                            //        {
+                            //            new SnippetConst("finally { ")
+                            //            , new SnippetDomain("final") { Indent = 1 }
+                            //            , new SnippetConst("}")
+                            //        }
+                            //    );
+                            //generator.AddCodeTemplate(tryCatchTemplate);

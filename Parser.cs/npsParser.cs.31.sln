@@ -1,0 +1,94 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33423.256
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.cs.31", "npsParser.cs\npsParser.cs.31.csproj", "{DEE726B0-4646-4095-85B4-A06799AE91BB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.parser.31", "npsParser.parser\npsParser.parser.31.csproj", "{A8C0C1FC-39A5-4563-B012-130111F5AA5A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.translator.31", "npsParser.translator\npsParser.translator.31.csproj", "{E99E3202-D2F7-4DC1-BF23-6177E248E072}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.base.31", "npsParser.base\npsParser.base.31.csproj", "{8A8548FC-BE3C-45A8-BA71-AB1D0DB14CA8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.cppTranslatorBasics.31", "Tests\npsParser.test.cppTranslatorBasics\npsParser.test.cppTranslatorBasics.31.csproj", "{AA83EF54-1621-4F87-83D7-E05E3F687A07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.CommonTestCases.31", "Tests\npsParser.test.CommonTestCases\npsParser.test.CommonTestCases.31.csproj", "{8B44CD5C-5915-40E1-A4B2-8ED91FF3A41A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.serializationBasics.31", "Tests\npsParser.test.serializationBasics\npsParser.test.serializationBasics.31.csproj", "{C474AFE3-BD0C-463B-A298-EDB4F0B99026}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.basicEditorApplet.31", "Tests\npsParser.test.basicEditorApplet\npsParser.test.basicEditorApplet.31.csproj", "{164086E2-FA8F-453C-84F4-EAFC6F582374}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.parserBasics.31", "Tests\npsParser.test.parserBasics\npsParser.test.parserBasics.31.csproj", "{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.utils.serialization.xml.31", "npsParser.utils.serialization.xml\npsParser.utils.serialization.xml.31.csproj", "{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.ExpressionTranslator.31", "Tests\npsParser.test.ExpressionTranslator\npsParser.test.ExpressionTranslator.31.csproj", "{2D16499C-9E60-47E7-AD76-B2AEBDBE792C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DEE726B0-4646-4095-85B4-A06799AE91BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEE726B0-4646-4095-85B4-A06799AE91BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEE726B0-4646-4095-85B4-A06799AE91BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEE726B0-4646-4095-85B4-A06799AE91BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8C0C1FC-39A5-4563-B012-130111F5AA5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8C0C1FC-39A5-4563-B012-130111F5AA5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8C0C1FC-39A5-4563-B012-130111F5AA5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8C0C1FC-39A5-4563-B012-130111F5AA5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E99E3202-D2F7-4DC1-BF23-6177E248E072}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E99E3202-D2F7-4DC1-BF23-6177E248E072}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E99E3202-D2F7-4DC1-BF23-6177E248E072}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E99E3202-D2F7-4DC1-BF23-6177E248E072}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A8548FC-BE3C-45A8-BA71-AB1D0DB14CA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A8548FC-BE3C-45A8-BA71-AB1D0DB14CA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A8548FC-BE3C-45A8-BA71-AB1D0DB14CA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A8548FC-BE3C-45A8-BA71-AB1D0DB14CA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA83EF54-1621-4F87-83D7-E05E3F687A07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA83EF54-1621-4F87-83D7-E05E3F687A07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA83EF54-1621-4F87-83D7-E05E3F687A07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA83EF54-1621-4F87-83D7-E05E3F687A07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B44CD5C-5915-40E1-A4B2-8ED91FF3A41A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B44CD5C-5915-40E1-A4B2-8ED91FF3A41A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B44CD5C-5915-40E1-A4B2-8ED91FF3A41A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B44CD5C-5915-40E1-A4B2-8ED91FF3A41A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C474AFE3-BD0C-463B-A298-EDB4F0B99026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C474AFE3-BD0C-463B-A298-EDB4F0B99026}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C474AFE3-BD0C-463B-A298-EDB4F0B99026}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C474AFE3-BD0C-463B-A298-EDB4F0B99026}.Release|Any CPU.Build.0 = Release|Any CPU
+		{164086E2-FA8F-453C-84F4-EAFC6F582374}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{164086E2-FA8F-453C-84F4-EAFC6F582374}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{164086E2-FA8F-453C-84F4-EAFC6F582374}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{164086E2-FA8F-453C-84F4-EAFC6F582374}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCA20ABC-5B8F-4BE6-83DA-48B54C2A04D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D16499C-9E60-47E7-AD76-B2AEBDBE792C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D16499C-9E60-47E7-AD76-B2AEBDBE792C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D16499C-9E60-47E7-AD76-B2AEBDBE792C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D16499C-9E60-47E7-AD76-B2AEBDBE792C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AA83EF54-1621-4F87-83D7-E05E3F687A07} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
+		{8B44CD5C-5915-40E1-A4B2-8ED91FF3A41A} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
+		{C474AFE3-BD0C-463B-A298-EDB4F0B99026} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
+		{164086E2-FA8F-453C-84F4-EAFC6F582374} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
+		{1EE81EBE-A52B-4A8C-AC0B-0D3AAA65B96D} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
+		{2D16499C-9E60-47E7-AD76-B2AEBDBE792C} = {6DF56A9D-421E-4C26-A4E2-ED9ECF6DFC83}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {236D9CCA-9A61-4950-92C8-9DD7EDEA4689}
+	EndGlobalSection
+EndGlobal

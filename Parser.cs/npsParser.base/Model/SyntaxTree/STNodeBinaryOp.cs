@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace nf.protoscript.syntaxtree
@@ -8,36 +9,26 @@ namespace nf.protoscript.syntaxtree
     /// <summary>
     /// Binary operators like + - * / %
     /// </summary>
-    public class STNodeBinaryOp : STNodeBase
+    public class STNodeBinaryOp
+        : STNodeBase
     {
         internal STNodeBinaryOp()
         {
         }
 
-        public STNodeBinaryOp(string InOpCode, ISyntaxTreeNode InLhs, ISyntaxTreeNode InRhs)
+        public STNodeBinaryOp(OpDefinition InOpDef, ISyntaxTreeNode InLhs, ISyntaxTreeNode InRhs)
         {
-            OpCode = InOpCode;
+            Debug.Assert(InOpDef.Usage != EOpUsage.UnaryBooleanOperator && InOpDef.Usage != EOpUsage.UnaryOperator);
+            OpDef = InOpDef;
             LHS = InLhs;
             RHS = InRhs;
         }
 
         /// <summary>
-        /// Suggested op definitions.
-        /// </summary>
-        public class Def
-        {
-            public const string Add = "+";
-            public const string Sub = "-";
-            public const string Mul = "*";
-            public const string Div = "/";
-            public const string Mod = "%";
-        }
-
-        /// <summary>
-        /// Operator character
+        /// The Operator Definition.
         /// </summary>
         [Serialization.SerializableInfo]
-        public string OpCode { get; private set; } = "";
+        public OpDefinition OpDef { get; private set; }
 
         /// <summary>
         /// Left hand expression

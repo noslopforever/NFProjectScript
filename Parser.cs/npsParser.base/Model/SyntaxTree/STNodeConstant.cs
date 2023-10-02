@@ -13,27 +13,33 @@ namespace nf.protoscript.syntaxtree
     {
         internal STNodeConstant()
         {
+            Value = null;
+            Type = CommonTypeInfos.Unknown;
         }
-
         public STNodeConstant(string InValueString)
         {
             Value = InValueString;
+            Type = CommonTypeInfos.String;
         }
         public STNodeConstant(int InValue)
         {
             Value = InValue;
+            Type = CommonTypeInfos.Integer;
         }
         public STNodeConstant(float InValue)
         {
             Value = (double)InValue;
+            Type = CommonTypeInfos.Float;
         }
         public STNodeConstant(double InValue)
         {
             Value = InValue;
+            Type = CommonTypeInfos.Float;
         }
         public STNodeConstant(TypeInfo InTypeInfo)
         {
             Value = InTypeInfo;
+            Type = CommonTypeInfos.TypeRef;
         }
 
         /// <summary>
@@ -42,6 +48,8 @@ namespace nf.protoscript.syntaxtree
         [Serialization.SerializableInfo]
         public object Value { get; private set; } = null;
 
+        [Serialization.SerializableInfo]
+        public TypeInfo Type { get; private set; } = null;
 
     }
 

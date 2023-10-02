@@ -82,6 +82,14 @@ namespace nf.protoscript
         // internal sub-infos.
         private List<Info> mSubInfos = new List<Info>();
 
+        /// <summary>
+        /// Show debug string of this info.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return InfoHelper.GetFullnameOfInfo(this);
+        }
 
         /// <summary>
         /// Extra infos registered in this info.
@@ -130,6 +138,25 @@ namespace nf.protoscript
                 if (!InFunc(pair.Key, pair.Value))
                     break;
         }
+
+        /// <summary>
+        /// Find the first Parent with type T.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T FindTheFirstParent<T>()
+            where T : Info
+        {
+            Info check = ParentInfo;
+            while (check != null)
+            {
+                if (check is T)
+                    return check as T;
+                check = check.ParentInfo;
+            }
+            return null;
+        }
+
 
         /// <summary>
         /// Check if the info has a sub-info with InSubName.
