@@ -2,7 +2,7 @@
 using nf.protoscript.translator;
 using nf.protoscript.translator.expression;
 using nf.protoscript.translator.expression.DefaultSnippetElements;
-using nf.protoscript.translator.expression.schemeSelectors;
+using nf.protoscript.translator.expression.SchemeSelectors;
 using System;
 using System.Collections.Generic;
 

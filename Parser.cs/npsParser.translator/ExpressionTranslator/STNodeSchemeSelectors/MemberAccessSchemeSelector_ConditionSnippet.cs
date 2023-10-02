@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nf.protoscript.translator.expression.schemeSelectors
+namespace nf.protoscript.translator.expression.SchemeSelectors
 {
     /// <summary>
     /// Member Access selector implemented by ConditionSnippet.

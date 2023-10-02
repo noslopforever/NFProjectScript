@@ -2,7 +2,7 @@
 using nf.protoscript.syntaxtree;
 using nf.protoscript.translator.expression;
 
-namespace nf.protoscript.translator.expression.schemeSelectors
+namespace nf.protoscript.translator.expression.SchemeSelectors
 {
     /// <summary>
     /// Member Access selector implemented by Lambda expressions.
