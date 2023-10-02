@@ -106,6 +106,25 @@ namespace nf.protoscript.translator.expression
                 PredictScope = outVarType;
             }
 
+            public virtual void Visit(STNodeMemberInit InInitNode)
+            {
+                // Order: Right > Left, Handle RHS first.
+                STNodeVisitor_GetNodeValue rhsVisitor = new STNodeVisitor_GetNodeValue(HostTranslator, ParentContext);
+                VisitByReflectionHelper.FindAndCallVisit<ISTNodeTranslateScheme>(InInitNode.RHS, rhsVisitor);
+
+                // LHS: Find VarInit scheme.
+                var var = ParentContext.HostMethodBody.RootEnvironment.FindVariable(InInitNode.InfoToBeInit.Name);
+                Debug.Assert(var != null && var.HostScope .ScopeInfo == InInitNode.InfoToBeInit.ParentInfo);
+
+                var ctx = new InitContext(ParentContext, InInitNode, var);
+                var scheme = HostTranslator.FindBestScheme(ctx, SystemScheme_VarInit);
+                ResultSchemeInstance = scheme.CreateInstance(HostTranslator, ctx);
+
+                // Add RHS scheme to the LHS's prerequistites.
+                ResultSchemeInstance.AddPrerequisiteScheme("RHS", rhsVisitor.ResultSchemeInstance);
+
+                PredictScope = InInitNode.VarType;
+            }
             public virtual void Visit(STNodeAssign InAssignNode)
             {
                 // Order: Right > Left, Handle RHS first.

@@ -107,6 +107,21 @@ namespace npsParser.test.ExpressionTranslator
                         )
                     }
                 );
+                exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarInit
+                    , new Dictionary<string, STNodeTranslateSnippet>()
+                    {
+                        //Present "%{Host}%%{VarName}% = %{RHS}%",
+                        ["Present"] = new STNodeTranslateSnippet(
+                            new ElementConstString("// Init ")
+                            , new ElementNodeValue("VarName")
+                            , new ElementNewLine()
+                            , new ElementCallOther("HostPresent")
+                            , new ElementNodeValue("VarName")
+                            , new ElementConstString(" = ")
+                            , new ElementNodeValue("RHS")
+                        )
+                    }
+                );
                 exprTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarGet
                     , new Dictionary<string, STNodeTranslateSnippet>()
                     {
@@ -342,20 +357,24 @@ namespace npsParser.test.ExpressionTranslator
                         , new ExprTranslateEnvironmentDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
                 );
-                FuncBodyContext funcBodyCtx = new FuncBodyContext(null, "ctor", ctorEnv);
+                FuncBodyContext ctorCtx = new FuncBodyContext(null, "ctor", ctorEnv);
 
-                InTargetType.ForeachSubInfoByHeader<ElementInfo>("property", memberInfo =>
+                // Gather all property-init expressions and convert them to STNodeInits.
+                List<ISyntaxTreeNode> initSyntaxes = new List<ISyntaxTreeNode>();
+                InTargetType.ForeachSubInfoByHeader<ElementInfo>("member", memberInfo =>
                 {
                     if (memberInfo.InitSyntax != null)
                     {
-                        var codes = InTranslator.Translate(funcBodyCtx, memberInfo.InitSyntax);
-                        foreach (var code in codes)
-                        {
-                            // TODO "this->member = %{RHS}%" should comes from MemberInitScheme
-                            Console.WriteLine($"        this->{memberInfo.Name} = " + code);
-                        }
+                        initSyntaxes.Add(new STNodeMemberInit(memberInfo, memberInfo.InitSyntax));
                     }
                 });
+                // Translate STNodeInits.
+                STNodeSequence seq = new STNodeSequence(initSyntaxes.ToArray());
+                var codes = InTranslator.Translate(ctorCtx, seq);
+                foreach (var code in codes)
+                {
+                    Console.WriteLine($"        " + code);
+                }
 
             }
 

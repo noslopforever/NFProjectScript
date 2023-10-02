@@ -115,6 +115,7 @@ namespace nf.protoscript.translator.expression
         public static string SystemScheme_Error { get; } = "SYS_ERROR";
         public static string SystemScheme_Null { get; } = "SYS_NULL";
         public static string SystemScheme_Const { get; } = "SYS_CONST";
+        public static string SystemScheme_VarInit { get; } = "SYS_VAR_INIT";
         public static string SystemScheme_VarGet { get; } = "SYS_VAR_GET";
         public static string SystemScheme_VarSet { get; } = "SYS_VAR_SET";
         public static string SystemScheme_VarRef { get; } = "SYS_VAR_REF";

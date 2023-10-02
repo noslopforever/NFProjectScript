@@ -233,6 +233,50 @@ namespace nf.protoscript.translator.expression
         }
 
         /// <summary>
+        /// Context when translating a STNodeInit.
+        /// </summary>
+        public class InitContext
+            : NodeContextBase
+            , IVariableContext
+        {
+            public InitContext(ExprContextBase InParentContext
+                , STNodeMemberInit InNode
+                , IExprTranslateEnvironment.IVariable InHostScopeVar
+                ) : base(InParentContext, InNode)
+            {
+                BoundElementInfo = InHostScopeVar.ElementInfo;
+                _variable = InHostScopeVar;
+            }
+
+            // Begin IVariableContext interfaces
+            public ElementInfo BoundElementInfo { get; }
+            // ~ End IVariableContext interfaces
+
+            /// <summary>
+            /// InitNode bound with this context.
+            /// </summary>
+            public STNodeMemberInit InitNode { get { return TranslatingNode as STNodeMemberInit; } }
+
+            //
+            // Context variables.
+            //
+
+            /// <summary>
+            /// Var Name registered to the context.
+            /// </summary>
+            public string VarName { get { return InitNode.InfoToBeInit.Name; } }
+
+            /// <summary>
+            /// Host Present Code defined by the scope of the variable.
+            /// </summary>
+            public string HostPresent { get { return _variable.HostScope.ScopePresentCode; } }
+
+            // variable
+            IExprTranslateEnvironment.IVariable _variable;
+
+        }
+        
+        /// <summary>
         /// Context when translating a member-access node
         /// </summary>
         public class MemberContext

@@ -96,6 +96,21 @@ namespace npsParser.test.ClassTranslator
                         )
                     }
                 );
+                AddScheme(ExprTranslatorAbstract.SystemScheme_VarInit
+                    , new Dictionary<string, STNodeTranslateSnippet>()
+                    {
+                        //Present "%{Host}%%{VarName}% = %{RHS}%",
+                        ["Present"] = new STNodeTranslateSnippet(
+                            new ElementConstString("// Init ")
+                            , new ElementNodeValue("VarName")
+                            , new ElementNewLine()
+                            , new ElementCallOther("HostPresent")
+                            , new ElementNodeValue("VarName")
+                            , new ElementConstString(" = ")
+                            , new ElementNodeValue("RHS")
+                        )
+                    }
+                );
                 AddScheme(ExprTranslatorAbstract.SystemScheme_VarGet
                     , new Dictionary<string, STNodeTranslateSnippet>()
                     {
