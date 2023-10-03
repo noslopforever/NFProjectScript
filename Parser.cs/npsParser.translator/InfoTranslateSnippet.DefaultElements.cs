@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -93,6 +93,73 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     }
 
     /// <summary>
+    /// Call another scheme with the specific context.
+    /// </summary>
+    public class ElementCall
+        : InfoTranslateSnippet.IElement
+    {
+        public ElementCall(params InfoTranslateSnippet.IElement[] InElements)
+        {
+            Snippet = new InfoTranslateSnippet(InElements);
+            ContextName = "";
+        }
+
+        public ElementCall(string InContextName
+            , params InfoTranslateSnippet.IElement[] InElements
+            )
+        {
+            Snippet = new InfoTranslateSnippet(InElements);
+            ContextName = InContextName;
+        }
+
+        /// <summary>
+        /// The scheme to call.
+        /// </summary>
+        public string SchemeName { get; }
+
+        /// <summary>
+        /// The Context's name.
+        /// </summary>
+        public string ContextName { get; }
+
+        /// <summary>
+        /// The calling snippet
+        /// </summary>
+        public InfoTranslateSnippet Snippet { get; }
+
+        public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            var targetContext = InHolderSchemeInstance.Context;
+            if (ContextName != "")
+            {
+                // TODO: A better way to find the target context.
+
+                if (ContextName == "LastType")
+                {
+                    var checkingCtx = targetContext;
+                    while (checkingCtx != null)
+                    {
+                        if ((checkingCtx as ITranslatingInfoContext)?.TranslatingInfo is TypeInfo)
+                        {
+                            targetContext = checkingCtx;
+                            break;
+                        }
+                        checkingCtx = checkingCtx.ParentContext;
+                    }
+                }
+            }
+
+            var translator = InHolderSchemeInstance.HostTranslator;
+            //var scheme = translator.FindBestScheme(InHolderSchemeInstance.Context, SchemeName);
+            var scheme = new InfoTranslateSchemeDefault(Snippet);
+            var si = scheme.CreateInstance(translator, targetContext);
+            return si.GetResult();
+        }
+
+    }
+
+
+    /// <summary>
     /// For each sub info and call another scheme for it.
     /// </summary>
     public class ElementForeachSubCall
@@ -145,7 +212,6 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         {
         }
 
-
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
             var translator = InHolderSchemeInstance.HostTranslator;
@@ -184,7 +250,9 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
     }
 
-
+    /// <summary>
+    /// Register a new method to the translating Type.
+    /// </summary>
     public class ElementNewMethod
         : InfoTranslateSnippet.IElement
     {

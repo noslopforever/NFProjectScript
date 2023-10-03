@@ -33,7 +33,9 @@ namespace npsParser.test.ClassTranslator
                         , new ElementNewLine()
                         , new ElementIndentBlock(
                             new ElementNewMethod("ctor",
-                                new ElementForeachSubCall("CtorInitTranslator", "member")
+                                new ElementCall("LastType",
+                                    new ElementForeachSubCall("CtorInitTranslator", "member")
+                                )
                             )
                         )
                         , new ElementNewLine()
