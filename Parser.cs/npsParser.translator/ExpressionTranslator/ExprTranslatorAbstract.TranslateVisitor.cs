@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using static nf.protoscript.translator.expression.ExprTranslatorAbstract;
 using System.Runtime.CompilerServices;
+using static nf.protoscript.translator.expression.IExprTranslateEnvironment;
 
 namespace nf.protoscript.translator.expression
 {
@@ -114,7 +115,9 @@ namespace nf.protoscript.translator.expression
 
                 // LHS: Find VarInit scheme.
                 var var = ParentContext.HostMethodBody.RootEnvironment.FindVariable(InInitNode.InfoToBeInit.Name);
-                Debug.Assert(var != null && var.HostScope .ScopeInfo == InInitNode.InfoToBeInit.ParentInfo);
+                Debug.Assert(var != null);
+                Debug.Assert(var.HostScope is IInfoScope);
+                Debug.Assert((var.HostScope as IInfoScope).ScopeInfo == InInitNode.InfoToBeInit.ParentInfo);
 
                 var ctx = new InitContext(ParentContext, InInitNode, var);
                 var scheme = HostTranslator.FindBestScheme(ctx, SystemScheme_VarInit);

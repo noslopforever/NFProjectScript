@@ -14,7 +14,7 @@ namespace nf.protoscript.translator.expression
     {
         public ExprTranslateEnvironmentDefault(
             Info InHostInfo
-            , IEnumerable<Scope> InScopeChain
+            , IEnumerable<ScopeBase> InScopeChain
             )
         {
             HostInfo = InHostInfo;
@@ -22,36 +22,81 @@ namespace nf.protoscript.translator.expression
         }
 
         /// <summary>
-        /// scope to find variables.
+        /// Base of all Scopes provided by this Env class .
         /// </summary>
-        public class Scope
+        public abstract class ScopeBase
             : IExprTranslateEnvironment.IScope
         {
-
-            public Scope(Info InScopeInfo
-                , string InScopeHostName
-                , string InScopeHostPresent
-                )
+            public ScopeBase(string InScopeHostName, string InScopeHostPresent)
             {
-                ScopeInfo = InScopeInfo;
                 ScopeName = InScopeHostName;
                 ScopePresentCode = InScopeHostPresent;
             }
-
-            /// <summary>
-            /// Info of the scope
-            /// </summary>
-            public Info ScopeInfo { get; }
-
-            /// <summary>
-            /// Host Name of the scope, <see cref="IExprTranslateEnvironment.IVariable"/>  for more informations.
-            /// </summary>
+            // Begin IScope interfaces
             public string ScopeName { get; }
+            public string ScopePresentCode { get; }
+            // ~ End IScope interfaces
+
+            internal IExprTranslateEnvironment.IVariable _FindVarInScope(string InName)
+                => FindVarInScope(InName);
 
             /// <summary>
-            /// Host Present of the scope, <see cref="IExprTranslateEnvironment.IVariable"/>  for more informations.
+            /// Try find a variable in this scope.
             /// </summary>
-            public string ScopePresentCode { get; }
+            /// <kvp InName="InName"></kvp>
+            /// <returns></returns>
+            protected abstract IExprTranslateEnvironment.IVariable FindVarInScope(string InName);
+
+        }
+
+        /// <summary>
+        /// scope bound with an info to find variables.
+        /// </summary>
+        /// TODO Exact Scope to GlobalScope, ThisTypeScope, MethodScope etc...
+        public class Scope
+            : ScopeBase
+            , IExprTranslateEnvironment.IInfoScope
+        {
+            public Scope(Info InScopeInfo, string InScopeHostName, string InScopeHostPresent)
+                :base(InScopeHostName, InScopeHostPresent)
+            {
+                ScopeInfo = InScopeInfo;
+            }
+
+            // Begin IInfoScope interfaces
+            public Info ScopeInfo { get; }
+            // ~ End IInfoScope interfaces
+
+            protected override IExprTranslateEnvironment.IVariable FindVarInScope(string InName)
+            {
+                if (ScopeInfo is TypeInfo)
+                {
+                    var propertyInfo = InfoHelper.FindPropertyOfType(ScopeInfo as TypeInfo, InName);
+                    if (propertyInfo != null)
+                    {
+                        return new ElementInfoVar(propertyInfo, this);
+                    }
+                }
+                // Try find archetype and global variables.
+                else if (ScopeInfo is ElementInfo)
+                {
+                    var varInfo = InfoHelper.FindPropertyInArchetype(ScopeInfo as ElementInfo, InName);
+                    if (varInfo != null)
+                    {
+                        return new ElementInfoVar(varInfo, this);
+                    }
+                }
+                // Try find variable in the global scope
+                else if (ScopeInfo is ProjectInfo)
+                {
+                    var globalInfo = InfoHelper.FindPropertyInGlobal(ScopeInfo as ProjectInfo, InName);
+                    if (globalInfo != null)
+                    {
+                        return new ElementInfoVar(globalInfo, this);
+                    }
+                }
+                return null;
+            }
 
         }
 
@@ -78,45 +123,82 @@ namespace nf.protoscript.translator.expression
         }
 
         public Info HostInfo { get; }
-        public IEnumerable<Scope> ScopeChain { get; }
+        public IEnumerable<ScopeBase> ScopeChain { get; }
 
         public IExprTranslateEnvironment.IVariable FindVariable(string InName)
         {
             // TODO Find local vars first
 
             // Find in scope chain.
-            foreach (Scope scope in ScopeChain)
+            foreach (ScopeBase scope in ScopeChain)
             {
-                if (scope.ScopeInfo is TypeInfo)
-                {
-                    var propertyInfo = InfoHelper.FindPropertyOfType(scope.ScopeInfo as TypeInfo, InName);
-                    if (propertyInfo != null)
-                    {
-                        return new ElementInfoVar(propertyInfo, scope);
-                    }
-                }
+                var var = scope._FindVarInScope(InName);
+                if (var != null)
+                    return var;
+            }
 
-                // Try find archetype and global variables.
-                if (scope.ScopeInfo is ElementInfo)
-                {
-                    var varInfo = InfoHelper.FindPropertyInArchetype(scope.ScopeInfo as ElementInfo, InName);
-                    if (varInfo != null)
-                    {
-                        return new ElementInfoVar(varInfo, scope);
-                    }
-                }
+            return null;
+        }
 
-                if (scope.ScopeInfo is ProjectInfo)
+        /// <summary>
+        /// A virtual scope which was not bound with Infos.
+        /// </summary>
+        public class VirtualMethodScope
+            : ScopeBase
+        {
+            public VirtualMethodScope(
+                string InScopeName
+                , string InScopeHostPresent
+                , Dictionary<string, TypeInfo> InScopeParamWithTypes = null
+                )
+                : base(InScopeName, InScopeHostPresent)
+            {
+                _paramWithTypes = new Dictionary<string, VirtualVar>();
+                if ( InScopeParamWithTypes != null)
                 {
-                    var globalInfo = InfoHelper.FindPropertyInGlobal(scope.ScopeInfo as ProjectInfo, InName);
-                    if (globalInfo != null)
+                    foreach ( var kvp in InScopeParamWithTypes )
                     {
-                        return new ElementInfoVar(globalInfo, scope);
+                        var varName = kvp.Key;
+                        var varType = kvp.Value;
+                        _paramWithTypes.Add(varName, new VirtualVar(varName, varType, this));
                     }
                 }
             }
 
-            return null;
+            /// <summary>
+            /// Parameters registered manually.
+            /// </summary>
+            Dictionary<string, VirtualVar> _paramWithTypes;
+
+            protected override IExprTranslateEnvironment.IVariable FindVarInScope(string InName)
+            {
+                if (_paramWithTypes.TryGetValue( InName, out var virtualVar))
+                {
+                    return virtualVar;
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// A virtual variable which is not bound with an ElementInfo.
+        /// </summary>
+        public class VirtualVar
+            : IExprTranslateEnvironment.IVariable
+        {
+            public VirtualVar(string InName, TypeInfo InType, IExprTranslateEnvironment.IScope InScope)
+            {
+                Name = InName;
+                VarType = InType;
+                HostScope = InScope;
+            }
+
+            // Begin IVariable interfaces
+            public string Name { get; }
+            public TypeInfo VarType { get; }
+            public IExprTranslateEnvironment.IScope HostScope { get; }
+            public ElementInfo ElementInfo => null;
+            // ~ End IVariable interfaces
         }
 
         public IExprTranslateEnvironment.IVariable AddTempVar(ISyntaxTreeNode InNodeToTranslate, string InKey)
@@ -157,9 +239,12 @@ namespace nf.protoscript.translator.expression
             {}
 
             // Begin IExprTranslateEnvironment.IScope interfaces
-            public Info ScopeInfo { get { return null; } }
             public string ScopeName { get { return "Local"; } }
             public string ScopePresentCode { get { return ""; } }
+            public IExprTranslateEnvironment.IVariable FindVariable(string InVarName)
+            {
+                throw new NotImplementedException();
+            }
             // ~ End IExprTranslateEnvironment.IScope interfaces
 
             /// <summary>
@@ -179,8 +264,8 @@ namespace nf.protoscript.translator.expression
             /// <summary>
             /// Register one temp var to the table.
             /// </summary>
-            /// <param name="InKey"></param>
-            /// <param name="InTempVar"></param>
+            /// <kvp InName="InKey"></kvp>
+            /// <kvp InName="InTempVar"></kvp>
             internal void AddTempVar(ISyntaxTreeNode InNode, string InKey, TempVar InTempVar)
             {
                 _tempVarTable.Add(new TempVarKey() { Node = InNode, Key = InKey }, InTempVar);
@@ -189,9 +274,9 @@ namespace nf.protoscript.translator.expression
             /// <summary>
             /// Try get one temp var from the table.
             /// </summary>
-            /// <param name="InNodeToTranslate"></param>
-            /// <param name="InKey"></param>
-            /// <param name="OutTempVar"></param>
+            /// <kvp InName="InNodeToTranslate"></kvp>
+            /// <kvp InName="InKey"></kvp>
+            /// <kvp InName="OutTempVar"></kvp>
             /// <returns></returns>
             /// <exception cref="NotImplementedException"></exception>
             internal bool TryGetTempVar(ISyntaxTreeNode InNode, string InKey, out TempVar OutTempVar)

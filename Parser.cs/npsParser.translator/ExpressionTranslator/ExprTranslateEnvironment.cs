@@ -58,11 +58,6 @@ namespace nf.protoscript.translator.expression
         public interface IScope
         {
             /// <summary>
-            /// Info bound with the scope.
-            /// </summary>
-            Info ScopeInfo { get; }
-
-            /// <summary>
             /// Name of the scope which holds variable in it.
             /// In the constructor and most methods, it may be this/self.
             /// </summary>
@@ -74,6 +69,18 @@ namespace nf.protoscript.translator.expression
             /// </summary>
             string ScopePresentCode { get; }
 
+        }
+
+        /// <summary>
+        /// Scope bound with an Info (like ProjectInfo, TypeInfo, MethodInfo ... )
+        /// </summary>
+        public interface IInfoScope
+            : IScope
+        {
+            /// <summary>
+            /// Info bound with this scope.
+            /// </summary>
+            Info ScopeInfo { get; }
         }
 
         /// <summary>
