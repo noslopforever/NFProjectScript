@@ -29,6 +29,18 @@ namespace npsParser.test.ClassTranslator
                     )
                     , new ElementNewLine()
                     , new ElementIndentBlock(
+                        new ElementConstString("<ctor>")
+                        , new ElementNewLine()
+                        , new ElementIndentBlock(
+                            new ElementNewMethod("ctor",
+                                new ElementForeachSubCall("CtorInitTranslator", "member")
+                            )
+                        )
+                        , new ElementNewLine()
+                        , new ElementConstString("</ctor>")
+                    )
+                    , new ElementNewLine()
+                    , new ElementIndentBlock(
                         new ElementConstString("<methods>")
                         , new ElementNewLine()
                         , new ElementIndentBlock(
@@ -54,6 +66,14 @@ namespace npsParser.test.ClassTranslator
                     , new ElementConstString(" Type=\"")
                     , new ElementNodeValue("ElementType")
                     , new ElementConstString("\" />")
+                )
+            );
+
+            xmlTrans.AddScheme("CtorInitTranslator",
+                new InfoTranslateSnippet(
+                    new ElementConstString("// Init ")
+                    , new ElementNodeValue("Name")
+                    , new ElementNewLine()
                 )
             );
 

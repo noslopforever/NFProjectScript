@@ -165,22 +165,86 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             var env = new expression.ExprTranslateEnvironmentDefault(mtdInfo
                 , new expression.ExprTranslateEnvironmentDefault.Scope[]
                 {
-                        new expression.ExprTranslateEnvironmentDefault.Scope(mtdInfo, "local", "")
-                        , new expression.ExprTranslateEnvironmentDefault.Scope(mtdHostType, "this", "this->")
-                        , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
+                    new expression.ExprTranslateEnvironmentDefault.Scope(mtdInfo, "local", "")
+                    , new expression.ExprTranslateEnvironmentDefault.Scope(mtdHostType, "this", "this->")
+                    , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
                 }
-                );
-            expression.FuncBodyContext mtdCtx = new expression.FuncBodyContext(ctx, mtdInfo, env);
+            );
+            var mtdCtx = new expression.FuncBodyContext(ctx, mtdInfo, env);
 
             // TODO let the translator decide how to create a MethodBodyContext.
             //expression.FuncBodyContext mtdCtx = translator.AllocBodyContextForMethod(ctx);
 
             // Select an expr-translator and do translating.
-            expression.ExprTranslatorAbstract exprTranslator = translator.CreateExprTranslator("");
+            var exprTranslator = translator.CreateExprTranslator("");
             var codes = exprTranslator.Translate(mtdCtx, mtdInfo.InitSyntax);
 
             return codes;
         }
+
+    }
+
+
+    public class ElementNewMethod
+        : InfoTranslateSnippet.IElement
+    {
+        public ElementNewMethod(string InMethodName, params InfoTranslateSnippet.IElement[] InSubElements)
+        {
+            MethodName = InMethodName;
+            SubSnippet = new InfoTranslateSnippet(InSubElements);
+        }
+
+        /// <summary>
+        /// Name of the method
+        /// </summary>
+        public string MethodName { get; }
+
+        /// <summary>
+        /// Sub snippet
+        /// </summary>
+        public InfoTranslateSnippet SubSnippet { get; }
+
+        public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            var translator = InHolderSchemeInstance.HostTranslator;
+            ITranslatingContext ctx = InHolderSchemeInstance.Context;
+
+            // Exact parameters from the context.
+            // This element must be called when the context is a 'TypeInfo' context.
+            TypeInfo typeInfo = (ctx as ITranslatingInfoContext)?.TranslatingInfo as TypeInfo;
+            ProjectInfo globalInfo = typeInfo.FindTheFirstParent<ProjectInfo>();
+
+            Debug.Assert(typeInfo != null);
+            Debug.Assert(globalInfo != null);
+
+            // TODO Create the special ctor method.
+
+            // Create Method Body Context
+            var ctorEnv = new expression.ExprTranslateEnvironmentDefault(typeInfo
+                , new expression.ExprTranslateEnvironmentDefault.ScopeBase[]
+                {
+                    // Special method scope with the param-list which was set manually.
+                    new expression.ExprTranslateEnvironmentDefault.VirtualMethodScope(MethodName, "")
+                    , new expression.ExprTranslateEnvironmentDefault.Scope(typeInfo, "this", "this->")
+                    , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
+                }
+            );
+            var mtdCtx = new expression.FuncBodyContext(ctx, "ctor", ctorEnv);
+
+            // Create and cache the scheme by SubSnippet.
+            if (_cachedScheme == null)
+            {
+                _cachedScheme = new InfoTranslateSchemeDefault(SubSnippet);
+            }
+            // Create the sub scheme-instance and set its context to the Ctor-method's context.
+            var subSI = _cachedScheme.CreateInstance(translator, mtdCtx);
+
+            var subResults = subSI.GetResult();
+            return subResults;
+        }
+
+        // Scheme constructed by the SubSnippet
+        InfoTranslateSchemeDefault _cachedScheme = null;
 
     }
 
