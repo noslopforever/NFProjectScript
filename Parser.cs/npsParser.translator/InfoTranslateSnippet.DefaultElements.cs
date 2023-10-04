@@ -101,15 +101,15 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         public ElementCall(params InfoTranslateSnippet.IElement[] InElements)
         {
             Snippet = new InfoTranslateSnippet(InElements);
-            ContextName = "";
+            ContextFindParam = null;
         }
 
-        public ElementCall(string InContextName
+        public ElementCall(TranslatingContextFinder.FindParam InContextName
             , params InfoTranslateSnippet.IElement[] InElements
             )
         {
             Snippet = new InfoTranslateSnippet(InElements);
-            ContextName = InContextName;
+            ContextFindParam = InContextName;
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         /// <summary>
         /// The Context's name.
         /// </summary>
-        public string ContextName { get; }
+        public TranslatingContextFinder.FindParam ContextFindParam { get; }
 
         /// <summary>
         /// The calling snippet
@@ -129,31 +129,22 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
-            var targetContext = InHolderSchemeInstance.Context;
-            if (ContextName != "")
+            IEnumerable<ITranslatingContext> targetContexts = new ITranslatingContext[] { InHolderSchemeInstance.Context };
+            if (ContextFindParam != null)
             {
-                // TODO: A better way to find the target context.
-
-                if (ContextName == "LastType")
-                {
-                    var checkingCtx = targetContext;
-                    while (checkingCtx != null)
-                    {
-                        if ((checkingCtx as ITranslatingInfoContext)?.TranslatingInfo is TypeInfo)
-                        {
-                            targetContext = checkingCtx;
-                            break;
-                        }
-                        checkingCtx = checkingCtx.ParentContext;
-                    }
-                }
+                targetContexts = TranslatingContextFinder.Find(InHolderSchemeInstance.Context, ContextFindParam);
             }
 
             var translator = InHolderSchemeInstance.HostTranslator;
-            //var scheme = translator.FindBestScheme(InHolderSchemeInstance.Context, SchemeName);
             var scheme = new InfoTranslateSchemeDefault(Snippet);
-            var si = scheme.CreateInstance(translator, targetContext);
-            return si.GetResult();
+
+            List<string> results = new List<string>();
+            foreach (var targetContext in targetContexts)
+            {
+                var si = scheme.CreateInstance(translator, targetContext);
+                results.AddRange(si.GetResult());
+            }
+            return results;
         }
 
     }
