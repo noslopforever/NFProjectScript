@@ -1,6 +1,9 @@
+﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.translator.expression;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace nf.protoscript.translator.DefaultSnippetElements
 {
@@ -308,5 +311,42 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
     }
 
+    /// <summary>
+    /// Element that takes the context's expression as init-expressions which means to wrap it with 'STNodeMemberInit' and then translate it.
+    /// </summary>
+    public class ElementInitExpression
+        : InfoTranslateSnippet.IElement
+    {
+        public ElementInitExpression()
+        {
+        }
+
+        public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            var translator = InHolderSchemeInstance.HostTranslator;
+            ITranslatingInfoContext ctx = InHolderSchemeInstance.Context as ITranslatingInfoContext;
+
+            // Exact parameters from the context.
+            // This element must be called when the context is a 'TypeInfo' context.
+            ElementInfo elemInfo = ctx?.TranslatingInfo as ElementInfo;
+            Debug.Assert(elemInfo != null);
+            if (elemInfo.InitSyntax == null)
+            {
+                return new string[0];
+            }
+
+            IMethodBodyContext mtdCtx = TranslatingContextFinder.FindAncestor(ctx, context => context is IMethodBodyContext) as IMethodBodyContext;
+            Debug.Assert(mtdCtx != null);
+
+            // Load ExpressionTranslator to translate the target expressions.
+            ExprTranslatorAbstract exprTranslator = translator.LoadExprTranslator("");
+
+            // Wrap init syntax and do translate.
+            var initSyntax = new STNodeMemberInit(elemInfo, elemInfo.InitSyntax);
+            var subResults = exprTranslator.Translate(mtdCtx, initSyntax);
+            return subResults;
+        }
+
+    }
 
 }

@@ -1,4 +1,4 @@
-using nf.protoscript;
+﻿using nf.protoscript;
 using nf.protoscript.translator;
 using nf.protoscript.translator.DefaultSnippetElements;
 
@@ -74,9 +74,7 @@ namespace npsParser.test.ClassTranslator
 
             xmlTrans.AddScheme("CtorInitTranslator",
                 new InfoTranslateSnippet(
-                    new ElementConstString("// Init ")
-                    , new ElementNodeValue("Name")
-                    , new ElementNewLine()
+                    new ElementInitExpression()
                 )
             );
 
