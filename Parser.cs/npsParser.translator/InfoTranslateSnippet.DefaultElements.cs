@@ -93,62 +93,78 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     }
 
     /// <summary>
-    /// Call another scheme with the specific context.
+    /// Base class of all elements with sub-snippets
     /// </summary>
-    public class ElementCall
-        : InfoTranslateSnippet.IElement
+    public abstract class ElementWithSubSnippets
     {
-        public ElementCall(params InfoTranslateSnippet.IElement[] InElements)
+        public ElementWithSubSnippets(params InfoTranslateSnippet.IElement[] InSubElements)
         {
-            Snippet = new InfoTranslateSnippet(InElements);
-            ContextFindParam = null;
+            SubSnippet = new InfoTranslateSnippet(InSubElements);
+            SubScheme = new InfoTranslateSchemeDefault(SubSnippet);
         }
 
-        public ElementCall(TranslatingContextFinder.FindParam InContextName
-            , params InfoTranslateSnippet.IElement[] InElements
-            )
-        {
-            Snippet = new InfoTranslateSnippet(InElements);
-            ContextFindParam = InContextName;
-        }
+        public InfoTranslateSnippet SubSnippet { get; }
 
-        /// <summary>
-        /// The scheme to call.
-        /// </summary>
-        public string SchemeName { get; }
-
-        /// <summary>
-        /// The Context's name.
-        /// </summary>
-        public TranslatingContextFinder.FindParam ContextFindParam { get; }
-
-        /// <summary>
-        /// The calling snippet
-        /// </summary>
-        public InfoTranslateSnippet Snippet { get; }
-
-        public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
-        {
-            IEnumerable<ITranslatingContext> targetContexts = new ITranslatingContext[] { InHolderSchemeInstance.Context };
-            if (ContextFindParam != null)
-            {
-                targetContexts = TranslatingContextFinder.Find(InHolderSchemeInstance.Context, ContextFindParam);
-            }
-
-            var translator = InHolderSchemeInstance.HostTranslator;
-            var scheme = new InfoTranslateSchemeDefault(Snippet);
-
-            List<string> results = new List<string>();
-            foreach (var targetContext in targetContexts)
-            {
-                var si = scheme.CreateInstance(translator, targetContext);
-                results.AddRange(si.GetResult());
-            }
-            return results;
-        }
+        public IInfoTranslateScheme SubScheme { get; }
 
     }
 
+    /// <summary>
+    /// Change current context and call sub-snippets with the new Context.
+    /// </summary>
+    public class ElementChangeContext
+        : ElementWithSubSnippets
+        , InfoTranslateSnippet.IElement
+    {
+        public ElementChangeContext(string InNewContextName, params InfoTranslateSnippet.IElement[] InSubElements)
+            : base(InSubElements)
+        {
+            NewContextName = InNewContextName;
+        }
+
+        /// <summary>
+        /// The new context 
+        /// </summary>
+        public string NewContextName { get; }
+
+        public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            var translator = InHolderSchemeInstance.HostTranslator;
+
+            IEnumerable<ITranslatingContext> targetContexts = null;
+            if (NewContextName != null && NewContextName != "")
+            {
+                // TODO Unify constructions of all contexts into a unique factory.
+
+                // Get the caller object by Name.
+                if (InHolderSchemeInstance.Context.TryGetContextValue(NewContextName, out var val))
+                {
+                    // construct the context for the caller-object
+                    if (val is Info)
+                    {
+                        var newCtx = new TranslatingInfoContext(InHolderSchemeInstance.Context, val as Info);
+                        targetContexts = new ITranslatingContext[] { newCtx };
+                    }
+                }
+            }
+
+            if (targetContexts != null)
+            {
+                List<string> results = new List<string>();
+                foreach (var targetContext in targetContexts)
+                {
+                    var si = SubScheme.CreateInstance(translator, targetContext);
+                    results.AddRange(si.GetResult());
+                }
+                return results;
+            }
+
+            // TODO log error.
+            throw new InvalidCastException();
+            return new string[0];
+        }
+
+    }
 
     /// <summary>
     /// For each sub info and call another scheme for it.
@@ -245,23 +261,19 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// Register a new method to the translating Type.
     /// </summary>
     public class ElementNewMethod
-        : InfoTranslateSnippet.IElement
+        : ElementWithSubSnippets
+        , InfoTranslateSnippet.IElement
     {
         public ElementNewMethod(string InMethodName, params InfoTranslateSnippet.IElement[] InSubElements)
+            : base(InSubElements)
         {
             MethodName = InMethodName;
-            SubSnippet = new InfoTranslateSnippet(InSubElements);
         }
 
         /// <summary>
         /// Name of the method
         /// </summary>
         public string MethodName { get; }
-
-        /// <summary>
-        /// Sub snippet
-        /// </summary>
-        public InfoTranslateSnippet SubSnippet { get; }
 
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
@@ -276,8 +288,6 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             Debug.Assert(typeInfo != null);
             Debug.Assert(globalInfo != null);
 
-            // TODO Create the special ctor method.
-
             // Create Method Body Context
             var ctorEnv = new expression.ExprTranslateEnvironmentDefault(typeInfo
                 , new expression.ExprTranslateEnvironmentDefault.ScopeBase[]
@@ -290,23 +300,13 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             );
             var mtdCtx = new expression.VirtualMethodBodyContext(ctx, typeInfo, "ctor", ctorEnv);
 
-            // Create and cache the scheme by SubSnippet.
-            if (_cachedScheme == null)
-            {
-                _cachedScheme = new InfoTranslateSchemeDefault(SubSnippet);
-            }
-            // Create the sub scheme-instance and set its context to the Ctor-method's context.
-            var subSI = _cachedScheme.CreateInstance(translator, mtdCtx);
-
+            // Create the sub scheme-instance and bind it with Ctor-method's context.
+            var subSI = SubScheme.CreateInstance(translator, mtdCtx);
             var subResults = subSI.GetResult();
             return subResults;
         }
 
-        // Scheme constructed by the SubSnippet
-        InfoTranslateSchemeDefault _cachedScheme = null;
-
     }
-
 
 
 }

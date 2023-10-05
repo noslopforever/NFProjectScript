@@ -1,4 +1,4 @@
-﻿using nf.protoscript;
+using nf.protoscript;
 using nf.protoscript.translator;
 using nf.protoscript.translator.DefaultSnippetElements;
 
@@ -34,7 +34,7 @@ namespace npsParser.test.ClassTranslator
                         , new ElementNewLine()
                         , new ElementIndentBlock(
                             new ElementNewMethod("ctor",
-                                new ElementCall(new TranslatingContextFinder.AncestorInfo(typeof(TypeInfo)),
+                                new ElementChangeContext("HostType",
                                     new ElementForeachSubCall("CtorInitTranslator", "member")
                                 )
                             )
