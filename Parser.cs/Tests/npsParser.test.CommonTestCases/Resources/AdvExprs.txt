@@ -25,3 +25,10 @@ model TestExpands
 	+TestMethod(InParam0:TestObj)
 		> tm0 = InParam0.ColorRO - InParam0.ColorRO
 		> tm1 = InParam0.ColorRO.R - InParam0.ColorRO.G
+
+model TestEmbbedConstructor
+	-IntColor TheColor
+		-R = 255
+		-G = 127
+	+Show()
+		# > log(TheColor) 

@@ -68,13 +68,35 @@ namespace npsParser.test.ClassTranslator
                     , new ElementConstString("\" ")
                     , new ElementConstString(" Type=\"")
                     , new ElementNodeValue("ElementType")
-                    , new ElementConstString("\" />")
+                    , new ElementConstString("\">")
+                    , new ElementNewLine()
+                    , new ElementIndentBlock(
+                        new ElementForeachSubCall("PropertyTranslator", "member")
+                    )
+                    , new ElementNewLine()
+                    , new ElementConstString("</")
+                    , new ElementNodeValue("Header")
+                    , new ElementConstString(">")
                 )
             );
 
             xmlTrans.AddScheme("CtorInitTranslator",
                 new InfoTranslateSnippet(
                     new ElementInitExpression()
+                    , new ElementIndentBlock(
+                        new ElementForeachSubCall("EmbbedCtorTranslator", "member")
+                    )
+                )
+            );
+
+            xmlTrans.AddScheme("EmbbedCtorTranslator",
+                new InfoTranslateSnippet(
+                    //new ElementInitExpression()
+                    new ElementConstString("// Embbed construct ")
+                    , new ElementNodeValue("Name")
+                    , new ElementIndentBlock(
+                        new ElementForeachSubCall("EmbbedCtorTranslator", "member")
+                    )
                 )
             );
 
@@ -84,7 +106,7 @@ namespace npsParser.test.ClassTranslator
                     , new ElementNodeValue("Header")
                     , new ElementConstString(" Name=\"")
                     , new ElementNodeValue("Name")
-                    , new ElementConstString("\" >")
+                    , new ElementConstString("\">")
                     , new ElementNewLine()
                     , new ElementIndentBlock(
                         new ElementMethodBody()
