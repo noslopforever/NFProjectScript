@@ -281,33 +281,89 @@ namespace nf.protoscript.translator.expression
     }
 
     /// <summary>
-    /// Context of the 'Root' body.
-    /// Root body is a special body with non-parent.
+    /// Context of a Method-Body which comes from a MethodInfo.
     /// </summary>
-    public class FuncBodyContext
+    public class MethodBodyContext
         : TranslatingContextBase
         , IMethodBodyContext
     {
-        public FuncBodyContext(ITranslatingContext InParentContext, string InMethodName, IExprTranslateEnvironment InEnvironment)
-            : base(InParentContext)
-        {
-            RootEnvironment = InEnvironment;
-            MethodName = InMethodName;
-        }
-        public FuncBodyContext(ITranslatingContext InParentContext, ElementInfo InBoundMethodInfo, IExprTranslateEnvironment InEnvironment)
+        public MethodBodyContext(ITranslatingContext InParentContext, ElementInfo InBoundMethodInfo, IExprTranslateEnvironment InEnvironment)
             : base(InParentContext)
         {
             MethodInfo = InBoundMethodInfo;
-            MethodName = MethodInfo.Name;
             RootEnvironment = InEnvironment;
         }
 
+        /// <summary>
+        /// MethodInfo which was used to construct this Context.
+        /// </summary>
         public ElementInfo MethodInfo { get; }
 
         // Begin ITranslatingContext interfaces
         public override bool TryGetContextValue(string InKey, out object OutValue)
         {
-            // TODO return value string registered in the root environment.
+            if (MethodInfo != null)
+            {
+                // Try find infos bound with the MethodInfo.
+                try
+                {
+                    var prop = MethodInfo.GetType().GetProperty(InKey);
+                    if (prop != null)
+                    {
+                        OutValue = prop.GetValue(MethodInfo);
+                        return true;
+                    }
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+
+            // TODO return value registered in the root environment.
+            return base.TryGetContextValue(InKey, out OutValue);
+        }
+        // ~ End ITranslatingContext interfaces
+
+        // Begin IMethodBodyContext interfaces
+        public string MethodName => MethodInfo.Name;
+        public IExprTranslateEnvironment RootEnvironment { get; }
+        // ~ End IMethodBodyContext interfaces
+
+    }
+
+
+    /// <summary>
+    /// Context of a Method-Body which comes from a virtual method.
+    /// </summary>
+    public class VirtualMethodBodyContext
+        : TranslatingContextBase
+        , IMethodBodyContext
+    {
+        public VirtualMethodBodyContext(ITranslatingContext InParentContext, TypeInfo InHostType, string InMethodName, IExprTranslateEnvironment InEnvironment)
+            : base(InParentContext)
+        {
+            RootEnvironment = InEnvironment;
+            HostType = InHostType;
+            MethodName = InMethodName;
+        }
+
+        /// <summary>
+        /// Type which hold this virtual method.
+        /// </summary>
+        public TypeInfo HostType { get; }
+
+        // Begin ITranslatingContext interfaces
+        public override bool TryGetContextValue(string InKey, out object OutValue)
+        {
+            // return the bound type if context comes from a virtual-method
+            if (InKey == "HostType")
+            {
+                OutValue = HostType;
+                return true;
+            }
+
+            // TODO return value registered in the root environment.
             return base.TryGetContextValue(InKey, out OutValue);
         }
         // ~ End ITranslatingContext interfaces

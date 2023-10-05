@@ -357,7 +357,7 @@ namespace npsParser.test.ExpressionTranslator
                         , new ExprTranslateEnvironmentDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
                 );
-                FuncBodyContext ctorCtx = new FuncBodyContext(null, "ctor", ctorEnv);
+                IMethodBodyContext ctorCtx = new VirtualMethodBodyContext(null, InTargetType, "ctor", ctorEnv);
 
                 // Gather all property-init expressions and convert them to STNodeInits.
                 List<ISyntaxTreeNode> initSyntaxes = new List<ISyntaxTreeNode>();
@@ -391,7 +391,7 @@ namespace npsParser.test.ExpressionTranslator
                         , new ExprTranslateEnvironmentDefault.Scope(InTargetType.ParentInfo, "global", "::")
                     }
                     );
-                FuncBodyContext funcBodyCtx = new FuncBodyContext(null, mtdInfo, mtdEnv);
+                MethodBodyContext funcBodyCtx = new MethodBodyContext(null, mtdInfo, mtdEnv);
                 var codes = InTranslator.Translate(funcBodyCtx, mtdInfo.InitSyntax);
                 foreach (var code in codes)
                 {

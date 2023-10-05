@@ -227,10 +227,10 @@ namespace nf.protoscript.translator.DefaultSnippetElements
                     , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
                 }
             );
-            var mtdCtx = new expression.FuncBodyContext(ctx, mtdInfo, env);
+            var mtdCtx = new expression.MethodBodyContext(ctx, mtdInfo, env);
 
             // TODO let the translator decide how to create a MethodBodyContext.
-            //expression.FuncBodyContext mtdCtx = translator.AllocBodyContextForMethod(ctx);
+            //expression.MethodBodyContext mtdCtx = translator.AllocBodyContextForMethod(ctx);
 
             // Select an expr-translator and do translating.
             var exprTranslator = translator.LoadExprTranslator("");
@@ -288,7 +288,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
                     , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
                 }
             );
-            var mtdCtx = new expression.FuncBodyContext(ctx, "ctor", ctorEnv);
+            var mtdCtx = new expression.VirtualMethodBodyContext(ctx, typeInfo, "ctor", ctorEnv);
 
             // Create and cache the scheme by SubSnippet.
             if (_cachedScheme == null)
