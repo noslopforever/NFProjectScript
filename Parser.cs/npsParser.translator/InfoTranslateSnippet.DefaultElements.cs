@@ -228,7 +228,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             ITranslatingContext ctx = InHolderSchemeInstance.Context;
 
             // Exact parameters from the context.
-            // This element must be called when the context is a 'ElementInfo' context.
+            // This element must be called when the context is a 'MethodInfo' context.
             ElementInfo mtdInfo = (ctx as ITranslatingInfoContext)?.TranslatingInfo as ElementInfo;
             TypeInfo mtdHostType = mtdInfo.FindTheFirstParent<TypeInfo>();
             ProjectInfo globalInfo = mtdInfo.FindTheFirstParent<ProjectInfo>();
@@ -327,7 +327,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             ITranslatingInfoContext ctx = InHolderSchemeInstance.Context as ITranslatingInfoContext;
 
             // Exact parameters from the context.
-            // This element must be called when the context is a 'TypeInfo' context.
+            // This element must be called when the context is a 'ElementInfo' context.
             ElementInfo elemInfo = ctx?.TranslatingInfo as ElementInfo;
             Debug.Assert(elemInfo != null);
             if (elemInfo.InitSyntax == null)
