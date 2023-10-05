@@ -19,7 +19,7 @@ namespace nf.protoscript.translator
             return null;
         }
 
-        public override expression.ExprTranslatorAbstract CreateExprTranslator(string InTranslatorType)
+        public override expression.ExprTranslatorAbstract LoadExprTranslator(string InTranslatorType)
         {
             return DefaultExprTranslator;
         }

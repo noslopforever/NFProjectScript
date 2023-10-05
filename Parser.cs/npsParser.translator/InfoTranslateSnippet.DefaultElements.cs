@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -233,7 +233,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             //expression.FuncBodyContext mtdCtx = translator.AllocBodyContextForMethod(ctx);
 
             // Select an expr-translator and do translating.
-            var exprTranslator = translator.CreateExprTranslator("");
+            var exprTranslator = translator.LoadExprTranslator("");
             var codes = exprTranslator.Translate(mtdCtx, mtdInfo.InitSyntax);
 
             return codes;

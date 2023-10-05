@@ -35,7 +35,7 @@ namespace nf.protoscript.translator
         /// </summary>
         /// <param name="InTranslatorType"></param>
         /// <returns></returns>
-        public abstract expression.ExprTranslatorAbstract CreateExprTranslator(string InTranslatorType);
+        public abstract expression.ExprTranslatorAbstract LoadExprTranslator(string InTranslatorType);
 
     }
 
