@@ -305,10 +305,10 @@ namespace nf.protoscript.translator.expression
         public ElementInfo MethodInfo { get; }
 
         // Begin ITranslatingContext interfaces
-        public override string GetContextValueString(string InKey)
+        public override bool TryGetContextValue(string InKey, out object OutValue)
         {
             // TODO return value string registered in the root environment.
-            return base.GetContextValueString(InKey);
+            return base.TryGetContextValue(InKey, out OutValue);
         }
         // ~ End ITranslatingContext interfaces
 

@@ -76,22 +76,22 @@ namespace nf.protoscript.translator.expression
             /// </summary>
             public ISyntaxTreeNode TranslatingNode { get; }
 
-            public override string GetContextValueString(string InKey)
+            public override bool TryGetContextValue(string InKey, out object OutValue)
             {
                 try
                 {
                     var keyProp = TranslatingNode.GetType().GetProperty(InKey);
                     if (keyProp != null)
                     {
-                        var propVal = keyProp.GetValue(TranslatingNode).ToString();
-                        return propVal;
+                        OutValue = keyProp.GetValue(TranslatingNode);
+                        return true;
                     }
                 }
                 catch (Exception ex)
                 {
                     // TODO log error
                 }
-                return base.GetContextValueString(InKey);
+                return base.TryGetContextValue(InKey, out OutValue);
             }
 
         }

@@ -14,18 +14,16 @@ namespace nf.protoscript.translator
         }
 
         public virtual ITranslatingContext ParentContext { get; }
-        //public virtual ProjectInfo HostProjectInfo => ParentContext.HostProjectInfo;
-        //public virtual TypeInfo HostTypeInfo => ParentContext.HostTypeInfo;
-        //public virtual ElementInfo HostElementInfo => ParentContext.HostElementInfo;
-        public virtual string GetContextValueString(string InKey)
+
+        public virtual bool TryGetContextValue(string InKey, out object OutValue)
         {
             try
             {
                 var keyProp = GetType().GetProperty(InKey);
                 if (keyProp != null)
                 {
-                    var propVal = keyProp.GetValue(this).ToString();
-                    return propVal;
+                    OutValue = keyProp.GetValue(this);
+                    return true;
                 }
             }
             catch (Exception ex)
@@ -35,9 +33,24 @@ namespace nf.protoscript.translator
 
             if (ParentContext != null)
             {
-                return ParentContext.GetContextValueString(InKey);
+                return ParentContext.TryGetContextValue(InKey, out OutValue);
             }
-            return $"<<NULL VALUE for {InKey}>>";
+
+            OutValue = null;
+            return false;
+        }
+
+        public string GetContextValueString(string InKey)
+        {
+            if (TryGetContextValue(InKey, out var val))
+            {
+                if (val == null)
+                {
+                    return "null";
+                }
+                return val.ToString();
+            }
+            return $"<<NULL VAR for {InKey}>>";
         }
 
     }
@@ -59,14 +72,15 @@ namespace nf.protoscript.translator
         public Info TranslatingInfo { get; }
         // ~ End ITranslatingInfoContext interfaces
 
-        public override string GetContextValueString(string InKey)
+        public override bool TryGetContextValue(string InKey, out object OutValue)
         {
             try
             {
                 var prop = TranslatingInfo.GetType().GetProperty(InKey);
                 if (prop != null)
                 {
-                    return prop.GetValue(TranslatingInfo).ToString();
+                    OutValue = prop.GetValue(TranslatingInfo);
+                    return true;
                 }
             }
             catch
@@ -74,7 +88,7 @@ namespace nf.protoscript.translator
                 // TODO log error.
             }
 
-            return base.GetContextValueString(InKey);
+            return base.TryGetContextValue(InKey, out OutValue);
         }
 
     }

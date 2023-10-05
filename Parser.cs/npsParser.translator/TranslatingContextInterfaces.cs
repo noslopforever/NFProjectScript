@@ -14,20 +14,13 @@
         /// </summary>
         ITranslatingContext ParentContext { get; }
 
-        ///// <summary>
-        ///// Which project is being translated when handling the current context.
-        ///// </summary>
-        //ProjectInfo HostProjectInfo { get; }
-
-        ///// <summary>
-        ///// Which Type is being translated when handling the current context. Nullable.
-        ///// </summary>
-        //TypeInfo HostTypeInfo { get; }
-
-        ///// <summary>
-        ///// Which element is being translated when handling the current context. Nullable.
-        ///// </summary>
-        //ElementInfo HostElementInfo { get; }
+        /// <summary>
+        /// Try get a context variable from this context.
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="OutValue"></param>
+        /// <returns></returns>
+        bool TryGetContextValue(string InKey, out object OutValue);
 
         /// <summary>
         /// Get value string from this context by InKey.
@@ -44,6 +37,20 @@
     public interface ITranslatingInfoContext
         : ITranslatingContext
     {
+        ///// <summary>
+        ///// Which project is being translated when handling the current context.
+        ///// </summary>
+        //ProjectInfo HostProjectInfo { get; }
+
+        ///// <summary>
+        ///// Which Type is being translated when handling the current context. Nullable.
+        ///// </summary>
+        //TypeInfo HostTypeInfo { get; }
+
+        ///// <summary>
+        ///// Which element is being translated when handling the current context. Nullable.
+        ///// </summary>
+        //ElementInfo HostElementInfo { get; }
 
         /// <summary>
         /// The translating Info.
