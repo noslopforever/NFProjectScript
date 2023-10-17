@@ -124,7 +124,7 @@ namespace nf.protoscript.parser.syntax1
                 var elemDef = _ParsedResult as STNode_ElementDef;
 
                 // Let TypeSig to find the target TypeInfo.
-                TypeInfo typeInfo = CommonTypeInfos.Any;
+                TypeInfo typeInfo = CommonTypeInfos.Unknown;
                 if (elemDef.TypeSig != null)
                 {
                     typeInfo = elemDef.TypeSig.LocateTypeInfo(InProjectInfo, parentInfo);
@@ -149,7 +149,7 @@ namespace nf.protoscript.parser.syntax1
                 )
             {
                 // ## Let TypeSig to find the method's return TypeInfo.
-                TypeInfo typeInfo = CommonTypeInfos.Any;
+                TypeInfo typeInfo = CommonTypeInfos.Unknown;
                 if (FuncDef.TypeSig != null)
                 {
                     typeInfo = FuncDef.TypeSig.LocateTypeInfo(InProjectInfo, parentInfo);
@@ -207,7 +207,7 @@ namespace nf.protoscript.parser.syntax1
         /// <param name="InSTElemDef"></param>
         private static void _GenerateParamByDef(ProjectInfo InProjectInfo, Info InFuncInfo, STNode_ElementDef InSTElemDef)
         {
-            TypeInfo paramTypeInfo = CommonTypeInfos.Any;
+            TypeInfo paramTypeInfo = CommonTypeInfos.Unknown;
             if (InSTElemDef.TypeSig != null)
             {
                 paramTypeInfo = InSTElemDef.TypeSig.LocateTypeInfo(InProjectInfo, InFuncInfo);
