@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nf.protoscript.syntaxtree;
+using System;
 using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1.analysis
@@ -63,6 +64,10 @@ namespace nf.protoscript.parser.syntax1.analysis
         {
             // Try find type in project.
             TypeInfo typeInProj = InProjectInfo.FindTheFirstSubInfoWithName<TypeInfo>(TypeCode);
+            if (typeInProj != null)
+            {
+                return typeInProj;
+            }
 
             // TODO Try find types in the InProjectInfo's related projects.
             //throw new NotImplementedException();
@@ -83,6 +88,14 @@ namespace nf.protoscript.parser.syntax1.analysis
             return typeInPak;
         }
 
+        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+        }
+
+        public TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            throw new InvalidProgramException();
+        }
     }
 
 }

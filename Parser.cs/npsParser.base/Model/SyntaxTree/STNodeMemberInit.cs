@@ -1,4 +1,7 @@
-﻿namespace nf.protoscript.syntaxtree
+﻿using System;
+using System.Collections.Generic;
+
+namespace nf.protoscript.syntaxtree
 {
     /// <summary>
     /// Init, describe a variable init expression.
@@ -21,6 +24,16 @@
         {
             InfoToBeInit = InInfoToBeInit;
             RHS = InRHS;
+        }
+
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(RHS)) { return; }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            return InfoToBeInit.ElementType;
         }
 
         /// <summary>

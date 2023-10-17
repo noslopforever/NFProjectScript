@@ -42,6 +42,15 @@ namespace nf.protoscript.syntaxtree
             Type = CommonTypeInfos.TypeRef;
         }
 
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            return Type;
+        }
+
         /// <summary>
         /// Value to save
         /// </summary>

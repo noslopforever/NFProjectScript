@@ -24,6 +24,29 @@ namespace nf.protoscript.syntaxtree
             RHS = InRhs;
         }
 
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(LHS)) { return; }
+            if (!InActionFunc(RHS)) { return; }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            switch (OpDef.Usage)
+            {
+                case EOpUsage.Comparer:
+                case EOpUsage.BooleanOperator:
+                    return CommonTypeInfos.Boolean;
+                case EOpUsage.LOperator:
+                    return LHS.GetPredictType(InHostElemInfo);
+                case EOpUsage.ROperator:
+                    return RHS.GetPredictType(InHostElemInfo);
+                case EOpUsage.BitwiseOperator:
+                    return LHS.GetPredictType(InHostElemInfo);
+            }
+            return null;
+        }
+
         /// <summary>
         /// The Operator Definition.
         /// </summary>

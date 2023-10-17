@@ -36,6 +36,27 @@ namespace nf.protoscript.syntaxtree
             Params = InParams.ToArray();
         }
 
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            foreach (var param in Params)
+            {
+                if (!InActionFunc(param)) { return; }
+            }
+            if (!InActionFunc(CollExpr)) { return; }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            var colType = CollExpr.GetPredictType(InHostElemInfo);
+
+            TypeInfo[] paramTypes = new TypeInfo[Params.Length];
+            for (int i = 0; i < Params.Length; i++)
+            {
+                paramTypes[i] = Params[i].GetPredictType(InHostElemInfo);
+            }
+            return colType.EvalCollectionElementType(paramTypes);
+        }
+
         /// <summary>
         /// Expression to locate a collection.
         /// </summary>

@@ -20,6 +20,23 @@ namespace nf.protoscript.syntaxtree
             RHS = InRhs;
         }
 
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(RHS)) { return; }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            switch (OpDef.Usage)
+            {
+                case EOpUsage.UnaryBooleanOperator:
+                    return CommonTypeInfos.Boolean;
+                case EOpUsage.UnaryOperator:
+                    return RHS.GetPredictType(InHostElemInfo);
+            }
+            return null;
+        }
+
         /// <summary>
         /// Operator character
         /// </summary>

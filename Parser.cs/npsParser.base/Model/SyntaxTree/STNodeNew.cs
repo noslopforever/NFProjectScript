@@ -1,4 +1,7 @@
-﻿namespace nf.protoscript.syntaxtree
+﻿using System;
+using System.Collections.Generic;
+
+namespace nf.protoscript.syntaxtree
 {
     /// <summary>
     /// Expr-node to create a object.
@@ -34,6 +37,19 @@
             Type = InTypeInfo;
             Typename = InTypeInfo.Name;
             Params = InParams;
+        }
+
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            foreach (var param in Params)
+            {
+                if (!InActionFunc(param)) { return; }
+            }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            return Type;
         }
 
         /// <summary>

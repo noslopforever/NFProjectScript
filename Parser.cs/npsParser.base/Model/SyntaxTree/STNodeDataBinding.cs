@@ -1,4 +1,7 @@
 ﻿
+using System;
+using System.Collections.Generic;
+
 namespace nf.protoscript.syntaxtree
 {
 
@@ -10,6 +13,9 @@ namespace nf.protoscript.syntaxtree
         internal STNodeDataBinding()
         {
         }
+
+        // TODO Introduce DataSystem to manage all DataBinding related Infos and STNodes.
+        internal static TypeInfo TEMP_StaticDataBindingType = new TypeInfo(SystemTypePackageInfo.Instance, "systype", "databinding");
 
         public STNodeDataBinding(DataBindingSettings InSettings)
         {
@@ -38,6 +44,16 @@ namespace nf.protoscript.syntaxtree
                 , InTargetObjectName
                 , InTargetPath
                 );
+        }
+
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            // TODO param in databinding params
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            return TEMP_StaticDataBindingType;
         }
 
         /// <summary>

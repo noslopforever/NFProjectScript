@@ -1,4 +1,5 @@
 ﻿using nf.protoscript.parser.token;
+using nf.protoscript.syntaxtree;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,6 +19,15 @@ namespace nf.protoscript.parser.syntax1.analysis
         /// </summary>
         public syntaxtree.STNodeBase CollectionExpr { get; private set; }
 
+        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(CollectionExpr)) { return; }
+        }
+
+        public TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            return null;
+        }
     }
 
 }

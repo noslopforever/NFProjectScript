@@ -38,6 +38,26 @@ namespace nf.protoscript.syntaxtree
             Params = InParams.ToArray();
         }
 
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            foreach (var param in Params)
+            {
+                if (!InActionFunc(param)) { return; }
+            }
+            if (!InActionFunc(FuncExpr)) { return; }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            var type = FuncExpr.GetPredictType(InHostElemInfo);
+            var delType = type as DelegateTypeInfo;
+            if (delType != null)
+            {
+                return delType.ReturnType;
+            }
+            return null;
+        }
+
         /// <summary>
         /// Function name
         /// </summary>

@@ -37,6 +37,36 @@ namespace nf.protoscript
             BaseType = InBaseType;
         }
 
+        /// <summary>
+        /// Evaluate element type of collection.
+        /// </summary>
+        /// <param name="paramTypes"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public TypeInfo EvalCollectionElementType(TypeInfo[] InParamTypes)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Check if the current type is same of or derived from the InElementType.
+        /// </summary>
+        /// <param name="InElementType"></param>
+        /// <returns></returns>
+        public bool IsSameOrDerivedOf(TypeInfo InElementType)
+        {
+            // If any Base of the current Type matches the InElementType, return true, else return false.
+            var checkingType = this;
+            while(checkingType != null)
+            {
+                if (checkingType == InElementType)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
     }
 
 }

@@ -23,6 +23,17 @@ namespace nf.protoscript.syntaxtree
             RHS = InRHS;
         }
 
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(LHS)) { return; }
+            if (!InActionFunc(RHS)) { return; }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            return LHS.GetPredictType(InHostElemInfo);
+        }
+
         /// <summary>
         /// Left hand value
         /// </summary>

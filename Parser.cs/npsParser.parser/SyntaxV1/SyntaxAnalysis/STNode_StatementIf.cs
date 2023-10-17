@@ -1,4 +1,7 @@
-﻿namespace nf.protoscript.parser.syntax1.analysis
+﻿using nf.protoscript.syntaxtree;
+using System;
+
+namespace nf.protoscript.parser.syntax1.analysis
 {
     /// <summary>
     /// Statement: If.
@@ -11,6 +14,16 @@
         /// Expression of the condition.
         /// </summary>
         public syntaxtree.STNodeBase ConditionExpr { get; private set; }
+
+        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(ConditionExpr)) { return; }
+        }
+
+        public TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            return null;
+        }
 
     }
 

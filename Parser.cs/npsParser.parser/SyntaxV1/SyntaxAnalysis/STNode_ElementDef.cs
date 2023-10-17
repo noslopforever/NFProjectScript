@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using nf.protoscript.syntaxtree;
+using System;
+using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1.analysis
 {
@@ -23,6 +25,18 @@ namespace nf.protoscript.parser.syntax1.analysis
         : List<STNode_ElementDef>
         , syntaxtree.ISyntaxTreeNode
     {
+        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            foreach (var node in this)
+            {
+                if (!InActionFunc(node)) { return; }
+            }
+        }
+
+        public TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            throw new InvalidProgramException();
+        }
     }
 
 

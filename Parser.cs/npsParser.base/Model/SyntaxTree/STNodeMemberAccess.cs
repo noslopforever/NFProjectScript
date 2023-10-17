@@ -1,4 +1,6 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+
 namespace nf.protoscript.syntaxtree
 {
     /// <summary>
@@ -14,6 +16,28 @@ namespace nf.protoscript.syntaxtree
         {
             LHS = InLhs;
             MemberID = InMemberID;
+        }
+
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(LHS)) { return; }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            // Let the lhs to find the element.
+            var lhsPredType = LHS.GetPredictType(InHostElemInfo);
+            if (lhsPredType == null)
+            {
+                return null;
+            }
+            // Try find the element and retrieve its type.
+            var info = lhsPredType.FindTheFirstSubInfoWithName<ElementInfo>(MemberID);
+            if (info != null)
+            {
+                return info.ElementType;
+            }
+            return null;
         }
 
         /// <summary>

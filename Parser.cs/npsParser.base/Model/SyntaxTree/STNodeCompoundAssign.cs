@@ -1,4 +1,7 @@
-﻿namespace nf.protoscript.syntaxtree
+﻿using System;
+using System.Collections.Generic;
+
+namespace nf.protoscript.syntaxtree
 {
     /// <summary>
     /// Expr node : compound assign.
@@ -17,6 +20,17 @@
             CompoundOp = InCompoundOp;
             LHS = InLHS;
             RHS = InRHS;
+        }
+
+        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(LHS)) { return; }
+            if (!InActionFunc(RHS)) { return; }
+        }
+
+        public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            return LHS.GetPredictType(InHostElemInfo);
         }
 
         /// <summary>

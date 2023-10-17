@@ -8,12 +8,17 @@ namespace nf.protoscript.syntaxtree
     /// <summary>
     /// Syntax-tree node base.
     /// </summary>
-    public class STNodeBase
+    public abstract class STNodeBase
         : ISyntaxTreeNode
     {
         public STNodeBase()
         {
         }
+
+        public abstract void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc);
+
+        public abstract TypeInfo GetPredictType(ElementInfo InHostElemInfo);
+
     }
 
 

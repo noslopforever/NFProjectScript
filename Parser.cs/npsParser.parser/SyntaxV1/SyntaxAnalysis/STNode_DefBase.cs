@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nf.protoscript.syntaxtree;
+using System;
 using System.Collections.Generic;
 
 namespace nf.protoscript.parser.syntax1.analysis
@@ -47,6 +48,18 @@ namespace nf.protoscript.parser.syntax1.analysis
         internal void _Internal_AddAttributes(STNode_AttributeDefs InAttrs)
         {
             Attributes.AddRange(InAttrs);
+        }
+
+        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        {
+            if (!InActionFunc(TypeSig)) { return; }
+            if (!InActionFunc(InitExpression)) { return; }
+            if (!InActionFunc(Attributes)) { return; }
+        }
+
+        public TypeInfo GetPredictType(ElementInfo InHostElemInfo)
+        {
+            throw new NotImplementedException();
         }
 
     }

@@ -14,6 +14,24 @@ namespace nf.protoscript.syntaxtree
     public interface ISyntaxTreeNode
     {
 
+        /// <summary>
+        /// Sub SyntaxTreeNodes belongs to this node.
+        /// </summary>
+        /// <param name="InActionFunc">
+        /// Return false to break the foreach loop.
+        /// </param>
+        void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc);
+
+        /// <summary>
+        /// Type predicted from this node.
+        /// </summary>
+        /// <param name="InHostElemInfo">
+        /// Host Element of the expression.
+        /// Member if the expression is an init-expression,
+        /// or Method if the expression is an method expression.
+        /// </param>
+        TypeInfo GetPredictType(ElementInfo InHostElemInfo);
+
     }
 
 }
