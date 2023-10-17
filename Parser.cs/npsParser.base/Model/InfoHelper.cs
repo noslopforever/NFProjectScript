@@ -143,7 +143,7 @@ namespace nf.protoscript
                 // if current context is a Type, try find its properties.
                 if (contextInfo is TypeInfo)
                 {
-                    foundInfo = FindPropertyOfType(InContextInfo as TypeInfo, InIDName);
+                    foundInfo = FindPropertyOfType(contextInfo as TypeInfo, InIDName);
                     if (foundInfo != null)
                     {
                         return foundInfo;
