@@ -19,7 +19,7 @@ namespace nf.protoscript.test
         public static TypeInfo __internal_EditorType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "editor");
         public static TypeInfo __internal_AppletType = new TypeInfo(SystemTypePackageInfo.Instance, "app", "applet");
 
-        public static DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(SystemTypePackageInfo.Instance, "FuncType", "func_V_V_Type");
+        public static DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(SystemTypePackageInfo.Instance, "FuncType", "func_V_V_Type", null);
 
         static TestCases()
         {
@@ -75,15 +75,8 @@ namespace nf.protoscript.test
                         );
 
                     // delegate int func_I_I_Type(int InParam)
-                    DelegateTypeInfo func_I_I_Type = new DelegateTypeInfo(testProj, "FuncType", "func_I_I_Type");
+                    DelegateTypeInfo func_I_I_Type = new DelegateTypeInfo(testProj, "FuncType", "func_I_I_Type", CommonTypeInfos.Integer);
                     {
-                        ElementInfo retVal = new ElementInfo(func_I_I_Type, "param", "___return___"
-                            , CommonTypeInfos.Integer
-                            , null
-                            );
-                        {
-                            AttributeInfo retAttr = new AttributeInfo(retVal, "Return", "__Anonymous_Return_Property__");
-                        }
                         ElementInfo inParam0 = new ElementInfo(func_I_I_Type, "param", "InParam"
                             , CommonTypeInfos.Integer
                             , null
@@ -114,7 +107,7 @@ namespace nf.protoscript.test
                         );
 
                     // delegate void func_V_IR_Type(int&)
-                    DelegateTypeInfo func_V_IR_Type = new DelegateTypeInfo(testProj, "FuncType", "funcV_IR_Type");
+                    DelegateTypeInfo func_V_IR_Type = new DelegateTypeInfo(testProj, "FuncType", "funcV_IR_Type", null);
                     {
                         ElementInfo refParam0 = new ElementInfo(func_V_IR_Type, "param", "RefParam"
                             , CommonTypeInfos.Integer
@@ -146,7 +139,7 @@ namespace nf.protoscript.test
 
 
                     // delegate void func_V_V_Type()
-                    DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(testProj, "FuncType", "func_V_V_Type");
+                    DelegateTypeInfo func_V_V_Type = new DelegateTypeInfo(testProj, "FuncType", "func_V_V_Type", null);
 
                     //
                     // void TestMethodC()

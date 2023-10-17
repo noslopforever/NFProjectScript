@@ -310,13 +310,11 @@ namespace nf.protoscript.test
                 { inOutMembers.Add(elem); }
             });
 
-            InMethodInfo.Extra.MethodReturnMember = returnMember;
-            InMethodInfo.Extra.MethodReturnType = null;
+            InMethodInfo.Extra.MethodReturnType = delegateType.ReturnType;
             InMethodInfo.Extra.MethodReturnTypeCode = "void";
-            if (returnMember != null)
+            if (delegateType.ReturnType != null)
             {
-                InMethodInfo.Extra.MethodReturnType = returnMember.ElementType;
-                InMethodInfo.Extra.MethodReturnTypeCode = _ExactCppTypeCodeFromInfo(returnMember.ElementType);
+                _ExactCppTypeCodeFromInfo(delegateType.ReturnType);
             }
 
             // generate C++ function decl by delegateType
@@ -661,14 +659,13 @@ namespace nf.protoscript.test
             STNodeSequence exprSeq = InMethodInfo.InitSyntax as STNodeSequence;
             System.Diagnostics.Debug.Assert(exprSeq != null);
 
-            var returnMember = InMethodInfo.Extra.MethodReturnMember;
             var retTypeCode = InMethodInfo.Extra.MethodReturnTypeCode;
 
             // prepare return
             CppFunction cppFunc = InMethodInfo.Extra.cppFuncCode;
-            if (returnMember != null)
+            if (InMethodInfo.Extra.MethodReturnType != null)
             {
-                cppFunc.TryRegTempVar($"{returnMember.Name}", $"{retTypeCode}");
+                cppFunc.TryRegTempVar($"__return__", $"{retTypeCode}");
             }
 
             // generate c++ codes per ST line.
@@ -682,9 +679,9 @@ namespace nf.protoscript.test
             }
 
             // finish return
-            if (returnMember != null)
+            if (InMethodInfo.Extra.MethodReturnType != null)
             {
-                cppFunc.FuncBodyCodes.Add($"return {returnMember.Name};");
+                cppFunc.FuncBodyCodes.Add($"return __return__;");
             }
 
             InMethodInfo.Extra.MemberFunctions = new List<CppFunction>();

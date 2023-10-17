@@ -6,10 +6,16 @@
     /// </summary>
     public class DelegateTypeInfo : TypeInfo
     {
-        public DelegateTypeInfo(Info InParentInfo, string InHeader, string InName)
+        public DelegateTypeInfo(Info InParentInfo, string InHeader, string InName, TypeInfo InReturnType)
             : base(InParentInfo, InHeader, InName)
         {
+            ReturnType = InReturnType;
         }
+
+        /// <summary>
+        /// Return type of the function (delegate)
+        /// </summary>
+        public TypeInfo ReturnType { get; private set; }
 
     }
 
