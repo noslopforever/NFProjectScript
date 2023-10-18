@@ -83,7 +83,7 @@ namespace nf.protoscript
                 {
                     return InitSyntax.GetPredictType(this);
                 }
-                return null;
+                return CommonTypeInfos.Unknown;
             }
         }
 

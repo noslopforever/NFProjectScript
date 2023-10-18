@@ -57,9 +57,15 @@ class testEvents
 
 class Animal
 	- Speed
+	- Name
 
 Animal Dog
 	- Speed
+	- Woof
+
+Dog Husky
+	-Speed
 
 Animal Cat
 	- Speed
+	- Meow

@@ -174,7 +174,7 @@ namespace nf.protoscript.modelchecker
                     {
                         indentStr += "    ";
                     }
-                    InOut.WriteLine(indentStr + elem.ToString());
+                    InOut.WriteLine($"{indentStr}Elem = {elem}, Type = {elem.ElementType}, SetType = {elem.SettedElementType}, InitType = {elem.InitSyntaxPredictType}");
                 });
             }
         }
