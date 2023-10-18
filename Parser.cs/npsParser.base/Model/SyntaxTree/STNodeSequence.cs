@@ -37,6 +37,11 @@ namespace nf.protoscript.syntaxtree
 
             List<STNode_Return> returns = new List<STNode_Return>();
             ForeachSubNodes(node => { GatherReturns(returns, node); return true; });
+            if (returns.Count == 0)
+            {
+                return null;
+            }
+
             var retTypes = GatherReturnTypes(InHostElemInfo, returns);
             TypeInfo commonType = PredictCommonBaseTypeFromTypes(retTypes);
             return commonType;

@@ -149,10 +149,17 @@ namespace nf.protoscript.parser.syntax1
                 )
             {
                 // ## Let TypeSig to find the method's return TypeInfo.
-                TypeInfo typeInfo = CommonTypeInfos.Unknown;
+                TypeInfo retTypeInfo = null;
                 if (FuncDef.TypeSig != null)
                 {
-                    typeInfo = FuncDef.TypeSig.LocateTypeInfo(InProjectInfo, parentInfo);
+                    retTypeInfo = FuncDef.TypeSig.LocateTypeInfo(InProjectInfo, parentInfo);
+                }
+
+                // ## Construct DelegateTypeInfo and fill parameters by this sector
+                DelegateTypeInfo mtdDelTypeInfo = new DelegateTypeInfo(InProjectInfo, "MethodType", $"SIG_{FuncDef.DefName}", retTypeInfo);
+                foreach (var paramDef in FuncDef.Params)
+                {
+                    _GenerateParamByDef(InProjectInfo, mtdDelTypeInfo, paramDef);
                 }
 
                 // ## Merge init-expr with sub expressions.
@@ -178,13 +185,7 @@ namespace nf.protoscript.parser.syntax1
                     default:
                         throw new InvalidProgramException("Unexpected Method Type");
                 }
-                chiefInfo = new ElementInfo(parentInfo, headerName, FuncDef.DefName, typeInfo, mergedSTSeq);
-
-                // ## Fill parameters by this sector
-                foreach (var paramDef in FuncDef.Params)
-                {
-                    _GenerateParamByDef(InProjectInfo, chiefInfo, paramDef);
-                }
+                chiefInfo = new ElementInfo(parentInfo, headerName, FuncDef.DefName, mtdDelTypeInfo, mergedSTSeq);
             }
 
             // Register inline attributes

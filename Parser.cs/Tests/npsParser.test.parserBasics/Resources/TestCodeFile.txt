@@ -56,16 +56,35 @@ class testEvents
 		> cout(MousePt)
 
 class Animal
-	- Speed
+	-float Speed
+	- Age
+
 	- Name
 
+	+ Sleep
+	+ Walk(Speed)
+
 Animal Dog
-	- Speed
-	- Woof
+	- Speed = 1.33
+	- Age = 1
+	- DogTag
+
+	+ Sleep
+	+ Walk(Speed, Action)
+
+	+ Woof
 
 Dog Husky
-	-Speed
+	-Speed = 1
+	-Age = 2
 
 Animal Cat
-	- Speed
-	- Meow
+	- Speed = 1.20
+	- Age = 1
+
+	- CatBrand
+
+	+ Sleep
+	+ Walk(Speed)
+
+	+ Meow
