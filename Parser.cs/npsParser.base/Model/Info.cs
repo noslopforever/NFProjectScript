@@ -106,6 +106,16 @@ namespace nf.protoscript
         }
 
         /// <summary>
+        /// Check if contains the sub 'InChild'.
+        /// </summary>
+        /// <param name="InChild"></param>
+        /// <returns></returns>
+        public bool SubContains(Info InChild)
+        {
+            return mSubInfos.Contains(InChild);
+        }
+
+        /// <summary>
         /// Test if 'Extra' contains some property.
         /// </summary>
         /// <param name="InPropertyName"></param>

@@ -54,3 +54,12 @@ class testEvents
 		- Ray
 		- Hit
 		> cout(MousePt)
+
+class Animal
+	- Speed
+
+Animal Dog
+	- Speed
+
+Animal Cat
+	- Speed

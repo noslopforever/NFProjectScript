@@ -1,4 +1,5 @@
-﻿using nf.protoscript.parser;
+﻿using nf.protoscript.modelchecker;
+using nf.protoscript.parser;
 using nf.protoscript.Serialization;
 using nf.protoscript.utils.serialization.xml;
 using System;
@@ -14,10 +15,18 @@ namespace nf.protoscript.test
         {
             parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
 
+            // Parse nps file.
             ProjectInfo testProj = new ProjectInfo("TestProject");
             ICodeContentReader reader = StringCodeContentReader.LoadFromString("TestCodeFile", TextResources.TestCodeFile);
 
             testParser.Parse(testProj, reader);
+
+            // Perform post-parse checkers.
+            {
+                ElementOverrideChecker ovrElemsChecker = new ElementOverrideChecker();
+                ovrElemsChecker.GatherOverrideElementsInProject(testProj);
+                ovrElemsChecker.Dump(Console.Out);
+            }
 
             // Output infos parsed by the test-parser
             var gatheredProjData = InfoGatherer.Gather(testProj);
