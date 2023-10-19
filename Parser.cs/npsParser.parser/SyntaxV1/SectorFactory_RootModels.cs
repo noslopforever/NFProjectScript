@@ -37,7 +37,10 @@ namespace nf.protoscript.parser.syntax1
                 ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
                 {
                     sector._SetAttributes(attrs);
-                    sector._SetComment(comments);
+                    if (comments != null)
+                    {
+                        sector._SetComment(comments.CommentText);
+                    }
                 });
 
                 ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);

@@ -44,7 +44,7 @@ namespace nf.protoscript.parser.syntax1
         /// <summary>
         /// Comments registered to the sector.
         /// </summary>
-        internal STNode_Comment Comment { get; private set; }
+        internal string Comment { get; private set; } = "";
 
         /// <summary>
         /// Does this sector contains TypeInfo?
@@ -60,7 +60,7 @@ namespace nf.protoscript.parser.syntax1
             Attributes = InAttrs;
         }
 
-        internal void _SetComment(STNode_Comment InComments)
+        internal void _SetComment(string InComments)
         {
             Comment = InComments;
         }
@@ -126,10 +126,10 @@ namespace nf.protoscript.parser.syntax1
                 }
             }
 
-            // TODO register comments
-            if (Comment != null)
+            // Register comments
+            if (Comment != "")
             {
-                // throw new NotImplementedException();
+                var cmtInfo = new CommentInfo(CollectedInfo, Comment);
             }
 
         }

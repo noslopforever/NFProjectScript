@@ -1,4 +1,5 @@
-﻿using nf.protoscript.parser.token;
+﻿using nf.protoscript.parser.syntax1.analysis;
+using nf.protoscript.parser.token;
 using System;
 using System.Collections.Generic;
 
@@ -48,7 +49,10 @@ namespace nf.protoscript.parser.syntax1
                 ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
                 {
                     sector._SetAttributes(attrs);
-                    sector._SetComment(comments);
+                    if (comments != null)
+                    {
+                        sector._SetComment(comments.CommentText);
+                    }
                 });
 
                 // if not end, there is an unexpected token
