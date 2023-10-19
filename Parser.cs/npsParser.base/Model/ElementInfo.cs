@@ -37,16 +37,17 @@ namespace nf.protoscript
         {
             get
             {
-                // 1, If setted manually, return the setted type.
+                // 1, If have init-syntax, try return the init-syntax's PredictType.
+                //    e.g. unit t = new Tank(), here the type of T should be the Tank inherited from Unit.
+                if (InitSyntaxPredictType != CommonTypeInfos.Unknown)
+                {
+                    return InitSyntaxPredictType;
+                }
+
+                // 2, If setted manually, return the setted type.
                 if (SettedElementType != CommonTypeInfos.Unknown)
                 {
                     return SettedElementType;
-                }
-
-                // 2, If have init-syntax, try return the init-syntax's PredictType
-                if (InitSyntaxPredictType != null)
-                {
-                    return InitSyntaxPredictType;
                 }
 
                 // 3, If override from anthoer element, try return the overriding element's type.
@@ -81,6 +82,8 @@ namespace nf.protoscript
             {
                 if (InitSyntax != null)
                 {
+                    // TODO InitSyntax may return null if the init-syntax is a non-type statement like "return;".
+                    // We need to guard against this situation, because what we often need here is to treat it as a "function" type.
                     return InitSyntax.GetPredictType(this);
                 }
                 return CommonTypeInfos.Unknown;

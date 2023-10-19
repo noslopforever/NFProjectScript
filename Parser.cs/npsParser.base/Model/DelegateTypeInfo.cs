@@ -1,4 +1,7 @@
-﻿namespace nf.protoscript
+using System;
+using System.Collections.Generic;
+
+namespace nf.protoscript
 {
     /// <summary>
     /// Infos to describe a delegate type (or function type).
@@ -17,6 +20,11 @@
         /// </summary>
         public TypeInfo ReturnType { get; private set; }
 
+        /// <summary>
+        /// Show human-readable text of the delegate type.
+        /// SignatureName(Params): ReturnType
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             string typeName = base.ToString();

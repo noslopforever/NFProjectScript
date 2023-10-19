@@ -215,7 +215,7 @@ namespace nf.protoscript.test
         /// 
         /// editor CharacterEditor
         ///     -Model = new testCharacterTemplate();
-        ///     +panel CharacterInfoPanel
+        ///     --panel CharacterInfoPanel
         ///         -DataContext = $db"Src=ancestor:CharacterEditor, Path=Model"
         ///         --Label
         ///             -Text = $db"HP"
@@ -284,7 +284,7 @@ namespace nf.protoscript.test
 
                     //     ...
                     //     -CharacterEditor characterEditor
-                    //     +panel characterInfoPanel
+                    //     --panel characterInfoPanel
                     //         -DataContext = $db"Src=ancestor:CharacterEditor, Path=Model"
                     //         ...
                     // ----
@@ -306,7 +306,7 @@ namespace nf.protoscript.test
                                 )
                             );
 
-                        // +Label
+                        // --Label
                         //     -Text=$db"HP"
                         ElementInfo label = new ElementInfo(panel, "ui", "Anonymous_label_0"
                             , __internal_LabelType
@@ -319,7 +319,7 @@ namespace nf.protoscript.test
 
                         } // end label
 
-                        // +Button upBtn
+                        // --Button upBtn
                         //     -Text = "+1"
                         //     -Click = new dataContextCall("HpUp")
                         ElementInfo upBtn = new ElementInfo(panel, "ui", "upBtn"
@@ -342,7 +342,7 @@ namespace nf.protoscript.test
                                     )
                                 );
                         }
-                        // +Button downBtn
+                        // --Button downBtn
                         //     -Text = "-1"
                         //     -Click
                         //         dataContext.HpUp -= 1
