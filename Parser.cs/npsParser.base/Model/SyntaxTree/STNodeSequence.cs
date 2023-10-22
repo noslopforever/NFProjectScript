@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using nf.protoscript.syntaxtree;
 
@@ -42,6 +42,8 @@ namespace nf.protoscript.syntaxtree
                 return null;
             }
 
+            // TODO return the signature, not the return value's type.
+            //throw new NotImplementedException();
             var retTypes = GatherReturnTypes(InHostElemInfo, returns);
             TypeInfo commonType = PredictCommonBaseTypeFromTypes(retTypes);
             return commonType;
