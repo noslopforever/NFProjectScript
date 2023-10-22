@@ -67,6 +67,39 @@ namespace nf.protoscript
             return false;
         }
 
+        /// <summary>
+        /// Predict the common base type from InTypes.
+        /// </summary>
+        /// <param name="InTypes"></param>
+        /// <returns>May be null, which means there is no valid common base type of all InTypes/</returns>
+        public static TypeInfo PredictCommonBaseTypeFromTypes(IEnumerable<TypeInfo> InTypes)
+        {
+            bool onlyOnce = false;
+            TypeInfo checkingBaseType = null;
+            foreach (var type in InTypes)
+            {
+                // Do once
+                if (!onlyOnce)
+                {
+                    checkingBaseType = type;
+                    onlyOnce = true;
+                    continue;
+                }
+
+                // If the checking type is not a common-base of another type, try select a new common-base from upper levels.
+                // e.g. B0 <- B1, B1 <- B10, B1 <- B11, checking: B10,
+                // Because the B11 is not derived from B10, so we must select B1 (B10's base) as the new checking type.
+                while (checkingBaseType != null)
+                {
+                    if (!checkingBaseType.IsSameOrDerivedOf(type))
+                    {
+                        checkingBaseType = checkingBaseType.BaseType;
+                    }
+                }
+            }
+            return checkingBaseType;
+        }
+
     }
 
 }
