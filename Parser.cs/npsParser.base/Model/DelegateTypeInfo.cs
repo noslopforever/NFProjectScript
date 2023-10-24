@@ -162,7 +162,7 @@ namespace nf.protoscript
                 }
             }
 
-            return new DelegateDifferent(result == EParamCheckResult.Equal && paramsDiff);
+            return new DelegateDifferent(result == EParamCheckResult.Equal && !paramsDiff);
         }
 
         public IReadOnlyList<ElementInfo> GetParameters()
