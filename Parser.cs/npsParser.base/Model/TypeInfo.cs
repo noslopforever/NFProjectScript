@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -53,7 +53,7 @@ namespace nf.protoscript
         /// </summary>
         /// <param name="InElementType"></param>
         /// <returns></returns>
-        public bool IsSameOrDerivedOf(TypeInfo InElementType)
+        public virtual bool IsSameOrDerivedOf(TypeInfo InElementType)
         {
             // If any Base of the current Type matches the InElementType, return true, else return false.
             var checkingType = this;
