@@ -6,8 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Logger\" />
-    <Folder Include="Event\" />
   </ItemGroup>
 
 </Project>

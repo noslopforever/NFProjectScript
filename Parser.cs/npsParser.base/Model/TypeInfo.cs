@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -63,6 +63,7 @@ namespace nf.protoscript
                 {
                     return true;
                 }
+                checkingType = checkingType.BaseType;
             }
             return false;
         }
@@ -91,12 +92,14 @@ namespace nf.protoscript
                 // Because the B11 is not derived from B10, so we must select B1 (B10's base) as the new checking type.
                 while (checkingBaseType != null)
                 {
-                    if (!checkingBaseType.IsSameOrDerivedOf(type))
+                    if (checkingBaseType.IsSameOrDerivedOf(type))
                     {
-                        checkingBaseType = checkingBaseType.BaseType;
+                        break;
                     }
+                    checkingBaseType = checkingBaseType.BaseType;
                 }
             }
+
             return checkingBaseType;
         }
 
