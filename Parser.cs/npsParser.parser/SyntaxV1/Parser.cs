@@ -21,6 +21,7 @@ namespace nf.protoscript.parser.syntax1
             Parser parser = new Parser();
             // Register system factories
             //parser._RootFactories.Add(new SectorFactory_Block());
+            parser._RootFactories.Add(new SectorFactory_Comment());
             parser._RootFactories.Add(new SectorFactory_RootModels());
 
             //parser._NonRootFactories.Add(new SectorFactory_Block());

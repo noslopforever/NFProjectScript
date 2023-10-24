@@ -154,15 +154,11 @@ namespace nf.protoscript.parser.syntax1
         /// <param name="InTokenList"></param>
         /// <param name="OutAttrs"></param>
         /// <param name="OutComment"></param>
-        internal static void TryParseLineEndBlocks(TokenList InTokenList, out STNode_AttributeDefs OutAttrs, out STNode_Comment OutComment)
+        internal static void TryParseLineEndBlocks(TokenList InTokenList, out STNode_AttributeDefs OutAttrs)
         {
             // Try parse line-end attributes.
             ASTParser_BlockLineEndAttributes leAttrsParser = new ASTParser_BlockLineEndAttributes();
             OutAttrs = leAttrsParser.Parse(InTokenList);
-
-            // Try parse line-end comments.
-            ASTParser_BlockLineEndComments leCommentParser = new ASTParser_BlockLineEndComments();
-            OutComment = leCommentParser.Parse(InTokenList);
         }
 
         /// <summary>
@@ -170,12 +166,11 @@ namespace nf.protoscript.parser.syntax1
         /// </summary>
         /// <param name="InTokenList"></param>
         /// <param name="InAct"></param>
-        internal static void TryParseLineEndBlocks(TokenList InTokenList, Action<STNode_AttributeDefs, STNode_Comment> InAct)
+        internal static void TryParseLineEndBlocks(TokenList InTokenList, Action<STNode_AttributeDefs> InAct)
         {
             STNode_AttributeDefs attrs = null;
-            STNode_Comment comment = null;
-            TryParseLineEndBlocks(InTokenList, out attrs, out comment);
-            InAct(attrs, comment);
+            TryParseLineEndBlocks(InTokenList, out attrs);
+            InAct(attrs);
         }
 
         /// <summary>
@@ -183,12 +178,11 @@ namespace nf.protoscript.parser.syntax1
         /// </summary>
         /// <param name="InTokenList"></param>
         /// <param name="InAct"></param>
-        internal static T TryParseLineEndBlocks<T>(TokenList InTokenList, Func<STNode_AttributeDefs, STNode_Comment, T> InFunc)
+        internal static T TryParseLineEndBlocks<T>(TokenList InTokenList, Func<STNode_AttributeDefs, T> InFunc)
         {
             STNode_AttributeDefs attrs = null;
-            STNode_Comment comment = null;
-            TryParseLineEndBlocks(InTokenList, out attrs, out comment);
-            return InFunc(attrs, comment);
+            TryParseLineEndBlocks(InTokenList, out attrs);
+            return InFunc(attrs);
         }
 
         /// <summary>

@@ -1,3 +1,15 @@
+# Root comment
+## Root comment with multiple '#'
+	### Root comment with indent 
+
+class testComment
+	# SubComment
+	## SubCommentWith multiple '#'
+	- CommentedProperty1 # Line-End comment
+	- CommentedProperty2 ## Line-End comment with multiple '#'
+	 	# PropertySubComment
+	 	## PropertySubComment with multiple '#'
+
 $ThisIsASingleton
 
 $applet GApp
@@ -95,7 +107,7 @@ Animal Cat
 
 
 class ErrorOvr0
-	- member
+	- member    # Error: There is no common base type of Ovr1.member(integer) and Ovr2.member(float).
 
 ErrorOvr0 ErrorOvr1
 	-integer member

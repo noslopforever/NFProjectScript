@@ -68,8 +68,11 @@ namespace nf.protoscript.parser.token
         /// <summary>
         /// Parse a line.
         /// </summary>
-        public void ParseLine(string InLineCodes, ref List<Token> RefTokens)
+        public List<Token> ParseLine(string InLineCodes, out string OutComment)
         {
+            OutComment = "";
+
+            List<Token> tokens = new List<Token>();
             string Codes = InLineCodes;
             while (true)
             {
@@ -84,8 +87,17 @@ namespace nf.protoscript.parser.token
                     { continue; }
                 }
 
-                RefTokens.Add(t);
+                // Comment, break, and take all strings after it as a comment.
+                if (t.TokenType == ETokenType.Sharp)
+                {
+                    OutComment = Codes;
+                    break;
+                }
+
+                tokens.Add(t);
             }
+
+            return tokens;
         }
 
 

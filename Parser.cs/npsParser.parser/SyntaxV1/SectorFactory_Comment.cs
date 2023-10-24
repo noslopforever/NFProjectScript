@@ -15,9 +15,7 @@ namespace nf.protoscript.parser.syntax1
             if (!ParseHelper.CheckAndRemoveStartCodes(InCodesWithoutIndent, out codesWithoutTags, "#"))
             { return null; }
 
-            List<Token> tokens = new List<Token>();
-            TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
-            var cmtSector = new CommentSector(InCodeLine, codesWithoutTags);
+            var cmtSector = new CommentSector(InCodeLine, InCodesWithoutIndent);
             return cmtSector;
         }
     }

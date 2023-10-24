@@ -11,22 +11,16 @@ namespace nf.protoscript.parser.syntax1
     class AttributesSector
         : Sector
     {
-        public AttributesSector(CodeLine InCodeLn, STNode_AttributeDefs InAttrs, STNode_Comment InComment)
+        public AttributesSector(CodeLine InCodeLn, STNode_AttributeDefs InAttrs)
             : base(InCodeLn)
         {
             AttrDefs = InAttrs;
-            CommentDefs = InComment;
         }
 
         /// <summary>
         /// AttributeDefs parsed by factory.
         /// </summary>
         internal STNode_AttributeDefs AttrDefs { get; }
-
-        /// <summary>
-        /// Line end comments parsed by factory.
-        /// </summary>
-        internal STNode_Comment CommentDefs { get; }
 
         protected override Info CollectInfosImpl(ProjectInfo InProjectInfo, Sector InParentSector)
         {

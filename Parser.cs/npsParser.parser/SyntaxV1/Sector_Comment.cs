@@ -19,13 +19,13 @@
             {
                 // No parent sector (root), register comment to the ProjectInfo.
                 var cmtInfo = new CommentInfo(InProjectInfo, Comment);
-                return null;
+                return cmtInfo;
             }
             else
             {
                 // register comment to the host sector.
                 var cmtInfo = new CommentInfo(InParentSector.CollectedInfo, Comment);
-                return null;
+                return cmtInfo;
             }
         }
 

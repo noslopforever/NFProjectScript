@@ -25,9 +25,8 @@ namespace nf.protoscript.parser.syntax1
             if (!ParseHelper.CheckAndRemoveStartCode(InCodesWithoutIndent, "-", out codesWithoutTags))
             { return null; }
 
-            List<Token> tokens = new List<Token>();
-            TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
-
+            string comments = "";
+            var tokens = TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, out comments);
             Exception tryExcp = null;
 
             // Try parse as StartType member define:
@@ -45,16 +44,10 @@ namespace nf.protoscript.parser.syntax1
                 if (elemDef != null)
                 {
                     Sector sector = ElementSector.NewMemberSector(InCodeLine, elemDef);
+                    sector._SetComment(comments);
 
                     // Try parse line-end attributes.
-                    ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
-                    {
-                        sector._SetAttributes(attrs);
-                        if (comments != null)
-                        {
-                            sector._SetComment(comments.CommentText);
-                        }
-                    });
+                    ParseHelper.TryParseLineEndBlocks(tl, sector._SetAttributes);
 
                     // if not end, there is an unexpected token
                     ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);
@@ -75,15 +68,9 @@ namespace nf.protoscript.parser.syntax1
                 if (elemDef != null)
                 {
                     var sector = ElementSector.NewMemberSector(InCodeLine, elemDef);
+                    sector._SetComment(comments);
                     // Parse line-end blocks
-                    ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
-                    {
-                        sector._SetAttributes(attrs);
-                        if (comments != null)
-                        {
-                            sector._SetComment(comments.CommentText);
-                        }
-                    });
+                    ParseHelper.TryParseLineEndBlocks(tl, sector._SetAttributes);
 
                     // if not end, there is an unexpected token
                     ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);

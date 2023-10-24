@@ -12,6 +12,7 @@
         public CommentInfo(Info InParentInfo, string InComment)
             : base(InParentInfo, "comment", "")
         {
+            Comment = InComment;
         }
 
         /// <summary>

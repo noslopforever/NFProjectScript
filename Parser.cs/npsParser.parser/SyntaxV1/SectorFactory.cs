@@ -1,4 +1,7 @@
-﻿namespace nf.protoscript.parser.syntax1
+﻿using System;
+using System.Collections.Generic;
+
+namespace nf.protoscript.parser.syntax1
 {
 
     /// <summary>

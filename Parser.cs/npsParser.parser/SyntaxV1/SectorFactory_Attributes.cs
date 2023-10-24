@@ -18,13 +18,13 @@ namespace nf.protoscript.parser.syntax1
             }
 
             // Parse line-end attributes from codes.
-            List<Token> tokens = new List<Token>();
-            TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, ref tokens);
+            string comments = "";
+            List<Token> tokens = TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, out comments);
             TokenList tl = new TokenList(tokens);
 
-            return ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
+            return ParseHelper.TryParseLineEndBlocks(tl, (attrs) =>
             {
-                return new AttributesSector(InCodeLine, attrs, comments);
+                return new AttributesSector(InCodeLine, attrs);
             });
         }
     }

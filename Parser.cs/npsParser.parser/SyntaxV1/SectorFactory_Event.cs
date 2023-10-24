@@ -34,9 +34,8 @@ namespace nf.protoscript.parser.syntax1
             if (!ParseHelper.CheckAndRemoveStartCodes(InCodesWithoutIndent, out codesWithoutTags, "~", ">>"))
             { return null; }
 
-            List<Token> tokens = new List<Token>();
-            TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
-
+            string comments = "";
+            var tokens = TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, out comments);
             var tl = new TokenList(tokens);
 
             // Try parse Event definitions.
@@ -45,15 +44,10 @@ namespace nf.protoscript.parser.syntax1
             if (funcDef != null)
             {
                 var sector = ElementSector.NewEventSector(InCodeLine, funcDef);
+                sector._SetComment(comments);
+
                 // Try parse line-end attributes.
-                ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
-                {
-                    sector._SetAttributes(attrs);
-                    if (comments != null)
-                    {
-                        sector._SetComment(comments.CommentText);
-                    }
-                });
+                ParseHelper.TryParseLineEndBlocks(tl, sector._SetAttributes);
 
                 // if not end, there is an unexpected token
                 ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);

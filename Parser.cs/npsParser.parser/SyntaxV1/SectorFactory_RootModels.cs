@@ -24,8 +24,8 @@ namespace nf.protoscript.parser.syntax1
             // $ID $ID: <ERROR>
             //
 
-            List<Token> tokens = new List<Token>();
-            TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, ref tokens);
+            string comments = "";
+            var tokens = TokenParser_CommonNps.Instance.ParseLine(InCodesWithoutIndent, out comments);
 
             TokenList tl = new TokenList(tokens);
             var sector = _ParseModelSector(InCodeLine, tl);
@@ -33,15 +33,9 @@ namespace nf.protoscript.parser.syntax1
             // If parsed a sector, try parse line-end attributes and check line-end.
             if (sector != null)
             {
+                sector._SetComment(comments);
                 // Try parse line-end attributes.
-                ParseHelper.TryParseLineEndBlocks(tl, (attrs, comments) =>
-                {
-                    sector._SetAttributes(attrs);
-                    if (comments != null)
-                    {
-                        sector._SetComment(comments.CommentText);
-                    }
-                });
+                ParseHelper.TryParseLineEndBlocks(tl, sector._SetAttributes);
 
                 ParseHelper.CheckFinishedAndThrow(tl, InCodeLine);
             }

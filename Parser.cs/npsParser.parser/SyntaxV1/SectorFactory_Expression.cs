@@ -22,8 +22,8 @@ namespace nf.protoscript.parser.syntax1
             string codesWithoutTags = InCodesWithoutIndent.Substring(1);
 
             // Parse expression statement from codes.
-            List<Token> tokens = new List<Token>();
-            TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, ref tokens);
+            string comments = "";
+            var tokens = TokenParser_CommonNps.Instance.ParseLine(codesWithoutTags, out comments);
             TokenList tl = new TokenList(tokens);
 
             // Parse tag and consume tag tokens.
@@ -42,6 +42,7 @@ namespace nf.protoscript.parser.syntax1
             var expr = exprStmtParser.Parse(tl);
 
             var secExpr = new ExpressionSector(InCodeLine, expr, tag);
+            secExpr._SetComment(comments);
             return secExpr;
         }
     }
