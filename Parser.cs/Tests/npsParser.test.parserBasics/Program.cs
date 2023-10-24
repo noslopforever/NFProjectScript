@@ -3,6 +3,7 @@ using nf.protoscript.parser;
 using nf.protoscript.Serialization;
 using nf.protoscript.utils.serialization.xml;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -23,9 +24,22 @@ namespace nf.protoscript.test
 
             // Perform post-parse checkers.
             {
-                ElementOverrideChecker ovrElemsChecker = new ElementOverrideChecker();
-                ovrElemsChecker.GatherOverrideElementsInProject(testProj);
-                ovrElemsChecker.Dump(Console.Out);
+                ElementOverrideCollector ovrElemsCollector = new ElementOverrideCollector();
+                ovrElemsCollector.GatherOverrideElementsInProject(testProj);
+                ovrElemsCollector.Dump(Console.Out);
+
+                // Analysis override elements.
+                List<ILog> checkErrors = new List<ILog>();
+                foreach (var root in ovrElemsCollector.RootNodes)
+                {
+                    ElementOverrideAnalyzer.AnalyzeOverrideTree(checkErrors, root);
+                }
+
+                // Dump errors.
+                foreach (var log in checkErrors)
+                {
+                    Logger.Instance.Log(log);
+                }
             }
 
             // Output infos parsed by the test-parser

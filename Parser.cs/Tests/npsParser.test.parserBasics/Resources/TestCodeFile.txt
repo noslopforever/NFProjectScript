@@ -77,10 +77,12 @@ Animal Dog
 Dog Husky
 	-Speed = 1
 	-Age = 2
+	- ErrorOvrMember = 1
 
 Animal Cat
 	- Speed = 1.20
 	- Age = 1
+	-float ErrorOvrMember
 
 	- CatBrand
 
@@ -88,3 +90,33 @@ Animal Cat
 	+ Walk(Speed)
 
 	+ Meow
+
+
+
+
+
+
+class ErrorOvr0
+	- member
+
+ErrorOvr0 ErrorOvr1
+	-integer member
+
+ErrorOvr0 ErrorOvr2
+	-float member
+
+
+
+
+class ErrorComplexOvr0
+	- member
+
+ErrorComplexOvr0 ErrorComplexOvr1
+	-integer member
+
+ErrorComplexOvr1 ErrorComplexOvr2
+
+ErrorComplexOvr2 ErrorComplexOvr3
+	-float member
+
+
