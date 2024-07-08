@@ -30,7 +30,7 @@ namespace nf.protoscript.parser.syntax1.analysis
                 ASTParser_Expression exprParser = new ASTParser_Expression();
                 var expr = exprParser.Parse(InTokenList);
 
-                return new syntaxtree.STNode_Return(expr);
+                return new syntaxtree.STNodeReturn(expr);
             }
 
             return null;

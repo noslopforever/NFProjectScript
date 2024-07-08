@@ -6,10 +6,10 @@ namespace nf.protoscript.syntaxtree
     /// <summary>
     /// Return statement, return an expression as the result of a method.
     /// </summary>
-    public sealed class STNode_Return
+    public sealed class STNodeReturn
         : STNodeBase
     {
-        public STNode_Return(ISyntaxTreeNode InReturnExpr)
+        public STNodeReturn(ISyntaxTreeNode InReturnExpr)
         {
             ReturnExpr = InReturnExpr;
         }
@@ -34,7 +34,7 @@ namespace nf.protoscript.syntaxtree
         /// <param name="InHostElementInfo"></param>
         /// <param name="InReturns"></param>
         /// <returns></returns>
-        public static List<TypeInfo> GatherReturnTypes(ElementInfo InHostElementInfo, IEnumerable<STNode_Return> InReturns)
+        public static List<TypeInfo> GatherReturnTypes(ElementInfo InHostElementInfo, IEnumerable<STNodeReturn> InReturns)
         {
             List<TypeInfo> types = new List<TypeInfo>();
             foreach (var ret in InReturns)
@@ -50,9 +50,9 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         /// <param name="InSTNodes"></param>
         /// <returns></returns>
-        public static List<STNode_Return> GatherReturns(IEnumerable<ISyntaxTreeNode> InSTNodes)
+        public static List<STNodeReturn> GatherReturns(IEnumerable<ISyntaxTreeNode> InSTNodes)
         {
-            List<STNode_Return> results = new List<STNode_Return>();
+            List<STNodeReturn> results = new List<STNodeReturn>();
             GatherReturns(results, InSTNodes);
             return results;
         }
@@ -62,7 +62,7 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         /// <param name="OutRetNodes"></param>
         /// <param name="InSTNodes"></param>
-        public static void GatherReturns(List<STNode_Return> OutRetNodes, IEnumerable<ISyntaxTreeNode> InSTNodes)
+        public static void GatherReturns(List<STNodeReturn> OutRetNodes, IEnumerable<ISyntaxTreeNode> InSTNodes)
         {
             foreach (var node in InSTNodes)
             {
@@ -74,12 +74,12 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         /// <param name="OutRetNodes"></param>
         /// <param name="InSTNodes"></param>
-        public static void GatherReturns(List<STNode_Return> OutRetNodes, ISyntaxTreeNode InSTNode)
+        public static void GatherReturns(List<STNodeReturn> OutRetNodes, ISyntaxTreeNode InSTNode)
         {
             // save if the node is a return node.
-            if (InSTNode is STNode_Return)
+            if (InSTNode is STNodeReturn)
             {
-                OutRetNodes.Add(InSTNode as STNode_Return);
+                OutRetNodes.Add(InSTNode as STNodeReturn);
             }
 
             // gather recursively

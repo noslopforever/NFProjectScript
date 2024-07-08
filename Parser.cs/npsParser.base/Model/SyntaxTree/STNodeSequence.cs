@@ -35,8 +35,8 @@ namespace nf.protoscript.syntaxtree
         {
             // Predict method type by returns from nodes.
 
-            List<STNode_Return> returns = new List<STNode_Return>();
-            ForeachSubNodes(node => { STNode_Return.GatherReturns(returns, node); return true; });
+            List<STNodeReturn> returns = new List<STNodeReturn>();
+            ForeachSubNodes(node => { STNodeReturn.GatherReturns(returns, node); return true; });
             if (returns.Count == 0)
             {
                 return null;
@@ -45,7 +45,7 @@ namespace nf.protoscript.syntaxtree
             // TODO return the signature, not the return value's type.
             //throw new NotImplementedException();
 
-            var retTypes = STNode_Return.GatherReturnTypes(InHostElemInfo, returns);
+            var retTypes = STNodeReturn.GatherReturnTypes(InHostElemInfo, returns);
             TypeInfo commonType = TypeInfo.PredictCommonBaseTypeFromTypes(retTypes);
             return commonType;
         }
