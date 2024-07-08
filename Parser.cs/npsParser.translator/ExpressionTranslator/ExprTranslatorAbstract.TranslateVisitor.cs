@@ -213,7 +213,7 @@ namespace nf.protoscript.translator.expression
                 , out ISTNodeTranslateSchemeInstance OutSI
                 )
             {
-                var elemInfo = InfoHelper.FindPropertyOfType(InHostPredictType, InMemberAccess.MemberID);
+                var elemInfo = InfoHelper.FindPropertyOfType(InHostPredictType, InMemberAccess.IDName);
                 if (elemInfo == null)
                 {
                     // TODO log warning: cannot find the property in type.

@@ -305,7 +305,7 @@ namespace nf.protoscript.translator.expression
             /// <summary>
             /// Var Name registered to the context.
             /// </summary>
-            public string VarName { get { return MemberAccessNode.MemberID; } }
+            public string VarName { get { return MemberAccessNode.IDName; } }
 
         }
 
