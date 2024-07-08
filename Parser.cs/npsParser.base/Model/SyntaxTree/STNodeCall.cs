@@ -39,13 +39,15 @@ namespace nf.protoscript.syntaxtree
             Params = InParams.ToArray();
         }
 
-        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public override void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            foreach (var param in Params)
+            for ( int i = 0; i< Params.Length; i++ )
             {
-                if (!InActionFunc(param)) { return; }
+                var param = Params[i];
+                string paramKey = $"Param{i}";
+                if (!InActionFunc(paramKey, param)) { return; }
             }
-            if (!InActionFunc(FuncExpr)) { return; }
+            if (!InActionFunc("FuncExpr", FuncExpr)) { return; }
         }
 
         public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)

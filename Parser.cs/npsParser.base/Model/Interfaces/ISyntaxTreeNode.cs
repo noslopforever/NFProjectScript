@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -20,7 +20,7 @@ namespace nf.protoscript.syntaxtree
         /// <param name="InActionFunc">
         /// Return false to break the foreach loop.
         /// </param>
-        void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc);
+        void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc);
 
         /// <summary>
         /// Type predicted from this node.

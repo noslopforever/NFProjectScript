@@ -24,11 +24,13 @@ namespace nf.protoscript.syntaxtree
             NodeList = InSTNodes;
         }
 
-        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public override void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            foreach (var node in NodeList)
+            for (int i = 0; i < NodeList.Count; i++)
             {
-                if (!InActionFunc(node)) { return; }
+                var node = NodeList[i];
+                var key = $"Node{i}";
+                if (!InActionFunc(key, node)) { return; }
             }
         }
 
@@ -37,7 +39,7 @@ namespace nf.protoscript.syntaxtree
             // Predict method type by returns from nodes.
 
             List<STNodeReturn> returns = new List<STNodeReturn>();
-            ForeachSubNodes(node => { STNodeReturn.GatherReturns(returns, node); return true; });
+            ForeachSubNodes((key, node) => { STNodeReturn.GatherReturns(returns, node); return true; });
             if (returns.Count == 0)
             {
                 return null;

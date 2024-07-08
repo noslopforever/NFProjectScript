@@ -50,11 +50,11 @@ namespace nf.protoscript.parser.syntax1.analysis
             Attributes.AddRange(InAttrs);
         }
 
-        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            if (!InActionFunc(TypeSig)) { return; }
-            if (!InActionFunc(InitExpression)) { return; }
-            if (!InActionFunc(Attributes)) { return; }
+            if (!InActionFunc("TypeSig", TypeSig)) { return; }
+            if (!InActionFunc("InitExpr", InitExpression)) { return; }
+            if (!InActionFunc("Attributes", Attributes)) { return; }
         }
 
         public TypeInfo GetPredictType(ElementInfo InHostElemInfo)

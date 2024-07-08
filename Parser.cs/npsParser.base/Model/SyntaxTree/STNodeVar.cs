@@ -20,7 +20,7 @@ namespace nf.protoscript.syntaxtree
             IDName = InIdName;
         }
 
-        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public override void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
         }
 

@@ -19,9 +19,9 @@ namespace nf.protoscript.parser.syntax1.analysis
         /// </summary>
         public syntaxtree.STNodeBase CollectionExpr { get; private set; }
 
-        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            if (!InActionFunc(CollectionExpr)) { return; }
+            if (!InActionFunc("CollectionExpr", CollectionExpr)) { return; }
         }
 
         public TypeInfo GetPredictType(ElementInfo InHostElemInfo)

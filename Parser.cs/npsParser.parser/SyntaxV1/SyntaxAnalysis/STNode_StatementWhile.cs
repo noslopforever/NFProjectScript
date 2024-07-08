@@ -20,9 +20,9 @@ namespace nf.protoscript.parser.syntax1.analysis
         /// </summary>
         public syntaxtree.STNodeBase ConditionExpr { get; private set; }
 
-        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            if (!InActionFunc(ConditionExpr)) { return; }
+            if (!InActionFunc("ConditionExpr", ConditionExpr)) { return; }
         }
 
         public TypeInfo GetPredictType(ElementInfo InHostElemInfo)

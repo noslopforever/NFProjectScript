@@ -88,7 +88,7 @@ namespace nf.protoscript.parser.syntax1.analysis
             return typeInPak;
         }
 
-        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
         }
 

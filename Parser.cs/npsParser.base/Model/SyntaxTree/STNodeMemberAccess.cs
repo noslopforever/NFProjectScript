@@ -18,9 +18,9 @@ namespace nf.protoscript.syntaxtree
             IDName = InIDName;
         }
 
-        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public override void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            if (!InActionFunc(LHS)) { return; }
+            if (!InActionFunc("LHS", LHS)) { return; }
         }
 
         public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)

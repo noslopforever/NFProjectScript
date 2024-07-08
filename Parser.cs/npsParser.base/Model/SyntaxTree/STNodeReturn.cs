@@ -15,9 +15,9 @@ namespace nf.protoscript.syntaxtree
             ReturnExpr = InReturnExpr;
         }
 
-        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public override void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            if (!InActionFunc(ReturnExpr)) { return; }
+            if (!InActionFunc("ReturnExpr", ReturnExpr)) { return; }
         }
 
         public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
@@ -84,7 +84,7 @@ namespace nf.protoscript.syntaxtree
             }
 
             // gather recursively
-            InSTNode.ForeachSubNodes(node => 
+            InSTNode.ForeachSubNodes((key, node) => 
             {
                 GatherReturns(OutRetNodes, node);
                 return true;

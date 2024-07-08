@@ -25,11 +25,13 @@ namespace nf.protoscript.parser.syntax1.analysis
         : List<STNode_ElementDef>
         , syntaxtree.ISyntaxTreeNode
     {
-        public void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            foreach (var node in this)
+            for (int i = 0; i < this.Count; i++)
             {
-                if (!InActionFunc(node)) { return; }
+                var node = this[i];
+                var key = $"Element{i}";
+                if (!InActionFunc(key, node)) { return; }
             }
         }
 

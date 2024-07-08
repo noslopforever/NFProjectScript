@@ -23,10 +23,10 @@ namespace nf.protoscript.syntaxtree
             RHS = InRHS;
         }
 
-        public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
+        public override void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
         {
-            if (!InActionFunc(LHS)) { return; }
-            if (!InActionFunc(RHS)) { return; }
+            if (!InActionFunc("LHS", LHS)) { return; }
+            if (!InActionFunc("RHS", RHS)) { return; }
         }
 
         public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)

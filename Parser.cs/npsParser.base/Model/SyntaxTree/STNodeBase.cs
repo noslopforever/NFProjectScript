@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,7 +15,7 @@ namespace nf.protoscript.syntaxtree
         {
         }
 
-        public abstract void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc);
+        public abstract void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc);
 
         public abstract TypeInfo GetPredictType(ElementInfo InHostElemInfo);
 
