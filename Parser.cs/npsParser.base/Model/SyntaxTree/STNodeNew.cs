@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace nf.protoscript.syntaxtree
 {
+
+    // TODO deprecated: New should be taken as a special call.
     /// <summary>
     /// Expr-node to create a object.
     /// </summary>

@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace nf.protoscript
 {
@@ -207,6 +208,13 @@ namespace nf.protoscript
         public string TargetObjectName { get; }
 
         public DataBindingPath TargetPath { get; }
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            return $"DataBinding {{ SourceObjectType = {SourceObjectType}, SourceObjectName = {SourceObjectName}, SourcePath = {SourcePath}, TargetObjectType = {TargetObjectType}, TargetObjectName = {TargetObjectName}, TargetPath = {TargetPath} }}";
+        }
+        // ~ End object interfaces
 
     }
 

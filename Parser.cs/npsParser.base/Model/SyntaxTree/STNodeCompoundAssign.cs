@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace nf.protoscript.syntaxtree
 {
@@ -50,6 +51,19 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         [Serialization.SerializableInfo]
         public ISyntaxTreeNode RHS { get; private set; }
+
+        /// <summary>
+        /// String code of the operator.
+        /// </summary>
+        public string OpCode { get { return CompoundOp; } }
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            return $"MemberAccess {{ OpCode = {OpCode}, LHS = {LHS}, RHS = {RHS} }}";
+        }
+        // ~ End object interfaces
+
 
     }
 

@@ -36,5 +36,12 @@ namespace nf.protoscript.syntaxtree
         [Serialization.SerializableInfo]
         public string IDName { get; private set; }
 
+        // Begin object interfaces
+        public override string ToString()
+        {
+            return $"Var {{ IDName = {IDName} }}";
+        }
+        // ~ End object interfaces
+
     }
 }

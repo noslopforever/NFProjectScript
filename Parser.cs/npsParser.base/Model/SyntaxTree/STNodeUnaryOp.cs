@@ -49,7 +49,19 @@ namespace nf.protoscript.syntaxtree
         [Serialization.SerializableInfo]
         public ISyntaxTreeNode RHS { get; private set; }
 
-        
+        /// <summary>
+        /// String code of the operator.
+        /// </summary>
+        public string OpCode { get { return OpDef.OpCode; } }
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            return $"UnaryOp {{ Op = {OpCode}, RHS = {RHS} }}";
+        }
+        // ~ End object interfaces
+
+
     }
 
 }

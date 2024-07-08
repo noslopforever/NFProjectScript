@@ -110,7 +110,7 @@ namespace nf.protoscript.test
                 var inst = new JsILInstruction_Sub(
                     InFunction
                     , instLhs
-                    , stnMemberAccess.MemberID
+                    , stnMemberAccess.IDName
                     );
 
                 return inst;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace nf.protoscript.syntaxtree
 {
+
+    // TODO deprecated. MemberInfo already has the InitExpression property. And we shall introduce a new STNodeVarInit to describe local-var-initialization in a method body.
     /// <summary>
     /// Init, describe a variable init expression.
     /// 

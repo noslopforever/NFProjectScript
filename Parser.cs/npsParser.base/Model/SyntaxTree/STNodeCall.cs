@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace nf.protoscript.syntaxtree
 {
@@ -69,6 +70,25 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         [Serialization.SerializableInfo]
         public ISyntaxTreeNode[] Params { get; private set; }
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            string paramStr = "";
+            for (int i = 0; i < Params.Length; ++i)
+            {
+                if (i != 0)
+                {
+                    paramStr += ", ";
+                }
+
+                var param = Params[i];
+                paramStr += param.ToString();
+            }
+
+            return $"Call {{ FuncExpr = {FuncExpr}, Params = {paramStr} }}";
+        }
+        // ~ End object interfaces
 
     }
 

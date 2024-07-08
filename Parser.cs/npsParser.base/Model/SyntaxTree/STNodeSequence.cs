@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using nf.protoscript.syntaxtree;
 
 namespace nf.protoscript.syntaxtree
@@ -55,6 +56,26 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         [Serialization.SerializableInfo]
         public IReadOnlyList<ISyntaxTreeNode> NodeList { get; private set; }
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            string subStr = "";
+            for (int i = 0; i < NodeList.Count; ++i)
+            {
+                if (i != 0)
+                {
+                    subStr += ", ";
+                }
+
+                var sub = NodeList[i];
+                subStr += sub.ToString();
+            }
+
+            return $"Sequence {{ NodeList = {subStr} }}";
+        }
+        // ~ End object interfaces
+
 
     }
 

@@ -139,10 +139,11 @@ namespace nf.protoscript
                     return EOpUsage.UnaryBooleanOperator;
                 case EOpFunction.BitwiseAnd:
                 case EOpFunction.BitwiseOr:
-                case EOpFunction.BitwiseNot:
                 case EOpFunction.ShiftLeft:
                 case EOpFunction.ShiftRight:
                     return EOpUsage.BitwiseOperator;
+                case EOpFunction.BitwiseNot:
+                    return EOpUsage.UnaryBooleanOperator;
                 case EOpFunction.Positive:
                 case EOpFunction.Negative:
                 case EOpFunction.Absolute:
@@ -178,8 +179,12 @@ namespace nf.protoscript
                     case EOpFunction.Multiply: return "*";
                     case EOpFunction.Divide: return "/";
                     case EOpFunction.Mod: return "%";
+                    case EOpFunction.Exp: return "^";
                     case EOpFunction.And: return "&&";
                     case EOpFunction.Or: return "||";
+                    case EOpFunction.BitwiseAnd: return "&";
+                    case EOpFunction.BitwiseOr: return "|";
+                    case EOpFunction.BitwiseNot: return "~";
                     case EOpFunction.Not: return "!";
                     case EOpFunction.ShiftLeft: return "<<";
                     case EOpFunction.ShiftRight: return ">>";
@@ -216,6 +221,27 @@ namespace nf.protoscript
         /// Custom Usage if the op is a custom op.
         /// </summary>
         public EOpUsage CustomUsage { get; }
+
+        public string OpCode
+        {
+            get
+            {
+                if (Function == EOpFunction.Unknown)
+                {
+                    return "<InvalidOperator>";
+                }
+                if (Function == EOpFunction.Custom)
+                {
+                    return CustomFunction;
+                }
+                return DefaultOpCode;
+            }
+        }
+
+        public override string ToString()
+        {
+            return OpCode;
+        }
 
     }
 

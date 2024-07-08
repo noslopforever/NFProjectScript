@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace nf.protoscript.syntaxtree
 {
@@ -60,6 +61,13 @@ namespace nf.protoscript.syntaxtree
         /// Settings of the data binding.
         /// </summary>
         public DataBindingSettings Settings { get; private set; } = null;
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            return $"DataBinding {{ Settings = {Settings} }}";
+        }
+        // ~ End object interfaces
 
     }
 

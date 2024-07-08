@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace nf.protoscript.syntaxtree
 {
@@ -96,6 +97,14 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         [Serialization.SerializableInfo]
         public ISyntaxTreeNode ReturnExpr { get; private set; }
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            return $"Return {{ ReturnExpr = {ReturnExpr} }}";
+        }
+        // ~ End object interfaces
+
 
     }
 

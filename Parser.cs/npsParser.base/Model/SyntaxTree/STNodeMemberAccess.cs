@@ -12,10 +12,10 @@ namespace nf.protoscript.syntaxtree
         {
         }
 
-        public STNodeMemberAccess(ISyntaxTreeNode InLhs, string InMemberID)
+        public STNodeMemberAccess(ISyntaxTreeNode InLhs, string InIDName)
         {
             LHS = InLhs;
-            MemberID = InMemberID;
+            IDName = InIDName;
         }
 
         public override void ForeachSubNodes(Func<ISyntaxTreeNode, bool> InActionFunc)
@@ -32,7 +32,7 @@ namespace nf.protoscript.syntaxtree
                 return null;
             }
             // Try find the element and retrieve its type.
-            var info = lhsPredType.FindTheFirstSubInfoWithName<ElementInfo>(MemberID);
+            var info = lhsPredType.FindTheFirstSubInfoWithName<ElementInfo>(IDName);
             if (info != null)
             {
                 return info.ElementType;
@@ -50,7 +50,14 @@ namespace nf.protoscript.syntaxtree
         /// Right hand expression
         /// </summary>
         [Serialization.SerializableInfo]
-        public string MemberID { get; private set; }
+        public string IDName { get; private set; }
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            return $"MemberAccess {{ IDName = {IDName}, LHS = {LHS} }}";
+        }
+        // ~ End object interfaces
 
     }
 }

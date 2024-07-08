@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 
 namespace nf.protoscript.syntaxtree
 {
@@ -45,6 +46,13 @@ namespace nf.protoscript.syntaxtree
         /// </summary>
         [Serialization.SerializableInfo]
         public ISyntaxTreeNode RHS { get; private set; }
+
+        // Begin object interfaces
+        public override string ToString()
+        {
+            return $"Assign {{ LHS = {LHS}, RHS = {RHS} }}";
+        }
+        // ~ End object interfaces
 
     }
 
