@@ -1,4 +1,6 @@
-﻿using System;
+﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.translator.SchemeSelectors;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,16 +21,6 @@ namespace nf.protoscript.translator
             return null;
         }
 
-        public override expression.ExprTranslatorAbstract LoadExprTranslator(string InTranslatorType)
-        {
-            return DefaultExprTranslator;
-        }
-
-        /// <summary>
-        /// Default ExprTranslator
-        /// </summary>
-        public expression.ExprTranslatorAbstract DefaultExprTranslator { get; set; }
-
         /// <summary>
         /// Add generic schemes
         /// </summary>
@@ -39,6 +31,105 @@ namespace nf.protoscript.translator
             var newScheme = new InfoTranslateSchemeDefault(InSnippet);
             EnsureGroup(InKey).DefaultScheme = newScheme;
         }
+
+        /// <summary>
+        /// Add scheme selectors.
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="InSnippet"></param>
+        public void AddSelector(string InKey, IInfoTranslateSchemeSelector InSchemeSelector)
+        {
+            EnsureGroup(InKey).AddSelector(InSchemeSelector);
+        }
+
+
+        /// <summary>
+        /// Add scheme for expressions (syntax tree nodes).
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="InExprType"></param>
+        /// <param name="InSnippet"></param>
+        public void AddExprScheme(string InKey, string InExprTypename, int InPriority, InfoTranslateSnippet InSnippet)
+        {
+            throw new NotImplementedException();
+            //AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
+            //    , ctx =>
+            //    {
+            //        var exprCtx = ctx as ITranslatingExprContext;
+            //        if (exprCtx != null && exprCtx.TranslatingExprNode != null)
+            //        {
+            //            return exprCtx.TranslatingExprNode.Typename == InExprTypename;
+            //        }
+            //        return false;
+            //    }
+            //    , new InfoTranslateSchemeDefault(InSnippet)
+            //    ));
+        }
+
+        /// <summary>
+        /// Add scheme for expressions (syntax tree nodes).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InKey"></param>
+        /// <param name="InPriority"></param>
+        /// <param name="InSnippet"></param>
+        public void AddExprScheme<T>(string InKey, int InPriority, InfoTranslateSnippet InSnippet)
+            where T : ISyntaxTreeNode
+        {
+            AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
+                , ctx =>
+                {
+                    var exprCtx = ctx as ITranslatingExprContext;
+                    if (exprCtx != null && exprCtx.TranslatingExprNode != null)
+                    {
+                        return exprCtx.TranslatingExprNode is T;
+                    }
+                    return false;
+                }
+                , new InfoTranslateSchemeDefault(InSnippet)
+                ));
+        }
+
+        /// <summary>
+        /// Add scheme for expressions (syntax tree nodes).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="InKey"></param>
+        /// <param name="InPriority"></param>
+        /// <param name="InSelector"></param>
+        /// <param name="InSnippet"></param>
+        public void AddExprSelector<T>(string InKey, int InPriority, Func<T, bool> InSelector, InfoTranslateSnippet InSnippet)
+            where T : class, ISyntaxTreeNode
+        {
+            AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
+                , ctx =>
+                {
+                    var exprCtx = ctx as ITranslatingExprContext;
+                    if (exprCtx != null && exprCtx.TranslatingExprNode != null)
+                    {
+                        T exprNode = exprCtx.TranslatingExprNode as T;
+                        if (exprNode != null)
+                        {
+                            return InSelector(exprNode);
+                        }
+                    }
+                    return false;
+                }
+                , new InfoTranslateSchemeDefault(InSnippet)
+                ));
+        }
+
+        /// <summary>
+        /// Add selector for expressions (syntax tree nodes).
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="InExprType"></param>
+        /// <param name="InSchemeSelector"></param>
+        public void AddExprSelector(string InKey, string InExprType, int InPriority, IInfoTranslateSchemeSelector InSchemeSelector)
+        {
+            throw new NotImplementedException();
+        }
+
 
 
         /// <summary>
@@ -98,9 +189,9 @@ namespace nf.protoscript.translator
             /// </summary>
             /// <param name="InPriority"></param>
             /// <param name="InSelector"></param>
-            internal void AddSelector(int InPriority, IInfoTranslateSchemeSelector InSelector)
+            internal void AddSelector(IInfoTranslateSchemeSelector InSelector)
             {
-                _selectors.Add(InPriority, InSelector);
+                _selectors.Add(InSelector.Priority, InSelector);
             }
 
             /// <summary>

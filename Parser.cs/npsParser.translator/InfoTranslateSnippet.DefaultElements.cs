@@ -1,5 +1,4 @@
 ﻿using nf.protoscript.syntaxtree;
-using nf.protoscript.translator.expression;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -66,6 +65,28 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
 
     /// <summary>
+    /// A snippet element to get value strings from the parameter.
+    /// </summary>
+    public class ElementParamValue
+        : InfoTranslateSnippet.IElement
+    {
+        public ElementParamValue(string InKey)
+        {
+            Key = InKey;
+        }
+
+        public string Key { get; }
+
+        public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            // Find data value from SI's context
+            var ctxValStr = InHolderSchemeInstance.GetParamValue(Key);
+            return ctxValStr;
+        }
+    }
+
+
+    /// <summary>
     /// Element to write all sub-elements in a new block which has a increment indent than the current block.
     /// </summary>
     public class ElementIndentBlock
@@ -114,6 +135,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
     /// <summary>
     /// Change current context and call sub-snippets with the new Context.
+    /// TODO replace with scope change.
     /// </summary>
     public class ElementChangeContext
         : ElementWithSubSnippets
@@ -148,6 +170,11 @@ namespace nf.protoscript.translator.DefaultSnippetElements
                         var newCtx = new TranslatingInfoContext(InHolderSchemeInstance.Context, val as Info);
                         targetContexts = new ITranslatingContext[] { newCtx };
                     }
+                    else if (val is ISyntaxTreeNode)
+                    {
+                        var newCtx = new TranslatingExprContext(InHolderSchemeInstance.Context, val as ISyntaxTreeNode);
+                        targetContexts = new ITranslatingContext[] { newCtx };
+                    }
                 }
             }
 
@@ -170,15 +197,64 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     }
 
     /// <summary>
+    /// Call another scheme for the current context.
+    /// </summary>
+    public class ElementCall
+        : InfoTranslateSnippet.IElement
+    {
+        public ElementCall(string InSchemeName, params (string, InfoTranslateSnippet.IElement)[] InParams)
+        {
+            SchemeName = InSchemeName;
+            foreach (var item in InParams)
+            {
+                _params.Add(item.Item1, new InfoTranslateSnippet(item.Item2));
+            }
+        }
+
+        /// <summary>
+        /// The scheme to call
+        /// </summary>
+        public string SchemeName { get; }
+
+        /// <summary>
+        /// Pass in parameters.
+        /// </summary>
+        public IReadOnlyDictionary<string, InfoTranslateSnippet> Params { get { return _params; } }
+        Dictionary<string, InfoTranslateSnippet> _params = new Dictionary<string, InfoTranslateSnippet>();
+
+        public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
+        {
+            var translator = InHolderSchemeInstance.HostTranslator;
+            var context = InHolderSchemeInstance.Context;
+
+            var scheme = translator.FindBestScheme(context, SchemeName);
+            var si = scheme.CreateInstance(translator, context);
+
+            // collect parameter scheme instances from parameter snippets.
+            foreach (var item in _params)
+            {
+                InfoTranslateSnippet snippet = item.Value;
+                var paramScheme = new InfoTranslateSchemeDefault(snippet);
+                var paramSI = paramScheme.CreateInstance(translator, context);
+                si.AddParam(item.Key, paramSI);
+            }
+
+            return si.GetResult();
+        }
+
+    }
+
+    /// <summary>
     /// For each sub info and call another scheme for it.
     /// </summary>
     public class ElementForeachSubCall
         : InfoTranslateSnippet.IElement
     {
-        public ElementForeachSubCall(string InSchemeName, string InHeaderFilter)
+        public ElementForeachSubCall(string InSchemeName, string InHeaderFilter, string InSeperator = "")
         {
             SchemeName = InSchemeName;
             HeaderFilter = InHeaderFilter;
+            Seperator = InSeperator;
         }
 
         /// <summary>
@@ -191,21 +267,68 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         /// </summary>
         public string HeaderFilter { get; }
 
+        /// <summary>
+        /// Seperator between sub items.
+        /// </summary>
+        public string Seperator { get; }
+
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
             var translator = InHolderSchemeInstance.HostTranslator;
             var context = InHolderSchemeInstance.Context;
             List<string> result = new List<string>();
-            (context as ITranslatingInfoContext)?.TranslatingInfo.ForeachSubInfo<Info>(
-                info =>
-                {
-                    TranslatingInfoContext infoCtx = new TranslatingInfoContext(context, info);
-                    var scheme = translator.FindBestScheme(infoCtx, SchemeName);
-                    var si = scheme.CreateInstance(translator, infoCtx);
-                    result.AddRange(si.GetResult());
-                }
-                , info => info.Header.Contains(HeaderFilter)
-                );
+            result.Add("");
+            if (context is ITranslatingInfoContext)
+            {
+                (context as ITranslatingInfoContext)?.TranslatingInfo.ForeachSubInfo<Info>(
+                    info =>
+                    {
+                        TranslatingInfoContext infoCtx = new TranslatingInfoContext(context, info);
+                        var scheme = translator.FindBestScheme(infoCtx, SchemeName);
+                        var si = scheme.CreateInstance(translator, infoCtx);
+                        var subResult = si.GetResult();
+                        if (subResult.Count > 0)
+                        {
+                            result[^1] += subResult[0];
+                        }
+                        for (int i = 1; i < subResult.Count; i++)
+                        {
+                            result.Add(subResult[i]);
+                        }
+                        result[^1] += Seperator;
+                    }
+                    , info => info.Header.Contains(HeaderFilter)
+                    );
+                // Remove the last seperator
+                result[^1] = result[^1].Remove(result[^1].Length - Seperator.Length);
+            }
+            else if (context is ITranslatingExprContext)
+            {
+                (context as ITranslatingExprContext).TranslatingExprNode.ForeachSubNodes(
+                    (key, stNode) =>
+                    {
+                        if (key.StartsWith(HeaderFilter))
+                        {
+                            TranslatingExprContext exprCtx = new TranslatingExprContext(context, stNode);
+                            var scheme = translator.FindBestScheme(exprCtx, SchemeName);
+                            var si = scheme.CreateInstance(translator, exprCtx);
+                            var subResult = si.GetResult();
+                            if (subResult.Count > 0)
+                            {
+                                result[^1] += subResult[0];
+                            }
+                            for (int i = 1; i < subResult.Count; i++)
+                            {
+                                result.Add(subResult[i]);
+                            }
+                            result[^1] += Seperator;
+                        }
+                        return true;
+                    }
+                    );
+                // Remove the last seperator
+                result[^1] = result[^1].Remove(result[^1].Length - Seperator.Length);
+            }
             return result;
         }
 
@@ -224,38 +347,27 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
-            var translator = InHolderSchemeInstance.HostTranslator;
-            ITranslatingContext ctx = InHolderSchemeInstance.Context;
+            throw new NotImplementedException();
+            //var translator = InHolderSchemeInstance.HostTranslator;
+            //ITranslatingContext ctx = InHolderSchemeInstance.Context;
 
-            // Exact parameters from the context.
-            // This element must be called when the context is a 'MethodInfo' context.
-            ElementInfo mtdInfo = (ctx as ITranslatingInfoContext)?.TranslatingInfo as ElementInfo;
-            TypeInfo mtdHostType = mtdInfo.FindTheFirstParent<TypeInfo>();
-            ProjectInfo globalInfo = mtdInfo.FindTheFirstParent<ProjectInfo>();
+            //// Exact parameters from the context.
+            //// This element must be called when the context is a 'MethodInfo' context.
+            //ElementInfo mtdInfo = (ctx as TranslatingInfoContext)?.TranslatingInfo as ElementInfo;
+            //TypeInfo mtdHostType = mtdInfo.FindTheFirstParent<TypeInfo>();
+            //ProjectInfo globalInfo = mtdInfo.FindTheFirstParent<ProjectInfo>();
 
-            Debug.Assert(mtdInfo != null);
-            Debug.Assert(mtdHostType != null);
-            Debug.Assert(globalInfo != null);
+            //Debug.Assert(mtdInfo != null);
+            //Debug.Assert(mtdHostType != null);
+            //Debug.Assert(globalInfo != null);
 
-            // Create Method Body Context
-            var env = new expression.ExprTranslateEnvironmentDefault(mtdInfo
-                , new expression.ExprTranslateEnvironmentDefault.Scope[]
-                {
-                    new expression.ExprTranslateEnvironmentDefault.Scope(mtdInfo, "local", "")
-                    , new expression.ExprTranslateEnvironmentDefault.Scope(mtdHostType, "this", "this->")
-                    , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
-                }
-            );
-            var mtdCtx = new expression.MethodBodyContext(ctx, mtdInfo, env);
+            //// Create a new scope (local-scope) for the method.
+            //var scopeCtx = translator.AllocScopeContext(ctx, mtdInfo);
+            //// Create the expression context and translate it.
+            //var mtdExprCtx = translator.AllocExpressionContext(scopeCtx, mtdInfo.InitSyntax);
+            //var codes = translator.TranslateInfo(mtdExprCtx, "");
 
-            // TODO let the translator decide how to create a MethodBodyContext.
-            //expression.MethodBodyContext mtdCtx = translator.AllocBodyContextForMethod(ctx);
-
-            // Select an expr-translator and do translating.
-            var exprTranslator = translator.LoadExprTranslator("");
-            var codes = exprTranslator.Translate(mtdCtx, mtdInfo.InitSyntax);
-
-            return codes;
+            //return codes;
         }
 
     }
@@ -280,33 +392,35 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
-            var translator = InHolderSchemeInstance.HostTranslator;
-            ITranslatingContext ctx = InHolderSchemeInstance.Context;
+            throw new NotImplementedException();
 
-            // Exact parameters from the context.
-            // This element must be called when the context is a 'TypeInfo' context.
-            TypeInfo typeInfo = (ctx as ITranslatingInfoContext)?.TranslatingInfo as TypeInfo;
-            ProjectInfo globalInfo = typeInfo.FindTheFirstParent<ProjectInfo>();
+            //var translator = InHolderSchemeInstance.HostTranslator;
+            //ITranslatingContext ctx = InHolderSchemeInstance.Context;
 
-            Debug.Assert(typeInfo != null);
-            Debug.Assert(globalInfo != null);
+            //// Exact parameters from the context.
+            //// This element must be called when the context is a 'TypeInfo' context.
+            //TypeInfo typeInfo = ctx?.TranslatingInfo as TypeInfo;
+            //ProjectInfo globalInfo = typeInfo.FindTheFirstParent<ProjectInfo>();
 
-            // Create Method Body Context
-            var ctorEnv = new expression.ExprTranslateEnvironmentDefault(typeInfo
-                , new expression.ExprTranslateEnvironmentDefault.ScopeBase[]
-                {
-                    // Special method scope with the param-list which was set manually.
-                    new expression.ExprTranslateEnvironmentDefault.VirtualMethodScope(MethodName, "")
-                    , new expression.ExprTranslateEnvironmentDefault.Scope(typeInfo, "this", "this->")
-                    , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
-                }
-            );
-            var mtdCtx = new expression.VirtualMethodBodyContext(ctx, typeInfo, "ctor", ctorEnv);
+            //Debug.Assert(typeInfo != null);
+            //Debug.Assert(globalInfo != null);
 
-            // Create the sub scheme-instance and bind it with Ctor-method's context.
-            var subSI = SubScheme.CreateInstance(translator, mtdCtx);
-            var subResults = subSI.GetResult();
-            return subResults;
+            //// Create Method Body Context
+            //var ctorEnv = new expression.ExprTranslateEnvironmentDefault(typeInfo
+            //    , new expression.ExprTranslateEnvironmentDefault.ScopeBase[]
+            //    {
+            //        // Special method scope with the param-list which was set manually.
+            //        new expression.ExprTranslateEnvironmentDefault.VirtualMethodScope(MethodName, "")
+            //        , new expression.ExprTranslateEnvironmentDefault.Scope(typeInfo, "this", "this->")
+            //        , new expression.ExprTranslateEnvironmentDefault.Scope(globalInfo, "global", "::")
+            //    }
+            //);
+            //var scopeCtx = new expression.VirtualMethodBodyContext(ctx, typeInfo, "ctor", ctorEnv);
+
+            //// Create the sub scheme-instance and bind it with Ctor-method's context.
+            //var subSI = SubScheme.CreateInstance(translator, scopeCtx);
+            //var subResults = subSI.GetResult();
+            //return subResults;
         }
 
     }
@@ -323,28 +437,30 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
-            var translator = InHolderSchemeInstance.HostTranslator;
-            ITranslatingInfoContext ctx = InHolderSchemeInstance.Context as ITranslatingInfoContext;
+            throw new NotImplementedException();
 
-            // Exact parameters from the context.
-            // This element must be called when the context is a 'ElementInfo' context.
-            ElementInfo elemInfo = ctx?.TranslatingInfo as ElementInfo;
-            Debug.Assert(elemInfo != null);
-            if (elemInfo.InitSyntax == null)
-            {
-                return new string[0];
-            }
+            //var translator = InHolderSchemeInstance.HostTranslator;
+            //var ctx = InHolderSchemeInstance.Context;
 
-            IMethodBodyContext mtdCtx = TranslatingContextFinder.FindAncestor(ctx, context => context is IMethodBodyContext) as IMethodBodyContext;
-            Debug.Assert(mtdCtx != null);
+            //// Exact parameters from the context.
+            //// This element must be called when the context is a 'ElementInfo' context.
+            //ElementInfo elemInfo = ctx?.TranslatingInfo as ElementInfo;
+            //Debug.Assert(elemInfo != null);
+            //if (elemInfo.InitSyntax == null)
+            //{
+            //    return new string[0];
+            //}
 
-            // Load ExpressionTranslator to translate the target expressions.
-            ExprTranslatorAbstract exprTranslator = translator.LoadExprTranslator("");
+            //IMethodBodyContext scopeCtx = TranslatingContextFinder.FindAncestor(ctx, context => context is IMethodBodyContext) as IMethodBodyContext;
+            //Debug.Assert(scopeCtx != null);
 
-            // Wrap init syntax and do translate.
-            var initSyntax = new STNodeMemberInit(elemInfo, elemInfo.InitSyntax);
-            var subResults = exprTranslator.Translate(mtdCtx, initSyntax);
-            return subResults;
+            //// Load ExpressionTranslator to translate the target expressions.
+            //ExprTranslatorAbstract exprTranslator = translator.LoadExprTranslator("");
+
+            //// Wrap init syntax and do translate.
+            //var initSyntax = new STNodeMemberInit(elemInfo, elemInfo.InitSyntax);
+            //var subResults = exprTranslator.Translate(scopeCtx, initSyntax);
+            //return subResults;
         }
 
     }

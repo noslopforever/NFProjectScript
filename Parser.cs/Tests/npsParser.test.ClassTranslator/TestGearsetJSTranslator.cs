@@ -6,79 +6,50 @@ using System;
 
 namespace npsParser.test.ClassTranslator
 {
-    internal static class TestXmlTranslator
+    internal static class TestGearsetJSTranslator
     {
         public static InfoTranslatorDefault Load()
         {
             var xmlTrans = new InfoTranslatorDefault();
             //xmlTrans.DefaultExprTranslator = new TestExprTranslatorCpp();
 
-            xmlTrans.AddScheme("TypeTranslator",
+            xmlTrans.AddScheme("CommonTypeTranslator",
                 new InfoTranslateSnippet(
-                    new ElementConstString("<")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(" Name=\"")
+                    new ElementConstString("class ")
                     , new ElementNodeValue("Name")
-                    , new ElementConstString("\">")
+                    , new ElementConstString(" {")
                     , new ElementNewLine()
                     , new ElementIndentBlock(
-                        new ElementConstString("<properties>")
+                        new ElementConstString("constructor() {")
                         , new ElementNewLine()
                         , new ElementIndentBlock(
-                            new ElementForeachSubCall("PropertyTranslator", "member")
+                            new ElementForeachSubCall("PropertyInitTranslator", "member")
                         )
                         , new ElementNewLine()
-                        , new ElementConstString("</properties>")
+                        , new ElementConstString("}")
                     )
                     , new ElementNewLine()
                     , new ElementIndentBlock(
-                        new ElementConstString("<ctor>")
+                        new ElementForeachSubCall("MethodTranslator", "method")
                         , new ElementNewLine()
-                        , new ElementIndentBlock(
-                            new ElementNewMethod("ctor",
-                                new ElementChangeContext("HostType",
-                                    new ElementForeachSubCall("CtorInitTranslator", "member")
-                                )
-                            )
-                        )
-                        , new ElementNewLine()
-                        , new ElementConstString("</ctor>")
                     )
                     , new ElementNewLine()
-                    , new ElementIndentBlock(
-                        new ElementConstString("<methods>")
-                        , new ElementNewLine()
-                        , new ElementIndentBlock(
-                            new ElementForeachSubCall("MethodTranslator", "method")
-                        )
-                        , new ElementNewLine()
-                        , new ElementConstString("</methods>")
-                    )
+                    , new ElementConstString("}")
                     , new ElementNewLine()
-                    , new ElementConstString("</")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(">")
                 )
             );
 
-            xmlTrans.AddScheme("PropertyTranslator",
+            // proprety with init
+            xmlTrans.AddScheme("PropertyInitTranslator",
                 new InfoTranslateSnippet(
-                    new ElementConstString("<")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(" Name=\"")
+                    // this.member = 0;
+                    new ElementConstString("this.")
                     , new ElementNodeValue("Name")
-                    , new ElementConstString("\" ")
-                    , new ElementConstString(" Type=\"")
-                    , new ElementNodeValue("ElementType")
-                    , new ElementConstString("\">")
+                    , new ElementConstString(" = ")
+                    , new ElementNodeValue("null;")
+                    // Sub properties: this.color.red = 100;
+                    , new ElementForeachSubCall("PropertyTranslator", "member")
                     , new ElementNewLine()
-                    , new ElementIndentBlock(
-                        new ElementForeachSubCall("PropertyTranslator", "member")
-                    )
-                    , new ElementNewLine()
-                    , new ElementConstString("</")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(">")
                 )
             );
 
@@ -104,19 +75,17 @@ namespace npsParser.test.ClassTranslator
 
             xmlTrans.AddScheme("MethodTranslator",
                 new InfoTranslateSnippet(
-                    new ElementConstString("<")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(" Name=\"")
+                    new ElementConstString("function ")
                     , new ElementNodeValue("Name")
-                    , new ElementConstString("\">")
+                    , new ElementConstString("(")
+                    // TODO parameters
+                    , new ElementConstString(") {")
                     , new ElementNewLine()
                     , new ElementIndentBlock(
                         new ElementMethodBody()
                     )
                     , new ElementNewLine()
-                    , new ElementConstString("</")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(">")
+                    , new ElementConstString("}")
                 )
             );
 

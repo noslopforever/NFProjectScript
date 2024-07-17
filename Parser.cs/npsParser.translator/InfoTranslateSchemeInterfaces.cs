@@ -1,5 +1,4 @@
-﻿using nf.protoscript.translator.expression;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,6 +48,20 @@ namespace nf.protoscript.translator
         ITranslatingContext Context { get; }
 
         /// <summary>
+        /// Add runtime parameter.
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="InParamSI"></param>
+        void AddParam(string InKey, IInfoTranslateSchemeInstance InParamSI);
+
+        /// <summary>
+        /// Get value of a parameter in runtime.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        IReadOnlyList<string> GetParamValue(string InKey);
+
+        /// <summary>
         /// Apply the scheme and get translated codes
         /// </summary>
         /// <returns></returns>
@@ -62,11 +75,6 @@ namespace nf.protoscript.translator
     /// </summary>
     public interface IInfoTranslateSchemeSelector
     {
-        /// <summary>
-        /// Name of the selector
-        /// </summary>
-        string SelectorName { get; }
-
         /// <summary>
         /// Priority of the selector, bigger runs earlier, default is 0.
         /// </summary>

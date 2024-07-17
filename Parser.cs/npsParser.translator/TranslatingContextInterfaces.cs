@@ -1,4 +1,6 @@
-﻿namespace nf.protoscript.translator
+﻿using nf.protoscript.syntaxtree;
+
+namespace nf.protoscript.translator
 {
 
     /// <summary>
@@ -59,6 +61,18 @@
 
     }
 
+
+    /// <summary>
+    /// Context for a translating expression node.
+    /// </summary>
+    public interface ITranslatingExprContext
+        : ITranslatingContext
+    {
+        /// <summary>
+        /// The translating expression node.
+        /// </summary>
+        ISyntaxTreeNode TranslatingExprNode { get; }
+    }
 
 
 

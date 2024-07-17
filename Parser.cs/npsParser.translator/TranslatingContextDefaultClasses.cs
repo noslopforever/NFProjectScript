@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nf.protoscript.syntaxtree;
+using System;
 
 namespace nf.protoscript.translator
 {
@@ -76,10 +77,50 @@ namespace nf.protoscript.translator
         {
             try
             {
+                // Try getting value from the translating info.
                 var prop = TranslatingInfo.GetType().GetProperty(InKey);
                 if (prop != null)
                 {
                     OutValue = prop.GetValue(TranslatingInfo);
+                    return true;
+                }
+            }
+            catch
+            {
+                // TODO log error.
+            }
+
+            return base.TryGetContextValue(InKey, out OutValue);
+        }
+
+    }
+
+    /// <summary>
+    /// Context for the translating expression-node (syntax tree node).
+    /// </summary>
+    public class TranslatingExprContext
+        : TranslatingContextBase
+        , ITranslatingExprContext
+    {
+        public TranslatingExprContext(ITranslatingContext InParentContext, ISyntaxTreeNode InSTNode)
+            : base(InParentContext)
+        {
+            TranslatingExprNode = InSTNode;
+        }
+
+        // Begin ITranslatingExprContext
+        public ISyntaxTreeNode TranslatingExprNode { get; }
+        // ~ End ITranslatingExprContext
+
+        public override bool TryGetContextValue(string InKey, out object OutValue)
+        {
+            try
+            {
+                // Try getting value from the translating info.
+                var prop = TranslatingExprNode.GetType().GetProperty(InKey);
+                if (prop != null)
+                {
+                    OutValue = prop.GetValue(TranslatingExprNode);
                     return true;
                 }
             }

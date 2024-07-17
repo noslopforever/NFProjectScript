@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 namespace nf.protoscript.translator
 {
 
+    /// <summary>
+    /// Default translate scheme class. Use snippets to translate the target context.
+    /// </summary>
     public partial class InfoTranslateSchemeDefault
         : IInfoTranslateScheme
     {

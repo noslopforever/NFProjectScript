@@ -1,5 +1,4 @@
-﻿using nf.protoscript.translator.expression;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,11 +41,25 @@ namespace nf.protoscript.translator
             public InfoTranslateSchemeDefault Scheme { get; }
             public ITranslatingContext Context { get; }
 
+            public void AddParam(string InKey, IInfoTranslateSchemeInstance InParamSI)
+            {
+                // TODO exceptions and logs
+                _params[InKey] = InParamSI;
+            }
+
+            public IReadOnlyList<string> GetParamValue(string InKey)
+            {
+                // TODO exceptions and logs
+                return _params[InKey].GetResult();
+            }
+
             public IReadOnlyList<string> GetResult()
             {
                 return Scheme.Snippet.Apply(this);
             }
             // ~ End IInfoTranslateSchemeInstance interfaces
+
+            Dictionary<string, IInfoTranslateSchemeInstance> _params = new Dictionary<string, IInfoTranslateSchemeInstance>();
 
         }
 
