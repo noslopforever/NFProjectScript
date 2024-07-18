@@ -13,7 +13,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             SchemeName = InSchemeName;
             foreach (var item in InParams)
             {
-                _params.Add(item.Item1, new InfoTranslateSnippet(item.Item2));
+                _params.Add(item.Item1, new InfoTranslateSchemeDefault(item.Item2));
             }
         }
 
@@ -25,8 +25,8 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         /// <summary>
         /// Pass in parameters.
         /// </summary>
-        public IReadOnlyDictionary<string, InfoTranslateSnippet> Params { get { return _params; } }
-        Dictionary<string, InfoTranslateSnippet> _params = new Dictionary<string, InfoTranslateSnippet>();
+        public IReadOnlyDictionary<string, IInfoTranslateScheme> Params { get { return _params; } }
+        Dictionary<string, IInfoTranslateScheme> _params = new Dictionary<string, IInfoTranslateScheme>();
 
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {
@@ -39,8 +39,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             // collect parameter scheme instances from parameter snippets.
             foreach (var item in _params)
             {
-                InfoTranslateSnippet snippet = item.Value;
-                var paramScheme = new InfoTranslateSchemeDefault(snippet);
+                var paramScheme = item.Value;
                 var paramSI = paramScheme.CreateInstance(translator, context);
                 si.AddParam(item.Key, paramSI);
             }

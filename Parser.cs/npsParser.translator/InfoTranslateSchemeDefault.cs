@@ -18,6 +18,14 @@ namespace nf.protoscript.translator
             Snippet = InSnippet;
         }
 
+        public InfoTranslateSchemeDefault(params InfoTranslateSnippet.IElement[] InElementArray)
+        {
+            Snippet = new InfoTranslateSnippet(InElementArray);
+        }
+
+        /// <summary>
+        /// Snippets constructs this scheme.
+        /// </summary>
         public InfoTranslateSnippet Snippet { get; }
 
         public IInfoTranslateSchemeInstance CreateInstance(InfoTranslatorAbstract InTranslator, ITranslatingContext InContext)

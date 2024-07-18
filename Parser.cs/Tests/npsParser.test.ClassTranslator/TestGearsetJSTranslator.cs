@@ -14,7 +14,7 @@ namespace npsParser.test.ClassTranslator
             //xmlTrans.DefaultExprTranslator = new TestExprTranslatorCpp();
 
             xmlTrans.AddScheme("CommonTypeTranslator",
-                new InfoTranslateSnippet(
+                new InfoTranslateSchemeDefault(
                     new ElementConstString("class ")
                     , new ElementNodeValue("Name")
                     , new ElementConstString(" {")
@@ -41,7 +41,7 @@ namespace npsParser.test.ClassTranslator
 
             // proprety with init
             xmlTrans.AddScheme("PropertyInitTranslator",
-                new InfoTranslateSnippet(
+                new InfoTranslateSchemeDefault(
                     // this.member = 0;
                     new ElementConstString("this.")
                     , new ElementNodeValue("Name")
@@ -54,7 +54,7 @@ namespace npsParser.test.ClassTranslator
             );
 
             xmlTrans.AddScheme("CtorInitTranslator",
-                new InfoTranslateSnippet(
+                new InfoTranslateSchemeDefault(
                     new ElementInitExpression()
                     , new ElementIndentBlock(
                         new ElementForeachSubCall("EmbbedCtorTranslator", "member")
@@ -63,7 +63,7 @@ namespace npsParser.test.ClassTranslator
             );
 
             xmlTrans.AddScheme("EmbbedCtorTranslator",
-                new InfoTranslateSnippet(
+                new InfoTranslateSchemeDefault(
                     //new ElementInitExpression()
                     new ElementConstString("// Embbed construct ")
                     , new ElementNodeValue("Name")
@@ -74,7 +74,7 @@ namespace npsParser.test.ClassTranslator
             );
 
             xmlTrans.AddScheme("MethodTranslator",
-                new InfoTranslateSnippet(
+                new InfoTranslateSchemeDefault(
                     new ElementConstString("function ")
                     , new ElementNodeValue("Name")
                     , new ElementConstString("(")

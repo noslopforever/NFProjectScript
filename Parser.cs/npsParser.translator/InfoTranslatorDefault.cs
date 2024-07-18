@@ -22,6 +22,16 @@ namespace nf.protoscript.translator
         }
 
         /// <summary>
+        /// Add a generic scheme
+        /// </summary>
+        /// <param name="InKey"></param>
+        /// <param name="InScheme"></param>
+        public void AddScheme(string InKey, IInfoTranslateScheme InScheme)
+        {
+            EnsureGroup(InKey).DefaultScheme = InScheme;
+        }
+
+        /// <summary>
         /// Add generic schemes
         /// </summary>
         /// <param name="InKey"></param>
@@ -48,8 +58,8 @@ namespace nf.protoscript.translator
         /// </summary>
         /// <param name="InKey"></param>
         /// <param name="InExprType"></param>
-        /// <param name="InSnippet"></param>
-        public void AddExprScheme(string InKey, string InExprTypename, int InPriority, InfoTranslateSnippet InSnippet)
+        /// <param name="InScheme"></param>
+        public void AddExprScheme(string InKey, string InExprTypename, int InPriority, IInfoTranslateScheme InScheme)
         {
             throw new NotImplementedException();
             //AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
@@ -72,8 +82,8 @@ namespace nf.protoscript.translator
         /// <typeparam name="T"></typeparam>
         /// <param name="InKey"></param>
         /// <param name="InPriority"></param>
-        /// <param name="InSnippet"></param>
-        public void AddExprScheme<T>(string InKey, int InPriority, InfoTranslateSnippet InSnippet)
+        /// <param name="InScheme"></param>
+        public void AddExprScheme<T>(string InKey, int InPriority, IInfoTranslateScheme InScheme)
             where T : ISyntaxTreeNode
         {
             AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
@@ -86,7 +96,7 @@ namespace nf.protoscript.translator
                     }
                     return false;
                 }
-                , new InfoTranslateSchemeDefault(InSnippet)
+                , InScheme
                 ));
         }
 
@@ -97,8 +107,8 @@ namespace nf.protoscript.translator
         /// <param name="InKey"></param>
         /// <param name="InPriority"></param>
         /// <param name="InSelector"></param>
-        /// <param name="InSnippet"></param>
-        public void AddExprSelector<T>(string InKey, int InPriority, Func<T, bool> InSelector, InfoTranslateSnippet InSnippet)
+        /// <param name="InScheme"></param>
+        public void AddExprSelector<T>(string InKey, int InPriority, Func<T, bool> InSelector, IInfoTranslateScheme InScheme)
             where T : class, ISyntaxTreeNode
         {
             AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
@@ -115,7 +125,7 @@ namespace nf.protoscript.translator
                     }
                     return false;
                 }
-                , new InfoTranslateSchemeDefault(InSnippet)
+                , InScheme
                 ));
         }
 
@@ -127,6 +137,7 @@ namespace nf.protoscript.translator
         /// <param name="InSchemeSelector"></param>
         public void AddExprSelector(string InKey, string InExprType, int InPriority, IInfoTranslateSchemeSelector InSchemeSelector)
         {
+            // TODO impl
             throw new NotImplementedException();
         }
 

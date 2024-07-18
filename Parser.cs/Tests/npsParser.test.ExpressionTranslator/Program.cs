@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -23,14 +23,14 @@ namespace npsParser.test.ExpressionTranslator
             var translator = new InfoTranslatorDefault();
             // Constant: ${ValueString}
             translator.AddExprScheme<STNodeConstant>("Get", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementNodeValue("ValueString")
                     )
                 );
             // Constant<string>: "${ValueString}"
             translator.AddExprSelector<STNodeConstant>("Get", 1
                 , expr => { return expr.Type == CommonTypeInfos.String || expr.Type == CommonTypeInfos.TypeRef; }
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementConstString("\"")
                     , new ElementNodeValue("ValueString")
                     , new ElementConstString("\"")
@@ -38,7 +38,7 @@ namespace npsParser.test.ExpressionTranslator
                 );
             // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}
             translator.AddExprScheme<STNodeBinaryOp>("Get", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementChangeContext("LHS", new ElementCall("Get"))
                     , new ElementConstString(" ")
                     , new ElementNodeValue("OpCode")
@@ -48,7 +48,7 @@ namespace npsParser.test.ExpressionTranslator
                 );
             // UnaryOp: ${OpCode} ${RHS.Get()}
             translator.AddExprScheme<STNodeUnaryOp>("Get", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementNodeValue("OpCode")
                     , new ElementConstString(" ")
                     , new ElementChangeContext("RHS", new ElementCall("Get"))
@@ -56,7 +56,7 @@ namespace npsParser.test.ExpressionTranslator
                 );
             // Assign: ${LHS.Set(RHS.Get())}
             translator.AddExprScheme<STNodeAssign>("Get", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementChangeContext("LHS"
                         , new ElementCall("Set"
                             , ("RHS", new ElementChangeContext("RHS", new ElementCall("Get")))
@@ -65,9 +65,9 @@ namespace npsParser.test.ExpressionTranslator
                     )
                 );
 
-            // HostPresent (VAR_NAME): ${VAR_NAME}
+            // Default HostPresent (VAR_NAME): ${VAR_NAME}
             translator.AddScheme("HostPresent"
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementParamValue("VAR_NAME")
                     )
                 );
@@ -94,7 +94,7 @@ namespace npsParser.test.ExpressionTranslator
 
             // Var Get: ${HostPresent(VarName)}
             translator.AddExprScheme<STNodeVar>("Get", 1
-                , new InfoTranslateSnippet
+                , new InfoTranslateSchemeDefault
                 (
                     new ElementCall("HostPresent",
                         ("VAR_NAME", new ElementNodeValue("IDName"))
@@ -103,7 +103,7 @@ namespace npsParser.test.ExpressionTranslator
                 );
             // Var Set (RHS): ${HostPresent(VarName)} = $RHS
             translator.AddExprScheme<STNodeVar>("Set", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementCall("HostPresent",
                         ("VAR_NAME", new ElementNodeValue("IDName"))
                     )
@@ -113,7 +113,7 @@ namespace npsParser.test.ExpressionTranslator
                 );
             // Member Get: ${LHS.Get()}.${IDName}
             translator.AddExprScheme<STNodeMemberAccess>("Get", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementChangeContext("LHS", new ElementCall("Get"))
                     , new ElementConstString(".")
                     , new ElementNodeValue("IDName")
@@ -121,7 +121,7 @@ namespace npsParser.test.ExpressionTranslator
                 );
             // Member Set (RHS): ${LHS.Get()}.${IDName} = $RHS}
             translator.AddExprScheme<STNodeMemberAccess>("Set", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementChangeContext("LHS", new ElementCall("Get"))
                     , new ElementConstString(".")
                     , new ElementNodeValue("IDName")
@@ -132,7 +132,7 @@ namespace npsParser.test.ExpressionTranslator
 
             // Call: $[FuncExpr.Get()](${For(Param, ", ").Get()})
             translator.AddExprScheme<STNodeCall>("Get", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementChangeContext("FuncExpr", new ElementCall("Get"))
                     , new ElementConstString("(")
                     , new ElementForeachSubCall("Get", "Param", ", ")
@@ -142,7 +142,7 @@ namespace npsParser.test.ExpressionTranslator
 
             // Collection access: ${CollExpr.Get()}[${For(Param, ", ").Get()}]
             translator.AddExprScheme<STNodeCollectionAccess>("Get", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementChangeContext("CollExpr", new ElementCall("Get"))
                     , new ElementConstString("[")
                     , new ElementForeachSubCall("Get", "Param", "][")
@@ -152,7 +152,7 @@ namespace npsParser.test.ExpressionTranslator
 
             // Sequence: ${For("$NL").Get()}
             translator.AddExprScheme<STNodeSequence>("Get", 1
-                , new InfoTranslateSnippet(
+                , new InfoTranslateSchemeDefault(
                     new ElementForeachSubCall("Get", "", Environment.NewLine)
                     )
                 );

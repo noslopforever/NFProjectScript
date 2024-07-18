@@ -7,8 +7,8 @@ namespace nf.protoscript.translator
 {
 
     /// <summary>
-    /// Snippets established by code Elements (like constant-string, variable-value).
-    /// Elements may be constructed from snippet-scripts.
+    /// Snippets defined by code elements (such as constant strings, variable values).
+    /// These elements can be assembled from snippet scripts.
     /// </summary>
     public class InfoTranslateSnippet
     {
@@ -26,10 +26,9 @@ namespace nf.protoscript.translator
         }
 
         /// <summary>
-        /// Elements which construct the snippet.
+        /// All elements composing this snippet.
         /// </summary>
         IElement[] SnippetElements { get; }
-
 
         /// <summary>
         /// GetResult for the context and return translated codes.

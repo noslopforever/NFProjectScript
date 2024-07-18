@@ -7,12 +7,12 @@
     {
         public ElementWithSubSnippets(params InfoTranslateSnippet.IElement[] InSubElements)
         {
-            SubSnippet = new InfoTranslateSnippet(InSubElements);
-            SubScheme = new InfoTranslateSchemeDefault(SubSnippet);
+            SubScheme = new InfoTranslateSchemeDefault(InSubElements);
         }
 
-        public InfoTranslateSnippet SubSnippet { get; }
-
+        /// <summary>
+        /// Scheme applied to each sub-info.
+        /// </summary>
         public IInfoTranslateScheme SubScheme { get; }
 
     }
