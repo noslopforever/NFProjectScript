@@ -49,7 +49,7 @@ namespace nf.protoscript.translator
             /// <see cref="IInfoTranslateSchemeInstance.GetResult"/>
             public IReadOnlyList<string> GetResult()
             {
-                return Scheme.Snippet.Apply(this);
+                return Scheme.Apply(this);
             }
 
             /// <see cref="IInfoTranslateSchemeInstance.TryGetParamValue"/>

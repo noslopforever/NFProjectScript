@@ -11,7 +11,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// </summary>
     public abstract class ElementWithSubSnippets
     {
-        public ElementWithSubSnippets(params InfoTranslateSnippet.IElement[] InSubElements)
+        public ElementWithSubSnippets(params InfoTranslateSchemeDefault.IElement[] InSubElements)
         {
             SubScheme = new InfoTranslateSchemeDefault(InSubElements);
         }
@@ -28,7 +28,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// The context of this Element must be a method context (Context with a valid MethodInfo).
     /// </summary>
     public class ElementMethodBody
-        : InfoTranslateSnippet.IElement
+        : InfoTranslateSchemeDefault.IElement
     {
         public ElementMethodBody()
         {
@@ -65,9 +65,9 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// Register a new method to the translating Type.
     /// </summary>
     public class ElementNewMethod
-        : InfoTranslateSnippet.IElement
+        : InfoTranslateSchemeDefault.IElement
     {
-        public ElementNewMethod(string InMethodName, params InfoTranslateSnippet.IElement[] InSubElements)
+        public ElementNewMethod(string InMethodName, params InfoTranslateSchemeDefault.IElement[] InSubElements)
         {
             MethodName = InMethodName;
         }
@@ -116,7 +116,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// Element that takes the context's expression as init-expressions which means to wrap it with 'STNodeMemberInit' and then translate it.
     /// </summary>
     public class ElementInitExpression
-        : InfoTranslateSnippet.IElement
+        : InfoTranslateSchemeDefault.IElement
     {
         public ElementInitExpression()
         {

@@ -7,7 +7,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// A special 'NewLine' element.
     /// </summary>
     public sealed class ElementNewLine
-        : InfoTranslateSnippet.IElement
+        : InfoTranslateSchemeDefault.IElement
     {
         public IReadOnlyList<string> Apply(IInfoTranslateSchemeInstance InHolderSchemeInstance)
         {

@@ -10,7 +10,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// Represents an element implemented by expressions.
     /// </summary>
     public class ElementExpr
-        : InfoTranslateSnippet.IElement
+        : InfoTranslateSchemeDefault.IElement
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ElementExpr"/> class with the specified expression code.

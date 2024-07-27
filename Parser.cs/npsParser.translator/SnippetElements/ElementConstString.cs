@@ -6,7 +6,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// A snippet element which contains only constant-string.
     /// </summary>
     public class ElementConstString
-        : InfoTranslateSnippet.IElement
+        : InfoTranslateSchemeDefault.IElement
     {
         public string Value { get; }
         public ElementConstString(string InValue)
