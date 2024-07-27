@@ -27,7 +27,7 @@ namespace nf.protoscript.syntaxtree
             Params = new ISyntaxTreeNode[1] { InParam0 };
         }
 
-        public STNodeCall(STNodeBase InLhs, ISyntaxTreeNode[] InParams)
+        public STNodeCall(STNodeBase InLhs, params ISyntaxTreeNode[] InParams)
         {
             FuncExpr = InLhs;
             Params = InParams;

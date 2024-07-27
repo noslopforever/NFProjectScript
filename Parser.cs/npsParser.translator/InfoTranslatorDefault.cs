@@ -31,16 +31,16 @@ namespace nf.protoscript.translator
             EnsureGroup(InKey).DefaultScheme = InScheme;
         }
 
-        /// <summary>
-        /// Add generic schemes
-        /// </summary>
-        /// <param name="InKey"></param>
-        /// <param name="InSnippet"></param>
-        public void AddScheme(string InKey, InfoTranslateSnippet InSnippet)
-        {
-            var newScheme = new InfoTranslateSchemeDefault(InSnippet);
-            EnsureGroup(InKey).DefaultScheme = newScheme;
-        }
+        ///// <summary>
+        ///// Add generic schemes
+        ///// </summary>
+        ///// <param name="InKey"></param>
+        ///// <param name="InSnippet"></param>
+        //public void AddScheme(string InKey, InfoTranslateSnippet InSnippet)
+        //{
+        //    var newScheme = new InfoTranslateSchemeDefault(InSnippet);
+        //    EnsureGroup(InKey).DefaultScheme = newScheme;
+        //}
 
         /// <summary>
         /// Add scheme selectors.

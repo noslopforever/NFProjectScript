@@ -20,7 +20,7 @@ namespace nf.protoscript.translator
         /// <param name="InTranslatingContext"></param>
         /// <param name="InSchemeName"></param>
         /// <returns></returns>
-        public virtual IReadOnlyList<string> TranslateInfo(ITranslatingContext InTranslatingContext, string InSchemeName)
+        public virtual IReadOnlyList<string> TranslateInfo(ITranslatingContext InTranslatingContext, string InSchemeName, object[] InParams = null)
         {
             var scheme = FindBestScheme(InTranslatingContext, InSchemeName);
             if (scheme == null)
@@ -29,7 +29,7 @@ namespace nf.protoscript.translator
                 throw new NotImplementedException();
                 return new string[] { };
             }
-            var si = scheme.CreateInstance(this, InTranslatingContext);
+            var si = scheme.CreateInstance(this, InTranslatingContext, InParams);
             return si.GetResult();
         }
 
@@ -55,13 +55,35 @@ namespace nf.protoscript.translator
         /// <summary>
         /// Create TranslatingContext for the target expression.
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="inNode"></param>
+        /// <param name="InParentContext"></param>
+        /// <param name="InExprNode"></param>
         /// <returns></returns>
         public virtual ITranslatingExprContext CreateContext(ITranslatingContext InParentContext, ISyntaxTreeNode InExprNode)
         {
             return new TranslatingExprContext(InParentContext, InExprNode);
         }
+
+        /// <summary>
+        /// Create TranslatingContext for a generic object.
+        /// </summary>
+        /// <param name="InParentContext"></param>
+        /// <param name="InGenericObject"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual ITranslatingContext CreateContext(ITranslatingContext InParentContext, object InGenericObject)
+        {
+            if (InGenericObject is Info)
+            {
+                return CreateContext(InParentContext, InGenericObject as Info);
+            }
+            else if (InGenericObject is ISyntaxTreeNode)
+            {
+                return CreateContext(InParentContext, InGenericObject as ISyntaxTreeNode);
+            }
+
+            return null;
+        }
+
 
     }
 

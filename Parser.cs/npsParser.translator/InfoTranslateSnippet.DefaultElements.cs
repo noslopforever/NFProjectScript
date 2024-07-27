@@ -7,6 +7,23 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 {
 
     /// <summary>
+    /// Base class of all elements with sub-snippets
+    /// </summary>
+    public abstract class ElementWithSubSnippets
+    {
+        public ElementWithSubSnippets(params InfoTranslateSnippet.IElement[] InSubElements)
+        {
+            SubScheme = new InfoTranslateSchemeDefault(InSubElements);
+        }
+
+        /// <summary>
+        /// Scheme applied to each sub-info.
+        /// </summary>
+        public IInfoTranslateScheme SubScheme { get; }
+
+    }
+
+    /// <summary>
     /// Element which creates a MethodBodyContext and translate expressions of the method.
     /// The context of this Element must be a method context (Context with a valid MethodInfo).
     /// </summary>
@@ -48,11 +65,9 @@ namespace nf.protoscript.translator.DefaultSnippetElements
     /// Register a new method to the translating Type.
     /// </summary>
     public class ElementNewMethod
-        : ElementWithSubSnippets
-        , InfoTranslateSnippet.IElement
+        : InfoTranslateSnippet.IElement
     {
         public ElementNewMethod(string InMethodName, params InfoTranslateSnippet.IElement[] InSubElements)
-            : base(InSubElements)
         {
             MethodName = InMethodName;
         }

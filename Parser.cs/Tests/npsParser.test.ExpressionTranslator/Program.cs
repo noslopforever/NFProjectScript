@@ -24,7 +24,7 @@ namespace npsParser.test.ExpressionTranslator
             // Constant: ${ValueString}
             translator.AddExprScheme<STNodeConstant>("Get", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementNodeValue("ValueString")
+                    ElementExpr.TEST_CreateTestExpr(new STNodeVar("ValueString"))
                     )
                 );
             // Constant<string>: "${ValueString}"
@@ -32,34 +32,49 @@ namespace npsParser.test.ExpressionTranslator
                 , expr => { return expr.Type == CommonTypeInfos.String || expr.Type == CommonTypeInfos.TypeRef; }
                 , new InfoTranslateSchemeDefault(
                     new ElementConstString("\"")
-                    , new ElementNodeValue("ValueString")
+                    , ElementExpr.TEST_CreateTestExpr(new STNodeVar("ValueString"))
                     , new ElementConstString("\"")
                     )
                 );
             // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}
             translator.AddExprScheme<STNodeBinaryOp>("Get", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementChangeContext("LHS", new ElementCall("Get"))
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeMemberAccess(new STNodeVar("LHS"), "Get")
+                            )
+                        )
                     , new ElementConstString(" ")
-                    , new ElementNodeValue("OpCode")
+                    , ElementExpr.TEST_CreateTestExpr(new STNodeVar("OpCode"))
                     , new ElementConstString(" ")
-                    , new ElementChangeContext("RHS", new ElementCall("Get"))
+                    , ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeMemberAccess(new STNodeVar("RHS"), "Get")
+                            )
+                        )
                     )
                 );
             // UnaryOp: ${OpCode} ${RHS.Get()}
             translator.AddExprScheme<STNodeUnaryOp>("Get", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementNodeValue("OpCode")
+                    ElementExpr.TEST_CreateTestExpr(new STNodeVar("OpCode"))
                     , new ElementConstString(" ")
-                    , new ElementChangeContext("RHS", new ElementCall("Get"))
+                    , ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeMemberAccess(new STNodeVar("RHS"), "Get")
+                            )
+                        )
                     )
                 );
             // Assign: ${LHS.Set(RHS.Get())}
             translator.AddExprScheme<STNodeAssign>("Get", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementChangeContext("LHS"
-                        , new ElementCall("Set"
-                            , ("RHS", new ElementChangeContext("RHS", new ElementCall("Get")))
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeMemberAccess(new STNodeVar("LHS"), "Set")
+                            , new STNodeCall(
+                                new STNodeMemberAccess(new STNodeVar("RHS"), "Get")
+                                )
                             )
                         )
                     )
@@ -68,7 +83,8 @@ namespace npsParser.test.ExpressionTranslator
             // Default HostPresent (VAR_NAME): ${VAR_NAME}
             translator.AddScheme("HostPresent"
                 , new InfoTranslateSchemeDefault(
-                    new ElementParamValue("VAR_NAME")
+                    new string[] { "VAR_NAME" }
+                    , ElementExpr.TEST_CreateTestExpr(new STNodeVar("VAR_NAME"))
                     )
                 );
             // TODO Global and class member hosts (:: and this->)
@@ -80,14 +96,12 @@ namespace npsParser.test.ExpressionTranslator
             //        , ctx => true
             //        , new InfoTranslateSchemeDefault
             //        (
-            //            new InfoTranslateSnippet
-            //            (
-            //                new ElementConstString("::")
-            //                // TODO , new ElementChangeContext("ParentType", new ElementCall("TypeName"))
-            //                , new ElementChangeContext("ParentType", new ElementNodeValue("Name"))
-            //                , new ElementConstString(".")
-            //                , new ElementParamValue("VAR_NAME")
-            //            )
+            //            new ElementConstString("::")
+            //            , ElementExpr.TEST_CreateTestExpr(
+            //                new STNodeMemberAccess(new STNodeVar("ParentType"), "Name")
+            //                )
+            //            , new ElementConstString(".")
+            //            , ElementExpr.TEST_CreateTestExpr(new STNodeVar("VAR_NAME"))
             //        )
             //    )
             //    );
@@ -96,64 +110,107 @@ namespace npsParser.test.ExpressionTranslator
             translator.AddExprScheme<STNodeVar>("Get", 1
                 , new InfoTranslateSchemeDefault
                 (
-                    new ElementCall("HostPresent",
-                        ("VAR_NAME", new ElementNodeValue("IDName"))
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeVar("HostPresent")
+                            , new STNodeVar("IDName")
+                            )
+                        )
                     )
-                )
                 );
             // Var Set (RHS): ${HostPresent(VarName)} = $RHS
             translator.AddExprScheme<STNodeVar>("Set", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementCall("HostPresent",
-                        ("VAR_NAME", new ElementNodeValue("IDName"))
-                    )
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeVar("HostPresent")
+                            , new STNodeVar("IDName")
+                            )
+                        )
                     , new ElementConstString(" = ")
-                    , new ElementParamValue("RHS")
+                    , ElementExpr.TEST_CreateTestExpr(new STNodeVar("RHS"))
                     )
                 );
             // Member Get: ${LHS.Get()}.${IDName}
             translator.AddExprScheme<STNodeMemberAccess>("Get", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementChangeContext("LHS", new ElementCall("Get"))
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                             new STNodeMemberAccess(new STNodeVar("LHS"), "Get")
+                            )
+                        )
                     , new ElementConstString(".")
-                    , new ElementNodeValue("IDName")
+                    , ElementExpr.TEST_CreateTestExpr(new STNodeVar("IDName"))
                     )
                 );
-            // Member Set (RHS): ${LHS.Get()}.${IDName} = $RHS}
+            // Member Set (RHS): ${LHS.Get()}.${IDName} = ${RHS}
             translator.AddExprScheme<STNodeMemberAccess>("Set", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementChangeContext("LHS", new ElementCall("Get"))
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                             new STNodeMemberAccess(new STNodeVar("LHS"), "Get")
+                            )
+                        )
                     , new ElementConstString(".")
-                    , new ElementNodeValue("IDName")
+                    , ElementExpr.TEST_CreateTestExpr(new STNodeVar("IDName"))
                     , new ElementConstString(" = ")
-                    , new ElementParamValue("RHS")
+                    , ElementExpr.TEST_CreateTestExpr(new STNodeVar("RHS"))
                     )
                 );
 
-            // Call: $[FuncExpr.Get()](${For(Param, ", ").Get()})
+            // Call: ${FuncExpr.Get()}(${For("Param", ", ", param => param.Get())})
             translator.AddExprScheme<STNodeCall>("Get", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementChangeContext("FuncExpr", new ElementCall("Get"))
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeMemberAccess(new STNodeVar("FuncExpr"), "Get")
+                            )
+                        )
                     , new ElementConstString("(")
-                    , new ElementForeachSubCall("Get", "Param", ", ")
+                    , ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeVar("For")
+                            , new STNodeConstant("Param")
+                            , new STNodeConstant(", ")
+                            , new STNodeConstant("Get")
+                            )
+                        )
                     , new ElementConstString(")")
                     )
                 );
 
-            // Collection access: ${CollExpr.Get()}[${For(Param, ", ").Get()}]
+            // Collection access: ${CollExpr.Get()}[${$For("Param", "][", param => param.Get())}]
             translator.AddExprScheme<STNodeCollectionAccess>("Get", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementChangeContext("CollExpr", new ElementCall("Get"))
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeMemberAccess(new STNodeVar("CollExpr"), "Get")
+                            )
+                        )
                     , new ElementConstString("[")
-                    , new ElementForeachSubCall("Get", "Param", "][")
+                    , ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeVar("For")
+                            , new STNodeConstant("Param")
+                            , new STNodeConstant("][")
+                            , new STNodeConstant("Get")
+                            )
+                        )
                     , new ElementConstString("]")
                     )
                 );
 
-            // Sequence: ${For("$NL").Get()}
+            // Sequence: ${For("", "$NL", sub => sub.Get())}
             translator.AddExprScheme<STNodeSequence>("Get", 1
                 , new InfoTranslateSchemeDefault(
-                    new ElementForeachSubCall("Get", "", Environment.NewLine)
+                    ElementExpr.TEST_CreateTestExpr(
+                        new STNodeCall(
+                            new STNodeVar("For")
+                            , new STNodeConstant("")
+                            , new STNodeConstant("$NL")
+                            , new STNodeConstant("Get")
+                            )
+                        )
                     )
                 );
 
