@@ -19,16 +19,8 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         public ElementExpr(string InExprCode)
         {
             ExprCode = InExprCode;
-        }
-
-        /// <summary>
-        /// Creates a test expression element.
-        /// </summary>
-        /// <param name="InExpr">The syntax tree node representing the expression.</param>
-        /// <returns>A new <see cref="ElementExpr"/> instance configured for testing.</returns>
-        public static ElementExpr TEST_CreateTestExpr(ISyntaxTreeNode InExpr)
-        {
-            return new ElementExpr("__Test_Expr__") { Expression = InExpr };
+            // Try parsing expressions from the ExprCode.
+            Expression = ParseExpression(ExprCode);
         }
 
         /// <summary>
@@ -49,12 +41,6 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             var translator = InHolderSchemeInstance.HostTranslator;
             var context = InHolderSchemeInstance.Context;
 
-            // Try parsing expressions from the ExprCode if it has not been done yet.
-            if (Expression == null)
-            {
-                Expression = ParseExpression(ExprCode);
-            }
-
             // Execute the translator expressions
             var exprResult = Execute(InHolderSchemeInstance, Expression);
             if (exprResult is IReadOnlyList<string>)
@@ -73,8 +59,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements
         /// <returns>The parsed syntax tree node.</returns>
         private static ISyntaxTreeNode ParseExpression(string InCode)
         {
-            // TODO: Implement parsing logic.
-            throw new NotImplementedException();
+            return ElementExprParser.ParseCode(InCode);
         }
 
         /// <summary>

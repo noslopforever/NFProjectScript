@@ -84,6 +84,21 @@ namespace nf.protoscript.translator.DefaultSnippetElements.Internal
                 return outValue;
             }
 
+            // TODO system var handling (with special name).
+
+            // TEMP Handle Newline/Tab
+            // TODO Replace it by system functions.
+            if (0 == string.Compare(InVar.IDName, "$NL", true))
+            {
+                return Environment.NewLine;
+            }
+            else if (0 == string.Compare(InVar.IDName, "$TAB", true))
+            {
+                return "\t";
+            }
+            // ~TEMP
+
+
             // TODO log error
             throw new NotImplementedException();
             return null;
@@ -188,7 +203,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements.Internal
 
             // TEMP Handle For function
             // TODO Replace it by system functions.
-            if (InVar.IDName == "For")
+            if (0 == string.Compare(InVar.IDName, "For", true))
             {
                 return _TEMP_HandleForCall(translator, context, InParams);
             }

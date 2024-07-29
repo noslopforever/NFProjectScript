@@ -16,24 +16,24 @@ namespace nf.protoscript.syntaxtree
         {
         }
 
-        public STNodeCall(STNodeBase InLhs)
+        public STNodeCall(ISyntaxTreeNode InLhs)
         {
             FuncExpr = InLhs;
         }
 
-        public STNodeCall(STNodeBase InLhs, ISyntaxTreeNode InParam0)
+        public STNodeCall(ISyntaxTreeNode InLhs, ISyntaxTreeNode InParam0)
         {
             FuncExpr = InLhs;
             Params = new ISyntaxTreeNode[1] { InParam0 };
         }
 
-        public STNodeCall(STNodeBase InLhs, params ISyntaxTreeNode[] InParams)
+        public STNodeCall(ISyntaxTreeNode InLhs, params ISyntaxTreeNode[] InParams)
         {
             FuncExpr = InLhs;
             Params = InParams;
         }
 
-        public STNodeCall(STNodeBase InLhs, IEnumerable<ISyntaxTreeNode> InParams)
+        public STNodeCall(ISyntaxTreeNode InLhs, IEnumerable<ISyntaxTreeNode> InParams)
         {
             FuncExpr = InLhs;
             Params = InParams.ToArray();
