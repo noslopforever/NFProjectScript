@@ -74,6 +74,11 @@ namespace nf.protoscript.translator.DefaultSnippetElements
             object val = executor.EvalValue(InHolderSchemeInstance, InStatement);
             return val;
         }
+
+        public override string ToString()
+        {
+            return ExprCode;
+        }
     }
 
 }

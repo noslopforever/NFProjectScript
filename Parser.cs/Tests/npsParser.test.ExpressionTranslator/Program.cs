@@ -24,50 +24,29 @@ namespace npsParser.test.ExpressionTranslator
 
             // Constant: ${ValueString}
             translator.AddExprScheme<STNodeConstant>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("ValueString")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], "${ValueString}")
                 );
             // Constant<string>: "${ValueString}"
             translator.AddExprSelector<STNodeConstant>("Get", 1
                 , expr => { return expr.Type == CommonTypeInfos.String || expr.Type == CommonTypeInfos.TypeRef; }
-                , new InfoTranslateSchemeDefault(
-                    new ElementConstString("\"")
-                    , new ElementExpr("ValueString")
-                    , new ElementConstString("\"")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], "\"${ValueString}\"")
                 );
             // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}
             translator.AddExprScheme<STNodeBinaryOp>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("LHS.Get()")
-                    , new ElementConstString(" ")
-                    , new ElementExpr("OpCode")
-                    , new ElementConstString(" ")
-                    , new ElementExpr("RHS.Get()")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], "${LHS.Get()} ${OpCode} ${RHS.Get()}")
                 );
             // UnaryOp: ${OpCode} ${RHS.Get()}
             translator.AddExprScheme<STNodeUnaryOp>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("OpCode")
-                    , new ElementConstString(" ")
-                    , new ElementExpr("RHS.Get()")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], "${OpCode}${RHS.Get()}")
                 );
             // Assign: ${LHS.Set(RHS.Get())}
             translator.AddExprScheme<STNodeAssign>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("LHS.Set(RHS.Get())")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], "${LHS.Set(RHS.Get())}")
                 );
 
             // Default HostPresent (VAR_NAME): ${VAR_NAME}
             translator.AddScheme("HostPresent"
-                , new InfoTranslateSchemeDefault(
-                    new string[] { "VAR_NAME" }
-                    , new ElementExpr("VAR_NAME")
-                    )
+                , new InfoTranslateSchemeDefault(new string[] { "VAR_NAME" }, "${VAR_NAME}")
                 );
             // TODO Global and class member hosts (:: and this->)
             //// HostPresent (VAR_NAME): ::${ParentType.Name}.${VAR_NAME}
@@ -88,64 +67,37 @@ namespace npsParser.test.ExpressionTranslator
             //    )
             //    );
 
-            // Var Get: ${HostPresent(VarName)}
+            // Var Get: ${HostPresent(IDName)}
             translator.AddExprScheme<STNodeVar>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("HostPresent(IDName)")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], "${HostPresent(IDName)}")
                 );
-            // Var Set (RHS): ${HostPresent(VarName)} = $RHS
+            // Var Set (RHS): ${HostPresent(IDName)} = $RHS
             translator.AddExprScheme<STNodeVar>("Set", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("HostPresent(IDName)")
-                    , new ElementConstString(" = ")
-                    , new ElementExpr("RHS")
-                    )
+                , new InfoTranslateSchemeDefault(new string[1] { "RHS" }, "${HostPresent(IDName)} = ${RHS}")
                 );
             // Member Get: ${LHS.Get()}.${IDName}
             translator.AddExprScheme<STNodeMemberAccess>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("LHS.Get()")
-                    , new ElementConstString(".")
-                    , new ElementExpr("IDName")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], "${LHS.Get()}.${IDName}")
                 );
             // Member Set (RHS): ${LHS.Get()}.${IDName} = ${RHS}
             translator.AddExprScheme<STNodeMemberAccess>("Set", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("LHS.Get()")
-                    , new ElementConstString(".")
-                    , new ElementExpr("IDName")
-                    , new ElementConstString(" = ")
-                    , new ElementExpr("RHS")
-                    )
+                , new InfoTranslateSchemeDefault(new string[1] { "RHS" }, "${LHS.Get()}.${IDName} = ${RHS}")
                 );
 
-            // Call: ${FuncExpr.Get()}(${For("Param", ", ", param => param.Get())})
+            // Call: ${FuncExpr.Get()}(${For("Param", ", ", "Get")}
             translator.AddExprScheme<STNodeCall>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("FuncExpr.Get()")
-                    , new ElementConstString("(")
-                    , new ElementExpr("""For("Param", ", ", "Get")""")
-                    , new ElementConstString(")")
+                , new InfoTranslateSchemeDefault(new string[0], """${FuncExpr.Get()}(${For("Param", ", ", "Get")})"""
                     )
                 );
 
-            // Collection access: ${CollExpr.Get()}[${$For("Param", "][", param => param.Get())}]
+            // Collection access: ${CollExpr.Get()}[${$For("Param", "][", "Get")}]
             translator.AddExprScheme<STNodeCollectionAccess>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("CollExpr.Get()")
-                    , new ElementConstString("[")
-                    , new ElementExpr("""For("Param", "][", "Get")""")
-                    , new ElementConstString("]")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], """${CollExpr.Get()}[${For("Param", "][", "Get")}]""")
                 );
 
-            // Sequence: ${For("", $NL, sub => sub.Get())}
+            // Sequence: 
             translator.AddExprScheme<STNodeSequence>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    new ElementExpr("For(\"\", $NL, \"Get\")")
-                    )
+                , new InfoTranslateSchemeDefault(new string[0], """${For("", $NL, "Get")}""")
                 );
 
             // # Basic syntax tree nodes:
