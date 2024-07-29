@@ -261,10 +261,10 @@ namespace nf.protoscript.translator.DefaultSnippetElements.Internal
             Debug.Assert(InParams.Length == 3);
 
             string filter = InParams[0] as string;
-            string seperator = InParams[1] as string;
+            string separator = InParams[1] as string;
             string function = InParams[2] as string;
 
-            Debug.Assert(filter != null && seperator != null && function != null);
+            Debug.Assert(filter != null && separator != null && function != null);
 
             List<string> result = new List<string>();
             result.Add("");
@@ -283,12 +283,12 @@ namespace nf.protoscript.translator.DefaultSnippetElements.Internal
                         {
                             result.Add(subResult[i]);
                         }
-                        result[^1] += seperator;
+                        result[^1] += separator;
                     }
                     , info => info.Header.Contains(filter, StringComparison.CurrentCultureIgnoreCase)
                     );
-                // Remove the last seperator
-                result[^1] = result[^1].Remove(result[^1].Length - seperator.Length);
+                // Remove the last Separator
+                result[^1] = result[^1].Remove(result[^1].Length - separator.Length);
             }
             else if (InContext is ITranslatingExprContext)
             {
@@ -307,13 +307,13 @@ namespace nf.protoscript.translator.DefaultSnippetElements.Internal
                             {
                                 result.Add(subResult[i]);
                             }
-                            result[^1] += seperator;
+                            result[^1] += separator;
                         }
                         return true;
                     }
                     );
-                // Remove the last seperator
-                result[^1] = result[^1].Remove(result[^1].Length - seperator.Length);
+                // Remove the last Separator
+                result[^1] = result[^1].Remove(result[^1].Length - separator.Length);
             }
             return result;
         }

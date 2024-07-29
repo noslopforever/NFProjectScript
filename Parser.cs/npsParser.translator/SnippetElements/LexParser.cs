@@ -111,13 +111,13 @@ namespace nf.protoscript.parser
                 }
 
                 // Handle function call: <Term> (EXPRs)
-                else if (InTokens[InStartIndex].TokenType == "Seperator" && InTokens[InStartIndex].Code == "(")
+                else if (InTokens[InStartIndex].TokenType == "Separator" && InTokens[InStartIndex].Code == "(")
                 {
                     InStartIndex++;
                     handled = true;
                     var exprListParser = new ASTParser_ExprList(
-                        new Token("Seperator", ","),
-                        new Token("Seperator", ")")
+                        new Token("Separator", ","),
+                        new Token("Separator", ")")
                     );
                     var nodeSeq = exprListParser.Parse(InTokens, ref InStartIndex) as STNodeSequence;
                     var call = new STNodeCall(lhs, nodeSeq.NodeList);
@@ -204,11 +204,11 @@ namespace nf.protoscript.parser
         /// <summary>
         /// Initializes a new instance of the <see cref="ASTParser_ExprList"/> class.
         /// </summary>
-        /// <param name="InSeperateToken">The token that separates expressions.</param>
+        /// <param name="InSeparateToken">The token that separates expressions.</param>
         /// <param name="InEndToken">The token that marks the end of the list.</param>
-        public ASTParser_ExprList(Token InSeperateToken, Token InEndToken)
+        public ASTParser_ExprList(Token InSeparateToken, Token InEndToken)
         {
-            _seperatorToken = InSeperateToken;
+            _separatorToken = InSeparateToken;
             _endToken = InEndToken;
         }
 
@@ -235,8 +235,8 @@ namespace nf.protoscript.parser
 
                 // (a, b, c)
                 //   ^  ^
-                if (InTokens[InStartIndex].TokenType == _seperatorToken.TokenType &&
-                    InTokens[InStartIndex].Code == _seperatorToken.Code)
+                if (InTokens[InStartIndex].TokenType == _separatorToken.TokenType &&
+                    InTokens[InStartIndex].Code == _separatorToken.Code)
                 {
                     InStartIndex++;
                     continue;
@@ -258,7 +258,7 @@ namespace nf.protoscript.parser
             throw new ArgumentException("Unexpected End");
         }
 
-        private readonly IToken _seperatorToken;
+        private readonly IToken _separatorToken;
 
         private readonly IToken _endToken;
 
