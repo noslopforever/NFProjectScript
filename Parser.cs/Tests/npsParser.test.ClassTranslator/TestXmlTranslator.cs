@@ -1,122 +1,76 @@
-﻿using nf.protoscript;
-using nf.protoscript.translator;
-using nf.protoscript.translator.DefaultSnippetElements;
-using System.Collections.Generic;
-using System;
+﻿using nf.protoscript.translator;
 
 namespace npsParser.test.ClassTranslator
 {
-    internal static class TestXmlTranslator
+
+    internal class TestXmlTranslator
+        : TestTranslatorBase
     {
-        public static InfoTranslatorDefault Load()
+        public TestXmlTranslator()
         {
-            var xmlTrans = new InfoTranslatorDefault();
-            //xmlTrans.DefaultExprTranslator = new TestExprTranslatorCpp();
-
-            xmlTrans.AddScheme("TypeTranslator",
+            AddScheme("CommonTypeTranslator",
                 new InfoTranslateSchemeDefault(
-                    new ElementConstString("<")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(" Name=\"")
-                    , new ElementNodeValue("Name")
-                    , new ElementConstString("\">")
-                    , new ElementNewLine()
-                    , new ElementIndentBlock(
-                        new ElementConstString("<properties>")
-                        , new ElementNewLine()
-                        , new ElementIndentBlock(
-                            new ElementForeachSubCall("PropertyTranslator", "member")
-                        )
-                        , new ElementNewLine()
-                        , new ElementConstString("</properties>")
-                    )
-                    , new ElementNewLine()
-                    , new ElementIndentBlock(
-                        new ElementConstString("<ctor>")
-                        , new ElementNewLine()
-                        , new ElementIndentBlock(
-                            new ElementNewMethod("ctor",
-                                new ElementChangeContext("HostType",
-                                    new ElementForeachSubCall("CtorInitTranslator", "member")
-                                )
-                            )
-                        )
-                        , new ElementNewLine()
-                        , new ElementConstString("</ctor>")
-                    )
-                    , new ElementNewLine()
-                    , new ElementIndentBlock(
-                        new ElementConstString("<methods>")
-                        , new ElementNewLine()
-                        , new ElementIndentBlock(
-                            new ElementForeachSubCall("MethodTranslator", "method")
-                        )
-                        , new ElementNewLine()
-                        , new ElementConstString("</methods>")
-                    )
-                    , new ElementNewLine()
-                    , new ElementConstString("</")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(">")
+                    """
+                    <${Header} Name="${Name}">
+                        <properties>
+                            ${for("member", $NL, "PropertyTranslator")}
+                        </properties>
+                        <ctor>
+                            ${for("member", $NL, "CtorInitTranslator")}
+                        </ctor>
+                        <methods>
+                            ${for("method", $NL, "MethodTranslator")}
+                        </methods>
+                    </${Header}>
+                    """
                 )
             );
 
-            xmlTrans.AddScheme("PropertyTranslator",
+            AddScheme("PropertyTranslator",
                 new InfoTranslateSchemeDefault(
-                    new ElementConstString("<")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(" Name=\"")
-                    , new ElementNodeValue("Name")
-                    , new ElementConstString("\" ")
-                    , new ElementConstString(" Type=\"")
-                    , new ElementNodeValue("ElementType")
-                    , new ElementConstString("\">")
-                    , new ElementNewLine()
-                    , new ElementIndentBlock(
-                        new ElementForeachSubCall("PropertyTranslator", "member")
-                    )
-                    , new ElementNewLine()
-                    , new ElementConstString("</")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(">")
+                    """
+                    <${Header} Name="${Name}" Type="${ElementType}">
+                        ${for("member", $NL, "PropertyTranslator")}
+                    </${Header}>
+                    """
                 )
             );
 
-            xmlTrans.AddScheme("CtorInitTranslator",
+            AddScheme("CtorInitTranslator",
                 new InfoTranslateSchemeDefault(
-                    new ElementInitExpression()
-                    , new ElementIndentBlock(
-                        new ElementForeachSubCall("EmbbedCtorTranslator", "member")
-                    )
+                    """
+                    ${InitSyntax.Get()}
+                    ${for("member", $NL, "EmbbedCtorTranslator")}
+                    """
                 )
             );
 
-            xmlTrans.AddScheme("EmbbedCtorTranslator",
+
+            AddScheme("EmbbedCtorTranslator",
                 new InfoTranslateSchemeDefault(
-                    //new ElementInitExpression()
-                    new ElementConstString("// Embbed construct ")
-                    , new ElementNodeValue("Name")
-                    , new ElementIndentBlock(
-                        new ElementForeachSubCall("EmbbedCtorTranslator", "member")
+                    """
+                    ${InitSyntax.Get()}
+                    // Embedded constructor ${Name}
+                    ${for("member", $NL, "EmbbedCtorTranslator")}
+                    """
                     )
+            );
+
+            AddScheme("MethodTranslator",
+                new InfoTranslateSchemeDefault(
+                    """
+                    <${Header} Name="${Name}">
+                        ${InitSyntax.MethodBody()}
+                    </${Header}>
+                    """
                 )
             );
 
-            xmlTrans.AddScheme("MethodTranslator",
+            AddScheme("MethodBody",
                 new InfoTranslateSchemeDefault(
-                    new ElementConstString("<")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(" Name=\"")
-                    , new ElementNodeValue("Name")
-                    , new ElementConstString("\">")
-                    , new ElementNewLine()
-                    , new ElementIndentBlock(
-                        new ElementMethodBody()
-                    )
-                    , new ElementNewLine()
-                    , new ElementConstString("</")
-                    , new ElementNodeValue("Header")
-                    , new ElementConstString(">")
+                    """
+                    ${for("", $NL, "Get")}
+                    """
                 )
             );
 
@@ -126,7 +80,7 @@ namespace npsParser.test.ClassTranslator
             //    {
 
             //        // Default HostPresent Call
-            //        xmlTrans.AddScheme("HostPresent"
+            //        AddScheme("HostPresent"
             //            // %{HostPresent}% in the context.
             //            , new STNodeTranslateSnippet(
             //                new ElementNodeValue("HostPresent")
@@ -134,7 +88,7 @@ namespace npsParser.test.ClassTranslator
             //        );
 
             //        // HostPresent for member call (HOST.MEMBER)
-            //        xmlTrans.AddSchemeSelector(
+            //        AddSchemeSelector(
             //            "HostPresent"
             //            , new STNodeTranslateSchemeSelector_Lambda(
             //                "HostPresent"
@@ -154,7 +108,7 @@ namespace npsParser.test.ClassTranslator
             //            )
             //        );
 
-            //        xmlTrans.AddScheme("Getter"
+            //        AddScheme("Getter"
             //            , new STNodeTranslateSnippet(
             //                new ElementConstString("get")
             //                , new ElementNodeValue("VarName")
@@ -162,7 +116,7 @@ namespace npsParser.test.ClassTranslator
             //            )
             //        );
 
-            //        xmlTrans.AddScheme("Setter"
+            //        AddScheme("Setter"
             //            , new STNodeTranslateSnippet(
             //                new ElementConstString("set")
             //                , new ElementNodeValue("VarName")
@@ -172,7 +126,7 @@ namespace npsParser.test.ClassTranslator
             //            )
             //        );
 
-            //        xmlTrans.AddScheme("InitTempVarBySelf"
+            //        AddScheme("InitTempVarBySelf"
             //            , new STNodeTranslateSnippet(
             //                new ElementConstString("auto ")
             //                , new ElementTempVar("Var")
@@ -187,7 +141,7 @@ namespace npsParser.test.ClassTranslator
             //    #region Default Schemes
 
             //    {
-            //        xmlTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_Null
+            //        AddScheme(ExprTranslatorAbstract.SystemScheme_Null
             //            , new Dictionary<string, STNodeTranslateSnippet>()
             //            {
             //                //Present "null",
@@ -196,7 +150,7 @@ namespace npsParser.test.ClassTranslator
             //                )
             //            }
             //        );
-            //        xmlTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_Const
+            //        AddScheme(ExprTranslatorAbstract.SystemScheme_Const
             //            , new Dictionary<string, STNodeTranslateSnippet>()
             //            {
             //                //Present "%{ValueString}%",
@@ -205,7 +159,7 @@ namespace npsParser.test.ClassTranslator
             //                )
             //            }
             //        );
-            //        xmlTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarInit
+            //        AddScheme(ExprTranslatorAbstract.SystemScheme_VarInit
             //            , new Dictionary<string, STNodeTranslateSnippet>()
             //            {
             //                //Present "%{Host}%%{VarName}% = %{RHS}%",
@@ -220,7 +174,7 @@ namespace npsParser.test.ClassTranslator
             //                )
             //            }
             //        );
-            //        xmlTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarGet
+            //        AddScheme(ExprTranslatorAbstract.SystemScheme_VarGet
             //            , new Dictionary<string, STNodeTranslateSnippet>()
             //            {
             //                //Present "%{Host}%%{VarName}%",
@@ -230,7 +184,7 @@ namespace npsParser.test.ClassTranslator
             //                )
             //            }
             //        );
-            //        xmlTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarRef
+            //        AddScheme(ExprTranslatorAbstract.SystemScheme_VarRef
             //            , new Dictionary<string, STNodeTranslateSnippet>()
             //            {
             //                //Present "%{Host}%%{VarName}%",
@@ -240,7 +194,7 @@ namespace npsParser.test.ClassTranslator
             //                )
             //            }
             //        );
-            //        xmlTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_VarSet
+            //        AddScheme(ExprTranslatorAbstract.SystemScheme_VarSet
             //            , new Dictionary<string, STNodeTranslateSnippet>()
             //            {
             //                //Present "%{Host}%%{VarName}% = %{RHS}%",
@@ -252,7 +206,7 @@ namespace npsParser.test.ClassTranslator
             //                )
             //            }
             //        );
-            //        xmlTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
+            //        AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
             //            , new Dictionary<string, STNodeTranslateSnippet>()
             //            {
             //                // Present: "%{LHS}% %{OpCode}% %{RHS}%"
@@ -265,7 +219,7 @@ namespace npsParser.test.ClassTranslator
             //                )
             //            }
             //        );
-            //        //xmlTrans.AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
+            //        //AddScheme(ExprTranslatorAbstract.SystemScheme_BinOp
             //        //    , new Dictionary<string, STNodeTranslateSnippet>()
             //        //    {
             //        //        ["PreStatement"] = new STNodeTranslateSnippet(
@@ -321,7 +275,7 @@ namespace npsParser.test.ClassTranslator
             //                return false;
             //            };
 
-            //            xmlTrans.AddSchemeSelector(
+            //            AddSchemeSelector(
             //                ExprTranslatorAbstract.SystemScheme_VarGet
             //                , new STNodeTranslateSchemeSelector_Lambda(
             //                    "ROProperty_GET"
@@ -371,7 +325,7 @@ namespace npsParser.test.ClassTranslator
             //            };
 
             //            // Special SET process for a setter property
-            //            xmlTrans.AddSchemeSelector(
+            //            AddSchemeSelector(
             //                ExprTranslatorAbstract.SystemScheme_VarSet
             //                , new STNodeTranslateSchemeSelector_Lambda(
             //                    "SetterProperty_SET"
@@ -389,7 +343,7 @@ namespace npsParser.test.ClassTranslator
             //            );
 
             //            // Handle the 'set-back' pattern in REF process for a setter property.
-            //            xmlTrans.AddSchemeSelector(
+            //            AddSchemeSelector(
             //                ExprTranslatorAbstract.SystemScheme_VarRef
             //                , new STNodeTranslateSchemeSelector_Lambda(
             //                    "SetterProperty_REF"
@@ -437,7 +391,7 @@ namespace npsParser.test.ClassTranslator
 
             //}
 
-            return xmlTrans;
         }
     }
+
 }

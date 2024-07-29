@@ -19,20 +19,25 @@ namespace npsParser.test.ClassTranslator
 
             Console.WriteLine("Which translator do you want to test?");
 
-            //var translator = TestXmlTranslator.Load();
-            var translator = TestGearsetJSTranslator.Load();
-
-            TestCases.BasicExprs().ForeachSubInfo<TypeInfo>(type => _GenerateTypeInfo(translator, type));
-            TestCases.AdvancedExpressions().ForeachSubInfo<TypeInfo>(type => _GenerateTypeInfo(translator, type));
+            var testTranslators = new InfoTranslatorAbstract[]
+            {
+                new TestXmlTranslator()
+                , new TestGearsetJSTranslator()
+            };
+            foreach (var translator in testTranslators)
+            {
+                TestCases.BasicExprs().ForeachSubInfo<TypeInfo>(type => _GenerateTypeInfo(translator, type));
+                TestCases.AdvancedExpressions().ForeachSubInfo<TypeInfo>(type => _GenerateTypeInfo(translator, type));
+            }
         }
 
-        private static void _GenerateTypeInfo(InfoTranslatorDefault InTranslator, TypeInfo InTargetType)
+        private static void _GenerateTypeInfo(InfoTranslatorAbstract InTranslator, TypeInfo InTargetType)
         {
             Console.WriteLine($"Code emit sequences for Type: {InTargetType.Name}");
 
             TranslatingInfoContext typeCtx = new TranslatingInfoContext(null, InTargetType);
             var codeLns = InTranslator.TranslateInfo(typeCtx, "CommonTypeTranslator");
-            foreach ( var code in codeLns )
+            foreach (var code in codeLns)
             {
                 Console.WriteLine(code);
             }

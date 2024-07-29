@@ -48,6 +48,14 @@ namespace nf.protoscript.translator
             SnippetElements = resultElems.ToArray();
         }
 
+        public InfoTranslateSchemeDefault(string InSchemeCode)
+        {
+            var resultElems = new List<IElement>();
+            var elements = ParseElements(InSchemeCode);
+            resultElems.AddRange(elements);
+            SnippetElements = resultElems.ToArray();
+        }
+
         // Begin IInfoTranslateScheme interfaces
         /// <see cref="IInfoTranslateScheme.ParamNum"/>
         public int ParamNum => _params.Length;
