@@ -43,6 +43,11 @@ namespace nf.protoscript.translator.DefaultSnippetElements
 
             // Execute the translator expressions
             var exprResult = Execute(InHolderSchemeInstance, Expression);
+            if (exprResult == null)
+            {
+                return new string[] { "" };
+            }
+
             if (exprResult is IReadOnlyList<string>)
             {
                 return exprResult as IReadOnlyList<string>;

@@ -229,8 +229,7 @@ namespace nf.protoscript.translator.DefaultSnippetElements.Internal
             var lhsValue = EvalValue(InHolderSchemeInstance, InMemberAccess.LHS);
             if (lhsValue == null)
             {
-                // TODO log error
-                throw new NotImplementedException();
+                return null;
             }
 
             // Create the context of LHS
@@ -288,7 +287,10 @@ namespace nf.protoscript.translator.DefaultSnippetElements.Internal
                     , info => info.Header.Contains(filter, StringComparison.CurrentCultureIgnoreCase)
                     );
                 // Remove the last Separator
-                result[^1] = result[^1].Remove(result[^1].Length - separator.Length);
+                if (result[^1].Length > 0)
+                {
+                    result[^1] = result[^1].Remove(result[^1].Length - separator.Length);
+                }
             }
             else if (InContext is ITranslatingExprContext)
             {
@@ -313,7 +315,10 @@ namespace nf.protoscript.translator.DefaultSnippetElements.Internal
                     }
                     );
                 // Remove the last Separator
-                result[^1] = result[^1].Remove(result[^1].Length - separator.Length);
+                if (result[^1].Length > 0)
+                {
+                    result[^1] = result[^1].Remove(result[^1].Length - separator.Length);
+                }
             }
             return result;
         }
