@@ -1,6 +1,7 @@
 ﻿using nf.protoscript;
 using nf.protoscript.translator;
-using nf.protoscript.translator.DefaultSnippetElements;
+using nf.protoscript.translator.DefaultScheme;
+using nf.protoscript.translator.DefaultScheme.Elements;
 using System.Collections.Generic;
 using System;
 using nf.protoscript.syntaxtree;
@@ -13,27 +14,31 @@ namespace npsParser.test.ClassTranslator
         public TestGearsetJSTranslator()
         {
             AddScheme("CommonTypeTranslator",
-                new InfoTranslateSchemeDefault(new string[0],
-                    """
-                    class ${Name} {
-                        constructor() {
-                            ${for("member", $NL, "PropertyInit")}
+                new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
+                        """
+                        class ${Name} {
+                            constructor() {
+                                ${for("member", $NL, "PropertyInit")}
+                            }
+                            ${for("method", $NL, "MethodDecl")}
                         }
-                        ${for("method", $NL, "MethodDecl")}
-                    }
-                    """
+                        """
+                    )
                 )
             );
 
             // proprety with init
             AddScheme("PropertyInit",
-                new InfoTranslateSchemeDefault(new string[0],
-                    """
-                    this.${Name} = ${InitSyntax.Get()};
-                    {
-                        ${for("member", $NL, "PropertyInit")}
-                    }
-                    """
+                new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
+                        """
+                        this.${Name} = ${InitSyntax.Get()};
+                        {
+                            ${for("member", $NL, "PropertyInit")}
+                        }
+                        """
+                    )
                 )
             );
 
@@ -58,22 +63,26 @@ namespace npsParser.test.ClassTranslator
             //);
 
             AddScheme("MethodDecl",
-                new InfoTranslateSchemeDefault(new string[0],
-                    """
-                    function ${Name}(${for("member", ", ", "MethodParamDecl")}) {
-                        ${InitSyntax.MethodBody()}
-                    }
-                    """
+                new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
+                        """
+                        function ${Name}(${for("member", ", ", "MethodParamDecl")}) {
+                            ${InitSyntax.MethodBody()}
+                        }
+                        """
+                    )
                 )
             );
             AddScheme("MethodParamDecl",
-                new InfoTranslateSchemeDefault(new string[0], "${Name}")
+                new InfoTranslateSchemeDefault(ElementParser.ParseElements("${Name}"))
             );
             AddScheme("MethodBody",
-                new InfoTranslateSchemeDefault(new string[0],
-                    """
-                    ${for("", $NL, "Get")}
-                    """
+                new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
+                        """
+                        ${for("", $NL, "Get")}
+                        """
+                    )
                 )
             );
 

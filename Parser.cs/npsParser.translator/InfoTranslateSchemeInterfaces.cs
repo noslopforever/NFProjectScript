@@ -55,7 +55,7 @@ namespace nf.protoscript.translator
         /// <summary>
         /// Gets the scheme associated with this instance.
         /// </summary>
-        InfoTranslateSchemeDefault Scheme { get; }
+        IInfoTranslateScheme Scheme { get; }
 
         /// <summary>
         /// Gets the context in which the translation will occur.

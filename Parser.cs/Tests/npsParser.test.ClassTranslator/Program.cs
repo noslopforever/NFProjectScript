@@ -6,7 +6,7 @@ using nf.protoscript;
 using nf.protoscript.syntaxtree;
 using nf.protoscript.test;
 using nf.protoscript.translator;
-using nf.protoscript.translator.DefaultSnippetElements;
+using nf.protoscript.translator.DefaultScheme.Elements;
 
 namespace npsParser.test.ClassTranslator
 {

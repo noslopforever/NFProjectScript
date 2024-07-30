@@ -1,9 +1,9 @@
 ﻿using nf.protoscript.syntaxtree;
-using nf.protoscript.translator.DefaultSnippetElements.Internal;
+using nf.protoscript.translator.DefaultScheme.Elements.Internal;
 using System;
 using System.Collections.Generic;
 
-namespace nf.protoscript.translator.DefaultSnippetElements
+namespace nf.protoscript.translator.DefaultScheme.Elements
 {
 
     /// <summary>

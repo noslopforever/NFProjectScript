@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace nf.protoscript.translator.DefaultSnippetElements
+namespace nf.protoscript.translator.DefaultScheme.Elements
 {
     /// <summary>
     /// A special 'NewLine' element.

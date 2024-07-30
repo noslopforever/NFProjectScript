@@ -1,4 +1,6 @@
 ﻿using nf.protoscript.translator;
+using nf.protoscript.translator.DefaultScheme;
+using nf.protoscript.translator.DefaultScheme.Elements;
 
 namespace npsParser.test.ClassTranslator
 {
@@ -10,6 +12,7 @@ namespace npsParser.test.ClassTranslator
         {
             AddScheme("CommonTypeTranslator",
                 new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
                     """
                     <${Header} Name="${Name}">
                         <properties>
@@ -23,54 +26,65 @@ namespace npsParser.test.ClassTranslator
                         </methods>
                     </${Header}>
                     """
+                    )
                 )
             );
 
             AddScheme("PropertyTranslator",
                 new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
                     """
                     <${Header} Name="${Name}" Type="${ElementType}">
                         ${for("member", $NL, "PropertyTranslator")}
                     </${Header}>
                     """
+                    )
                 )
             );
 
             AddScheme("CtorInitTranslator",
                 new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
                     """
                     ${InitSyntax.Get()}
                     ${for("member", $NL, "EmbbedCtorTranslator")}
                     """
+                    )
                 )
             );
 
 
             AddScheme("EmbbedCtorTranslator",
                 new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
                     """
                     ${InitSyntax.Get()}
                     // Embedded constructor ${Name}
                     ${for("member", $NL, "EmbbedCtorTranslator")}
                     """
                     )
+                )
             );
 
             AddScheme("MethodTranslator",
                 new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
                     """
                     <${Header} Name="${Name}">
                         ${InitSyntax.MethodBody()}
                     </${Header}>
                     """
+                    )
                 )
             );
 
             AddScheme("MethodBody",
                 new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
                     """
                     ${for("", $NL, "Get")}
                     """
+                    )
                 )
             );
 

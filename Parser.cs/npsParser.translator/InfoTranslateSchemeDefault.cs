@@ -1,4 +1,4 @@
-﻿using nf.protoscript.translator.DefaultSnippetElements;
+﻿using nf.protoscript.translator.DefaultScheme.Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace nf.protoscript.translator
+namespace nf.protoscript.translator.DefaultScheme
 {
     /// <summary>
     /// Defines a default translation scheme containing one or more snippets. 
@@ -36,25 +36,25 @@ namespace nf.protoscript.translator
             SnippetElements = InElementArray;
         }
 
-        public InfoTranslateSchemeDefault(string[] InParams, params string[] InSchemeCodes)
-        {
-            _params = InParams;
-            var resultElems = new List<IElement>();
-            foreach(var code in InSchemeCodes)
-            {
-                var elements = ParseElements(code);
-                resultElems.AddRange(elements);
-            }
-            SnippetElements = resultElems.ToArray();
-        }
+        //public InfoTranslateSchemeDefault(string[] InParams, params string[] InSchemeCodes)
+        //{
+        //    _params = InParams;
+        //    var resultElems = new List<IElement>();
+        //    foreach(var code in InSchemeCodes)
+        //    {
+        //        var elements = ElementParser.ParseElements(code);
+        //        resultElems.AddRange(elements);
+        //    }
+        //    SnippetElements = resultElems.ToArray();
+        //}
 
-        public InfoTranslateSchemeDefault(string InSchemeCode)
-        {
-            var resultElems = new List<IElement>();
-            var elements = ParseElements(InSchemeCode);
-            resultElems.AddRange(elements);
-            SnippetElements = resultElems.ToArray();
-        }
+        //public InfoTranslateSchemeDefault(string InSchemeCode)
+        //{
+        //    var resultElems = new List<IElement>();
+        //    var elements = ElementParser.ParseElements(InSchemeCode);
+        //    resultElems.AddRange(elements);
+        //    SnippetElements = resultElems.ToArray();
+        //}
 
         // Begin IInfoTranslateScheme interfaces
         /// <see cref="IInfoTranslateScheme.ParamNum"/>
@@ -115,7 +115,7 @@ namespace nf.protoscript.translator
             for (int i = 0; i < SnippetElements.Length; i++)
             {
                 var snippetElem = SnippetElements[i];
-                if (snippetElem is DefaultSnippetElements.ElementNewLine)
+                if (snippetElem is DefaultScheme.Elements.ElementNewLine)
                 {
                     codeLines.Add("");
                     writingLineIndex++;
@@ -140,49 +140,6 @@ namespace nf.protoscript.translator
             }
 
             return codeLines;
-        }
-
-        private const string Pattern = @"\$\{[^{}]*\}";
-
-        /// <summary>
-        /// Parse elements from InCode.
-        /// </summary>
-        /// <param name="InCode"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        private static IEnumerable<IElement> ParseElements(string InCode)
-        {
-            List<IElement> resultElements = new List<IElement>();
-
-            // 使用正则表达式找到所有的 ${ ... } 部分
-            var matches = Regex.Matches(InCode, Pattern);
-
-            int lastIndex = 0;
-            foreach (Match match in matches)
-            {
-                // 处理括号外的部分
-                if (lastIndex < match.Index)
-                {
-                    string outsideCode = InCode.Substring(lastIndex, match.Index - lastIndex);
-                    resultElements.Add(new ElementConstString(outsideCode));
-                }
-
-                // 处理括号内的部分
-                string insideCode = match.Value;
-                var codeWithoutContainer = insideCode.Substring(2, insideCode.Length - 3);
-                resultElements.Add(new ElementExpr(codeWithoutContainer));
-
-                // 更新 lastIndex
-                lastIndex = match.Index + match.Length;
-            }
-
-            // 处理最后一个括号之后的文本
-            if (lastIndex < InCode.Length)
-            {
-                string remainingText = InCode.Substring(lastIndex);
-                resultElements.Add(new ElementConstString(remainingText));
-            }
-            return resultElements;
         }
 
         /// <summary>

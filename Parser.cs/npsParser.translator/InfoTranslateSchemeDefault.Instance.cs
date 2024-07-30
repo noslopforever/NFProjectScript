@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace nf.protoscript.translator
+namespace nf.protoscript.translator.DefaultScheme
 {
 
     public partial class InfoTranslateSchemeDefault
@@ -26,7 +26,7 @@ namespace nf.protoscript.translator
             public Instance(InfoTranslateSchemeDefault InScheme, InfoTranslatorAbstract InTranslator, ITranslatingContext InContext, object[] InParams)
             {
                 HostTranslator = InTranslator;
-                Scheme = InScheme;
+                _scheme = InScheme;
                 Context = InContext;
                 ExtParams = InParams;
             }
@@ -38,7 +38,7 @@ namespace nf.protoscript.translator
             public InfoTranslatorAbstract HostTranslator { get; }
 
             /// <see cref="IInfoTranslateSchemeInstance.Scheme"/>
-            public InfoTranslateSchemeDefault Scheme { get; }
+            public IInfoTranslateScheme Scheme { get { return _scheme; } }
 
             /// <see cref="IInfoTranslateSchemeInstance.Context"/>
             public ITranslatingContext Context { get; }
@@ -49,7 +49,7 @@ namespace nf.protoscript.translator
             /// <see cref="IInfoTranslateSchemeInstance.GetResult"/>
             public IReadOnlyList<string> GetResult()
             {
-                return Scheme.Apply(this);
+                return _scheme.Apply(this);
             }
 
             /// <see cref="IInfoTranslateSchemeInstance.TryGetParamValue"/>
@@ -72,6 +72,11 @@ namespace nf.protoscript.translator
             /// Stores additional scheme instances by their names.
             /// </summary>
             private Dictionary<string, IInfoTranslateSchemeInstance> _params = new Dictionary<string, IInfoTranslateSchemeInstance>();
+
+            /// <summary>
+            /// The scheme associated with this instance.
+            /// </summary>
+            InfoTranslateSchemeDefault _scheme = null;
 
         }
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace nf.protoscript.translator.DefaultSnippetElements
+namespace nf.protoscript.translator.DefaultScheme.Elements
 {
     /// <summary>
     /// A snippet element which contains only constant-string.

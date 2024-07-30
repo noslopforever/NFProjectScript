@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace nf.protoscript.translator.DefaultSnippetElements.Internal
+namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
 {
 
     /// <summary>

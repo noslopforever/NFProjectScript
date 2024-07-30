@@ -2,7 +2,7 @@
 using nf.protoscript.parser;
 using System.Collections.Generic;
 
-namespace nf.protoscript.translator.DefaultSnippetElements.Internal
+namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
 {
 
     /// <summary>
