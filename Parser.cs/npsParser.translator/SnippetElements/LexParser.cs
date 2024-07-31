@@ -61,6 +61,172 @@ namespace nf.protoscript.parser
     }
 
     /// <summary>
+    /// Represents a parser for binary expressions.
+    /// </summary>
+    class ASTParser_ExprOperator : ASTParserBase
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ASTParser_ExprOperator"/> class with a collection of operators and a reference to the next parser.
+        /// </summary>
+        /// <param name="InOps">The collection of operators.</param>
+        /// <param name="InNextExprParser">The next parser in the chain for lower precedence expressions.</param>
+        public ASTParser_ExprOperator(OpCodeWithDef[] InOps, ASTParserBase InNextExprParser)
+        {
+            Ops = InOps;
+            _nextParser = InNextExprParser;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ASTParser_ExprOperator"/> class with a single operator and a reference to the next parser.
+        /// </summary>
+        /// <param name="InOp">The operator definition.</param>
+        /// <param name="InNextExprParser">The next parser in the chain for lower precedence expressions.</param>
+        public ASTParser_ExprOperator(OpCodeWithDef InOp, ASTParserBase InNextExprParser)
+        {
+            Ops = new OpCodeWithDef[] { InOp };
+            _nextParser = InNextExprParser;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ASTParser_ExprOperator"/> class with a token type, a single operator, and a reference to the next parser.
+        /// </summary>
+        /// <param name="InTokenType">The token type expected for the operators.</param>
+        /// <param name="InOp">The operator definition.</param>
+        /// <param name="InNextExprParser">The next parser in the chain for lower precedence expressions.</param>
+        public ASTParser_ExprOperator(string InTokenType, OpCodeWithDef InOp, ASTParserBase InNextExprParser)
+        {
+            TokenType = InTokenType;
+            Ops = new OpCodeWithDef[] { InOp };
+            _nextParser = InNextExprParser;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ASTParser_ExprOperator"/> class with a token type, a collection of operators, and a reference to the next parser.
+        /// </summary>
+        /// <param name="InTokenType">The token type expected for the operators.</param>
+        /// <param name="InOps">The collection of operators.</param>
+        /// <param name="InNextExprParser">The next parser in the chain for lower precedence expressions.</param>
+        public ASTParser_ExprOperator(string InTokenType, OpCodeWithDef[] InOps, ASTParserBase InNextExprParser)
+        {
+            TokenType = InTokenType;
+            Ops = InOps;
+            _nextParser = InNextExprParser;
+        }
+
+        /// <summary>
+        /// Gets the operators handled by this parser.
+        /// </summary>
+        public OpCodeWithDef[] Ops { get; private set; }
+
+        /// <summary>
+        /// Gets the token type for the operators.
+        /// </summary>
+        public string TokenType { get; private set; } = "Operator";
+
+        /// <summary>
+        /// Parses an expression using the current parser.
+        /// </summary>
+        /// <param name="InTokens">The list of tokens representing the input.</param>
+        /// <param name="InStartIndex">The starting index of the tokens to parse.</param>
+        /// <returns>The parsed syntax tree node.</returns>
+        public override ISyntaxTreeNode Parse(IReadOnlyList<IToken> InTokens, ref int InStartIndex)
+        {
+            // Try parse the left-hand side (LHS) of the expression.
+            var lhs = _nextParser.Parse(InTokens, ref InStartIndex);
+
+            // Parse and consume the operator(s).
+            OpDefinition opDef = null;
+            while (InStartIndex < InTokens.Count
+                && string.Equals(InTokens[InStartIndex].TokenType, TokenType, StringComparison.OrdinalIgnoreCase)
+                && (opDef = OpCodeWithDef.FindDefByCode(Ops, InTokens[InStartIndex].Code)) != null)
+            {
+                // Save, consume, then step to the next token.
+                var opToken = InTokens[InStartIndex];
+                InStartIndex++;
+
+                // All operators must have a right-hand side (RHS).
+                var rhs = _nextParser.Parse(InTokens, ref InStartIndex);
+
+                // Create a binary operation node.
+                lhs = new STNodeBinaryOp(opDef, lhs, rhs);
+            }
+
+            return lhs;
+        }
+
+        /// <summary>
+        /// Reference to the next parser in the chain for lower precedence expressions.
+        /// </summary>
+        private readonly ASTParserBase _nextParser;
+    }
+
+    /// <summary>
+    /// Represents a parser for unary expressions.
+    /// </summary>
+    class ASTParser_ExprUnary : ASTParserBase
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ASTParser_ExprUnary"/> class with a collection of unary operators and a reference to the next parser.
+        /// </summary>
+        /// <param name="InUnaryOps">The collection of unary operator definitions.</param>
+        /// <param name="InNextExprParser">The next parser in the chain for lower precedence expressions.</param>
+        public ASTParser_ExprUnary(OpCodeWithDef[] InUnaryOps, ASTParserBase InNextExprParser)
+        {
+            UnaryOps = InUnaryOps;
+            _nextParser = InNextExprParser;
+        }
+
+        /// <summary>
+        /// Gets the unary operators handled by this parser.
+        /// </summary>
+        public OpCodeWithDef[] UnaryOps { get; private set; }
+
+        /// <summary>
+        /// Gets the token type for the unary operators.
+        /// </summary>
+        public string TokenType { get; private set; } = "Operator";
+
+        /// <summary>
+        /// Parses an expression using the current parser.
+        /// </summary>
+        /// <param name="InTokens">The list of tokens representing the input.</param>
+        /// <param name="InStartIndex">The starting index of the tokens to parse.</param>
+        /// <returns>The parsed syntax tree node.</returns>
+        public override ISyntaxTreeNode Parse(IReadOnlyList<IToken> InTokens, ref int InStartIndex)
+        {
+            // Try parse and consume unary operator(s).
+            List<OpDefinition> unaryTokens = new List<OpDefinition>();
+            OpDefinition opDef = null;
+            while (InStartIndex < InTokens.Count
+                && string.Equals(InTokens[InStartIndex].TokenType, TokenType, StringComparison.OrdinalIgnoreCase)
+                && (opDef = OpCodeWithDef.FindDefByCode(UnaryOps, InTokens[InStartIndex].Code)) != null)
+            {
+                var opToken = InTokens[InStartIndex];
+                InStartIndex++;
+
+                unaryTokens.Add(opDef);
+            }
+
+            // Parse the right-hand side (RHS) of the expression.
+            var rhs = _nextParser.Parse(InTokens, ref InStartIndex);
+
+            // Construct unary operation nodes from the last operator to the first.
+            var lastNode = rhs;
+            for (int i = unaryTokens.Count - 1; i >= 0; i--)
+            {
+                lastNode = new STNodeUnaryOp(unaryTokens[i], lastNode);
+            }
+
+            return lastNode;
+        }
+
+        /// <summary>
+        /// Reference to the next parser in the chain for lower precedence expressions.
+        /// </summary>
+        private readonly ASTParserBase _nextParser;
+    }
+
+    /// <summary>
     /// Parser for expressions that involve access (e.g., member access) or calls (e.g., function calls).
     /// </summary>
     public class ASTParser_ExprAccessOrCall : ASTParserBase
@@ -270,6 +436,52 @@ namespace nf.protoscript.parser
     public class ASTParser_Expression : ASTParserBase
     {
         /// <summary>
+        /// Operator parsers sorted by prorities (from HIGH to LOW, more inner, more lower).
+        /// TODO assign
+        /// </summary>
+        static ASTParserBase GDefaultOpExprParsers =
+            new ASTParser_ExprOperator(new OpCodeWithDef("|", EOpFunction.Or)
+                , new ASTParser_ExprOperator(new OpCodeWithDef("&", EOpFunction.And)
+                    , new ASTParser_ExprOperator(new OpCodeWithDef[]
+                    {
+                        new OpCodeWithDef("==", EOpFunction.Equal)
+                        , new OpCodeWithDef("!=", EOpFunction.NotEqual)
+                    }
+                        , new ASTParser_ExprOperator(new OpCodeWithDef[]
+                        {
+                            new OpCodeWithDef("<", EOpFunction.LessThan)
+                            , new OpCodeWithDef("<=", EOpFunction.LessThanOrEqual)
+                            , new OpCodeWithDef(">", EOpFunction.GreaterThan)
+                            , new OpCodeWithDef(">=", EOpFunction.GreaterThanOrEqual)
+                        }
+                            , new ASTParser_ExprOperator(new OpCodeWithDef[]
+                            {
+                                new OpCodeWithDef("+", EOpFunction.Add)
+                                , new OpCodeWithDef("-", EOpFunction.Substract)
+                            }
+                                , new ASTParser_ExprOperator(new OpCodeWithDef[]
+                                {
+                                    new OpCodeWithDef("*", EOpFunction.Multiply)
+                                    , new OpCodeWithDef("/", EOpFunction.Divide)
+                                    , new OpCodeWithDef("%", EOpFunction.Mod)
+                                }
+                                    , new ASTParser_ExprUnary(new OpCodeWithDef[]
+                                    {
+                                        new OpCodeWithDef("~", EOpFunction.BitwiseNot)
+                                        , new OpCodeWithDef("+", EOpFunction.Positive)
+                                        , new OpCodeWithDef("-", EOpFunction.Negative)
+                                        , new OpCodeWithDef("!", EOpFunction.Not)
+                                    }
+                                        , new ASTParser_ExprAccessOrCall()
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ASTParser_Expression"/> class.
         /// </summary>
         public ASTParser_Expression()
@@ -284,9 +496,7 @@ namespace nf.protoscript.parser
         /// <returns>The parsed syntax tree node.</returns>
         public override ISyntaxTreeNode Parse(IReadOnlyList<IToken> InTokens, ref int InStartIndex)
         {
-            // TODO: Implement priority-sorted operator parsers.
-            var exprParser = new ASTParser_ExprAccessOrCall();
-            var exprNode = exprParser.Parse(InTokens, ref InStartIndex);
+            var exprNode = GDefaultOpExprParsers.Parse(InTokens, ref InStartIndex);
             return exprNode;
         }
     }
