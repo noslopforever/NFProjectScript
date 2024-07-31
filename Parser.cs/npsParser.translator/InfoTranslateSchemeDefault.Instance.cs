@@ -34,25 +34,25 @@ namespace nf.protoscript.translator.DefaultScheme
             // Begin IInfoTranslateSchemeInstance interfaces
 
 
-            /// <see cref="IInfoTranslateSchemeInstance.HostTranslator"/>
+            /// <inheritdoc />
             public InfoTranslatorAbstract HostTranslator { get; }
 
-            /// <see cref="IInfoTranslateSchemeInstance.Scheme"/>
+            /// <inheritdoc />
             public IInfoTranslateScheme Scheme { get { return _scheme; } }
 
-            /// <see cref="IInfoTranslateSchemeInstance.Context"/>
+            /// <inheritdoc />
             public ITranslatingContext Context { get; }
 
-            /// <see cref="IInfoTranslateSchemeInstance.ExtParams"/>
+            /// <inheritdoc />
             public object[] ExtParams { get; }
 
-            /// <see cref="IInfoTranslateSchemeInstance.GetResult"/>
+            /// <inheritdoc />
             public IReadOnlyList<string> GetResult()
             {
                 return _scheme.Apply(this);
             }
 
-            /// <see cref="IInfoTranslateSchemeInstance.TryGetParamValue"/>
+            /// <inheritdoc />
             public bool TryGetParamValue(string InName, out object OutValue)
             {
                 OutValue = null;

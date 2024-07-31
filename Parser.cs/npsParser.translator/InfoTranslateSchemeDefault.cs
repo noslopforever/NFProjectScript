@@ -57,11 +57,11 @@ namespace nf.protoscript.translator.DefaultScheme
         //}
 
         // Begin IInfoTranslateScheme interfaces
-        /// <see cref="IInfoTranslateScheme.ParamNum"/>
+        /// <inheritdoc />
         public int ParamNum => _params.Length;
-        /// <see cref="IInfoTranslateScheme.ParamNames"/>
+        /// <inheritdoc />
         public string[] ParamNames => _params;
-        /// <see cref="IInfoTranslateScheme.GetParamIndex"/>
+        /// <inheritdoc />
         public int GetParamIndex(string InName)
         {
             for (int i = 0; i < _params.Length; ++i)
@@ -73,7 +73,7 @@ namespace nf.protoscript.translator.DefaultScheme
             }
             return -1;
         }
-        /// <see cref="IInfoTranslateScheme.CreateInstance"/>
+        /// <inheritdoc />
         public IInfoTranslateSchemeInstance CreateInstance(InfoTranslatorAbstract InTranslator, ITranslatingContext InContext, params object[] InParams)
         {
             return new Instance(this, InTranslator, InContext, InParams);
