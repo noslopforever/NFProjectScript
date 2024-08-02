@@ -21,26 +21,70 @@ namespace npsParser.test.ExpressionTranslator
 
             Console.WriteLine("Which translator do you want to test?");
 
+            var serialData = SchemeJsonLoader.GenerateDefaultSerializeData();
+            Console.WriteLine(serialData);
+
+            //"""
+            //{
+            //    "Name":"Get",
+            //    "Params":["Param0"],
+            //    "Condition":"${Condition}",
+            //    "Code":"${Code}"
+            //}
+            //"""
+
             var translator = new InfoTranslatorDefault();
 
+            var schemesJson =
+                """
+                [
+                    {
+                        "Name":"Get",
+                        "Params":[],
+                        "Condition": "Type_Name == \"Constant\"",
+                        "Code":"${ValueString}"
+                    },
+                    {
+                        "Name":"Get",
+                        "Params":[],
+                        "Condition": "Type_Name == \"Constant\" & ValueType == \"string\"",
+                        "Code":"\"${ValueString}\""
+                    }
+                ]
+                """
+                ;
+            SchemeJsonLoader.LoadSchemes(translator, schemesJson);
+
+            //// Constant: ${ValueString}
+            //SchemeJsonLoader.LoadSchemeFromJson(translator,
+            //    """
+            //    {
+            //        "Name":"Get",
+            //        "Params":[],
+            //        "Condition": "Type_Name == \"Constant\"",
+            //        "Code":"${ValueString}"
+            //    }
+            //    """
+            //    );
+
             // Constant: ${ValueString}
-            translator.AddSelector("Get"
-                , new TranslateSchemeSelector_Expr(1
-                    , "Type_Name == \"Constant\" "
-                    , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${ValueString}"))
-                    )
-                );
+            //translator.AddSelector("Get"
+            //    , new TranslateSchemeSelector_Expr(1
+            //        , "Type_Name == \"Constant\" "
+            //        , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${ValueString}"))
+            //        )
+            //    );
             //translator.AddExprScheme<STNodeConstant>("Get", 1
             //    , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${ValueString}"))
             //    );
 
             // Constant<string>: "${ValueString}"
-            translator.AddSelector("Get"
-                , new TranslateSchemeSelector_Expr(1
-                    , "Type_Name == \"Constant\" & ValueType == \"string\""
-                    , new InfoTranslateSchemeDefault()
-                    )
-                );
+            //translator.AddSelector("Get"
+            //    , new TranslateSchemeSelector_Expr(1
+            //        , "Type_Name == \"Constant\" & ValueType == \"string\""
+            //        , new InfoTranslateSchemeDefault()
+            //        )
+            //    );
             //translator.AddExprSelector<STNodeConstant>("Get", 1
             //    , expr => { return expr.ValueType == CommonTypeInfos.String || expr.ValueType == CommonTypeInfos.TypeRef; }
             //    , new InfoTranslateSchemeDefault(ElementParser.ParseElements("\"${ValueString}\""))
