@@ -260,7 +260,9 @@ namespace nf.protoscript.parser
                 bool handled = false;
 
                 // Handle member access: <Term> . <Term>
-                if (InTokens[InStartIndex].TokenType == "Operator" || InTokens[InStartIndex].Code == ".")
+                if (InTokens[InStartIndex].TokenType == "Operator"
+                    && InTokens[InStartIndex].Code == "."
+                    )
                 {
                     InStartIndex++;
                     handled = true;
@@ -277,7 +279,9 @@ namespace nf.protoscript.parser
                 }
 
                 // Handle function call: <Term> (EXPRs)
-                else if (InTokens[InStartIndex].TokenType == "Separator" && InTokens[InStartIndex].Code == "(")
+                else if (InTokens[InStartIndex].TokenType == "Separator"
+                    && InTokens[InStartIndex].Code == "("
+                    )
                 {
                     InStartIndex++;
                     handled = true;
