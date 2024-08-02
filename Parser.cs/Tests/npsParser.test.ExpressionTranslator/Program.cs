@@ -24,12 +24,19 @@ namespace npsParser.test.ExpressionTranslator
             var translator = new InfoTranslatorDefault();
 
             // Constant: ${ValueString}
-            translator.AddExprScheme<STNodeConstant>("Get", 1
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${ValueString}"))
+            translator.AddSelector("Get"
+                , new TranslateSchemeSelector_Expr(1
+                    , "Type_Name == \"Constant\" "
+                    , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${ValueString}"))
+                    )
                 );
+            //translator.AddExprScheme<STNodeConstant>("Get", 1
+            //    , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${ValueString}"))
+            //    );
+
             // Constant<string>: "${ValueString}"
             translator.AddExprSelector<STNodeConstant>("Get", 1
-                , expr => { return expr.Type == CommonTypeInfos.String || expr.Type == CommonTypeInfos.TypeRef; }
+                , expr => { return expr.ValueType == CommonTypeInfos.String || expr.ValueType == CommonTypeInfos.TypeRef; }
                 , new InfoTranslateSchemeDefault(ElementParser.ParseElements("\"${ValueString}\""))
                 );
             // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}

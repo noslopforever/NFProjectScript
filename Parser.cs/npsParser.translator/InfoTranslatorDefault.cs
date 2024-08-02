@@ -31,17 +31,6 @@ namespace nf.protoscript.translator
             EnsureGroup(InKey).DefaultScheme = InScheme;
         }
 
-        ///// <summary>
-        ///// Add generic schemes
-        ///// </summary>
-        ///// <param name="InKey"></param>
-        ///// <param name="InSnippet"></param>
-        //public void AddScheme(string InKey, InfoTranslateSnippet InSnippet)
-        //{
-        //    var newScheme = new InfoTranslateSchemeDefault(InSnippet);
-        //    EnsureGroup(InKey).DefaultScheme = newScheme;
-        //}
-
         /// <summary>
         /// Add scheme selectors.
         /// </summary>
@@ -129,17 +118,6 @@ namespace nf.protoscript.translator
                 ));
         }
 
-        /// <summary>
-        /// Add selector for expressions (syntax tree nodes).
-        /// </summary>
-        /// <param name="InKey"></param>
-        /// <param name="InExprType"></param>
-        /// <param name="InSchemeSelector"></param>
-        public void AddExprSelector(string InKey, string InExprType, int InPriority, IInfoTranslateSchemeSelector InSchemeSelector)
-        {
-            // TODO impl
-            throw new NotImplementedException();
-        }
 
 
 

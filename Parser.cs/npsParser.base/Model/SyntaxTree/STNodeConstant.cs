@@ -14,32 +14,32 @@ namespace nf.protoscript.syntaxtree
         internal STNodeConstant()
         {
             Value = null;
-            Type = CommonTypeInfos.Unknown;
+            ValueType = CommonTypeInfos.Unknown;
         }
         public STNodeConstant(string InValueString)
         {
             Value = InValueString;
-            Type = CommonTypeInfos.String;
+            ValueType = CommonTypeInfos.String;
         }
         public STNodeConstant(int InValue)
         {
             Value = InValue;
-            Type = CommonTypeInfos.Integer;
+            ValueType = CommonTypeInfos.Integer;
         }
         public STNodeConstant(float InValue)
         {
             Value = (double)InValue;
-            Type = CommonTypeInfos.Float;
+            ValueType = CommonTypeInfos.Float;
         }
         public STNodeConstant(double InValue)
         {
             Value = InValue;
-            Type = CommonTypeInfos.Float;
+            ValueType = CommonTypeInfos.Float;
         }
         public STNodeConstant(TypeInfo InTypeInfo)
         {
             Value = InTypeInfo;
-            Type = CommonTypeInfos.TypeRef;
+            ValueType = CommonTypeInfos.TypeRef;
         }
 
         public override void ForeachSubNodes(Func<string, ISyntaxTreeNode, bool> InActionFunc)
@@ -48,7 +48,7 @@ namespace nf.protoscript.syntaxtree
 
         public override TypeInfo GetPredictType(ElementInfo InHostElemInfo)
         {
-            return Type;
+            return ValueType;
         }
 
         /// <summary>
@@ -58,8 +58,11 @@ namespace nf.protoscript.syntaxtree
         [Serialization.SerializableInfo]
         public object Value { get; private set; } = null;
 
+        /// <summary>
+        /// Type of the value
+        /// </summary>
         [Serialization.SerializableInfo]
-        public TypeInfo Type { get; private set; } = null;
+        public TypeInfo ValueType { get; private set; } = null;
 
         /// <summary>
         /// Value string.
@@ -79,7 +82,7 @@ namespace nf.protoscript.syntaxtree
         // Begin object interfaces
         public override string ToString()
         {
-            return $"Constant {{ Type = {Type}, Value = {ValueString} }}";
+            return $"Constant {{ Type = {ValueType}, Value = {ValueString} }}";
         }
         // ~ End object interfaces
 
