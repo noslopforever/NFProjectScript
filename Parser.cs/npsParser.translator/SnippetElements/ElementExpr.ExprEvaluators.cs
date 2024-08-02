@@ -184,19 +184,47 @@ namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
                 || InBinOp.OpDef.Function == EOpFunction.LessThanOrEqual
                 || InBinOp.OpDef.Function == EOpFunction.GreaterThan
                 || InBinOp.OpDef.Function == EOpFunction.GreaterThanOrEqual
-                || InBinOp.OpDef.Function == EOpFunction.Equal
+                )
+            {
+                double lhsDouble = Convert.ToDouble(lhsValue);
+                double rhsDouble = Convert.ToDouble(rhsValue);
+                switch (InBinOp.OpDef.Function)
+                {
+                    case EOpFunction.LessThan:
+                        return lhsDouble < rhsDouble;
+                    case EOpFunction.LessThanOrEqual:
+                        return lhsDouble <= rhsDouble;
+                    case EOpFunction.GreaterThan:
+                        return lhsDouble > rhsDouble;
+                    case EOpFunction.GreaterThanOrEqual:
+                        return lhsDouble >= rhsDouble;
+                }
+            }
+            else if (InBinOp.OpDef.Function == EOpFunction.Equal
                 || InBinOp.OpDef.Function == EOpFunction.NotEqual
                 )
             {
-                // TODO: Implement comparison operations.
-                throw new NotImplementedException();
+                switch (InBinOp.OpDef.Function)
+                {
+                    case EOpFunction.Equal:
+                        return lhsValue.Equals(rhsValue);
+                    case EOpFunction.NotEqual:
+                        return !lhsValue.Equals(rhsValue);
+                }
             }
             else if (InBinOp.OpDef.Function == EOpFunction.And
                 || InBinOp.OpDef.Function == EOpFunction.Or
                 )
             {
-                // TODO: Implement logical operations.
-                throw new NotImplementedException();
+                bool lhsBool = Convert.ToBoolean(lhsValue);
+                bool rhsBool = Convert.ToBoolean(rhsValue);
+                switch (InBinOp.OpDef.Function)
+                {
+                    case EOpFunction.And:
+                        return lhsBool && rhsBool;
+                    case EOpFunction.Or:
+                        return lhsBool || rhsBool;
+                }
             }
 
             // Log an error message that the binary operation is not supported.
