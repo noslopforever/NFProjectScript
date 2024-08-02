@@ -1,4 +1,4 @@
-﻿using nf.protoscript;
+using nf.protoscript;
 using nf.protoscript.translator;
 using nf.protoscript.translator.DefaultScheme;
 using nf.protoscript.translator.DefaultScheme.Elements;
@@ -20,17 +20,20 @@ namespace npsParser.test.ClassTranslator
                 );
             // Constant<string>: "${ValueString}"
             AddExprSelector<STNodeConstant>("Get", 1
-                , expr => { return expr.Type == CommonTypeInfos.String || expr.Type == CommonTypeInfos.TypeRef; }
+                , expr => { return expr.ValueType == CommonTypeInfos.String || expr.ValueType == CommonTypeInfos.TypeRef; }
                 , new InfoTranslateSchemeDefault(ElementParser.ParseElements("\"${ValueString}\""))
                 );
+
             // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}
             AddExprScheme<STNodeBinaryOp>("Get", 1
                 , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${LHS.Get()} ${OpCode} ${RHS.Get()}"))
                 );
+
             // UnaryOp: ${OpCode} ${RHS.Get()}
             AddExprScheme<STNodeUnaryOp>("Get", 1
                 , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${OpCode}${RHS.Get()}"))
                 );
+
             // Assign: ${LHS.Set(RHS.Get())}
             AddExprScheme<STNodeAssign>("Get", 1
                 , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${LHS.Set(RHS.Get())}"))
