@@ -90,12 +90,12 @@ namespace nf.protoscript.translator.SchemeSelectors
         private object _HandleGlobalVar(ITranslatingContext InContext, string InVarName)
         {
             object outValue = null;
-            if (!InContext.TryGetContextValue(InVarName, out outValue))
+            if (InContext.TryGetContextValue(InVarName, out outValue))
             {
-                throw new ArgumentException($"Cannot find property {InVarName} in Context {InContext}.");
+                return outValue;
             }
 
-            return outValue;
+            throw new ArgumentException($"Cannot find property {InVarName} in Context {InContext}.");
         }
 
         private object _HandleMemberVar(ITranslatingContext InContext, object InHolder, string InVarName)

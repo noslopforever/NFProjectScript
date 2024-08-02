@@ -103,6 +103,19 @@ namespace nf.protoscript
             return checkingBaseType;
         }
 
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (obj is string)
+            {
+                if (0 == string.Compare(Name, obj as string, true))
+                {
+                    return true;
+                }
+            }
+            return base.Equals(obj);
+        }
+
     }
 
 }

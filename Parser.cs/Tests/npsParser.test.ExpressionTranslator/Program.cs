@@ -35,18 +35,27 @@ namespace npsParser.test.ExpressionTranslator
             //    );
 
             // Constant<string>: "${ValueString}"
-            translator.AddExprSelector<STNodeConstant>("Get", 1
-                , expr => { return expr.ValueType == CommonTypeInfos.String || expr.ValueType == CommonTypeInfos.TypeRef; }
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("\"${ValueString}\""))
+            translator.AddSelector("Get"
+                , new TranslateSchemeSelector_Expr(1
+                    , "Type_Name == \"Constant\" & ValueType == \"string\""
+                    , new InfoTranslateSchemeDefault()
+                    )
                 );
+            //translator.AddExprSelector<STNodeConstant>("Get", 1
+            //    , expr => { return expr.ValueType == CommonTypeInfos.String || expr.ValueType == CommonTypeInfos.TypeRef; }
+            //    , new InfoTranslateSchemeDefault(ElementParser.ParseElements("\"${ValueString}\""))
+            //    );
+
             // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}
             translator.AddExprScheme<STNodeBinaryOp>("Get", 1
                 , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${LHS.Get()} ${OpCode} ${RHS.Get()}"))
                 );
+
             // UnaryOp: ${OpCode} ${RHS.Get()}
             translator.AddExprScheme<STNodeUnaryOp>("Get", 1
                 , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${OpCode}${RHS.Get()}"))
                 );
+
             // Assign: ${LHS.Set(RHS.Get())}
             translator.AddExprScheme<STNodeAssign>("Get", 1
                 , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${LHS.Set(RHS.Get())}"))

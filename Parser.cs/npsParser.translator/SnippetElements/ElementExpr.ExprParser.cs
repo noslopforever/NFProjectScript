@@ -22,7 +22,7 @@ namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
                 , new TokenParserRegex("\"(\\\\\"|[^\"])*\"", "String")
                 , new TokenParserRegex(@"[\(\)\[\],]", "Separator")
                 , new TokenParserRegex("[!<>]=?|==", "Operator")
-                , new TokenParserRegex(@"[\+\-\*/%=\.]", "Operator")
+                , new TokenParserRegex(@"[\+\-\*/%=\&|.]", "Operator")
                 , new TokenParserRegex(@"[ \t\r]+", "") // Skip whitespace
             );
         }
