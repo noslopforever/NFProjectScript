@@ -10,6 +10,7 @@ namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
     /// </summary>
     internal static class ElementExprParser
     {
+
         /// <summary>
         /// Initializes the tokenizer used by the expression parser.
         /// </summary>
@@ -20,6 +21,7 @@ namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
                 , new TokenParserRegex(@"\d+", "Number")
                 , new TokenParserRegex(@"\d*\.\d+", "FloatingNumber")
                 , new TokenParserRegex("\"(\\\\\"|[^\"])*\"", "String")
+                , new TokenParserRegex("'([^'])*'", "String")
                 , new TokenParserRegex(@"[\(\)\[\],]", "Separator")
                 , new TokenParserRegex("[!<>]=?|==", "Operator")
                 , new TokenParserRegex(@"[\+\-\*/%=\&|.]", "Operator")
