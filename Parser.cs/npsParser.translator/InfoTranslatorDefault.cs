@@ -81,7 +81,7 @@ namespace nf.protoscript.translator
         /// <param name="InPriority">The priority of the scheme.</param>
         /// <param name="InSelector">The selector function for the syntax tree node.</param>
         /// <param name="InScheme">The scheme to add.</param>
-        public void AddExprSelector<T>(string InKey, int InPriority, Func<T, bool> InSelector)
+        public void AddExprSelector<T>(string InKey, int InPriority, Func<T, bool> InSelector, IInfoTranslateScheme InScheme)
             where T : class, ISyntaxTreeNode
         {
             AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority,
