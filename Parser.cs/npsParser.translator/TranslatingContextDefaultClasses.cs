@@ -4,18 +4,31 @@ using System;
 namespace nf.protoscript.translator
 {
     /// <summary>
-    /// Base of all Contexts implemented in the project.
+    /// Base class for all contexts implemented in the project.
+    /// Provides functionality for accessing parent context and retrieving context values.
     /// </summary>
-    public abstract class TranslatingContextBase
-       : ITranslatingContext
+    public abstract class TranslatingContextBase : ITranslatingContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TranslatingContextBase"/> class.
+        /// </summary>
+        /// <param name="InParentContext">The parent context.</param>
         public TranslatingContextBase(ITranslatingContext InParentContext)
         {
             ParentContext = InParentContext;
         }
 
+        /// <summary>
+        /// Gets the parent context.
+        /// </summary>
         public virtual ITranslatingContext ParentContext { get; }
 
+        /// <summary>
+        /// Tries to get the context value for a specified key.
+        /// </summary>
+        /// <param name="InKey">The key to look up.</param>
+        /// <param name="OutValue">The value associated with the key, if found.</param>
+        /// <returns>true if the value was found; otherwise, false.</returns>
         public virtual bool TryGetContextValue(string InKey, out object OutValue)
         {
             try
@@ -29,7 +42,7 @@ namespace nf.protoscript.translator
             }
             catch (Exception ex)
             {
-                // TODO log error
+                // TODO: Log the exception.
             }
 
             if (ParentContext != null)
@@ -41,6 +54,11 @@ namespace nf.protoscript.translator
             return false;
         }
 
+        /// <summary>
+        /// Gets the context value for a specified key as a string.
+        /// </summary>
+        /// <param name="InKey">The key to look up.</param>
+        /// <returns>The string representation of the value, or a default message if not found.</returns>
         public string GetContextValueString(string InKey)
         {
             if (TryGetContextValue(InKey, out var val))
@@ -53,31 +71,34 @@ namespace nf.protoscript.translator
             }
             return $"<<NULL VAR for {InKey}>>";
         }
-
     }
 
     /// <summary>
-    /// Context for the translating Info
+    /// Context for the translating Info.
     /// </summary>
-    public class TranslatingInfoContext
-        : TranslatingContextBase
-        , ITranslatingInfoContext
+    public class TranslatingInfoContext : TranslatingContextBase, ITranslatingInfoContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TranslatingInfoContext"/> class.
+        /// </summary>
+        /// <param name="InParentContext">The parent context.</param>
+        /// <param name="InBoundInfo">The info to translate.</param>
         public TranslatingInfoContext(ITranslatingContext InParentContext, Info InBoundInfo)
             : base(InParentContext)
         {
             TranslatingInfo = InBoundInfo;
         }
 
-        // Begin ITranslatingInfoContext interfaces
+        /// <summary>
+        /// Gets the info being translated.
+        /// </summary>
         public Info TranslatingInfo { get; }
-        // ~ End ITranslatingInfoContext interfaces
 
+        /// <inheritdoc />
         public override bool TryGetContextValue(string InKey, out object OutValue)
         {
             try
             {
-                // Try getting value from the translating info.
                 var prop = TranslatingInfo.GetType().GetProperty(InKey);
                 if (prop != null)
                 {
@@ -87,36 +108,39 @@ namespace nf.protoscript.translator
             }
             catch
             {
-                // TODO log error.
+                // TODO: Log the exception.
             }
 
             return base.TryGetContextValue(InKey, out OutValue);
         }
-
     }
 
     /// <summary>
     /// Context for the translating expression-node (syntax tree node).
     /// </summary>
-    public class TranslatingExprContext
-        : TranslatingContextBase
-        , ITranslatingExprContext
+    public class TranslatingExprContext : TranslatingContextBase, ITranslatingExprContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TranslatingExprContext"/> class.
+        /// </summary>
+        /// <param name="InParentContext">The parent context.</param>
+        /// <param name="InSTNode">The syntax tree node to translate.</param>
         public TranslatingExprContext(ITranslatingContext InParentContext, ISyntaxTreeNode InSTNode)
             : base(InParentContext)
         {
             TranslatingExprNode = InSTNode;
         }
 
-        // Begin ITranslatingExprContext
+        /// <summary>
+        /// Gets the syntax tree node being translated.
+        /// </summary>
         public ISyntaxTreeNode TranslatingExprNode { get; }
-        // ~ End ITranslatingExprContext
 
+        /// <inheritdoc />
         public override bool TryGetContextValue(string InKey, out object OutValue)
         {
             try
             {
-                // Try getting value from the translating info.
                 var prop = TranslatingExprNode.GetType().GetProperty(InKey);
                 if (prop != null)
                 {
@@ -126,12 +150,11 @@ namespace nf.protoscript.translator
             }
             catch
             {
-                // TODO log error.
+                // TODO: Log the exception.
             }
 
             return base.TryGetContextValue(InKey, out OutValue);
         }
-
     }
 
     ///// <summary>

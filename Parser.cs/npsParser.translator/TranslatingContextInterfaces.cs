@@ -4,77 +4,56 @@ namespace nf.protoscript.translator
 {
 
     /// <summary>
-    /// Context which preserves states for a translating process.
+    /// Represents a context used to store state information during the translation process.
     /// 
-    /// Translating Project holds translating Types, translating Types holds translating properties/methods,
-    /// So the contexts will always establish a context-tree.
+    /// This context helps avoid the need to handle different objects directly during translation.
+    /// All translatable objects should provide their own implementation of this interface,
+    /// and these implementations should be registered within the translator to ensure that
+    /// <see cref="InfoTranslatorAbstract.CreateContext"/> can return the appropriate context for each object.
     /// </summary>
     public interface ITranslatingContext
     {
         /// <summary>
-        /// The parent context of this context.
+        /// Gets the parent context of this context.
         /// </summary>
         ITranslatingContext ParentContext { get; }
 
         /// <summary>
-        /// Try get a context variable from this context.
+        /// Attempts to retrieve a context variable by its key.
         /// </summary>
-        /// <param name="InKey"></param>
-        /// <param name="OutValue"></param>
-        /// <returns></returns>
+        /// <param name="InKey">The key of the context variable to retrieve.</param>
+        /// <param name="OutValue">The retrieved context variable value, if found.</param>
+        /// <returns><c>true</c> if the context variable was found; otherwise, <c>false</c>.</returns>
         bool TryGetContextValue(string InKey, out object OutValue);
 
         /// <summary>
-        /// Get value string from this context by InKey.
+        /// Retrieves a context variable as a string by its key.
         /// </summary>
-        /// <param name="InKey"></param>
-        /// <returns></returns>
+        /// <param name="InKey">The key of the context variable to retrieve.</param>
+        /// <returns>The string representation of the context variable, or a default message if not found.</returns>
         string GetContextValueString(string InKey);
 
     }
 
     /// <summary>
-    /// Context for an Info which is being translated.
+    /// Defines the contract for a context that represents an Info being translated.
     /// </summary>
-    public interface ITranslatingInfoContext
-        : ITranslatingContext
+    public interface ITranslatingInfoContext : ITranslatingContext
     {
-        ///// <summary>
-        ///// Which project is being translated when handling the current context.
-        ///// </summary>
-        //ProjectInfo HostProjectInfo { get; }
-
-        ///// <summary>
-        ///// Which Type is being translated when handling the current context. Nullable.
-        ///// </summary>
-        //TypeInfo HostTypeInfo { get; }
-
-        ///// <summary>
-        ///// Which element is being translated when handling the current context. Nullable.
-        ///// </summary>
-        //ElementInfo HostElementInfo { get; }
-
         /// <summary>
-        /// The translating Info.
+        /// Gets the Info being translated.
         /// </summary>
         Info TranslatingInfo { get; }
-
     }
 
-
     /// <summary>
-    /// Context for a translating expression node.
+    /// Defines the contract for a context that represents a translating expression node.
     /// </summary>
-    public interface ITranslatingExprContext
-        : ITranslatingContext
+    public interface ITranslatingExprContext : ITranslatingContext
     {
         /// <summary>
-        /// The translating expression node.
+        /// Gets the expression node being translated.
         /// </summary>
         ISyntaxTreeNode TranslatingExprNode { get; }
     }
-
-
-
-
 }

@@ -115,12 +115,6 @@ namespace nf.protoscript.translator.DefaultScheme
             for (int i = 0; i < SnippetElements.Length; i++)
             {
                 var snippetElem = SnippetElements[i];
-                if (snippetElem is DefaultScheme.Elements.ElementNewLine)
-                {
-                    codeLines.Add("");
-                    writingLineIndex++;
-                    continue;
-                }
 
                 // Get results applied by the element.
                 var elemCodeLns = snippetElem.Apply(InHolderSchemeInstance).ToArray();

@@ -8,10 +8,18 @@ using System.Threading.Tasks;
 
 namespace nf.protoscript.translator
 {
-    public class InfoTranslatorDefault
-        : InfoTranslatorAbstract
+    /// <summary>
+    /// Represents a translator that uses default schemes and selectors for translation.
+    /// </summary>
+    public class InfoTranslatorDefault : InfoTranslatorAbstract
     {
 
+        /// <summary>
+        /// Finds the best scheme for the given translating context and scheme name.
+        /// </summary>
+        /// <param name="InTranslatingContext">The translating context.</param>
+        /// <param name="InSchemeName">The name of the scheme to find.</param>
+        /// <returns>The best matching scheme, or null if none found.</returns>
         public override IInfoTranslateScheme FindBestScheme(ITranslatingContext InTranslatingContext, string InSchemeName)
         {
             if (_schemeGroups.TryGetValue(InSchemeName, out var schemeGroup))
@@ -22,61 +30,37 @@ namespace nf.protoscript.translator
         }
 
         /// <summary>
-        /// Add a generic scheme
+        /// Adds a generic scheme to the translator.
         /// </summary>
-        /// <param name="InKey"></param>
-        /// <param name="InScheme"></param>
+        /// <param name="InKey">The unique identifier for the scheme group.</param>
+        /// <param name="InScheme">The scheme to add.</param>
         public void AddScheme(string InKey, IInfoTranslateScheme InScheme)
         {
             EnsureGroup(InKey).DefaultScheme = InScheme;
         }
 
         /// <summary>
-        /// Add scheme selectors.
+        /// Adds a scheme selector to the translator.
         /// </summary>
-        /// <param name="InKey"></param>
-        /// <param name="InSnippet"></param>
+        /// <param name="InKey">The unique identifier for the scheme group.</param>
+        /// <param name="InSchemeSelector">The scheme selector to add.</param>
         public void AddSelector(string InKey, IInfoTranslateSchemeSelector InSchemeSelector)
         {
             EnsureGroup(InKey).AddSelector(InSchemeSelector);
         }
 
-
         /// <summary>
-        /// Add scheme for expressions (syntax tree nodes).
+        /// Adds a scheme for expressions (syntax tree nodes) using a generic type.
         /// </summary>
-        /// <param name="InKey"></param>
-        /// <param name="InExprType"></param>
-        /// <param name="InScheme"></param>
-        public void AddExprScheme(string InKey, string InExprTypename, int InPriority, IInfoTranslateScheme InScheme)
-        {
-            throw new NotImplementedException();
-            //AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
-            //    , ctx =>
-            //    {
-            //        var exprCtx = ctx as ITranslatingExprContext;
-            //        if (exprCtx != null && exprCtx.TranslatingExprNode != null)
-            //        {
-            //            return exprCtx.TranslatingExprNode.Typename == InExprTypename;
-            //        }
-            //        return false;
-            //    }
-            //    , new InfoTranslateSchemeDefault(InSnippet)
-            //    ));
-        }
-
-        /// <summary>
-        /// Add scheme for expressions (syntax tree nodes).
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="InKey"></param>
-        /// <param name="InPriority"></param>
-        /// <param name="InScheme"></param>
+        /// <typeparam name="T">The type of the syntax tree node.</typeparam>
+        /// <param name="InKey">The unique identifier for the scheme group.</param>
+        /// <param name="InPriority">The priority of the scheme.</param>
+        /// <param name="InScheme">The scheme to add.</param>
         public void AddExprScheme<T>(string InKey, int InPriority, IInfoTranslateScheme InScheme)
             where T : ISyntaxTreeNode
         {
-            AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
-                , ctx =>
+            AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority,
+                ctx =>
                 {
                     var exprCtx = ctx as ITranslatingExprContext;
                     if (exprCtx != null && exprCtx.TranslatingExprNode != null)
@@ -84,24 +68,24 @@ namespace nf.protoscript.translator
                         return exprCtx.TranslatingExprNode is T;
                     }
                     return false;
-                }
-                , InScheme
+                },
+                InScheme
                 ));
         }
 
         /// <summary>
-        /// Add scheme for expressions (syntax tree nodes).
+        /// Adds a scheme for expressions (syntax tree nodes) using a custom selector.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="InKey"></param>
-        /// <param name="InPriority"></param>
-        /// <param name="InSelector"></param>
-        /// <param name="InScheme"></param>
-        public void AddExprSelector<T>(string InKey, int InPriority, Func<T, bool> InSelector, IInfoTranslateScheme InScheme)
+        /// <typeparam name="T">The type of the syntax tree node.</typeparam>
+        /// <param name="InKey">The unique identifier for the scheme group.</param>
+        /// <param name="InPriority">The priority of the scheme.</param>
+        /// <param name="InSelector">The selector function for the syntax tree node.</param>
+        /// <param name="InScheme">The scheme to add.</param>
+        public void AddExprSelector<T>(string InKey, int InPriority, Func<T, bool> InSelector)
             where T : class, ISyntaxTreeNode
         {
-            AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority
-                , ctx =>
+            AddSelector(InKey, new TranslateSchemeSelector_Lambda(InPriority,
+                ctx =>
                 {
                     var exprCtx = ctx as ITranslatingExprContext;
                     if (exprCtx != null && exprCtx.TranslatingExprNode != null)
@@ -113,19 +97,16 @@ namespace nf.protoscript.translator
                         }
                     }
                     return false;
-                }
-                , InScheme
+                },
+                InScheme
                 ));
         }
 
-
-
-
         /// <summary>
-        /// Find Or Add a scheme group with SchemeName.
+        /// Ensures a scheme group exists for the given scheme name.
         /// </summary>
-        /// <param name="InSchemeName"></param>
-        /// <returns></returns>
+        /// <param name="InSchemeName">The name of the scheme.</param>
+        /// <returns>The scheme group for the given scheme name.</returns>
         protected SchemeGroup EnsureGroup(string InSchemeName)
         {
             if (_schemeGroups.TryGetValue(InSchemeName, out var group))
@@ -137,27 +118,29 @@ namespace nf.protoscript.translator
             return newGrp;
         }
 
-
         /// <summary>
-        /// Use a group to manage all schemes with the same name but different trigger conditions (selectors).
+        /// Represents a group of schemes with the same name but different trigger conditions (selectors).
         /// </summary>
         public class SchemeGroup
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="SchemeGroup"/> class.
+            /// </summary>
+            /// <param name="InSchemeName">The name of the scheme group.</param>
             internal SchemeGroup(string InSchemeName)
             {
                 SchemeName = InSchemeName;
             }
 
             /// <summary>
-            /// Name of the scheme group
+            /// Gets the name of the scheme group.
             /// </summary>
             public string SchemeName { get; }
 
             /// <summary>
-            /// The default scheme, if no selector matched, return this scheme.
-            /// Only one default scheme can be assigned to a group.
+            /// Gets or sets the default scheme. Only one default scheme can be assigned per group.
             /// </summary>
-            /// <exception cref="InvalidOperationException">Triggered if the default scheme has been set twice.</exception>
+            /// <exception cref="InvalidOperationException">Thrown if the default scheme is set twice.</exception>
             public IInfoTranslateScheme DefaultScheme
             {
                 get { return _default; }
@@ -165,71 +148,62 @@ namespace nf.protoscript.translator
                 {
                     if (_default != null)
                     {
-                        // TODO log error
+                        // TODO: Implement logging
                         throw new InvalidOperationException("Cannot set default scheme twice!");
                     }
                     _default = value;
                 }
             }
-            IInfoTranslateScheme _default = null;
+            private IInfoTranslateScheme _default = null;
 
             /// <summary>
-            /// Add a selector.
+            /// Adds a selector to the group.
             /// </summary>
-            /// <param name="InPriority"></param>
-            /// <param name="InSelector"></param>
+            /// <param name="InSelector">The scheme selector to add.</param>
             internal void AddSelector(IInfoTranslateSchemeSelector InSelector)
             {
                 _selectors.Add(InSelector.Priority, InSelector);
             }
 
             /// <summary>
-            /// Find a best scheme to match the InContext.
+            /// Finds the best scheme to match the given context.
             /// </summary>
-            /// <param name="InContext"></param>
-            /// <returns></returns>
-            internal IInfoTranslateScheme FindBestScheme(ITranslatingContext InTranslatingContext)
+            /// <param name="InContext">The translating context.</param>
+            /// <returns>The best matching scheme, or the default scheme if none matched.</returns>
+            internal IInfoTranslateScheme FindBestScheme(ITranslatingContext InContext)
             {
-                // Find special MemberAccess schemes by (HostType, PropertyName)
                 foreach (var selectorKvp in _selectors)
                 {
-                    if (selectorKvp.Value.IsMatch(InTranslatingContext))
+                    if (selectorKvp.Value.IsMatch(InContext))
                     {
                         return selectorKvp.Value.Scheme;
                     }
                 }
 
-                // return default scheme if have
+                // Return the default scheme if no selector matched
                 return DefaultScheme;
             }
 
-            // selectors
-            SortedList<int, IInfoTranslateSchemeSelector> _selectors
+            // Selectors sorted by priority
+            private SortedList<int, IInfoTranslateSchemeSelector> _selectors
                 = new SortedList<int, IInfoTranslateSchemeSelector>(new DuplicateKeyComparer<int>());
-
         }
 
-        // Scheme groups
-        Dictionary<string, SchemeGroup> _schemeGroups = new Dictionary<string, SchemeGroup>();
+        // Scheme groups dictionary
+        private Dictionary<string, SchemeGroup> _schemeGroups = new Dictionary<string, SchemeGroup>();
 
-        // TODO Move it into the 'Base' project.
-        class DuplicateKeyComparer<TKey>
-            : IComparer<TKey> where TKey : IComparable
+        // A comparer that handles duplicate keys by treating them as greater than each other.
+        private class DuplicateKeyComparer<TKey> : IComparer<TKey> where TKey : IComparable
         {
-            #region IComparer<TKey> Members
-
             public int Compare(TKey x, TKey y)
             {
                 int result = x.CompareTo(y);
 
                 if (result == 0)
-                    return 1; // Handle equality as being greater. Note: this will break Remove(key) or
-                else          // IndexOfKey(key) since the comparer never returns 0 to signal key equality
+                    return 1; // Treat equal keys as greater to allow duplicates
+                else
                     return result;
             }
-
-            #endregion
         }
-
     }
 }
