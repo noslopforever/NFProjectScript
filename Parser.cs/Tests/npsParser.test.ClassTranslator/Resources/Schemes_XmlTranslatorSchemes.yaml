@@ -1,0 +1,45 @@
+﻿- Name: CommonTypeTranslator
+  Params: []
+  Condition: ""
+  Code: |
+    <${Header} Name="${Name}">
+        <properties>
+            ${for("member", $NL, "PropertyTranslator")}
+        </properties>
+        <ctor>
+            ${for("member", $NL, "CtorInitTranslator")}
+        </ctor>
+        <methods>
+            ${for("method", $NL, "MethodTranslator")}
+        </methods>
+    </${Header}>
+
+- Name: PropertyTranslator
+  Params: []
+  Condition: ""
+  Code: |
+    <${Header} Name="${Name}" Type="${ElementType}">
+        ${for("member", $NL, "PropertyTranslator")}
+    </${Header}>  
+
+- Name: CtorInitTranslator
+  Params: []
+  Condition: ""
+  Code: |
+    ${InitSyntax.Get()}
+    ${for("member", $NL, "EmbbedCtorTranslator")}
+
+- Name: EmbbedCtorTranslator
+  Code: |
+    ${InitSyntax.Get()}
+    // Embedded constructor ${Name}
+    ${for("member", $NL, "EmbbedCtorTranslator")}
+
+- Name: MethodTranslator
+  Code: |
+    <${Header} Name="${Name}">
+        ${InitSyntax.MethodBody()}
+    </${Header}>  
+
+- Name: MethodBody
+  Code: ${for("", $NL, "Get")}

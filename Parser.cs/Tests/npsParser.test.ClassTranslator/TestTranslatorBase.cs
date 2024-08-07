@@ -6,7 +6,7 @@ using nf.protoscript.syntaxtree;
 using System.Collections.Generic;
 using System;
 
-namespace npsParser.test.ClassTranslator
+namespace nf.protoscript.test
 {
 
     internal partial class TestTranslatorBase

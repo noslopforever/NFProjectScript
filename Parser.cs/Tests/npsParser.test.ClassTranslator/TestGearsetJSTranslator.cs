@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System;
 using nf.protoscript.syntaxtree;
 
-namespace npsParser.test.ClassTranslator
+namespace nf.protoscript.test
 {
     internal class TestGearsetJSTranslator
         : TestTranslatorBase

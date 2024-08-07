@@ -1,0 +1,29 @@
+- Name: CommonTypeTranslator
+  Params: []
+  Condition: ""
+  Code: |
+    class ${Name} {
+        constructor() {
+            ${for('member', $NL, 'PropertyInit')}
+        }
+        ${for('method', $NL, 'MethodDecl')}
+    }
+
+- Name: PropertyInit
+  Params: []
+  Condition: ""
+  Code: this.${Name} = ${InitSyntax.Get()};
+
+- Name: MethodDecl
+  Params: []
+  Condition: ""
+  Code: |
+    function ${Name}(${for('member', ', ', 'MethodParamDecl')}) {
+        ${InitSyntax.MethodBody()}
+    }
+
+- Name: MethodParamDecl
+  Code: ${Name}
+
+- Name: MethodBody
+  Code: ${for('', $NL, 'Get')}

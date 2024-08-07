@@ -2,7 +2,7 @@
 using nf.protoscript.translator.DefaultScheme;
 using nf.protoscript.translator.DefaultScheme.Elements;
 
-namespace npsParser.test.ClassTranslator
+namespace nf.protoscript.test
 {
 
     internal class TestXmlTranslator

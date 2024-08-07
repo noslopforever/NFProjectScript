@@ -1,0 +1,59 @@
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'Constant'
+  Code: ${ValueString}
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'Constant' & ValueType == 'string'
+  Code: '"${ValueString}"'
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'BinaryOp'
+  Code: ${LHS.Get()} ${OpCode} ${RHS.Get()}
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'UnaryOp'
+  Code: ${OpCode} ${RHS.Get()}
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'Assign'
+  Code: ${LHS.Set(RHS.Get())}
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'Var'
+  Code: ${HostPresent(IDName)}
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'MemberAccess'
+  Code: ${LHS.Get()}.${IDName}
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'Call'
+  Code: ${FuncExpr.Get()}(${For('Param', ', ', 'Get')})
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'CollectionAccess'
+  Code: ${CollExpr.Get()}[${For('Param', '][', 'Get')}]
+- Name: Get
+  Params: []
+  Condition: Type_Name == 'Sequence'
+  Code: ${For('', $NL, 'Get')}
+
+
+- Name: Set
+  Params: [RHS_VALUE]
+  Condition: ""
+  Code: <UNEXPECTED SET>
+- Name: Set
+  Params: [RHS_VALUE]
+  Condition: Type_Name == 'Var'
+  Code: ${HostPresent(IDName)} = ${RHS_VALUE}
+- Name: Set
+  Params: [RHS_VALUE]
+  Condition: Type_Name == 'MemberAccess'
+  Code: ${LHS.Get()}.${IDName} = ${RHS_VALUE}
+
+
+- Name: HostPresent
+  Params: [VAR_NAME]
+  Code: ${VAR_NAME}
