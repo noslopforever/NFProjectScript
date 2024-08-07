@@ -32,7 +32,10 @@ namespace nf.protoscript.translator.DefaultScheme
         /// <param name="InElementArray">An array of elements that define the snippet.</param>
         public InfoTranslateSchemeDefault(string[] InParams, params IElement[] InElementArray)
         {
-            _params = InParams;
+            if (InParams != null)
+            {
+                _params = InParams;
+            }
             SnippetElements = InElementArray;
         }
 

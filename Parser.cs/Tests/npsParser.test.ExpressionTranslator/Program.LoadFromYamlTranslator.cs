@@ -73,25 +73,21 @@ namespace npsParser.test.ExpressionTranslator
 
 
                 - Name: Set
-                  Params:
-                    - RHS_VALUE
+                  Params: [RHS_VALUE]
                   Condition: ""
                   Code: <UNEXPECTED SET>
                 - Name: Set
-                  Params:
-                    - RHS_VALUE
+                  Params: [RHS_VALUE]
                   Condition: Type_Name == 'Var'
-                  Code: ${HostPresent(IDName)} = ${RHS}
+                  Code: ${HostPresent(IDName)} = ${RHS_VALUE}
                 - Name: Set
-                  Params:
-                    - RHS_VALUE
+                  Params: [RHS_VALUE]
                   Condition: Type_Name == 'MemberAccess'
-                  Code: ${LHS.Get()}.${IDName} = ${RHS}
+                  Code: ${LHS.Get()}.${IDName} = ${RHS_VALUE}
 
 
                 - Name: HostPresent
-                  Params:
-                    - VAR_NAME
+                  Params: [VAR_NAME]
                   Code: ${VAR_NAME}
                 """
                 ;
