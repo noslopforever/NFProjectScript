@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\npsParser.translator\npsParser.translator.70.csproj" />
+	  <ProjectReference Include="..\..\npsParser.utils.serialization.yaml\npsParser.utils.serialization.yaml.70.csproj" />
+	  <ProjectReference Include="..\..\npsParser.translator\npsParser.translator.70.csproj" />
     <ProjectReference Include="..\npsParser.test.CommonTestCases\npsParser.test.CommonTestCases.70.csproj" />
   </ItemGroup>
 

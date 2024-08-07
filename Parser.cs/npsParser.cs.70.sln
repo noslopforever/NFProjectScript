@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.serializatio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.test.ClassTranslator.70", "Tests\npsParser.test.ClassTranslator\npsParser.test.ClassTranslator.70.csproj", "{3BBF9C06-2F3F-492B-9853-C7633922926C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "npsParser.utils.serialization.yaml.70", "npsParser.utils.serialization.yaml\npsParser.utils.serialization.yaml.70.csproj", "{2B407F1B-A733-4B58-8E06-08511FFC7B0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{3BBF9C06-2F3F-492B-9853-C7633922926C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BBF9C06-2F3F-492B-9853-C7633922926C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BBF9C06-2F3F-492B-9853-C7633922926C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B407F1B-A733-4B58-8E06-08511FFC7B0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B407F1B-A733-4B58-8E06-08511FFC7B0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B407F1B-A733-4B58-8E06-08511FFC7B0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B407F1B-A733-4B58-8E06-08511FFC7B0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

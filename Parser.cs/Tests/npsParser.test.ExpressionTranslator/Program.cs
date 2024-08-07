@@ -22,6 +22,7 @@ namespace npsParser.test.ExpressionTranslator
             {
                 ("Hardcode [Default, Fallback]", _CreateHardcodeTranslator),
                 ("Json", _CreateLoadFromJsonTranslator),
+                ("Yaml", _CreateLoadFromYamlTranslator),
             };
 
             int procID = Process.GetCurrentProcess().Id;
