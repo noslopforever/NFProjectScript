@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using System;
 
 namespace nf.protoscript.translator
@@ -13,22 +13,16 @@ namespace nf.protoscript.translator
         /// Initializes a new instance of the <see cref="TranslatingContextBase"/> class.
         /// </summary>
         /// <param name="InParentContext">The parent context.</param>
-        public TranslatingContextBase(ITranslatingContext InParentContext)
+        public TranslatingContextBase(ITranslatingContext InPrevContext)
         {
-            ParentContext = InParentContext;
+            PreviousContext = InPrevContext;
         }
 
-        /// <summary>
-        /// Gets the parent context.
-        /// </summary>
-        public virtual ITranslatingContext ParentContext { get; }
+        // Begin ITranslatingContext interfaces
 
-        /// <summary>
-        /// Tries to get the context value for a specified key.
-        /// </summary>
-        /// <param name="InKey">The key to look up.</param>
-        /// <param name="OutValue">The value associated with the key, if found.</param>
-        /// <returns>true if the value was found; otherwise, false.</returns>
+        /// <inheritdoc />
+        public ITranslatingContext PreviousContext { get; }
+        /// <inheritdoc />
         public virtual bool TryGetContextValue(string InKey, out object OutValue)
         {
             try
@@ -45,20 +39,10 @@ namespace nf.protoscript.translator
                 // TODO: Log the exception.
             }
 
-            if (ParentContext != null)
-            {
-                return ParentContext.TryGetContextValue(InKey, out OutValue);
-            }
-
             OutValue = null;
             return false;
         }
-
-        /// <summary>
-        /// Gets the context value for a specified key as a string.
-        /// </summary>
-        /// <param name="InKey">The key to look up.</param>
-        /// <returns>The string representation of the value, or a default message if not found.</returns>
+        /// <inheritdoc />
         public string GetContextValueString(string InKey)
         {
             if (TryGetContextValue(InKey, out var val))

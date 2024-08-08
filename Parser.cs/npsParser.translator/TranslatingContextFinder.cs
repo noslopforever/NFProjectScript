@@ -83,15 +83,16 @@ namespace nf.protoscript.translator
         /// <returns></returns>
         public static ITranslatingContext FindAncestor(ITranslatingContext InContext, Func<ITranslatingContext, bool> InPred)
         {
-            var checkingCtx = InContext;
-            while (checkingCtx != null)
-            {
-                if (InPred(checkingCtx))
-                {
-                    return checkingCtx;
-                }
-                checkingCtx = checkingCtx.ParentContext;
-            }
+            throw new NotImplementedException();
+            //var checkingCtx = InContext;
+            //while (checkingCtx != null)
+            //{
+            //    if (InPred(checkingCtx))
+            //    {
+            //        return checkingCtx;
+            //    }
+            //    checkingCtx = checkingCtx.ParentContext;
+            //}
             return null;
         }
 

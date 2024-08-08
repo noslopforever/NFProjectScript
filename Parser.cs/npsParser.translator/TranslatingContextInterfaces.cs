@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 
 namespace nf.protoscript.translator
 {
@@ -14,9 +14,10 @@ namespace nf.protoscript.translator
     public interface ITranslatingContext
     {
         /// <summary>
-        /// Gets the parent context of this context.
+        /// Gets the previous running context of this context.
+        /// This property is useful for accessing the context of the previous state in the translation process.
         /// </summary>
-        ITranslatingContext ParentContext { get; }
+        ITranslatingContext PreviousContext { get; }
 
         /// <summary>
         /// Attempts to retrieve a context variable by its key.
