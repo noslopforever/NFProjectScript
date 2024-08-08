@@ -1,4 +1,4 @@
-using nf.protoscript.syntaxtree;
+﻿using nf.protoscript.syntaxtree;
 using System;
 
 namespace nf.protoscript.translator
@@ -55,6 +55,9 @@ namespace nf.protoscript.translator
             }
             return $"<<NULL VAR for {InKey}>>";
         }
+
+        // ~ End ITranslatingContext interfaces
+
     }
 
     /// <summary>
@@ -97,6 +100,7 @@ namespace nf.protoscript.translator
 
             return base.TryGetContextValue(InKey, out OutValue);
         }
+
     }
 
     /// <summary>
@@ -139,6 +143,7 @@ namespace nf.protoscript.translator
 
             return base.TryGetContextValue(InKey, out OutValue);
         }
+
     }
 
     ///// <summary>
