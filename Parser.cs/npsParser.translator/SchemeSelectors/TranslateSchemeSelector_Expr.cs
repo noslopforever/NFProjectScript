@@ -130,6 +130,40 @@ namespace nf.protoscript.translator.SchemeSelectors
         /// <returns>The result of the function call.</returns>
         private object _HandleGlobalFunction(ITranslatingContext InContext, string InVarName, object[] InParams)
         {
+            // TEMP
+            if (0 == string.Compare(InVarName, "IsValid", true))
+            {
+                return InContext != null;
+            }
+            else if (0 == string.Compare(InVarName, "HasSub", true))
+            {
+                if (InParams.Length != 1)
+                {
+                    // TODO log warning
+                    throw new ArgumentException("Need a parameter.");
+                }
+                string strParam = InParams[0] as string;
+                if (strParam == null)
+                {
+                    // TODO log warning
+                    throw new ArgumentException("Need a string parameter.");
+                }
+
+                var infoCtx = InContext as ITranslatingInfoContext;
+                if (infoCtx == null)
+                {
+                    throw new ArgumentException("Need a Info context.");
+                }
+
+                if (infoCtx.TranslatingInfo == null)
+                {
+                    throw new ArgumentException("Need a valid Info context.");
+                }
+
+                return infoCtx.TranslatingInfo.HasSubInfoWithHeader<Info>(strParam);
+            }
+            // ~ TEMP
+
             throw new NotImplementedException("Handling global functions is not yet implemented.");
         }
 
@@ -143,6 +177,13 @@ namespace nf.protoscript.translator.SchemeSelectors
         /// <returns>The result of the method call.</returns>
         private object _HandleMemberMethod(ITranslatingContext InContext, object InHolder, string InVarName, object[] InParams)
         {
+            // TEMP
+            if (0 == string.Compare(InVarName, "IsValid", true))
+            {
+                return InHolder != null;
+            }
+            // ~ TEMP
+
             throw new NotImplementedException("Handling member methods is not yet implemented.");
         }
 

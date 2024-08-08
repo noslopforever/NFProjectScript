@@ -4,15 +4,40 @@
   Code: |
     class ${Name} {
         constructor() {
-            ${for('member', $NL, 'PropertyInit')}
+            ${for('member', $NL, 'PropertyInit', 'this')}
         }
         ${for('method', $NL, 'MethodDecl')}
     }
 
 - Name: PropertyInit
-  Params: []
+  Params: [HOST]
   Condition: ""
-  Code: this.${Name} = ${InitSyntax.Get()};
+  Code: |
+    // No init syntax for ${HOST}.${Name}
+    ${EmbeddedPropertyInit(HOST)}
+
+- Name: PropertyInit
+  Params: [HOST]
+  Condition: "InitSyntax.IsValid()"
+  Code: |
+    ${HOST}.${Name} = ${InitSyntax.Get()};
+    ${EmbeddedPropertyInit(HOST)}
+
+- Name: EmbeddedPropertyInit
+  Params: [HOST]
+  Condition: ""
+  Code: ""
+
+- Name: EmbeddedPropertyInit
+  Params: [HOST]
+  Condition: "HasSub('member')"
+  Code: |
+    var __tmpMember_${Name} = new ${SettedElementType.Name}();
+    {
+        ${for('member', $NL, 'PropertyInit', '__tmpMember_' + Name)}
+    }
+    ${HOST}.${Name} = __tmpMember_${Name};
+
 
 - Name: MethodDecl
   Params: []
