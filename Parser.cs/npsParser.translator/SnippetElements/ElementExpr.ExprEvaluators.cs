@@ -178,16 +178,23 @@ namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
         /// <returns>The result of the binary operation.</returns>
         private object _EvalValue(object InExternalObject, STNodeBinaryOp InBinOp)
         {
+            // Evaluate the right-hand side and left-hand side of the binary operation.
             var rhsValue = EvalValue(InExternalObject, InBinOp.RHS);
             var lhsValue = EvalValue(InExternalObject, InBinOp.LHS);
+
+            // Handle comparison operations.
             if (InBinOp.OpDef.Function == EOpFunction.LessThan
                 || InBinOp.OpDef.Function == EOpFunction.LessThanOrEqual
                 || InBinOp.OpDef.Function == EOpFunction.GreaterThan
                 || InBinOp.OpDef.Function == EOpFunction.GreaterThanOrEqual
-                )
+            )
             {
+                // Convert both operands to doubles for numerical comparison.
+                // TODO catch exceptions.
                 double lhsDouble = Convert.ToDouble(lhsValue);
                 double rhsDouble = Convert.ToDouble(rhsValue);
+
+                // Perform the specified comparison.
                 switch (InBinOp.OpDef.Function)
                 {
                     case EOpFunction.LessThan:
@@ -200,10 +207,12 @@ namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
                         return lhsDouble >= rhsDouble;
                 }
             }
+            // Handle equality and inequality operations.
             else if (InBinOp.OpDef.Function == EOpFunction.Equal
                 || InBinOp.OpDef.Function == EOpFunction.NotEqual
-                )
+            )
             {
+                // Perform the specified equality check.
                 switch (InBinOp.OpDef.Function)
                 {
                     case EOpFunction.Equal:
@@ -212,12 +221,16 @@ namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
                         return !lhsValue.Equals(rhsValue);
                 }
             }
+            // Handle logical AND and OR operations.
             else if (InBinOp.OpDef.Function == EOpFunction.And
                 || InBinOp.OpDef.Function == EOpFunction.Or
-                )
+            )
             {
+                // Convert both operands to booleans for logical operations.
                 bool lhsBool = Convert.ToBoolean(lhsValue);
                 bool rhsBool = Convert.ToBoolean(rhsValue);
+
+                // Perform the specified logical operation.
                 switch (InBinOp.OpDef.Function)
                 {
                     case EOpFunction.And:
@@ -226,7 +239,50 @@ namespace nf.protoscript.translator.DefaultScheme.Elements.Internal
                         return lhsBool || rhsBool;
                 }
             }
+            else if (InBinOp.OpDef.Function == EOpFunction.Add
+                || InBinOp.OpDef.Function == EOpFunction.Decrement
+                || InBinOp.OpDef.Function == EOpFunction.Multiply
+                || InBinOp.OpDef.Function == EOpFunction.Divide
+                || InBinOp.OpDef.Function == EOpFunction.Mod
+            )
+            {
+                // Handle string concatenation if the left-hand side is a string.
+                if (lhsValue is string)
+                {
+                    if (InBinOp.OpDef.Function == EOpFunction.Add)
+                    {
+                        // Concatenate strings if the operation is addition.
+                        return lhsValue.ToString() + rhsValue.ToString();
+                    }
 
+                    // For other operations, throw an exception because they are not implemented for strings.
+                    throw new NotImplementedException("String operations other than concatenation are not supported.");
+                }
+
+                // Check if either operand is a boolean.
+                if (lhsValue is bool || rhsValue is bool)
+                {
+                    // Boolean +-*/% are not implemented.
+                    throw new NotImplementedException("Boolean arithmetic operations are not supported.");
+                }
+
+                // Convert both operands to numbers and perform the arithmetic operation.
+                double lhsDouble = Convert.ToDouble(lhsValue);
+                double rhsDouble = Convert.ToDouble(rhsValue);
+                switch (InBinOp.OpDef.Function)
+                {
+                    case EOpFunction.Add:
+                        return lhsDouble + rhsDouble;
+                    case EOpFunction.Decrement:
+                        return lhsDouble - rhsDouble;
+                    case EOpFunction.Multiply:
+                        return lhsDouble * rhsDouble;
+                    case EOpFunction.Divide:
+                        return lhsDouble / rhsDouble;
+                    case EOpFunction.Mod:
+                        return lhsDouble % rhsDouble;
+                }
+            }
             // Log an error message that the binary operation is not supported.
             Debug.WriteLine("Unsupported binary operation.");
             throw new NotImplementedException();

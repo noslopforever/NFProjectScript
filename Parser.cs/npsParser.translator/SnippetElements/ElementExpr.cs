@@ -237,7 +237,7 @@ namespace nf.protoscript.translator.DefaultScheme.Elements
 
             // TEMP Handle For function
             // TODO Replace it by system functions.
-            if (InVarName == "For")
+            if (0 == string.Compare(InVarName, "For", true))
             {
                 return _TEMP_HandleForCall(translator, lhsCtx, InParams);
             }
@@ -251,13 +251,20 @@ namespace nf.protoscript.translator.DefaultScheme.Elements
         // TEMP Handle For function
         private static object _TEMP_HandleForCall(InfoTranslatorAbstract InTranslator, ITranslatingContext InContext, object[] InParams)
         {
-            Debug.Assert(InParams.Length == 3);
+            Debug.Assert(InParams.Length >= 3);
 
             string filter = InParams[0] as string;
             string separator = InParams[1] as string;
             string function = InParams[2] as string;
 
             Debug.Assert(filter != null && separator != null && function != null);
+
+            // Gather other parameters.
+            object[] otherParams = new object[InParams.Length - 3];
+            for (int i = 3; i < InParams.Length; i++)
+            {
+                otherParams[i - 3] = InParams[i];
+            }
 
             List<string> result = new List<string>();
             result.Add("");
@@ -267,7 +274,7 @@ namespace nf.protoscript.translator.DefaultScheme.Elements
                     info =>
                     {
                         TranslatingInfoContext infoCtx = new TranslatingInfoContext(InContext, info);
-                        var subResult = InTranslator.TranslateInfo(infoCtx, function);
+                        var subResult = InTranslator.TranslateInfo(infoCtx, function, otherParams);
                         if (subResult.Count > 0)
                         {
                             result[^1] += subResult[0];
@@ -294,7 +301,7 @@ namespace nf.protoscript.translator.DefaultScheme.Elements
                         if (key.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                         {
                             TranslatingExprContext exprCtx = new TranslatingExprContext(InContext, stNode);
-                            var subResult = InTranslator.TranslateInfo(exprCtx, function);
+                            var subResult = InTranslator.TranslateInfo(exprCtx, function, otherParams);
                             if (subResult.Count > 0)
                             {
                                 result[^1] += subResult[0];
