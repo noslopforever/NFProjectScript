@@ -18,6 +18,7 @@ namespace nf.protoscript.translator.DefaultScheme
 
         /// <summary>
         /// Gets or sets the priority of the scheme.
+        /// The higher the priority, the earlier the scheme is applied during the translation process.
         /// </summary>
         public int Priority { get; set; }
 
@@ -43,12 +44,17 @@ namespace nf.protoscript.translator.DefaultScheme
         /// <param name="InData">The serialized data of the scheme.</param>
         public static void LoadSchemeFromData(InfoTranslatorDefault InTranslator, SerializeData InData)
         {
+            // Parse the code into elements.
             var elemArray = ElementParser.ParseElements(InData.Code);
-            var scheme = new InfoTranslateSchemeDefault(InData.Params, elemArray);
 
+            // Create a scheme/selector by the elements/condition.
+            var scheme = new InfoTranslateSchemeDefault(InData.Params, elemArray);
             var selector = new TranslateSchemeSelector_Expr(InData.Priority, InData.Condition, scheme);
+
+            // Add the selector to the translator.
             InTranslator.AddSelector(InData.Name, selector);
         }
 
     }
+
 }

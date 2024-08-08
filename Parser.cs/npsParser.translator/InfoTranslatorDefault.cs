@@ -54,7 +54,7 @@ namespace nf.protoscript.translator
         /// </summary>
         /// <typeparam name="T">The type of the syntax tree node.</typeparam>
         /// <param name="InKey">The unique identifier for the scheme group.</param>
-        /// <param name="InPriority">The priority of the scheme.</param>
+        /// <param name="InPriority">The priority of the scheme. The higher the priority, the earlier the scheme is applied during the translation process.</param>
         /// <param name="InScheme">The scheme to add.</param>
         public void AddExprScheme<T>(string InKey, int InPriority, IInfoTranslateScheme InScheme)
             where T : ISyntaxTreeNode
@@ -200,9 +200,11 @@ namespace nf.protoscript.translator
                 int result = x.CompareTo(y);
 
                 if (result == 0)
-                    return 1; // Treat equal keys as greater to allow duplicates
-                else
-                    return result;
+                {
+                    // Treat equal keys as greater to allow duplicates
+                    return 1;
+                }
+                return -result;
             }
         }
     }
