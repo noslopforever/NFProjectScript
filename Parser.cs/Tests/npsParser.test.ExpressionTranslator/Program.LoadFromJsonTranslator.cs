@@ -43,64 +43,40 @@ namespace npsParser.test.ExpressionTranslator
                 """
                 [
                     {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition": "Type_Name == 'Constant'",
+                        "Name":"EvalConstant",
                         "Code":"${ValueString}"
                     },
                     {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition": "Type_Name == 'Constant' & ValueType == 'string'",
+                        "Name":"EvalConstString",
                         "Code":"'${ValueString}'"
                     },
                     {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition": "Type_Name == 'BinaryOp'",
+                        "Name":"EvalBinOp",
                         "Code":"${LHS.Get()} ${OpCode} ${RHS.Get()}"
                     },
                     {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition":"Type_Name == 'UnaryOp'",
+                        "Name":"EvalUnaryOp",
                         "Code":"${OpCode} ${RHS.Get()}"
                     },
                     {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition":"Type_Name == 'Assign'",
+                        "Name":"EvalAssign",
                         "Code":"${LHS.Set(RHS.Get())}"
                     },
                     {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition":"Type_Name == 'Var'",
+                        "Name":"EvalVar",
                         "Code":"${HostPresent(IDName)}"
                     },
                     {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition":"Type_Name == 'MemberAccess'",
+                        "Name":"EvalMemberAccess",
                         "Code":"${LHS.Get()}.${IDName}"
                     },
                     {
-                        "Name": "Get",
-                        "Params":[],
-                        "Condition":"Type_Name == 'Call'",
+                        "Name": "EvalCall",
                         "Code":"${FuncExpr.Get()}(${For('Param', ', ', 'Get')})"
                     },
                     {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition":"Type_Name == 'CollectionAccess'",
+                        "Name":"EvalCollAccess",
                         "Code":"${CollExpr.Get()}[${For('Param', '][', 'Get')}]"
-                    },
-                    {
-                        "Name":"Get",
-                        "Params":[],
-                        "Condition":"Type_Name == 'Sequence'",
-                        "Code":"${For('', $NL, 'Get')}"
                     },
 
 
@@ -115,13 +91,13 @@ namespace npsParser.test.ExpressionTranslator
                         "Name":"Set",
                         "Params":[ "RHS_VALUE" ],
                         "Condition":"Type_Name == 'Var'",
-                        "Code":"${HostPresent(IDName)} = ${RHS}"
+                        "Code":"${HostPresent(IDName)} = ${RHS_VALUE}"
                     },
                     {
                         "Name":"Set",
                         "Params":[ "RHS_VALUE" ],
                         "Condition":"Type_Name == 'MemberAccess'",
-                        "Code":"${LHS.Get()}.${IDName} = ${RHS}"
+                        "Code":"${LHS.Get()}.${IDName} = ${RHS_VALUE}"
                     },
 
 

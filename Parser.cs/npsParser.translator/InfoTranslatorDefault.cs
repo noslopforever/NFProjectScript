@@ -1,4 +1,7 @@
 ﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.translator.DefaultScheme;
+using nf.protoscript.translator.DefaultScheme.Elements;
+using nf.protoscript.translator.DefaultScheme.Elements.Internal;
 using nf.protoscript.translator.SchemeSelectors;
 using System;
 using System.Collections.Generic;
@@ -13,6 +16,90 @@ namespace nf.protoscript.translator
     /// </summary>
     public class InfoTranslatorDefault : InfoTranslatorAbstract
     {
+        public InfoTranslatorDefault()
+        {
+            // Begin Default selector for expression nodes
+            AddExprScheme<STNodeConstant>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("EvalConstant()"))
+                );
+            AddExprSelector<STNodeConstant>("Get", 0
+                , expr => { return expr.ValueType == CommonTypeInfos.String || expr.ValueType == CommonTypeInfos.TypeRef; }
+                , new InfoTranslateSchemeDefault(new ElementExpr("EvalConstString()"))
+                );
+            AddExprScheme<STNodeBinaryOp>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("EvalBinOp()"))
+                );
+            AddExprScheme<STNodeUnaryOp>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("EvalUnaryOp()"))
+                );
+            AddExprScheme<STNodeAssign>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("EvalAssign()"))
+                );
+            AddExprScheme<STNodeVar>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("EvalVar()"))
+                );
+            AddExprScheme<STNodeMemberAccess>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("EvalMemberAccess()"))
+                );
+            AddExprScheme<STNodeCall>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("EvalCall()"))
+                );
+            AddExprScheme<STNodeCollectionAccess>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("EvalCollAccess()"))
+                );
+            AddExprScheme<STNodeSequence>("Get", 0, new InfoTranslateSchemeDefault(
+                new ElementExpr("ListSequence()"))
+                );
+            // ~ End Default selector for expression nodes
+
+            // Constant: ${ValueString}
+            AddScheme("EvalConstant", new InfoTranslateSchemeDefault(
+                new ElementExpr("ValueString")
+                ));
+
+            // Constant<string>: "${ValueString}"
+            AddScheme("EvalConstString", new InfoTranslateSchemeDefault(
+                ElementParser.ParseElements("\"${ValueString}\"")
+                ));
+
+            // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}
+            AddScheme("EvalBinOp", new InfoTranslateSchemeDefault(
+                ElementParser.ParseElements("${LHS.Get()} ${OpCode} ${RHS.Get()}"))
+                );
+
+            // UnaryOp: ${OpCode} ${RHS.Get()}
+            AddScheme("EvalUnaryOp", new InfoTranslateSchemeDefault(
+                ElementParser.ParseElements("${OpCode}${RHS.Get()}"))
+                );
+
+            // Call: ${FuncExpr.Get()}(${For("Param", ", ", "Get")}
+            AddScheme("EvalCall"
+                , new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
+                        """
+                        ${FuncExpr.Get()}(${For("Param", ", ", "Get")})
+                        """
+                        )
+                    )
+                );
+
+            // Collection access: ${CollExpr.Get()}[${$For("Param", "][", "Get")}]
+            AddScheme("EvalCollAccess"
+                , new InfoTranslateSchemeDefault(
+                    ElementParser.ParseElements(
+                        """
+                        ${CollExpr.Get()}[${For("Param", "][", "Get")}]
+                        """
+                        )
+                    )
+                );
+
+            // Sequence: ${"For('', $NL, 'Get')"}
+            AddScheme("ListSequence", new InfoTranslateSchemeDefault(
+                ElementParser.ParseElements("${For('', $NL, 'Get')}"))
+                );
+
+        }
 
         /// <summary>
         /// Finds the best scheme for the given translating context and scheme name.

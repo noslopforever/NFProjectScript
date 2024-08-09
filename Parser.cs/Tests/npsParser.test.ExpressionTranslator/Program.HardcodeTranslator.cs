@@ -16,30 +16,9 @@ namespace npsParser.test.ExpressionTranslator
         {
             var translator = new InfoTranslatorDefault();
 
-            // Constant: ${ValueString}
-            translator.AddExprScheme<STNodeConstant>("Get", 1
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${ValueString}"))
-                );
-
-            // Constant<string>: "${ValueString}"
-            translator.AddExprSelector<STNodeConstant>("Get", 1
-                , expr => { return expr.ValueType == CommonTypeInfos.String || expr.ValueType == CommonTypeInfos.TypeRef; }
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("\"${ValueString}\""))
-                );
-
-            // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}
-            translator.AddExprScheme<STNodeBinaryOp>("Get", 1
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${LHS.Get()} ${OpCode} ${RHS.Get()}"))
-                );
-
-            // UnaryOp: ${OpCode} ${RHS.Get()}
-            translator.AddExprScheme<STNodeUnaryOp>("Get", 1
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${OpCode}${RHS.Get()}"))
-                );
-
             // Assign: ${LHS.Set(RHS.Get())}
-            translator.AddExprScheme<STNodeAssign>("Get", 1
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${LHS.Set(RHS.Get())}"))
+            translator.AddScheme("EvalAssign", new InfoTranslateSchemeDefault(
+                ElementParser.ParseElements("${LHS.Set(RHS.Get())}"))
                 );
 
             // Default HostPresent (VAR_NAME): ${VAR_NAME}
@@ -66,54 +45,22 @@ namespace npsParser.test.ExpressionTranslator
             //    );
 
             // Var Get: ${HostPresent(IDName)}
-            translator.AddExprScheme<STNodeVar>("Get", 1
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${HostPresent(IDName)}"))
+            translator.AddScheme("EvalVar", new InfoTranslateSchemeDefault(
+                ElementParser.ParseElements("${HostPresent(IDName)}"))
                 );
             // Var Set (RHS): ${HostPresent(IDName)} = $RHS
             translator.AddExprScheme<STNodeVar>("Set", 1
                 , new InfoTranslateSchemeDefault(new string[1] { "RHS" }, ElementParser.ParseElements("${HostPresent(IDName)} = ${RHS}"))
                 );
             // Member Get: ${LHS.Get()}.${IDName}
-            translator.AddExprScheme<STNodeMemberAccess>("Get", 1
-                , new InfoTranslateSchemeDefault(ElementParser.ParseElements("${LHS.Get()}.${IDName}"))
+            translator.AddScheme("EvalMemberAccess", new InfoTranslateSchemeDefault(
+                ElementParser.ParseElements("${LHS.Get()}.${IDName}"))
                 );
             // Member Set (RHS): ${LHS.Get()}.${IDName} = ${RHS}
             translator.AddExprScheme<STNodeMemberAccess>("Set", 1
                 , new InfoTranslateSchemeDefault(new string[1] { "RHS" }, ElementParser.ParseElements("${LHS.Get()}.${IDName} = ${RHS}"))
                 );
 
-            // Call: ${FuncExpr.Get()}(${For("Param", ", ", "Get")}
-            translator.AddExprScheme<STNodeCall>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    ElementParser.ParseElements(
-                        """
-                        ${FuncExpr.Get()}(${For("Param", ", ", "Get")})
-                        """
-                        )
-                    )
-                );
-
-            // Collection access: ${CollExpr.Get()}[${$For("Param", "][", "Get")}]
-            translator.AddExprScheme<STNodeCollectionAccess>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    ElementParser.ParseElements(
-                        """
-                        ${CollExpr.Get()}[${For("Param", "][", "Get")}]
-                        """
-                        )
-                    )
-                );
-
-            // Sequence: 
-            translator.AddExprScheme<STNodeSequence>("Get", 1
-                , new InfoTranslateSchemeDefault(
-                    ElementParser.ParseElements(
-                        """
-                        ${For("", $NL, "Get")}
-                        """
-                        )
-                    )
-                );
             return translator;
         }
 
