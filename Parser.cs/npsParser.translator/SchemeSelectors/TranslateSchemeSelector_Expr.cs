@@ -1,4 +1,4 @@
-﻿using nf.protoscript.syntaxtree;
+using nf.protoscript.syntaxtree;
 using nf.protoscript.translator.DefaultScheme.Elements;
 using nf.protoscript.translator.DefaultScheme.Elements.Internal;
 using System;
@@ -15,24 +15,6 @@ namespace nf.protoscript.translator.SchemeSelectors
     public class TranslateSchemeSelector_Expr : IInfoTranslateSchemeSelector
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TranslateSchemeSelector_Expr"/> class with a condition code.
-        /// </summary>
-        /// <param name="InPriority">The priority of the selector.</param>
-        /// <param name="InConditionCode">The condition code as a string.</param>
-        /// <param name="InScheme">The translation scheme to apply when the condition is met.</param>
-        public TranslateSchemeSelector_Expr(int InPriority, string InConditionCode, IInfoTranslateScheme InScheme)
-        {
-            Priority = InPriority;
-            Scheme = InScheme;
-
-            _conditionCode = InConditionCode;
-            if (!string.IsNullOrWhiteSpace(_conditionCode))
-            {
-                _conditionExpr = ElementExprParser.ParseCode(InConditionCode);
-            }
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="TranslateSchemeSelector_Expr"/> class with a pre-parsed condition expression.
         /// </summary>
         /// <param name="InPriority">The priority of the selector.</param>
@@ -43,11 +25,7 @@ namespace nf.protoscript.translator.SchemeSelectors
             Priority = InPriority;
             Scheme = InScheme;
 
-            _conditionCode = InExpr.ToString();
-            if (!string.IsNullOrWhiteSpace(_conditionCode))
-            {
-                _conditionExpr = InExpr;
-            }
+            _conditionExpr = InExpr;
         }
 
         // Begin IInfoTranslateSchemeSelector implementation
@@ -62,7 +40,8 @@ namespace nf.protoscript.translator.SchemeSelectors
         {
             if (_conditionExpr == null)
             {
-                return true;
+                // TODO log warning.
+                return false;
             }
 
             // Evaluate the condition expression using an expression executor.
@@ -188,11 +167,6 @@ namespace nf.protoscript.translator.SchemeSelectors
         }
 
         // ~ End IInfoTranslateSchemeSelector implementation
-
-        /// <summary>
-        /// The condition code as a string.
-        /// </summary>
-        private string _conditionCode = "";
 
         /// <summary>
         /// The parsed condition expression.

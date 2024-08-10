@@ -14,20 +14,13 @@ namespace nf.protoscript.translator.DefaultScheme.Elements
         : InfoTranslateSchemeDefault.IElement
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ElementExpr"/> class with the specified expression code.
+        /// Initializes a new instance of the <see cref="ElementExpr"/> class with the specified expression.
         /// </summary>
-        /// <param name="InExprCode">The original expression code.</param>
-        public ElementExpr(string InExprCode)
+        /// <param name="InExpr">The original expression.</param>
+        public ElementExpr(ISyntaxTreeNode InExpr)
         {
-            ExprCode = InExprCode;
-            // Try parsing expressions from the ExprCode.
-            Expression = ParseExpression(ExprCode);
+            Expression = InExpr;
         }
-
-        /// <summary>
-        /// Gets the original expression code.
-        /// </summary>
-        public string ExprCode { get; }
 
         /// <summary>
         /// Gets the expression parsed from the ExprCode.
@@ -57,16 +50,6 @@ namespace nf.protoscript.translator.DefaultScheme.Elements
         }
 
         // ~ End IElement interfaces
-
-        /// <summary>
-        /// Parses the expression code into a syntax tree node.
-        /// </summary>
-        /// <param name="InCode">The expression code to parse.</param>
-        /// <returns>The parsed syntax tree node.</returns>
-        private static ISyntaxTreeNode ParseExpression(string InCode)
-        {
-            return ElementExprParser.ParseCode(InCode);
-        }
 
         /// <summary>
         /// Executes an expression statement within the given translation scheme instance.
@@ -108,7 +91,7 @@ namespace nf.protoscript.translator.DefaultScheme.Elements
         /// <inheritdoc />
         public override string ToString()
         {
-            return ExprCode;
+            return Expression != null? Expression.ToString(): "<null>";
         }
         // ~ End object interfaces
 

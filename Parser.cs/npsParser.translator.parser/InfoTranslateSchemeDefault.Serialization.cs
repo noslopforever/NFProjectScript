@@ -1,4 +1,5 @@
-﻿using nf.protoscript.translator.DefaultScheme.Elements.Internal;
+﻿using nf.protoscript.parser.SyntaxV1;
+using nf.protoscript.translator.DefaultScheme.Elements.Internal;
 using nf.protoscript.translator.SchemeSelectors;
 using System;
 
@@ -49,10 +50,18 @@ namespace nf.protoscript.translator.DefaultScheme
 
             // Create a scheme/selector by the elements/condition.
             var scheme = new InfoTranslateSchemeDefault(InData.Params, elemArray);
-            var selector = new TranslateSchemeSelector_Expr(InData.Priority, InData.Condition, scheme);
+            if (!string.IsNullOrWhiteSpace(InData.Condition))
+            {
+                var conditionExpr = ExpressionParser_CommonNps.ParseExpression(InData.Condition);
+                var selector = new TranslateSchemeSelector_Expr(InData.Priority, conditionExpr, scheme);
 
-            // Add the selector to the translator.
-            InTranslator.AddSelector(InData.Name, selector);
+                // Add the selector to the translator.
+                InTranslator.AddSelector(InData.Name, selector);
+            }
+            else
+            {
+                InTranslator.AddScheme(InData.Name, scheme);
+            }
         }
 
     }

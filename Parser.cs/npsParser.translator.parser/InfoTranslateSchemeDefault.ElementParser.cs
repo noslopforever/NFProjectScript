@@ -1,3 +1,5 @@
+using nf.protoscript.parser.SyntaxV1;
+using nf.protoscript.parser.token;
 using nf.protoscript.translator.DefaultScheme.Elements;
 using System;
 using System.Collections.Generic;
@@ -45,7 +47,10 @@ namespace nf.protoscript.translator.DefaultScheme
                 // Handle the code inside the ${ ... } block.
                 string insideCode = match.Value;
                 var codeWithoutContainer = insideCode.Substring(2, insideCode.Length - 3); // Remove the ${ and } characters.
-                resultElements.Add(new ElementExpr(codeWithoutContainer));
+
+                // Let Parser to parse the expression
+                var expr = ExpressionParser_CommonNps.ParseExpression(codeWithoutContainer);
+                resultElements.Add(new ElementExpr(expr));
 
                 // Update the lastIndex to the end of the current match.
                 lastIndex = match.Index + match.Length;

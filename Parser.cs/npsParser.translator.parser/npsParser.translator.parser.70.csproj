@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\npsParser.base\npsParser.base.70.csproj" />
+    <ProjectReference Include="..\npsParser.translator\npsParser.translator.70.csproj" />
+    <ProjectReference Include="..\npsParser.parser\npsParser.parser.70.csproj" />
+  </ItemGroup>
+
+</Project>

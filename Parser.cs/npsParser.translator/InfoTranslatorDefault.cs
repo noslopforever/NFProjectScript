@@ -1,7 +1,6 @@
 ﻿using nf.protoscript.syntaxtree;
 using nf.protoscript.translator.DefaultScheme;
 using nf.protoscript.translator.DefaultScheme.Elements;
-using nf.protoscript.translator.DefaultScheme.Elements.Internal;
 using nf.protoscript.translator.SchemeSelectors;
 using System;
 using System.Collections.Generic;
@@ -19,85 +18,172 @@ namespace nf.protoscript.translator
         public InfoTranslatorDefault()
         {
             // Begin Default selector for expression nodes
-            AddExprScheme<STNodeConstant>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("EvalConstant()"))
+            AddExprScheme<STNodeConstant>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalConstant"))
+                        )
+                    )
                 );
             AddExprSelector<STNodeConstant>("Get", 0
                 , expr => { return expr.ValueType == CommonTypeInfos.String || expr.ValueType == CommonTypeInfos.TypeRef; }
-                , new InfoTranslateSchemeDefault(new ElementExpr("EvalConstString()"))
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(
+                            new STNodeVar("EvalConstString")
+                            )
+                        )
+                    )
                 );
-            AddExprScheme<STNodeBinaryOp>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("EvalBinOp()"))
+            AddExprScheme<STNodeBinaryOp>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalBinOp"))
+                        )
+                    )
                 );
-            AddExprScheme<STNodeUnaryOp>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("EvalUnaryOp()"))
+            AddExprScheme<STNodeUnaryOp>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalUnaryOp"))
+                        )
+                    )
                 );
-            AddExprScheme<STNodeAssign>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("EvalAssign()"))
+            AddExprScheme<STNodeAssign>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalAssign"))
+                        )
+                    )
                 );
-            AddExprScheme<STNodeVar>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("EvalVar()"))
+            AddExprScheme<STNodeVar>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalVar"))
+                        )
+                    )
                 );
-            AddExprScheme<STNodeMemberAccess>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("EvalMemberAccess()"))
+            AddExprScheme<STNodeMemberAccess>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalMemberAccess"))
+                        )
+                    )
                 );
-            AddExprScheme<STNodeCall>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("EvalCall()"))
+            AddExprScheme<STNodeCall>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalCall"))
+                        )
+                    )
                 );
-            AddExprScheme<STNodeCollectionAccess>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("EvalCollAccess()"))
+            AddExprScheme<STNodeCollectionAccess>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalCollAccess"))
+                        )
+                    )
                 );
-            AddExprScheme<STNodeSequence>("Get", 0, new InfoTranslateSchemeDefault(
-                new ElementExpr("ListSequence()"))
+            AddExprScheme<STNodeCollectionAccess>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("EvalCollAccess"))
+                        )
+                    )
+                );
+            AddExprScheme<STNodeSequence>("Get", 0
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeVar("ListSequence"))
+                        )
+                )
                 );
             // ~ End Default selector for expression nodes
 
             // Constant: ${ValueString}
-            AddScheme("EvalConstant", new InfoTranslateSchemeDefault(
-                new ElementExpr("ValueString")
-                ));
+            AddScheme("EvalConstant"
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeVar("ValueString")
+                        )
+                    )
+                );
 
             // Constant<string>: "${ValueString}"
-            AddScheme("EvalConstString", new InfoTranslateSchemeDefault(
-                ElementParser.ParseElements("\"${ValueString}\"")
-                ));
+            AddScheme("EvalConstString"
+                , new InfoTranslateSchemeDefault(
+                    new ElementConstString("\"")
+                    , new ElementExpr(new STNodeVar("ValueString"))
+                    , new ElementConstString("\"")
+                    )
+                );
 
             // BinaryOp: ${LHS.Get()} ${OpCode} ${RHS.Get()}
-            AddScheme("EvalBinOp", new InfoTranslateSchemeDefault(
-                ElementParser.ParseElements("${LHS.Get()} ${OpCode} ${RHS.Get()}"))
+            AddScheme("EvalBinOp"
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeCall(new STNodeMemberAccess(new STNodeVar("LHS"), "Get"))
+                        )
+                    , new ElementConstString(" ")
+                    , new ElementExpr(
+                        new STNodeVar("OpCode")
+                        )
+                    , new ElementConstString(" ")
+                    , new ElementExpr(
+                        new STNodeCall(new STNodeMemberAccess(new STNodeVar("RHS"), "Get"))
+                        )
+                    )
                 );
 
             // UnaryOp: ${OpCode} ${RHS.Get()}
-            AddScheme("EvalUnaryOp", new InfoTranslateSchemeDefault(
-                ElementParser.ParseElements("${OpCode}${RHS.Get()}"))
+            AddScheme("EvalUnaryOp"
+                , new InfoTranslateSchemeDefault(
+                    new ElementExpr(
+                        new STNodeVar("OpCode")
+                        )
+                    , new ElementConstString(" ")
+                    , new ElementExpr(
+                        new STNodeCall(new STNodeMemberAccess(new STNodeVar("RHS"), "Get"))
+                        )
+                    )
                 );
 
             // Call: ${FuncExpr.Get()}(${For("Param", ", ", "Get")}
             AddScheme("EvalCall"
                 , new InfoTranslateSchemeDefault(
-                    ElementParser.ParseElements(
-                        """
-                        ${FuncExpr.Get()}(${For("Param", ", ", "Get")})
-                        """
+                    new ElementExpr(
+                        new STNodeCall(new STNodeMemberAccess(new STNodeVar("FuncExpr"), "Get"))
                         )
+                    , new ElementConstString("(")
+                    , new ElementExpr(
+                        new STNodeCall(new STNodeVar("For"), new STNodeConstant("Param"), new STNodeConstant(", "), new STNodeConstant("Get"))
+                        )
+                    , new ElementConstString(")")
                     )
                 );
 
             // Collection access: ${CollExpr.Get()}[${$For("Param", "][", "Get")}]
             AddScheme("EvalCollAccess"
-                , new InfoTranslateSchemeDefault(
-                    ElementParser.ParseElements(
-                        """
-                        ${CollExpr.Get()}[${For("Param", "][", "Get")}]
-                        """
-                        )
-                    )
-                );
+               , new InfoTranslateSchemeDefault(
+                   new ElementExpr(
+                       new STNodeCall(new STNodeMemberAccess(new STNodeVar("CollExpr"), "Get"))
+                       )
+                   , new ElementConstString("(")
+                   , new ElementExpr(
+                       new STNodeCall(new STNodeVar("For"), new STNodeConstant("Param"), new STNodeConstant("]["), new STNodeConstant("Get"))
+                       )
+                   , new ElementConstString(")")
+                   )
+               );
 
             // Sequence: ${"For('', $NL, 'Get')"}
-            AddScheme("ListSequence", new InfoTranslateSchemeDefault(
-                ElementParser.ParseElements("${For('', $NL, 'Get')}"))
-                );
+            AddScheme("ListSequence"
+              , new InfoTranslateSchemeDefault(
+                  new ElementExpr(
+                      new STNodeCall(new STNodeVar("For"), new STNodeConstant(""), new STNodeConstant(Environment.NewLine), new STNodeConstant("Get"))
+                      )
+                  )
+              );
 
         }
 
@@ -227,7 +313,6 @@ namespace nf.protoscript.translator
             /// <summary>
             /// Gets or sets the default scheme. Only one default scheme can be assigned per group.
             /// </summary>
-            /// <exception cref="InvalidOperationException">Thrown if the default scheme is set twice.</exception>
             public IInfoTranslateScheme DefaultScheme
             {
                 get { return _default; }
@@ -235,8 +320,8 @@ namespace nf.protoscript.translator
                 {
                     if (_default != null)
                     {
-                        // TODO: Implement logging
-                        throw new InvalidOperationException("Cannot set default scheme twice!");
+                        // TODO: Log Info
+                        //throw new InvalidOperationException("Cannot set default scheme twice!");
                     }
                     _default = value;
                 }
