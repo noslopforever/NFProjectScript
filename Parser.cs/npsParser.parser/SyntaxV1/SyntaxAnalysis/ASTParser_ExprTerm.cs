@@ -45,7 +45,8 @@ namespace nf.protoscript.parser.syntax1.analysis
             // <String>
             else if (InTokenList.CheckToken(ETokenType.String))
             {
-                syntaxtree.STNodeConstant stConst = new syntaxtree.STNodeConstant(InTokenList.CurrentToken.Code);
+                string codeWithoutQuote = InTokenList.CurrentToken.Code.Substring(1, InTokenList.CurrentToken.Code.Length - 2);
+                syntaxtree.STNodeConstant stConst = new syntaxtree.STNodeConstant(codeWithoutQuote);
                 InTokenList.Consume();
                 return stConst;
             }
