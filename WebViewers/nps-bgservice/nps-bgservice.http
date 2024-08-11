@@ -1,0 +1,6 @@
+@nps_bgservice_HostAddress = http://localhost:5189
+
+GET {{nps_bgservice_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

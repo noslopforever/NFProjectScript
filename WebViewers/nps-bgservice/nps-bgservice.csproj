@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>nps_bgservice</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+	  <ProjectReference Include="..\..\Parser.cs\npsParser.translator\npsParser.translator.70.csproj" />
+	  <ProjectReference Include="..\..\Parser.cs\npsParser.translator.parser\npsParser.translator.parser.70.csproj" />
+	  <ProjectReference Include="..\..\Parser.cs\npsParser.utils.serialization.yaml\npsParser.utils.serialization.yaml.70.csproj" />
+  </ItemGroup>
+
+</Project>
