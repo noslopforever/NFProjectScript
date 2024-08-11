@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= username %>'s Projects</title>
+</head>
+<body>
+    <h1>Welcome <%= username %>!</h1>
+    <ul>
+        <% projects.forEach(function(project) { %>
+            <li>
+                <strong><%= project.name %>:</strong> <%= project.summary %>
+            </li>
+        <% }); %>
+    </ul>
+</body>
+</html>
