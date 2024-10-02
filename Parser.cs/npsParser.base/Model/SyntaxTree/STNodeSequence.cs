@@ -15,8 +15,9 @@ namespace nf.protoscript.syntaxtree
     /// </summary>
     public class STNodeSequence : STNodeBase
     {
-        internal STNodeSequence()
+        public STNodeSequence()
         {
+            NodeList = new ISyntaxTreeNode[0];
         }
 
         public STNodeSequence(params ISyntaxTreeNode[] InSTNodes)

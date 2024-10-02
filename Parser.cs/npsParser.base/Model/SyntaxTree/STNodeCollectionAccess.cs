@@ -19,19 +19,19 @@ namespace nf.protoscript.syntaxtree
         {
         }
 
-        public STNodeCollectionAccess(STNodeBase InLhs, ISyntaxTreeNode InParam0)
+        public STNodeCollectionAccess(ISyntaxTreeNode InLhs, ISyntaxTreeNode InParam0)
         {
             CollExpr = InLhs;
             Params = new ISyntaxTreeNode[1] { InParam0 };
         }
 
-        public STNodeCollectionAccess(STNodeBase InLhs, ISyntaxTreeNode[] InParams)
+        public STNodeCollectionAccess(ISyntaxTreeNode InLhs, ISyntaxTreeNode[] InParams)
         {
             CollExpr = InLhs;
             Params = InParams;
         }
 
-        public STNodeCollectionAccess(STNodeBase InLhs, IEnumerable<ISyntaxTreeNode> InParams)
+        public STNodeCollectionAccess(ISyntaxTreeNode InLhs, IEnumerable<ISyntaxTreeNode> InParams)
         {
             CollExpr = InLhs;
             Params = InParams.ToArray();
