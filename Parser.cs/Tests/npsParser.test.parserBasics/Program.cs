@@ -1,5 +1,6 @@
 ﻿using nf.protoscript.modelchecker;
 using nf.protoscript.parser;
+using nf.protoscript.parser.nps1;
 using nf.protoscript.Serialization;
 using nf.protoscript.utils.serialization.xml;
 using System;
@@ -14,12 +15,28 @@ namespace nf.protoscript.test
     {
         static void Main(string[] args)
         {
-            parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
-
-            // Parse nps file.
-            ProjectInfo testProj = new ProjectInfo("TestProject");
+            // Read nps file.
             ICodeContentReader reader = StringCodeContentReader.LoadFromString("TestCodeFile", TextResources.TestCodeFile);
 
+            // Show Tokens parsed from file.
+            {
+                reader.GoStart();
+                do
+                {
+                    Console.WriteLine("Show Tokens of the target code:");
+                    Console.WriteLine($"{reader.CurrentCodeLine.Content}");
+                    Console.WriteLine($"---------------------------------------------------");
+                    var tokens = NPSTokenizer.Instance.Tokenize(reader.CurrentCodeLine.Content);
+                    TokenHelpers.DumpTokens(Console.Out, tokens);
+                    Console.WriteLine($"");
+                } while (reader.GoNextLine());
+                // Back to the start
+                reader.GoStart();
+            }
+
+            // Parse NPS file.
+            ProjectInfo testProj = new ProjectInfo("TestProject");
+            NPSCodeParser testParser = new NPSCodeParser();
             testParser.Parse(testProj, reader);
 
             // Perform post-parse checkers.

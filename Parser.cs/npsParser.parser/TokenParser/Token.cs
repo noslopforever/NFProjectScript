@@ -1,36 +1,54 @@
-﻿namespace nf.protoscript.parser.token
+﻿using System;
+
+namespace nf.protoscript.parser
 {
+
     /// <summary>
-    /// Token
+    /// Default implementation of a token.
     /// </summary>
     public class Token
+        : IToken
     {
-        public Token(ETokenType InTokenType, string InCode, int InLenToTheEnd)
+        public Token(string InTokenTypeCode, string InCode, string InDebugOutput)
         {
-            TokenType = InTokenType;
+            TokenType = InTokenTypeCode;
             Code = InCode;
-            LengthToTheEnd = InLenToTheEnd;
+            DebugOutput = InDebugOutput;
         }
 
-        /// <summary>
-        /// Type of token
-        /// </summary>
-        public ETokenType TokenType { get; }
+        /// <inheritdoc />
+        public string TokenType { get; }
 
-        /// <summary>
-        /// Token's code
-        /// </summary>
+        /// <inheritdoc />
         public string Code { get; }
 
-        /// <summary>
-        /// Length to the string's end.
-        /// </summary>
-        public int LengthToTheEnd { get; }
+        /// <inheritdoc />
+        public string DebugOutput { get; }
 
+        /// <inheritdoc />
+        public bool CheckToken(TokenChecker InChecker)
+        {
+            if (0 != string.Compare(InChecker.TokenType, TokenType, true))
+            {
+                return false;
+            }
+
+            foreach (var specCode in InChecker.SpecificTokenCodes)
+            {
+                if (0 == string.Compare(Code, specCode, InChecker.IgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        /// <inheritdoc />
         public override string ToString()
         {
             return string.Format("{0}['{1}']", TokenType.ToString(), Code);
         }
+
     }
 
 

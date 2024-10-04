@@ -1,4 +1,4 @@
-﻿using nf.protoscript.parser.SyntaxV1;
+﻿using nf.protoscript.parser.nps1;
 using nf.protoscript.translator.DefaultScheme.Elements.Internal;
 using nf.protoscript.translator.SchemeSelectors;
 using System;
@@ -52,7 +52,7 @@ namespace nf.protoscript.translator.DefaultScheme
             var scheme = new InfoTranslateSchemeDefault(InData.Params, elemArray);
             if (!string.IsNullOrWhiteSpace(InData.Condition))
             {
-                var conditionExpr = ExpressionParser_CommonNps.ParseExpression(InData.Condition);
+                var conditionExpr = NPSExpressionParser.ParseExpression(InData.Condition);
                 var selector = new TranslateSchemeSelector_Expr(InData.Priority, conditionExpr, scheme);
 
                 // Add the selector to the translator.

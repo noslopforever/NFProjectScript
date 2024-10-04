@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\npsParser.parser\npsParser.parser.70.csproj" />
+	  <ProjectReference Include="..\..\npsParser.parser\npsParser.parser.70.csproj" />
+	  <ProjectReference Include="..\..\npsParser.parser.nps1\npsParser.parser.nps1.70.csproj" />
     <ProjectReference Include="..\..\npsParser.utils.serialization.xml\npsParser.utils.serialization.xml.70.csproj" />
   </ItemGroup>
 

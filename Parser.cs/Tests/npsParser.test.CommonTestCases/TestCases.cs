@@ -1,4 +1,5 @@
 ﻿using nf.protoscript;
+using nf.protoscript.parser.nps1;
 using nf.protoscript.syntaxtree;
 using System;
 
@@ -173,7 +174,7 @@ namespace nf.protoscript.test
         /// <returns></returns>
         public static ProjectInfo BasicExprs()
         {
-            parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
+            NPSCodeParser testParser = new NPSCodeParser();
 
             ProjectInfo testProj = new ProjectInfo("TestProject");
             parser.ICodeContentReader reader = parser.StringCodeContentReader.LoadFromString(
@@ -192,7 +193,7 @@ namespace nf.protoscript.test
         /// <returns></returns>
         public static ProjectInfo AdvancedExpressions()
         {
-            parser.syntax1.Parser testParser = parser.syntax1.Parser.CreateDefault();
+            NPSCodeParser testParser = new NPSCodeParser();
 
             ProjectInfo testProj = new ProjectInfo("TestProject");
             parser.ICodeContentReader reader = parser.StringCodeContentReader.LoadFromString(

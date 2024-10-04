@@ -2,120 +2,122 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace nf.protoscript.parser.token
+namespace nf.protoscript.parser
 {
 
     /// <summary>
-    /// Token definitions
+    /// Common Token Type Strings. This is used to identify the token type in IToken.
     /// </summary>
-    public enum ETokenType : int
+    public static class CommonTokenTypes
     {
+        /// <summary>
+        /// 'White space', this token should be skipped when parsing.
+        /// </summary>
+        public const string Skip = "$SKIP";
+
         /// <summary>
         /// Unknown token type.
         /// </summary>
-        Unknown = -1,
+        public const string Unknown = "Unknown";
 
         /// <summary>
         /// Strings
         /// </summary>
-        String = 0,
+        public  const string String = "String";
 
         /// <summary>
         /// Floating number
         /// </summary>
-        Floating = 1,
+        public const string Floating = "Floating";
 
         /// <summary>
         /// Integer number
         /// </summary>
-        Integer = 2,
+        public const string Integer = "Integer";
 
         /// <summary>
-        /// Identity
+        /// Identifier
         /// </summary>
-        ID = 100,
+        public const string ID = "ID";
 
         /// <summary>
         /// ,
         /// </summary>
-        Comma = 200,
+        public const string Comma = ",";
 
         /// <summary>
         /// \
         /// </summary>
-        NextLine = 201,
+        public const string NextLine = "$NL";
 
         /// <summary>
         /// #
         /// </summary>
-        Sharp = 202,
+        public const string Sharp = "#";
 
         /// <summary>
         /// @
         /// </summary>
-        At = 203,
+        public const string At = "@";
 
         /// <summary>
-        /// + - * / % += -= *= /= %= == != ! & | < > <= >= 
+        /// + - * / % = += -= *= /= %= == != ! & | < > <= >=
         /// </summary>
-        Operator = 300,
-
-        /// <summary>
-        /// =
-        /// </summary>
-        Assign = 301,
+        public const string Operator = "Operator";
 
         /// <summary>
         /// .
         /// </summary>
-        Dot = 302,
+        public const string Dot = ".";
 
         /// <summary>
         /// :
         /// </summary>
-        Colon = 303,
+        public const string Colon = ":";
+
+        /// <summary>
+        /// ;
+        /// </summary>
+        public const string Semicolon = ";";
 
         /// <summary>
         /// ...
         /// </summary>
-        Ellipsis = 304,
+        public const string Ellipsis = "...";
 
         /// <summary>
         /// (
         /// </summary>
-        OpenParen = 401,
+        public const string OpenParen = "(";
 
         /// <summary>
         /// )
         /// </summary>
-        CloseParen = 402,
+        public const string CloseParen = ")";
 
         /// <summary>
         /// [
         /// </summary>
-        OpenBracket = 403,
+        public const string OpenBracket = "[";
 
         /// <summary>
         /// ]
         /// </summary>
-        CloseBracket = 404,
+        public const string CloseBracket = "]";
 
         /// <summary>
         /// {
         /// </summary>
-        OpenBrace = 405,
+        public const string OpenBrace = "{";
 
         /// <summary>
         /// }
         /// </summary>
-        CloseBrace = 406,
+        public const string CloseBrace = "}";
 
-        /// <summary>
-        /// $WhiteSpace
-        /// </summary>
-        Skip = 10000,
 
     }
+
 
 
 }

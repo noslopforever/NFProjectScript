@@ -2,172 +2,63 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace nf.protoscript.parser.token
+namespace nf.protoscript.parser
 {
-    using TokenTypeWithRegex = KeyValuePair<ETokenType, string>;
+
 
     /// <summary>
-    /// Token factory to create tokens.
+    /// A token parser that uses regular expressions to identify tokens.
     /// </summary>
-    internal class TokenParser
+    public class TokenParserRegex
+        : ITokenParser
     {
-        const string RegexAll = ".";
-
         /// <summary>
-        /// Construct with tokens which should be checked by this parser and regexes which are used to check these tokens.
+        /// Initializes a new instance of the <see cref="TokenParserRegex"/> class.
         /// </summary>
-        /// <param name="InTypeByPriority"></param>
-        internal TokenParser(params (ETokenType, string)[] InTypeByPriority)
+        /// <param name="InRegexPattern">The regular expression pattern to match tokens.</param>
+        /// <param name="InTokenType">The type of token to return when a match is found.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="InRegexPattern"/> or <paramref name="InTokenType"/> is null or empty.</exception>
+        public TokenParserRegex(string InRegexPattern, string InTokenType)
         {
-            // Push the 'fallback' regex.
-            var typeWithRegexList = new List<(ETokenType, string)>();
-            typeWithRegexList.AddRange(InTypeByPriority);
-            typeWithRegexList.Add((ETokenType.Unknown, RegexAll));
-
-            List<TokenTypeWithRegex> tokenTypes = new List<TokenTypeWithRegex>();
-
-            bool addVerticalBar = false;
-            for (int i = 0; i < typeWithRegexList.Count; i++)
+            if (string.IsNullOrEmpty(InRegexPattern))
             {
-                var tokenTypeWithRegex = typeWithRegexList[i];
-                ETokenType tokenType = tokenTypeWithRegex.Item1;
-                string regex = tokenTypeWithRegex.Item2;
-
-                // Add vertical bar except the first element.
-                // E0|E1|E2|...
-                if (addVerticalBar)
-                { _TokenRegexPatterns += "|"; }
-                addVerticalBar = true;
-
-                // register group name: (?<r0>{regex})|(?<r1>{regex})|...
-                string regexGroupName = _GenRegexGroupNameForIndex(i);
-                _TokenRegexPatterns += string.Format("(?<{0}>{1})"
-                    , regexGroupName
-                    , regex
-                    );
-                tokenTypes.Add(new TokenTypeWithRegex(tokenType, regex));
+                throw new ArgumentNullException(nameof(InRegexPattern), "The regular expression pattern cannot be null or empty.");
             }
-            _TokenTypes_SortByPriority = tokenTypes.ToArray();
-        }
-
-        private static string _GenRegexGroupNameForIndex(int i)
-        {
-            return $"r{i}";
-        }
-
-        /// <summary>
-        /// TokenType sorted by priority.
-        /// </summary>
-        TokenTypeWithRegex[] _TokenTypes_SortByPriority = new TokenTypeWithRegex[] { };
-
-        /// <summary>
-        /// Merged regex pattern.
-        /// </summary>
-        string _TokenRegexPatterns = "";
-
-        /// <summary>
-        /// Parse a line.
-        /// </summary>
-        public List<Token> ParseLine(string InLineCodes, out string OutComment)
-        {
-            OutComment = "";
-
-            List<Token> tokens = new List<Token>();
-            string Codes = InLineCodes;
-            while (true)
+            if (string.IsNullOrEmpty(InTokenType))
             {
-                Token t = ParseToken(Codes, out Codes);
-                if (t == null)
-                { break; }
-
-                // Skip 'skip' tokens, do not save it.
-                if (true)
-                {
-                    if (t.TokenType == ETokenType.Skip)
-                    { continue; }
-                }
-
-                // Comment, break, and take all strings after it as a comment.
-                if (t.TokenType == ETokenType.Sharp)
-                {
-                    OutComment = Codes;
-                    break;
-                }
-
-                tokens.Add(t);
+                throw new ArgumentNullException(nameof(InTokenType), "The token type cannot be null or empty.");
             }
 
-            return tokens;
+            // Compile the regular expression for better performance.
+            _regex = new Regex(InRegexPattern, RegexOptions.Compiled);
+            _tokenType = InTokenType;
         }
 
-
-        /// <summary>
-        /// Try parse strings into tokens.
-        /// </summary>
-        /// <param name="InLineIndex"></param>
-        /// <param name="InString"></param>
-        /// <param name="OutOtherString"></param>
-        /// <returns></returns>
-        public Token ParseToken(string InString, out string OutOtherString)
+        // Begin ITokenParser implementation
+        /// <inheritdoc />
+        public IToken ParseCodeToToken(string InCode, int InStartIndex)
         {
-            // do match token patterns.
-            var regMatch = Regex.Match(InString, _TokenRegexPatterns);
-
-            // check which token has been matched.
-            ETokenType result = ETokenType.Unknown;
-            Group resultGroup = null;
-            if (_CheckRegexMatch(
-                    regMatch
-                    , out result
-                    , out resultGroup
-                    )
-                )
+            if (InCode == null)
             {
-                ETokenType tokenType = result;
-                string code = resultGroup.Value;
-                Token token = new Token(tokenType, code, InString.Length);
-
-                // Get strings after this token.
-                int consumeCodeLen = resultGroup.Index + resultGroup.Value.Length;
-                OutOtherString = InString.Substring(consumeCodeLen);
-
-                return token;
+                throw new ArgumentException("Input code cannot be null.", nameof(InCode));
             }
 
-            OutOtherString = "";
-            return null;
-        }
-
-        /// <summary>
-        /// Do check regexes by priority
-        /// </summary>
-        bool _CheckRegexMatch(Match InRegMatch
-            , out ETokenType OutMatchToken
-            , out Group OutMatchGroup
-            )
-        {
-            // Find and return the first match object.
-            for (int i = 0; i < _TokenTypes_SortByPriority.Length; ++i)
+            // Attempt to match the input code starting at the given index.
+            var match = _regex.Match(InCode, InStartIndex);
+            if (!match.Success || match.Index != InStartIndex)
             {
-                var checkingObj = _TokenTypes_SortByPriority[i];
-                string checkingGroupName = _GenRegexGroupNameForIndex(i);
-
-                Group checkingMatchGroup = InRegMatch.Groups[checkingGroupName];
-                if (checkingGroupName == null)
-                    continue;
-
-                if (!checkingMatchGroup.Success)
-                    continue;
-
-                OutMatchToken = checkingObj.Key;
-                OutMatchGroup = checkingMatchGroup;
-                return true;
+                return null;
             }
-            OutMatchGroup = null;
-            OutMatchToken = ETokenType.Unknown;
-            return false;
-        }
 
+            // Create a new token with the matched value, token type, and debug information.
+            var result = new Token(_tokenType, match.Value, $"{match.Index}:{match.Index + match.Length}");
+            return result;
+        }
+        // End ITokenParser implementation
+
+        // Private fields to store the compiled regular expression and the token type.
+        private readonly Regex _regex;
+        private readonly string _tokenType;
 
     }
 
